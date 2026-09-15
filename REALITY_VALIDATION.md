@@ -22,6 +22,11 @@ None of them were visible to the fixture tests, which is exactly the gap this
 milestone exists to close. The remaining gap, the one only a server can close,
 is listed at the end and is still open.
 
+> **Update, later the same day.** A LAN world was opened and Person connected
+> to it. This headline is kept exactly as it was written, because it is the
+> honest record of what Milestone 1 could and could not claim. What happened on
+> first contact is recorded in [First contact](#first-contact) at the end.
+
 ## Environment
 
 |                                       |                                                  |
@@ -418,3 +423,105 @@ milestone needs, observation capture, comparison, prediction error and timing,
 exist and are already finding things.
 
 Person has still never been in Minecraft.
+
+**That changed on 2026-09-15, a few hours after the above was written.** The
+next section records it.
+
+## First contact
+
+The first live connection to Minecraft Java 1.16.1 over LAN. Person joined a
+disposable Peaceful world as `PersonAda`, non-OP, using `person observe` with
+the LAN port supplied by `--port`.
+
+### What worked, first time
+
+- The connection was established and the identity check passed.
+- Person spawned inside the configured exploration bounds.
+- Readiness held: chunks, clock, inventory, vitals and dimension all arrived
+  before anything was read.
+- One Observation was captured and it was **valid against the protocol schema**
+  with no diagnostics.
+- The configured home was reported correctly, at distance zero.
+- The world rules check accepted the world: survival, Peaceful, daylight cycle
+  running, Overworld.
+- Person disconnected cleanly and the command exited.
+
+The capture is kept as `first-contact.json`. `person observe` joining for a few
+seconds and leaving is the designed behaviour and has not been changed.
+
+### What the first real observation exposed
+
+Four defects, none of which any fixture test could have found, because in each
+case the fixture or the double was the thing that was wrong.
+
+**1. `biome` was `"unknown"` in a loaded Overworld chunk.** Not a chunk
+problem. `prismarine-block` builds its `Biome` class with
+`require('prismarine-biome')(registry.version)`, passing a Version object where
+`prismarine-biome` only accepts a version _string_; it therefore treats the
+Version as a registry, finds no biome table on it, and returns its empty
+placeholder for every id. `block.biome.name` is unconditionally `""` with these
+versions, and the adapter's identifier check turned that into `"unknown"`. The
+numeric id beside it was correct all along. Biome is now resolved from that id
+against `bot.registry`, which is `minecraft-data`'s table on 1.16.1 and the
+server's dimension codec on the versions that send one. The Mineflayer double
+used to return `{ name: "forest" }`, a shape the real library never produces,
+which is precisely why a green test suite let this through; it now returns the
+same nameless biome the real library does.
+
+**2. The human player was reported as `"player"`.** Correct, and useless.
+Minecraft names every player entity `player`; identity lives in the account
+name and the UUID. Entity records now carry `username` and `uuid` as additive
+optional protocol fields, so two people can no longer collapse into one
+identity. Nothing social was built on top of this: the point is that the
+observation is now semantically capable of supporting it.
+
+**3. Perception was saturated.** The observation held exactly 64 resource
+entries: 55 stone and 9 coal, because a single nearest-N search standing on
+stone returns stone. Every tree in sight was invisible to cognition, and the
+planner's `reachable_wood` fact was consequently zero in a world full of wood.
+Resources are now gathered per category and balanced: a guaranteed quota each,
+a small shared overflow budget, the same hard ceiling as before. The list is
+usually shorter than it was and always more informative.
+
+**4. Passive entity sensing was noise.** 80 animals, 70 of them outside the
+configured exploration area, some 190 blocks away, none of them usable. The
+observation now reports only animals inside the region Person may actually
+enter and within reach of it, nearest first, bounded. This is a perception
+decision and deliberately not a safety one: the runtime's snapshot still holds
+every entity the body can see, and the permission gate still refuses the
+out-of-region ones for their own reason.
+
+### The failed run before the successful one
+
+The first attempt spawned outside the configured exploration area and reported
+`spawn_outside_bounds`. That refusal is correct and is unchanged. What was
+wrong is that the command then held the terminal for thirty seconds and was
+killed by hand.
+
+The cause was in `disconnect`, which quit the session and then ended the client
+a second time two hundred milliseconds later. In `minecraft-protocol`,
+`Client.end` arms a thirty-second `closeTimer` that destroys the socket if it
+has not closed on its own, and the handler that clears that timer runs exactly
+once, on the first close, after which it sets `ended` and removes its own
+listeners. Whenever the server's close arrived inside those two hundred
+milliseconds, which on a LAN world it usually does, the second end armed a
+timer nothing would ever clear. The successful run and the failed run differed
+only in who won that race.
+
+The client is now ended once, the close is awaited with a bound, the timer is
+cleared explicitly and the socket is destroyed if the server never answers. A
+regression test runs the entire failure in a child process and waits for it:
+with the old code that child takes 31.5 seconds, with the fix it exits
+immediately.
+
+### Live re-validation: pending
+
+No Minecraft server was reachable while these four fixes were made. No Java
+process is running and nothing is listening on a Minecraft port. The fixes are
+implemented against the real installed libraries and covered by conformance
+tests that use `prismarine-registry`, `prismarine-chunk` and `prismarine-block`
+for 1.16.1 directly, but **none of them has been seen working against
+Minecraft**. The next live action is a second `person observe`, and the things
+to check in its output are: `biome` is a real biome name, the operator appears
+under their own account name, `resources` shows a mix of categories rather than
+one, and `passiveAnimals` is a short list of animals that are actually nearby.

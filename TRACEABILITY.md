@@ -249,3 +249,23 @@ claim without reading the whole tree.
 | Operator intervention marked in evidence and status       | `PersonRuntime` episode events, `StatusWriter`                           | `tests/integration/vertical-slice.test.ts`, `tests/cli/observe-safety.test.ts` |
 | Person cannot issue a server command                      | no chat or command path exists                                           | `tests/architecture/architecture.test.ts`                                      |
 | Pre-flight separates setup from reachability              | `scripts/lan-check.sh`                                                   | run by hand; output shown in `docs/LAN_TESTING.md`                             |
+
+## First-contact corrections (Milestone 1 patch 2)
+
+| Requirement                                               | Implementation                                                              | Tests                                                                      |
+| --------------------------------------------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Biome resolved through the real client data               | `adapters/minecraft/src/registry.ts` `resolveBiome`, `MineflayerEmbodiment` | `tests/adapter/biome.test.ts`, `tests/adapter/perception.test.ts`          |
+| Biome unavailability stays an explicit, testable fallback | `resolveBiome` returns `"unknown"` only for a missing block or unknown id   | `tests/adapter/biome.test.ts`, `tests/adapter/perception.test.ts`          |
+| Stable player identity in the observation                 | `EntityView.username`/`uuid`, `entityRecord`, schema `entityList`           | `tests/adapter/perception.test.ts`, `tests/observation/perception.test.ts` |
+| Two players cannot collapse into one identity             | same                                                                        | same                                                                       |
+| Identity is additive and old evidence stays readable      | optional schema properties, `observationVersion` unchanged                  | `fixtures/protocol-corpus/valid/observation-player-identity.json`          |
+| Category-balanced resource perception                     | `apps/node-runtime/src/observation/perception.ts` `gatherResources`         | `tests/adapter/perception.test.ts`                                         |
+| Abundant stone cannot hide wood                           | per-category quota plus shared overflow                                     | same                                                                       |
+| Resource output bounded and deterministic                 | `balanceResources`, `nearestBlocks`                                         | same                                                                       |
+| Perception constants live in one place                    | `PERCEPTION` in `observation/perception.ts`, used by both bodies            | `tests/adapter/perception.test.ts`, `tests/observation/perception.test.ts` |
+| Passive animals shaped to the usable region               | `shapeEntities` with `areas.permitted` in `buildObservation`                | `tests/observation/perception.test.ts`                                     |
+| Shaping is not a safety boundary                          | the runtime snapshot keeps every entity; `mayHunt` unchanged                | same                                                                       |
+| Hunting protections unchanged                             | `PermissionGate.mayHunt`, `protectedTarget`                                 | same, and `tests/safety/permissions.test.ts`                               |
+| A failed observe exits cleanly, no orphan timer           | `MineflayerEmbodiment.disconnect` ends once and clears the close timer      | `tests/cli/observe-exit.test.ts`                                           |
+| `spawn_outside_bounds` refusal unchanged                  | `MineflayerEmbodiment.connect`                                              | same                                                                       |
+| Observe starts no cognition process                       | `captureObservation`                                                        | `tests/cli/observe-safety.test.ts`                                         |

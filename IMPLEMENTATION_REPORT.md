@@ -523,3 +523,81 @@ Totals: 138 Node tests and 120 Python tests, 258 in all.
 
 Person has never connected to a Minecraft server. This patch prepares the first
 connection; it does not perform it.
+
+---
+
+# Milestone 1 patch 2: first-contact corrections
+
+Date: 2026-09-15. Branch: `feat/lan-validation`.
+
+## Why
+
+Person connected to a real Minecraft 1.16.1 LAN world, spawned inside bounds,
+produced a schema-valid Observation, reported its home correctly and
+disconnected cleanly. `person observe` did exactly what it was built to do.
+
+The Observation it produced was also wrong in three ways and preceded by a
+failure that would not exit. This patch fixes those four things and nothing
+else. No new capability, no new skill, no planner change, no learning change.
+
+## What the first real observation exposed
+
+| Symptom                                             | Actual cause                                                                                                                                                   |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `biome: "unknown"` in a loaded Overworld chunk      | `prismarine-block` builds its Biome class from `registry.version` rather than the registry, so `prismarine-biome` returns a nameless placeholder for every id. |
+| The human operator reported as `name: "player"`     | Correct species name, no identity. Minecraft calls every player entity `player`; the account name and UUID were being discarded.                               |
+| 64 resources, 55 of them stone, no wood at all      | A single nearest-N search across all kinds. Standing on stone, the budget is spent before anything else is reached.                                            |
+| 80 passive animals, 70 outside the exploration area | No relevance filter at all on the entity lists.                                                                                                                |
+| `spawn_outside_bounds` needed Ctrl-C                | `disconnect` ended the client twice; `minecraft-protocol` arms a 30s close timer per end and clears it only on the first close.                                |
+
+## Files changed
+
+| Area                                              | Change                                                                                                                                                                           |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/node-runtime/src/observation/perception.ts` | New. Every perception constant in one place, the category map, the balanced selection, and the entity-shaping helper. Used by both bodies.                                       |
+| `apps/node-runtime/src/observation/builder.ts`    | Resource categories come from `perception.ts`; entity lists are shaped and bounded; entity records carry `username` and `uuid` when the body has them.                           |
+| `apps/node-runtime/src/embodiment/types.ts`       | `EntityView` gains `username` and `uuid`.                                                                                                                                        |
+| `adapters/minecraft/src/registry.ts`              | New `resolveBiome`, resolving the biome id against the client's own registry, with the upstream defect documented at the call site.                                              |
+| `adapters/minecraft/src/embodiment.ts`            | Biome resolution, player identity normalisation, per-category resource search, and a disconnect that ends the client once and leaves no armed timer behind.                      |
+| `fixtures/src/world.ts`                           | Same balanced search as the Minecraft body, and fixture entities can carry an identity.                                                                                          |
+| `packages/protocol/schemas/*.json`                | `minecraftUsername` definition; `username` and `uuid` added to the entity list as optional properties.                                                                           |
+| `packages/protocol/ts/types.ts`                   | `EntityRecord` gains the two optional fields.                                                                                                                                    |
+| `apps/cli/src/observe.ts`                         | The rendered observation shows the resource mix by category and names players by account name.                                                                                   |
+| `tests/support/mineflayer-double.ts`              | Biomes now have the shape `prismarine-block` really produces; `findBlocks` sorts by distance like the real one; optional emulation of the socket shutdown, close timer included. |
+| `tests/support/observe-exit-child.ts`             | New. One failed observe in its own process, for the lifecycle test to wait on.                                                                                                   |
+
+## Protocol change
+
+Additive and unversioned. `username` and `uuid` are optional properties on the
+existing entity list: an observation written before this patch still validates,
+and one written after it validates under the same `observationVersion`. Both
+runtimes read the same schema files, and the shared corpus gained a valid
+message that uses both fields and an invalid one that misuses `username`, so
+Node and Python are checked against the change rather than trusted to agree.
+
+## Deviations
+
+None. Perception shaping is not a safety boundary and is not allowed to become
+one: the snapshot the safety kernel, the permission gate and the physical guard
+read is unshaped, and a test asserts an animal dropped from the observation is
+still refused by the permission gate for its own reason.
+
+## New tests
+
+| Suite                                  | Tests   | Covers                                                                                                                                                                                                         |
+| -------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/adapter/biome.test.ts`          | 6       | The upstream defect pinned, resolution against the real registry, every 1.16.1 biome round-tripping to a protocol identifier, and both unknown fallbacks                                                       |
+| `tests/adapter/perception.test.ts`     | 7       | Biome through the body, the unknown fallback, stone not hiding wood, budget bounds, determinism, two distinguishable players, unusable identities dropped                                                      |
+| `tests/observation/perception.test.ts` | 7       | Out-of-region animals omitted while staying refused for their own reason, protections intact, bounded and nearest-first, hostiles never region-filtered, two players surviving into a schema-valid observation |
+| `tests/cli/observe-exit.test.ts`       | 1       | A rejected spawn exits on its own, non-zero, with the reason, in a real child process                                                                                                                          |
+| `tests/cli/observe-safety.test.ts`     | 1 added | Observe opens no cognition channel and spawns no process                                                                                                                                                       |
+| `fixtures/protocol-corpus`             | 2 added | Player identity accepted, malformed username rejected, in both runtimes                                                                                                                                        |
+
+Totals: 160 Node tests and 122 Python tests, 282 in all. `mise run check` is
+green.
+
+## Still true
+
+These fixes have not been seen working against Minecraft. No server was
+reachable while they were made. The next live action is a second
+`person observe`.
