@@ -173,7 +173,9 @@ export const withdrawOwnedStorage: SkillImplementation = async (context) => {
   await approach(context, container.position);
   context.checkpoint();
   const matcher = MATCHERS[category] ?? MATCHERS.any;
-  const live = context.embodiment.containerAt(container.position);
+  // The cached view is empty until something has been transferred, so the
+  // contents have to be read from the container itself before choosing.
+  const live = await context.embodiment.inspectContainer(container.position);
   const wanted: ItemStack[] = (live?.contents ?? [])
     .filter((item) => matcher(item.name))
     .map((item) => ({ name: item.name, count: Math.min(amount, item.count) }));
@@ -222,7 +224,7 @@ export const lootPermittedContainer: SkillImplementation = async (context) => {
 
   await approach(context, container.position);
   context.checkpoint();
-  const live = context.embodiment.containerAt(container.position);
+  const live = await context.embodiment.inspectContainer(container.position);
   const wanted: ItemStack[] = (live?.contents ?? []).map((item) => ({
     name: item.name,
     count: Math.min(amount, item.count),

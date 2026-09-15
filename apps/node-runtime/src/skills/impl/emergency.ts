@@ -28,9 +28,7 @@ const hostileClearance = (
   context: SkillContext,
   position: Position,
 ): number => {
-  const hostiles = context
-    .snapshot()
-    .entities.filter((entity) => entity.hostile);
+  const hostiles = context.kernel.threats(context.snapshot());
   if (hostiles.length === 0) return Number.POSITIVE_INFINITY;
   return Math.min(
     ...hostiles.map((entity) => distance(position, entity.position)),
@@ -62,7 +60,7 @@ export const flee: SkillImplementation = async (context) => {
   for (let attempt = 0; attempt < 8; attempt++) {
     context.checkpoint();
     const snapshot = context.snapshot();
-    const hostiles = snapshot.entities.filter((entity) => entity.hostile);
+    const hostiles = context.kernel.threats(snapshot);
     if (
       hostileClearance(context, snapshot.position) >= clearance &&
       !standingHazard(context)
@@ -151,8 +149,8 @@ export const flee: SkillImplementation = async (context) => {
 export const digIn: SkillImplementation = async (context) => {
   const snapshot = context.snapshot();
   const depth = context.number("depth");
-  const threat = snapshot.entities
-    .filter((entity) => entity.hostile)
+  const threat = context.kernel
+    .threats(snapshot)
     .sort((a, b) => a.distance - b.distance)[0];
   const feet = snapshot.position;
   const dx = threat
@@ -236,9 +234,7 @@ export const waitSafely: SkillImplementation = async (context) => {
   while (waited < total) {
     context.checkpoint();
     const snapshot = context.snapshot();
-    if (
-      snapshot.entities.some((entity) => entity.hostile && entity.distance <= 8)
-    )
+    if (context.kernel.threats(snapshot).some((entity) => entity.distance <= 8))
       throw new SkillFailure(
         "threat_appeared",
         "INTERRUPTED",

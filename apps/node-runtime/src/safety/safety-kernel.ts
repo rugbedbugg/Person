@@ -84,8 +84,23 @@ export class SafetyKernel {
     this.thresholds = thresholds;
   }
 
+  /**
+   * Everything that counts as a threat right now.
+   *
+   * Hostiles always count. Neutrals, which are most of what actually kills an
+   * unarmoured player in practice, count only once Person has taken damage:
+   * treating a llama as a standing emergency would leave Person unable to do
+   * anything in half the biomes in the game.
+   */
+  threats(snapshot: WorldSnapshot): WorldSnapshot["entities"] {
+    return snapshot.entities.filter(
+      (entity) =>
+        entity.hostile || (entity.neutral && snapshot.recentlyDamaged),
+    );
+  }
+
   threatState(snapshot: WorldSnapshot): ThreatState {
-    const hostiles = snapshot.entities.filter((entity) => entity.hostile);
+    const hostiles = this.threats(snapshot);
     if (
       hostiles.some(
         (e) => e.distance <= this.thresholds.immediateThreatDistance,
@@ -155,7 +170,7 @@ export class SafetyKernel {
         reasonCodes: ["position_outside_permitted_territory"],
       };
 
-    const hostiles = snapshot.entities.filter((entity) => entity.hostile);
+    const hostiles = this.threats(snapshot);
     const immediate = hostiles.filter(
       (e) => e.distance <= t.immediateThreatDistance,
     );
