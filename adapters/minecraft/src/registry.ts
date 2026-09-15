@@ -88,6 +88,44 @@ export const TAMEABLE_MOBS = new Set([
   "llama",
 ]);
 
+/**
+ * Armour points per piece in 1.16.1.
+ *
+ * Mineflayer does not expose a total, so it is computed from the equipped
+ * slots. Leaving it at zero would tell the safety kernel that Person is
+ * unarmoured no matter what it is wearing.
+ */
+export const ARMOR_POINTS: Readonly<Record<string, number>> = Object.freeze({
+  leather_helmet: 1,
+  leather_chestplate: 3,
+  leather_leggings: 2,
+  leather_boots: 1,
+  golden_helmet: 2,
+  golden_chestplate: 5,
+  golden_leggings: 3,
+  golden_boots: 1,
+  chainmail_helmet: 2,
+  chainmail_chestplate: 5,
+  chainmail_leggings: 4,
+  chainmail_boots: 1,
+  iron_helmet: 2,
+  iron_chestplate: 6,
+  iron_leggings: 5,
+  iron_boots: 2,
+  diamond_helmet: 3,
+  diamond_chestplate: 8,
+  diamond_leggings: 6,
+  diamond_boots: 3,
+  netherite_helmet: 3,
+  netherite_chestplate: 8,
+  netherite_leggings: 6,
+  netherite_boots: 3,
+  turtle_helmet: 2,
+});
+
+/** Player inventory window slots that hold armour, head to feet. */
+export const ARMOR_SLOTS = [5, 6, 7, 8] as const;
+
 /** Fuel burn value in smelting operations for the fuels Person uses. */
 export const FUEL_BURN: Readonly<Record<string, number>> = Object.freeze({
   coal: 8,

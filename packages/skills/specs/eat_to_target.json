@@ -22,12 +22,13 @@
     {
       "fact": "food_level",
       "op": "max",
-      "value": 18
+      "value": 18,
+      "scalesWith": "target_food"
     },
     {
       "fact": "edible_food",
       "op": "-=",
-      "value": 1
+      "value": 3
     }
   ],
   "possibleFailures": ["no_food", "already_full", "interrupted_by_threat"],

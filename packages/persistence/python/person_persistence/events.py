@@ -14,7 +14,16 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v1"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v2"
+
+#: Versions this reader understands. A journal written before prediction-error
+#: instrumentation existed is still valid history and is read unchanged; only
+#: new records carry the current version. This is the compatibility rule
+#: `migrations/README.md` describes: read both, convert neither.
+SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
+    "person-evidence-v1",
+    "person-evidence-v2",
+)
 
 EVENT_TYPES: tuple[str, ...] = (
     "episode_started",
@@ -28,7 +37,12 @@ EVENT_TYPES: tuple[str, ...] = (
     "skill_interrupted",
     "emergency_override",
     "death",
+    #: Instrumentation only. Never scored, never fed back into policy.
+    "prediction_error",
 )
+
+#: Event types introduced after the first evidence schema version.
+V2_EVENT_TYPES: frozenset[str] = frozenset({"prediction_error"})
 
 REQUIRED_FIELDS: tuple[str, ...] = (
     "event_id",
@@ -94,13 +108,16 @@ class EvidenceEvent:
         missing = [field_name for field_name in REQUIRED_FIELDS if field_name not in document]
         if missing:
             raise EvidenceError(f"Evidence record is missing {', '.join(missing)}")
-        if document["schema_version"] != EVIDENCE_SCHEMA_VERSION:
+        schema = document["schema_version"]
+        if schema not in SUPPORTED_EVIDENCE_SCHEMAS:
             raise EvidenceError(
-                f"Unsupported evidence schema {document['schema_version']!r}; "
-                f"this runtime reads {EVIDENCE_SCHEMA_VERSION}"
+                f"Unsupported evidence schema {schema!r}; "
+                f"this runtime reads {', '.join(SUPPORTED_EVIDENCE_SCHEMAS)}"
             )
         if document["type"] not in EVENT_TYPES:
             raise EvidenceError(f"Unknown evidence event type {document['type']!r}")
+        if schema == "person-evidence-v1" and document["type"] in V2_EVENT_TYPES:
+            raise EvidenceError(f"Event type {document['type']!r} cannot claim schema {schema!r}")
         if not isinstance(document["payload"], dict):
             raise EvidenceError("Evidence payload must be an object")
         if not isinstance(document["tick"], int) or document["tick"] < 0:

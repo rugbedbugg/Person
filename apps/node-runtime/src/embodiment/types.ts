@@ -102,6 +102,14 @@ export interface WorldSnapshot {
   resources: BlockView[];
   hazards: BlockView[];
   stuck: boolean;
+  /**
+   * Whether there is solid, diggable ground beside Person right now.
+   *
+   * The safety kernel needs this to choose between running and digging in. On
+   * flat open terrain there is no wall to tunnel into, and sending Person to
+   * dig a refuge that cannot exist wastes the one chance it had to run.
+   */
+  diggableGround: boolean;
   lastSafePosition: Position | null;
   connected: boolean;
   /** True when Person lost health recently enough for a neutral mob to count. */

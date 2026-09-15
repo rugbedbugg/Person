@@ -105,6 +105,7 @@ export class MineflayerDouble extends EventEmitter {
   inventory: {
     items: () => { name: string; count: number; type: number }[];
     emptySlotCount: () => number;
+    slots: ({ name: string } | null)[];
   };
   heldItem: { name: string } | null = null;
   pathfinder: Record<string, unknown>;
@@ -114,6 +115,7 @@ export class MineflayerDouble extends EventEmitter {
   #containers = new Map<string, Map<string, number>>();
   #chunksReadyAt: number;
   #emptySlots: number;
+  #armorSlots: ({ name: string } | null)[] = [];
   #nextEntityId = 100;
   /** Set by a test to make the next container transfer fail like mineflayer. */
   failNextTransfer: string | null = null;
@@ -177,6 +179,8 @@ export class MineflayerDouble extends EventEmitter {
             type: registry.itemsByName[name]?.id ?? 0,
           })),
       emptySlotCount: () => this.#emptySlots,
+      // Slots five to eight hold armour in the player window.
+      slots: this.#armorSlots,
     };
     this.pathfinder = {
       setMovements: () => {},
@@ -420,6 +424,14 @@ export class MineflayerDouble extends EventEmitter {
   }
 
   // ------------------------------------------------------------ test hooks
+
+  /** Equips armour in the player window's armour slots. */
+  wear(pieces: string[]): void {
+    this.#armorSlots = [null, null, null, null, null];
+    for (const [index, name] of pieces.entries())
+      this.#armorSlots[5 + index] = { name };
+    this.inventory.slots = this.#armorSlots;
+  }
 
   spawnEntity(
     name: string,

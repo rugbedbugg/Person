@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   ConfigError,
@@ -14,6 +14,13 @@ import { skillRegistry } from "#skills";
 import { PROTOCOL_VERSION } from "#protocol";
 import { EvidenceInspector } from "./inspect.ts";
 import { createEmbodiment } from "./embodiment.ts";
+import {
+  captureObservation,
+  compareObservations,
+  renderFindings,
+  renderObservation,
+  resolveBase,
+} from "./observe.ts";
 
 export interface CommandResult {
   code: number;
@@ -58,6 +65,75 @@ export async function runCommand(options: RunOptions): Promise<CommandResult> {
     output: options.json
       ? `${JSON.stringify(report, null, 2)}\n`
       : `${summariseEpisode(report)}\n`,
+  };
+}
+
+/**
+ * Connects, takes one observation, and stops.
+ *
+ * The smallest thing that can be done against a live server, and therefore the
+ * right first thing to do against one.
+ */
+export async function observeCommand(
+  configPath: string,
+  json: boolean,
+  outputFile?: string,
+): Promise<CommandResult> {
+  const config = loadConfig(configPath);
+  const captured = await captureObservation(config, resolveBase(configPath));
+  if (outputFile)
+    writeFileSync(
+      path.resolve(outputFile),
+      `${JSON.stringify(captured.observation, null, 2)}\n`,
+      { mode: 0o600 },
+    );
+  if (json)
+    return {
+      code: captured.valid ? 0 : 1,
+      output: `${JSON.stringify(
+        {
+          valid: captured.valid,
+          diagnostics: captured.diagnostics,
+          observation: captured.observation,
+        },
+        null,
+        2,
+      )}\n`,
+    };
+  const header = captured.valid
+    ? "Observation is valid against the protocol schema."
+    : `Observation FAILS the protocol schema:\n  ${captured.diagnostics.join("\n  ")}`;
+  const written = outputFile ? `Written to ${path.resolve(outputFile)}\n` : "";
+  return {
+    code: captured.valid ? 0 : 1,
+    output: `${header}\n${renderObservation(captured.observation)}\n${written}`,
+  };
+}
+
+/**
+ * Compares a reference observation with one taken somewhere else.
+ *
+ * Two different worlds differ in their contents; that is not news. What this
+ * looks for is a field the real body cannot populate, or a value that is
+ * really a default nothing ever wrote.
+ */
+export function compareCommand(
+  referencePath: string,
+  actualPath: string,
+  json: boolean,
+): CommandResult {
+  const reference: unknown = JSON.parse(
+    readFileSync(path.resolve(referencePath), "utf8"),
+  );
+  const actual: unknown = JSON.parse(
+    readFileSync(path.resolve(actualPath), "utf8"),
+  );
+  const result = compareObservations(reference, actual);
+  return {
+    code: result.structural > 0 ? 1 : 0,
+    output: json
+      ? `${JSON.stringify(result, null, 2)}\n`
+      : `${renderFindings(result)}\n`,
   };
 }
 
@@ -124,10 +200,15 @@ export function inspectCommand(
   configPath: string | undefined,
   json: boolean,
 ): CommandResult {
-  if (what !== "evidence" && what !== "skills" && what !== "config")
+  if (
+    what !== "evidence" &&
+    what !== "skills" &&
+    what !== "config" &&
+    what !== "predictions"
+  )
     return {
       code: 2,
-      output: `Unknown inspect target ${what}. Try: evidence, skills, config.\n`,
+      output: `Unknown inspect target ${what}. Try: evidence, skills, config, predictions.\n`,
     };
 
   if (what === "skills") {
@@ -162,6 +243,27 @@ export function inspectCommand(
 
   const inspector = new EvidenceInspector(config.learning.evidenceDirectory);
   const summary = inspector.summarise();
+  if (what === "predictions")
+    return {
+      code: 0,
+      output: json
+        ? `${JSON.stringify(summary.predictionError, null, 2)}\n`
+        : `Prediction error in ${summary.directory}\n  recorded=${summary.predictionError.recorded} ${Object.entries(
+            summary.predictionError.severities,
+          )
+            .map(([severity, count]) => `${severity}=${count}`)
+            .join(" ")}\n${summary.predictionError.worst
+            .map(
+              (entry) =>
+                `  ${entry.severity} ${entry.skill}: ${entry.facts
+                  .map(
+                    (fact) =>
+                      `${fact.fact} predicted ${fact.predicted} observed ${fact.observed}`,
+                  )
+                  .join("; ")}`,
+            )
+            .join("\n")}\n`,
+    };
   return {
     code: 0,
     output: json

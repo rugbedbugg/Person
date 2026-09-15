@@ -9,6 +9,7 @@ from .demonstrations import (
 from .events import (
     EVENT_TYPES,
     EVIDENCE_SCHEMA_VERSION,
+    SUPPORTED_EVIDENCE_SCHEMAS,
     EvidenceError,
     EvidenceEvent,
     new_event,
@@ -20,6 +21,7 @@ from .store import EvidenceReducer, EvidenceStore, RestoreReport
 __all__ = [
     "EVENT_TYPES",
     "EVIDENCE_SCHEMA_VERSION",
+    "SUPPORTED_EVIDENCE_SCHEMAS",
     "DemonstrationError",
     "DemonstrationManifest",
     "EvidenceError",

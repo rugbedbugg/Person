@@ -38,6 +38,7 @@ from person_skills import SkillRegistry, skill_registry
 
 from .context import decision_context
 from .goals import Goal, GoalStack, SurvivalGoalProvider
+from .prediction import PendingPrediction, build_payload
 from .reporting import LearningSummary
 from .routines import (
     Routine,
@@ -113,6 +114,10 @@ class CognitionLoop:
         self.restore_notes: list[str] = []
         self.consecutive_failures: dict[str, int] = {}
         self._pending_choice: PolicyChoice | None = None
+        #: One prediction at a time: the runtime runs one skill at a time.
+        self.pending_prediction: PendingPrediction | None = None
+        self.prediction_errors: list[dict[str, Any]] = []
+        self._last_state: dict[str, float] = {}
 
     # ------------------------------------------------------------------ utils
 
@@ -243,6 +248,7 @@ class CognitionLoop:
             },
         )
         if message["phase"] == "ended":
+            self._settle_prediction(None, message["tick"])
             self._finish_routine("INTERRUPTED", message["tick"], reason="episode_ended")
             if self.store is not None:
                 self.store.write_snapshot(self.statistics)
@@ -265,6 +271,10 @@ class CognitionLoop:
         state = symbolic_state(message)
         context = decision_context(message)
         context_id = context.identifier()
+        # The first thing a new observation is good for is settling whatever
+        # the last skill claimed it would do.
+        self._settle_prediction(state, tick)
+        self._last_state = dict(state)
 
         proposals = self.goal_provider.propose(message, state, tick)
         goal = self.goals.update(proposals, state, tick)
@@ -466,6 +476,17 @@ class CognitionLoop:
                 "shadowRoutineId": choice.shadow_routine_id,
             }
         )
+        # The state a prediction is measured against is the one the planner
+        # reasoned over, captured before anything physical happens.
+        self.pending_prediction = PendingPrediction(
+            decision_id=decision_id,
+            context_id=context_id,
+            routine_id=self.active.routine.routine_id,
+            goal_id=goal.goal_id,
+            requested_skill=step.skill_id,
+            state_before=dict(self._last_state),
+            tick=tick,
+        )
         self._send(
             {
                 **self._envelope("SkillInvocation", tick),
@@ -591,8 +612,22 @@ class CognitionLoop:
             "completion_evidence": message["completionEvidence"],
             "interrupt_reason": message["interruptReason"],
         }
-        self._record(event_type, message["tick"], payload, message["decisionId"])
+        event = self._record(event_type, message["tick"], payload, message["decisionId"])
         self.summary.note_outcome(message)
+
+        pending = self.pending_prediction
+        if pending is not None and pending.decision_id == message["decisionId"]:
+            pending.executed_skill = message["executedSkill"]
+            # The effects belong to the skill that actually ran, which is the
+            # only thing there is any point predicting.
+            pending.expected_effects = tuple(message["expectedEffects"])
+            pending.status = status
+            pending.emergency = bool(message["emergency"])
+            pending.elapsed_ticks = int(message["elapsedTicks"])
+            pending.health_cost = float(message["healthCost"])
+            pending.settled = True
+            if event is not None:
+                pending.evidence_refs.append(event.event_id)
 
         active = self.active
         if active is None:
@@ -629,6 +664,22 @@ class CognitionLoop:
 
         active.failure_modes.append(status.lower())
         self._finish_routine("INTERRUPTED", message["tick"], reason="skill_interrupted")
+
+    def _settle_prediction(self, state: dict[str, float] | None, tick: int) -> None:
+        """Record how far the skill contract was from what actually happened.
+
+        This is measurement only. The record never reaches the policy, which is
+        why prediction error cannot change behaviour in this milestone even by
+        accident: the statistics reducer has no case for it.
+        """
+        pending = self.pending_prediction
+        if pending is None or not pending.settled:
+            return
+        self.pending_prediction = None
+        payload = build_payload(pending, state)
+        self.prediction_errors.append(payload)
+        self.summary.note_prediction(payload)
+        self._record("prediction_error", tick, payload, pending.decision_id)
 
     def _finish_routine(self, status: str, tick: int, *, reason: str) -> None:
         active = self.active

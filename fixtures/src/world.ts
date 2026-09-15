@@ -468,6 +468,7 @@ export class FixtureWorld implements Embodiment {
       resources,
       hazards,
       stuck: false,
+      diggableGround: this.#diggableGround(),
       lastSafePosition: this.#lastSafePosition,
       connected: this.#connected,
       recentlyDamaged:
@@ -475,6 +476,27 @@ export class FixtureWorld implements Embodiment {
         this.#tick - this.#lastDamageTick <= DAMAGE_MEMORY_TICKS,
       lastDamageTick: this.#lastDamageTick,
     };
+  }
+
+  /** Mirrors the adapter: solid diggable ground beside Person. */
+  #diggableGround(): boolean {
+    const diggable = new Set(["dirt", "grass", "stone", "cobblestone"]);
+    const here = this.#position;
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as [number, number][])
+      for (const dy of [0, 1]) {
+        const block = this.blockAt({
+          x: here.x + dx,
+          y: here.y + dy,
+          z: here.z + dz,
+        });
+        if (block && block.solid && diggable.has(block.kind)) return true;
+      }
+    return false;
   }
 
   #view(entity: FixtureEntityState): EntityView {

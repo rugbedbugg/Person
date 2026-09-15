@@ -25,7 +25,13 @@ import {
   type PhysicalGuard,
   type WorldSnapshot,
 } from "#node-runtime";
-import { FUEL_BURN, HAZARD_BLOCKS, blockKind } from "./registry.ts";
+import {
+  ARMOR_POINTS,
+  ARMOR_SLOTS,
+  FUEL_BURN,
+  HAZARD_BLOCKS,
+  blockKind,
+} from "./registry.ts";
 import {
   EXTRA_HOSTILE_MOBS,
   HOSTILE_CATEGORY,
@@ -494,6 +500,38 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     return timeOfDay < 12000 ? 15 : 4;
   }
 
+  /** Solid, diggable ground beside Person, at head or foot height. */
+  #diggableGround(here: Position): boolean {
+    const diggable = new Set(["dirt", "grass", "stone", "cobblestone"]);
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as [number, number][])
+      for (const dy of [0, 1]) {
+        const block = this.blockAt({
+          x: here.x + dx,
+          y: here.y + dy,
+          z: here.z + dz,
+        });
+        if (block && block.solid && diggable.has(block.kind)) return true;
+      }
+    return false;
+  }
+
+  /** Armour points from the equipped pieces, which mineflayer does not total. */
+  #armorPoints(): number {
+    const slots = this.#bot?.inventory?.slots;
+    if (!Array.isArray(slots)) return 0;
+    let points = 0;
+    for (const index of ARMOR_SLOTS) {
+      const item = slots[index] as { name?: string } | null | undefined;
+      if (item?.name) points += ARMOR_POINTS[item.name] ?? 0;
+    }
+    return Math.min(20, points);
+  }
+
   #statusEffects(): WorldSnapshot["statusEffects"] {
     const effects = this.#bot?.entity?.effects;
     if (!effects || typeof effects !== "object") return [];
@@ -548,6 +586,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         resources: [],
         hazards: [],
         stuck: false,
+        diggableGround: false,
         lastSafePosition: this.#lastSafePosition,
         connected: false,
         recentlyDamaged: false,
@@ -602,7 +641,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       food: bot.food ?? 0,
       saturation: bot.foodSaturation ?? 0,
       air: bot.oxygenLevel === undefined ? 300 : bot.oxygenLevel * 15,
-      armor: 0,
+      armor: this.#armorPoints(),
       alive: (bot.health ?? 0) > 0,
       statusEffects: this.#statusEffects(),
       inventory,
@@ -615,6 +654,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       resources,
       hazards,
       stuck: this.#stuck,
+      diggableGround: this.#diggableGround(here),
       lastSafePosition: this.#lastSafePosition,
       connected: this.#connected,
       recentlyDamaged:

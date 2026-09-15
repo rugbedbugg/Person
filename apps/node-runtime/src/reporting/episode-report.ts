@@ -30,6 +30,11 @@ export interface DecisionRecord {
   healthDelta: number;
   foodDelta: number;
   elapsedTicks: number;
+  budgetTicks: number;
+  budgetPressure: number;
+  navigationTicks: number;
+  interactionTicks: number;
+  waitingTicks: number;
   inventoryDelta: ItemDelta[];
   outcomeMessageId: string;
 }
@@ -75,6 +80,24 @@ export interface EpisodeReport {
     healthLost: number;
     resourceDelta: ItemDelta[];
   };
+  /**
+   * Per-skill timing, so a cost limit can be revised from measurements.
+   *
+   * `worstPressure` is the closest any single run came to its budget. A value
+   * near one means the budget is about to start causing timeouts; a value far
+   * below it means the budget is not the reason anything failed.
+   */
+  tickBudgets: {
+    skill: string;
+    runs: number;
+    budgetTicks: number;
+    meanElapsedTicks: number;
+    maxElapsedTicks: number;
+    worstPressure: number;
+    meanNavigationTicks: number;
+    meanInteractionTicks: number;
+    timeouts: number;
+  }[];
 }
 
 const mergeDeltas = (deltas: ItemDelta[][]): ItemDelta[] => {
@@ -87,6 +110,37 @@ const mergeDeltas = (deltas: ItemDelta[][]): ItemDelta[] => {
     .map(([name, delta]) => ({ name, delta }))
     .sort((a, b) => a.name.localeCompare(b.name));
 };
+
+function summariseTickBudgets(
+  decisions: DecisionRecord[],
+): EpisodeReport["tickBudgets"] {
+  const grouped = new Map<string, DecisionRecord[]>();
+  for (const decision of decisions) {
+    if (!decision.executedSkill) continue;
+    const bucket = grouped.get(decision.executedSkill) ?? [];
+    bucket.push(decision);
+    grouped.set(decision.executedSkill, bucket);
+  }
+  const mean = (values: number[]): number =>
+    values.length === 0
+      ? 0
+      : Number((values.reduce((a, b) => a + b, 0) / values.length).toFixed(1));
+  return [...grouped]
+    .map(([skill, runs]) => ({
+      skill,
+      runs: runs.length,
+      budgetTicks: runs[0]?.budgetTicks ?? 0,
+      meanElapsedTicks: mean(runs.map((run) => run.elapsedTicks)),
+      maxElapsedTicks: Math.max(...runs.map((run) => run.elapsedTicks)),
+      worstPressure: Number(
+        Math.max(...runs.map((run) => run.budgetPressure)).toFixed(4),
+      ),
+      meanNavigationTicks: mean(runs.map((run) => run.navigationTicks)),
+      meanInteractionTicks: mean(runs.map((run) => run.interactionTicks)),
+      timeouts: runs.filter((run) => run.status === "TIMED_OUT").length,
+    }))
+    .sort((a, b) => b.worstPressure - a.worstPressure);
+}
 
 /**
  * Per-episode report.
@@ -112,6 +166,7 @@ export class EpisodeReportBuilder {
       | "endTick"
       | "elapsedTicks"
       | "storageProvenance"
+      | "tickBudgets"
     >,
   ) {
     this.#report = {
@@ -124,6 +179,7 @@ export class EpisodeReportBuilder {
       decisions: [],
       safetyOverrides: [],
       storageProvenance: [],
+      tickBudgets: [],
       totals: {
         decisions: 0,
         accepted: 0,
@@ -176,6 +232,7 @@ export class EpisodeReportBuilder {
     this.#report.totals.resourceDelta = mergeDeltas(
       this.#report.decisions.map((decision) => decision.inventoryDelta),
     );
+    this.#report.tickBudgets = summariseTickBudgets(this.#report.decisions);
     return this.#report;
   }
 
@@ -226,6 +283,18 @@ export function summariseEpisode(report: EpisodeReport): string {
       `  [${decision.tick}] ${decision.goalType} via ${decision.routineName} (${decision.learnedOrFallback}) ${attribution} ${decision.status}`,
     );
   }
+  const pressured = report.tickBudgets.filter(
+    (entry) => entry.worstPressure >= 0.5,
+  );
+  if (pressured.length)
+    lines.push(
+      `  tick budgets under pressure: ${pressured
+        .map(
+          (entry) =>
+            `${entry.skill} ${Math.round(entry.worstPressure * 100)}% of ${entry.budgetTicks}`,
+        )
+        .join(", ")}`,
+    );
   if (report.totals.resourceDelta.length)
     lines.push(
       `  resources: ${report.totals.resourceDelta

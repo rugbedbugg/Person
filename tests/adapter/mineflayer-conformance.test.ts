@@ -299,6 +299,18 @@ test("smelting collects the output that is ready instead of losing it", async ()
   await body.disconnect();
 });
 
+test("armour points are computed from what Person is wearing", async () => {
+  const { body, bot } = await connected();
+  assert.equal(body.snapshot().armor, 0, "nothing worn");
+  bot.wear(["iron_helmet", "iron_chestplate"]);
+  assert.equal(
+    body.snapshot().armor,
+    8,
+    "mineflayer exposes no total, so it is summed",
+  );
+  await body.disconnect();
+});
+
 test("the observation reports real light rather than guessing from the clock", async () => {
   const { body } = await connected({ timeOfDay: 18000 });
   const snapshot = body.snapshot();

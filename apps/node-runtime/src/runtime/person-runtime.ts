@@ -612,6 +612,21 @@ export class PersonRuntime {
       healthDelta: outcome.healthAfter - outcome.healthBefore,
       foodDelta: outcome.foodAfter - outcome.foodBefore,
       elapsedTicks: outcome.elapsedTicks,
+      budgetTicks: Number(
+        outcome.completionEvidence.details["timing_budget_ticks"] ?? 0,
+      ),
+      budgetPressure: Number(
+        outcome.completionEvidence.details["timing_budget_pressure"] ?? 0,
+      ),
+      navigationTicks: Number(
+        outcome.completionEvidence.details["timing_navigation_ticks"] ?? 0,
+      ),
+      interactionTicks: Number(
+        outcome.completionEvidence.details["timing_interaction_ticks"] ?? 0,
+      ),
+      waitingTicks: Number(
+        outcome.completionEvidence.details["timing_waiting_ticks"] ?? 0,
+      ),
       inventoryDelta: outcome.inventoryDelta,
       outcomeMessageId: outcome.messageId,
     });
