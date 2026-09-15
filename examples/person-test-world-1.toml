@@ -1,0 +1,96 @@
+# Person Test World #1
+# Disposable Minecraft Java 1.16.1 LAN validation world.
+# LAN port is supplied at runtime with --port and is not persisted here.
+
+configVersion = 2
+personId = "ada"
+worldId = "person-test-world-1"
+
+[runtime]
+embodiment = "minecraft"
+trainingContext = "minecraft_peaceful"
+outputDirectory = "../runs"
+rngSeed = 20260915
+maxDecisions = 200
+maxTicks = 48000
+decisionIntervalMs = 0
+
+[learning]
+# Keep learning completely disabled for first-contact and initial body validation.
+mode = "off"
+evidenceDirectory = "../runs/evidence"
+snapshotEveryEvents = 25
+explorationBonus = 0.15
+minimumSupport = 3
+
+[server]
+host = "127.0.0.1"
+
+# Placeholder only.
+# Always override this using:
+#   --port <LAN_PORT>
+port = 33759
+
+version = "1.16.1"
+
+[bot]
+username = "PersonAda"
+auth = "offline"
+
+[authorization]
+worldOwnerApproved = true
+dedicatedIdentity = true
+resourceAreasAreUnowned = true
+naturalDaylightCycle = true
+
+# First validation world is Peaceful.
+normalDifficulty = false
+
+[cognition]
+command = ["uv", "run", "person-cognition"]
+startTimeoutMs = 20000
+decisionTimeoutMs = 5000
+
+[world]
+
+# Replace this with the actual location you want Person to consider home
+# before autonomous survival testing.
+#
+# For the first observe-only run this value is mostly just schema/config state.
+home = { x = -218, y = 66, z = 164 }
+
+# Keep Person geographically constrained during the first live validation.
+# Full vertical range avoids accidental failure if spawn is on elevated terrain.
+exploration = { min = { x = -266, y = 0, z = 116 }, max = { x = -170, y = 255, z = 212 } }
+
+# Natural resources inside the initial test region may be used by Person.
+resourceAreas = [{ min = { x = -266, y = 0, z = 116 }, max = { x = -170, y = 255, z = 212 } }]
+
+# No protected areas for first contact.
+# Add explicit protected regions before destructive/building skill tests if needed.
+protectedAreas = []
+
+[permissions.containers.existing]
+withdraw = true
+deposit = false
+
+[permissions.containers.owned]
+withdraw = true
+deposit = true
+
+[permissions.hunting]
+passiveUnnamedAnimals = true
+namedAnimals = false
+tamedAnimals = false
+
+[permissions.players]
+combat = false
+
+[permissions.villagers]
+harm = false
+
+[permissions.building]
+enabled = true
+
+[permissions.protectedAreas]
+enforcement = "strict"
