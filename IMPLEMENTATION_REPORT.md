@@ -449,8 +449,9 @@ of the same plan, which both diluted evidence and produced absurd magnitudes.
 | `apps/cognition/tests/test_prediction.py`      | 12                 | Effect semantics, severity classification, unexplained changes, volatile-fact suppression, settlement on the next observation, attribution to the executed skill, unobserved predictions, persistence, and that replaying prediction records changes no policy statistic                                                                                                                          |
 | `packages/planner/tests/test_planner.py`       | 6 added            | Parameter-aware cost, sensible magnitudes, substantively different alternatives, using materials already held, no pointless repetition, expensive routes ranked last                                                                                                                                                                                                                              |
 | `tests/safety/kernel.test.ts`                  | 1 added, 1 revised | Refuge chosen only where one can be dug, and fleeing where one cannot                                                                                                                                                                                                                                                                                                                             |
+| `tests/cli/cli.test.ts`                        | 5 added            | Parsing, capture, capture to file, structural gaps and suspicious defaults, and a self-comparison finding nothing                                                                                                                                                                                                                                                                                 |
 
-Totals: 103 Node tests and 120 Python tests, 223 in all, up from 173.
+Totals: 108 Node tests and 120 Python tests, 228 in all, up from 173.
 
 ## Manual validation remaining
 
