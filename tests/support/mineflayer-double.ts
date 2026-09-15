@@ -37,6 +37,7 @@ export interface DoubleEntity {
   type?: string;
   kind?: string;
   username?: string;
+  uuid?: string;
   position: InstanceType<typeof Vec3>;
   metadata?: Record<string, unknown>;
   effects?: Record<string, unknown>;
@@ -51,6 +52,8 @@ export interface DoubleOptions {
   gameMode?: string;
   difficulty?: string;
   dimension?: string;
+  /** A 1.16.1 biome name. Resolved through the real minecraft-data table. */
+  biome?: string;
   doDaylightCycle?: boolean;
   timeOfDay?: number;
   age?: number;
@@ -60,15 +63,44 @@ export interface DoubleOptions {
   chunkDelayTicks?: number;
   emptySlots?: number;
   containers?: Record<string, { name: string; count: number }[]>;
+  /**
+   * Model `minecraft-protocol`'s socket shutdown, close timer included.
+   *
+   * Off by default, because a leaked thirty-second timer would hang the whole
+   * suite rather than fail one test. The lifecycle test turns it on.
+   */
+  emulateSocket?: boolean;
+  /** How long the server takes to close after the client ends. */
+  socketCloseDelayMs?: number;
 }
+
+/** minecraft-protocol/src/client.js: `const closeTimeout = 30 * 1000`. */
+export const CLOSE_TIMEOUT_MS = 30_000;
 
 const key = (p: { x: number; y: number; z: number }): string =>
   `${Math.floor(p.x)},${Math.floor(p.y)},${Math.floor(p.z)}`;
+
+/**
+ * The biome every block in this world sits in, as prismarine-block reports it.
+ *
+ * Faithfully wrong on purpose. `prismarine-block` constructs its Biome class
+ * from `registry.version` rather than the registry, so `prismarine-biome`
+ * never finds a biome table and hands back its placeholder: the correct
+ * numeric id, and an empty name. A double that returned `{ name: "forest" }`
+ * would be testing a library that does not exist, which is exactly how
+ * `biome: "unknown"` survived every test and reached the first live run.
+ */
+function makeBiome(name: string): { id: number; name: string } {
+  const id = registry.biomesByName[name]?.id;
+  if (id === undefined) throw new Error(`No such 1.16.1 biome: ${name}`);
+  return { id, name: "" };
+}
 
 /** A block shaped like prismarine-block, with the fields the adapter reads. */
 function makeBlock(
   name: string,
   position: InstanceType<typeof Vec3>,
+  biome: { id: number; name: string },
 ): Record<string, unknown> {
   const data = registry.blocksByName[name];
   return {
@@ -84,7 +116,7 @@ function makeBlock(
     transparent: Boolean(data?.transparent),
     light: 0,
     skyLight: 15,
-    biome: { name: "forest" },
+    biome,
     getProperties: () => ({}),
   };
 }
@@ -92,6 +124,8 @@ function makeBlock(
 export class MineflayerDouble extends EventEmitter {
   readonly registry = registry;
   username = "PersonAda";
+  /** Set to null to model a chunk whose biome data never arrived. */
+  biome: { id: number; name: string } | null;
   entity: DoubleEntity;
   entities: Record<string, DoubleEntity> = {};
   health: number;
@@ -119,10 +153,18 @@ export class MineflayerDouble extends EventEmitter {
   #nextEntityId = 100;
   /** Set by a test to make the next container transfer fail like mineflayer. */
   failNextTransfer: string | null = null;
+  /** Present only when socket emulation is on, mirroring `bot._client`. */
+  _client?: {
+    ended: boolean;
+    closeTimer?: NodeJS.Timeout;
+    socket: { destroy: () => void };
+  };
+  #socketCloseDelayMs = 0;
 
   constructor(options: DoubleOptions = {}) {
     super();
     const start = options.position ?? { x: 0, y: 64, z: 0 };
+    this.biome = makeBiome(options.biome ?? "forest");
     this.entity = {
       id: 1,
       name: "player",
@@ -166,6 +208,18 @@ export class MineflayerDouble extends EventEmitter {
       );
       this.#blocks.set(position, "chest");
     }
+    if (options.emulateSocket) {
+      this.#socketCloseDelayMs = options.socketCloseDelayMs ?? 0;
+      this._client = {
+        ended: false,
+        socket: {
+          destroy: () => {
+            clearTimeout(this._client?.closeTimer);
+            this.#endSocket();
+          },
+        },
+      };
+    }
     this.#chunksReadyAt = Date.now() + (options.chunkDelayTicks ?? 0) * 50;
     this.#emptySlots = options.emptySlots ?? 30;
 
@@ -199,9 +253,40 @@ export class MineflayerDouble extends EventEmitter {
 
   quit(): void {
     this.calls.push("quit");
+    // Real mineflayer: `bot.quit = reason => bot.end(reason)`.
+    this.end();
   }
 
-  end(): void {}
+  /**
+   * A port of `Client.end` from minecraft-protocol 1.x.
+   *
+   * Every call arms a close timer that destroys the socket if it has not
+   * closed on its own. The handler that clears that timer runs once, on the
+   * first close, and then removes itself. So a second end after the socket has
+   * already gone arms a timer that nothing will ever clear, and the process
+   * stays alive for thirty seconds with no work left to do. That is the bug
+   * that made a failed `person observe` need Ctrl-C, reproduced here rather
+   * than described.
+   */
+  end(): void {
+    const client = this._client;
+    if (!client) return;
+    this.calls.push("end");
+    client.closeTimer = setTimeout(
+      () => client.socket.destroy(),
+      CLOSE_TIMEOUT_MS,
+    );
+    if (client.ended) return;
+    setTimeout(() => this.#endSocket(), this.#socketCloseDelayMs);
+  }
+
+  #endSocket(): void {
+    const client = this._client;
+    if (!client || client.ended) return;
+    client.ended = true;
+    clearTimeout(client.closeTimer);
+    this.emit("end", "socketClosed");
+  }
 
   spawn(): void {
     queueMicrotask(() => {
@@ -225,12 +310,19 @@ export class MineflayerDouble extends EventEmitter {
       Math.floor(position.y),
       Math.floor(position.z),
     );
+    const biome = this.#biomeOrVoid();
     const explicit = this.#blocks.get(key(floored));
-    if (explicit) return makeBlock(explicit, floored);
+    if (explicit) return makeBlock(explicit, floored, biome);
     return makeBlock(
       floored.y > 63 ? "air" : floored.y === 63 ? "grass_block" : "stone",
       floored,
+      biome,
     );
+  }
+
+  /** An id no registry knows, which is what an unloaded chunk looks like. */
+  #biomeOrVoid(): { id: number; name: string } {
+    return this.biome ?? { id: -1, name: "" };
   }
 
   findBlocks(options: {
@@ -251,11 +343,20 @@ export class MineflayerDouble extends EventEmitter {
       const point = new Vec3(x, y, z);
       if (point.distanceTo(this.entity.position) > options.maxDistance)
         continue;
-      if (!options.matching(makeBlock(name, point))) continue;
+      if (!options.matching(makeBlock(name, point, this.#biomeOrVoid())))
+        continue;
       found.push(point);
-      if (found.length >= options.count) break;
     }
-    return found;
+    // Real findBlocks sorts by distance and then truncates, so a caller that
+    // asks for eight gets the eight nearest rather than the first eight the
+    // scan happened to touch.
+    return found
+      .sort(
+        (a, b) =>
+          a.distanceTo(this.entity.position) -
+          b.distanceTo(this.entity.position),
+      )
+      .slice(0, options.count);
   }
 
   canDigBlock(): boolean {
@@ -452,11 +553,16 @@ export class MineflayerDouble extends EventEmitter {
     return entity;
   }
 
-  spawnPlayer(username: string, position: Position): DoubleEntity {
+  spawnPlayer(
+    username: string,
+    position: Position,
+    uuid?: string,
+  ): DoubleEntity {
     return this.spawnEntity("player", position, {
       name: "player",
       type: "player",
       username,
+      ...(uuid === undefined ? {} : { uuid }),
       kind: undefined,
     });
   }

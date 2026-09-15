@@ -374,8 +374,17 @@ export function renderObservation(observation: Observation): string {
 
   const nearby = observation.nearby;
   lines.push("  nearby");
+  // The category breakdown is the point of a balanced search: a run that finds
+  // sixty-four of one thing is reporting a perception failure, not a forest.
+  const perKind = new Map<string, number>();
+  for (const resource of nearby.resources)
+    perKind.set(resource.kind, (perKind.get(resource.kind) ?? 0) + 1);
+  const breakdown = [...perKind]
+    .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .map(([kind, count]) => `${kind} ${count}`)
+    .join(", ");
   lines.push(
-    `    resources    ${nearby.resources.length}${
+    `    resources    ${nearby.resources.length}${breakdown ? ` (${breakdown})` : ""}${
       nearby.resources.length
         ? `: ${nearest(nearby.resources)
             .map(
@@ -411,7 +420,10 @@ export function renderObservation(observation: Observation): string {
     `    players      ${nearby.players.length}${
       nearby.players.length
         ? `: ${nearest(nearby.players)
-            .map((player) => `${player.name} ${away(player.distance)}`)
+            .map(
+              (player) =>
+                `${player.username ?? player.name} ${away(player.distance)}`,
+            )
             .join(", ")}`
         : ""
     }`,

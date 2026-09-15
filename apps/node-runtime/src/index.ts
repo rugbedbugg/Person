@@ -10,6 +10,7 @@ export * from "./skills/recipes.ts";
 export * from "./skills/shelter-plan.ts";
 export * from "./skills/navigate.ts";
 export * from "./skills/impl/index.ts";
+export * from "./observation/perception.ts";
 export * from "./observation/builder.ts";
 export * from "./runtime/world-memory.ts";
 export * from "./runtime/person-runtime.ts";

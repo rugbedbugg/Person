@@ -14,6 +14,7 @@ import {
   type MoveOptions,
   type PhysicalGuard,
   type WorldSnapshot,
+  gatherResources,
   FOOD_VALUE,
   FUEL_VALUE,
   SMELTING,
@@ -38,6 +39,8 @@ import { SeededRandom } from "./rng.ts";
 interface FixtureEntityState {
   entityId: number;
   name: string;
+  username: string | null;
+  uuid: string | null;
   position: Position;
   health: number;
   hostile: boolean;
@@ -423,11 +426,13 @@ export class FixtureWorld implements Embodiment {
 
   #buildSnapshot(): WorldSnapshot {
     const inventory = this.inventory();
-    const resources = this.findBlocks({
-      kinds: ["wood", "stone", "coal_ore", "plant_food", "leaves"],
-      maxDistance: 48,
-      limit: 64,
-    });
+    // The same category-balanced search the Minecraft body runs, so a skill
+    // never sees a richer or poorer world here than it will in Minecraft.
+    const resources = gatherResources(
+      (kinds, maxDistance, limit) =>
+        this.findBlocks({ kinds, maxDistance, limit }),
+      this.#position,
+    );
     const hazards = this.findBlocks({
       kinds: ["lava", "fire", "water", "cactus"],
       maxDistance: 16,
@@ -503,6 +508,8 @@ export class FixtureWorld implements Embodiment {
     return {
       entityId: entity.entityId,
       name: entity.name,
+      username: entity.username,
+      uuid: entity.uuid,
       position: { ...entity.position },
       distance: distance(this.#position, entity.position),
       hostile: entity.hostile,
@@ -921,6 +928,8 @@ export class FixtureWorld implements Embodiment {
     const entity: FixtureEntityState = {
       entityId: this.#nextEntityId++,
       name,
+      username: options.username ?? null,
+      uuid: options.uuid ?? null,
       position: { ...position },
       health: options.health ?? PASSIVE_ANIMALS[name]?.health ?? 20,
       hostile: HOSTILES.has(name),

@@ -63,6 +63,15 @@ export interface EntityRecord {
   named: boolean;
   tamed: boolean;
   protectedTarget: boolean;
+  /**
+   * Stable identity, when the body has it.
+   *
+   * Both are optional additions rather than required fields: an observation
+   * recorded before they existed is still a valid observation, and a mob has
+   * no account name to report.
+   */
+  username?: string;
+  uuid?: string;
 }
 
 export interface ResourceRecord {

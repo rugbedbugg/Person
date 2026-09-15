@@ -46,7 +46,18 @@ export interface BlockView {
 
 export interface EntityView {
   entityId: number;
+  /**
+   * The species name, or literally "player" for a person.
+   *
+   * Minecraft reports every player entity under the same name, so this field
+   * says what something is and never who it is. Identity lives in `username`
+   * and `uuid`.
+   */
   name: string;
+  /** The account name, when the client knows one. Players only. */
+  username: string | null;
+  /** The server's stable entity UUID, when one was sent. */
+  uuid: string | null;
   position: Position;
   distance: number;
   /** Attacks without provocation. */
