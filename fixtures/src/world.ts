@@ -24,6 +24,7 @@ import {
 import {
   BLOCKS,
   HOSTILES,
+  NEUTRALS,
   PASSIVE_ANIMALS,
   RANGED_HOSTILES,
   definitionOf,
@@ -40,6 +41,7 @@ interface FixtureEntityState {
   position: Position;
   health: number;
   hostile: boolean;
+  neutral: boolean;
   passive: boolean;
   player: boolean;
   villager: boolean;
@@ -50,6 +52,8 @@ interface FixtureEntityState {
 
 const MAX_SLOTS = 36;
 const SCAN_RADIUS = 64;
+/** Mirrors the Mineflayer adapter: how long damage keeps a neutral dangerous. */
+const DAMAGE_MEMORY_TICKS = 200;
 
 /**
  * A deterministic Minecraft-shaped world.
@@ -88,10 +92,11 @@ export class FixtureWorld implements Embodiment {
   #connected = false;
   #guard: PhysicalGuard | null = null;
   #lastSafePosition: Position | null = null;
-  #lastDamageTick = -1000;
+  #lastAttackTick = -1000;
   #firedEvents = new Set<number>();
   #groundLevel: number;
   #snapshotCache: { tick: number; value: WorldSnapshot } | null = null;
+  #lastDamageTick: number | null = null;
 
   constructor(definition: Partial<FixtureWorldDefinition> = {}) {
     this.definition = { ...DEFAULT_DEFINITION, ...definition };
@@ -248,6 +253,19 @@ export class FixtureWorld implements Embodiment {
       .slice(0, query.limit);
   }
 
+  /**
+   * The fixture always knows what is in a container, but the port promises an
+   * asynchronous read because a real server only reveals contents once the
+   * window is open. Both bodies must present the same shape or the skills
+   * would be written against the easier one.
+   */
+  async inspectContainer(position: Position): Promise<ContainerView | null> {
+    const view = this.containerAt(position);
+    if (!view) return null;
+    this.#advance(4);
+    return this.containerAt(position);
+  }
+
   containerAt(position: Position): ContainerView | null {
     const container = this.#containers.get(positionKey(position));
     if (!container) return null;
@@ -351,11 +369,19 @@ export class FixtureWorld implements Embodiment {
         };
       }
       const reach = entity.ranged ? 12 : 2.5;
-      if (gap <= reach && this.#tick - this.#lastDamageTick >= 20) {
-        this.#lastDamageTick = this.#tick;
-        this.#health = Math.max(0, this.#health - 2);
+      if (gap <= reach && this.#tick - (this.#lastAttackTick ?? -1000) >= 20) {
+        this.#lastAttackTick = this.#tick;
+        this.#damage(2);
       }
     }
+  }
+
+  /** Every health loss is recorded, so a neutral mob can become a threat. */
+  #damage(amount: number): void {
+    if (amount <= 0) return;
+    this.#invalidate();
+    this.#health = Math.max(0, this.#health - amount);
+    this.#lastDamageTick = this.#tick;
   }
 
   #stepVitals(): void {
@@ -368,7 +394,7 @@ export class FixtureWorld implements Embodiment {
       this.#health = Math.min(20, this.#health + 1);
     const feet = this.blockAt(this.#position);
     if (feet?.hazard && feet.kind === "lava" && this.#tick % 10 === 0)
-      this.#health = Math.max(0, this.#health - 4);
+      this.#damage(4);
     if (!this.blockAt(this.#position)?.hazard && this.#air < 300)
       this.#air = Math.min(300, this.#air + 10);
     if (this.#health > 0 && this.#threatFree())
@@ -444,6 +470,10 @@ export class FixtureWorld implements Embodiment {
       stuck: false,
       lastSafePosition: this.#lastSafePosition,
       connected: this.#connected,
+      recentlyDamaged:
+        this.#lastDamageTick !== null &&
+        this.#tick - this.#lastDamageTick <= DAMAGE_MEMORY_TICKS,
+      lastDamageTick: this.#lastDamageTick,
     };
   }
 
@@ -454,6 +484,7 @@ export class FixtureWorld implements Embodiment {
       position: { ...entity.position },
       distance: distance(this.#position, entity.position),
       hostile: entity.hostile,
+      neutral: entity.neutral,
       passive: entity.passive,
       player: entity.player,
       villager: entity.villager,
@@ -871,6 +902,7 @@ export class FixtureWorld implements Embodiment {
       position: { ...position },
       health: options.health ?? PASSIVE_ANIMALS[name]?.health ?? 20,
       hostile: HOSTILES.has(name),
+      neutral: options.neutral ?? NEUTRALS.has(name),
       passive,
       player: options.player ?? name === "player",
       villager: options.villager ?? name === "villager",

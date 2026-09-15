@@ -1,0 +1,490 @@
+/**
+ * A stand-in for a Mineflayer bot that mirrors the real API shapes.
+ *
+ * Every shape here was checked against the installed mineflayer 4.39.0 source
+ * rather than against what the adapter wished were true. In particular:
+ *
+ * - `entity.metadata` is a sparse object keyed by metadata index, not an array
+ *   (`parseMetadata` in lib/plugins/entities.js), and index 2 carries the
+ *   optional custom name in 1.16.1;
+ * - `entity.kind` is the minecraft-data entity category;
+ * - players report `type: "player"` and `name: "player"`, with `username` set;
+ * - `bot.game.dimension` has already had its `minecraft:` prefix stripped;
+ * - `bot.oxygenLevel` is air supply divided by fifteen, so zero to twenty;
+ * - `bot.inventory.emptySlotCount()` exists and is authoritative;
+ * - `recipesFor` filters by both table availability and current inventory.
+ *
+ * Block, item and entity data come from the real `minecraft-data` for 1.16.1
+ * and recipes from the real `prismarine-recipe`, so a test that passes here is
+ * checking the adapter against Minecraft's own tables rather than against a
+ * second copy of the adapter's assumptions.
+ */
+import { EventEmitter } from "node:events";
+import { createRequire } from "node:module";
+import vec3Package from "vec3";
+import type { Position } from "#config";
+
+const require = createRequire(import.meta.url);
+const { Vec3 } = vec3Package;
+
+export const MINECRAFT_VERSION = "1.16.1";
+export const registry = require("minecraft-data")(MINECRAFT_VERSION);
+const Recipe = require("prismarine-recipe")(registry).Recipe;
+
+export interface DoubleEntity {
+  id: number;
+  name: string;
+  type?: string;
+  kind?: string;
+  username?: string;
+  position: InstanceType<typeof Vec3>;
+  metadata?: Record<string, unknown>;
+  effects?: Record<string, unknown>;
+}
+
+export interface DoubleOptions {
+  position?: Position;
+  health?: number;
+  food?: number;
+  saturation?: number;
+  oxygenLevel?: number;
+  gameMode?: string;
+  difficulty?: string;
+  dimension?: string;
+  doDaylightCycle?: boolean;
+  timeOfDay?: number;
+  age?: number;
+  inventory?: { name: string; count: number }[];
+  blocks?: Record<string, string>;
+  /** Ticks to withhold chunk data after spawn, to exercise readiness. */
+  chunkDelayTicks?: number;
+  emptySlots?: number;
+  containers?: Record<string, { name: string; count: number }[]>;
+}
+
+const key = (p: { x: number; y: number; z: number }): string =>
+  `${Math.floor(p.x)},${Math.floor(p.y)},${Math.floor(p.z)}`;
+
+/** A block shaped like prismarine-block, with the fields the adapter reads. */
+function makeBlock(
+  name: string,
+  position: InstanceType<typeof Vec3>,
+): Record<string, unknown> {
+  const data = registry.blocksByName[name];
+  return {
+    name,
+    type: data?.id ?? 0,
+    position,
+    boundingBox:
+      data && data.boundingBox
+        ? data.boundingBox
+        : name === "air"
+          ? "empty"
+          : "block",
+    transparent: Boolean(data?.transparent),
+    light: 0,
+    skyLight: 15,
+    biome: { name: "forest" },
+    getProperties: () => ({}),
+  };
+}
+
+export class MineflayerDouble extends EventEmitter {
+  readonly registry = registry;
+  username = "PersonAda";
+  entity: DoubleEntity;
+  entities: Record<string, DoubleEntity> = {};
+  health: number;
+  food: number;
+  foodSaturation: number;
+  oxygenLevel: number;
+  isRaining = false;
+  thunderState = 0;
+  game: Record<string, unknown>;
+  time: Record<string, unknown>;
+  inventory: {
+    items: () => { name: string; count: number; type: number }[];
+    emptySlotCount: () => number;
+  };
+  heldItem: { name: string } | null = null;
+  pathfinder: Record<string, unknown>;
+  readonly calls: string[] = [];
+  #blocks = new Map<string, string>();
+  #items = new Map<string, number>();
+  #containers = new Map<string, Map<string, number>>();
+  #chunksReadyAt: number;
+  #emptySlots: number;
+  #nextEntityId = 100;
+  /** Set by a test to make the next container transfer fail like mineflayer. */
+  failNextTransfer: string | null = null;
+
+  constructor(options: DoubleOptions = {}) {
+    super();
+    const start = options.position ?? { x: 0, y: 64, z: 0 };
+    this.entity = {
+      id: 1,
+      name: "player",
+      type: "player",
+      username: this.username,
+      position: new Vec3(start.x + 0.5, start.y, start.z + 0.5),
+      metadata: {},
+      effects: {},
+    };
+    this.entities = { 1: this.entity };
+    this.health = options.health ?? 20;
+    this.food = options.food ?? 20;
+    this.foodSaturation = options.saturation ?? 5;
+    this.oxygenLevel = options.oxygenLevel ?? 20;
+    this.game = {
+      gameMode: options.gameMode ?? "survival",
+      difficulty: options.difficulty ?? "peaceful",
+      dimension: options.dimension ?? "overworld",
+      minY: 0,
+      height: 256,
+    };
+    this.time = {
+      age: options.age ?? 1000,
+      time: options.timeOfDay ?? 1000,
+      timeOfDay: options.timeOfDay ?? 1000,
+      doDaylightCycle: options.doDaylightCycle ?? true,
+    };
+    for (const [position, name] of Object.entries(options.blocks ?? {}))
+      this.#blocks.set(position, name);
+    for (const item of options.inventory ?? [])
+      this.#items.set(
+        item.name,
+        (this.#items.get(item.name) ?? 0) + item.count,
+      );
+    for (const [position, contents] of Object.entries(
+      options.containers ?? {},
+    )) {
+      this.#containers.set(
+        position,
+        new Map(contents.map((item) => [item.name, item.count])),
+      );
+      this.#blocks.set(position, "chest");
+    }
+    this.#chunksReadyAt = Date.now() + (options.chunkDelayTicks ?? 0) * 50;
+    this.#emptySlots = options.emptySlots ?? 30;
+
+    this.inventory = {
+      items: () =>
+        [...this.#items]
+          .filter(([, count]) => count > 0)
+          .map(([name, count]) => ({
+            name,
+            count,
+            type: registry.itemsByName[name]?.id ?? 0,
+          })),
+      emptySlotCount: () => this.#emptySlots,
+    };
+    this.pathfinder = {
+      setMovements: () => {},
+      setGoal: () => {},
+      goto: async () => {},
+      thinkTimeout: 5000,
+      tickTimeout: 40,
+    };
+  }
+
+  // ------------------------------------------------------------- lifecycle
+
+  loadPlugin(): void {}
+
+  async waitForChunksToLoad(): Promise<void> {}
+
+  quit(): void {
+    this.calls.push("quit");
+  }
+
+  end(): void {}
+
+  spawn(): void {
+    queueMicrotask(() => {
+      this.emit("login");
+      this.emit("spawn");
+    });
+  }
+
+  // ----------------------------------------------------------------- world
+
+  blockAt(position: {
+    x: number;
+    y: number;
+    z: number;
+  }): Record<string, unknown> | null {
+    // Chunks arrive after the spawn packet. Until then, blockAt returns null,
+    // exactly as it does against a real server.
+    if (Date.now() < this.#chunksReadyAt) return null;
+    const floored = new Vec3(
+      Math.floor(position.x),
+      Math.floor(position.y),
+      Math.floor(position.z),
+    );
+    const explicit = this.#blocks.get(key(floored));
+    if (explicit) return makeBlock(explicit, floored);
+    return makeBlock(
+      floored.y > 63 ? "air" : floored.y === 63 ? "grass_block" : "stone",
+      floored,
+    );
+  }
+
+  findBlocks(options: {
+    matching: (block: Record<string, unknown>) => boolean;
+    maxDistance: number;
+    count: number;
+  }): InstanceType<typeof Vec3>[] {
+    // Real mineflayer calls the matcher on palette entries that have no
+    // position, which is why a matcher may only look at the block name.
+    options.matching({ name: "oak_log", position: undefined } as never);
+    const found: InstanceType<typeof Vec3>[] = [];
+    for (const [position, name] of this.#blocks) {
+      const [x, y, z] = position.split(",").map(Number) as [
+        number,
+        number,
+        number,
+      ];
+      const point = new Vec3(x, y, z);
+      if (point.distanceTo(this.entity.position) > options.maxDistance)
+        continue;
+      if (!options.matching(makeBlock(name, point))) continue;
+      found.push(point);
+      if (found.length >= options.count) break;
+    }
+    return found;
+  }
+
+  canDigBlock(): boolean {
+    return true;
+  }
+
+  canSeeBlock(): boolean {
+    return true;
+  }
+
+  // ---------------------------------------------------------------- acting
+
+  async equip(item: { name: string }): Promise<void> {
+    this.heldItem = item;
+    this.calls.push(`equip:${item.name}`);
+  }
+
+  async dig(block: {
+    name: string;
+    position: InstanceType<typeof Vec3>;
+  }): Promise<void> {
+    this.calls.push(`dig:${block.name}`);
+    this.#blocks.set(key(block.position), "air");
+    const drop = block.name === "stone" ? "cobblestone" : block.name;
+    this.#items.set(drop, (this.#items.get(drop) ?? 0) + 1);
+  }
+
+  async placeBlock(
+    reference: { position: InstanceType<typeof Vec3> },
+    face: InstanceType<typeof Vec3>,
+  ): Promise<void> {
+    const held = this.heldItem?.name;
+    if (!held) throw new Error("Nothing held");
+    this.calls.push(`place:${held}`);
+    this.#items.set(held, (this.#items.get(held) ?? 0) - 1);
+    this.#blocks.set(key(reference.position.plus(face)), held);
+  }
+
+  recipesFor(
+    itemType: number,
+    _metadata: unknown,
+    minResultCount: number,
+    craftingTable: unknown,
+  ): unknown[] {
+    return Recipe.find(itemType, null).filter((recipe: never) => {
+      const entry = recipe as {
+        requiresTable: boolean;
+        delta: { id: number; count: number }[];
+        result: { count: number };
+      };
+      if (entry.requiresTable && !craftingTable) return false;
+      const runs = Math.ceil(Math.max(1, minResultCount) / entry.result.count);
+      return entry.delta
+        .filter((d) => d.count < 0)
+        .every(
+          (d) =>
+            (this.#items.get(registry.items[d.id].name) ?? 0) >=
+            -d.count * runs,
+        );
+    });
+  }
+
+  async craft(recipe: unknown, times: number): Promise<void> {
+    const entry = recipe as { delta: { id: number; count: number }[] };
+    this.calls.push("craft");
+    for (let run = 0; run < times; run++)
+      for (const delta of entry.delta) {
+        const name = registry.items[delta.id].name;
+        this.#items.set(name, (this.#items.get(name) ?? 0) + delta.count);
+      }
+  }
+
+  async consume(): Promise<void> {
+    const name = this.heldItem?.name;
+    if (!name) throw new Error("Nothing to eat");
+    this.calls.push(`consume:${name}`);
+    this.#items.set(name, (this.#items.get(name) ?? 0) - 1);
+    this.food = Math.min(20, this.food + 6);
+  }
+
+  async attack(entity: DoubleEntity): Promise<void> {
+    this.calls.push(`attack:${entity.name}`);
+  }
+
+  async openContainer(block: {
+    position: InstanceType<typeof Vec3>;
+  }): Promise<unknown> {
+    const position = key(block.position);
+    const contents =
+      this.#containers.get(position) ?? new Map<string, number>();
+    this.#containers.set(position, contents);
+    const self = this;
+    return {
+      containerItems: () =>
+        [...contents]
+          .filter(([, count]) => count > 0)
+          .map(([name, count]) => ({
+            name,
+            count,
+            type: registry.itemsByName[name]?.id ?? 0,
+          })),
+      async deposit(type: number, _metadata: unknown, count: number) {
+        if (self.failNextTransfer) {
+          const message = self.failNextTransfer;
+          self.failNextTransfer = null;
+          throw new Error(message);
+        }
+        const name = registry.items[type].name;
+        self.#items.set(name, (self.#items.get(name) ?? 0) - count);
+        contents.set(name, (contents.get(name) ?? 0) + count);
+      },
+      async withdraw(type: number, _metadata: unknown, count: number) {
+        if (self.failNextTransfer) {
+          const message = self.failNextTransfer;
+          self.failNextTransfer = null;
+          throw new Error(message);
+        }
+        const name = registry.items[type].name;
+        contents.set(name, (contents.get(name) ?? 0) - count);
+        self.#items.set(name, (self.#items.get(name) ?? 0) + count);
+      },
+      close() {
+        self.calls.push("container_close");
+      },
+    };
+  }
+
+  async openFurnace(): Promise<unknown> {
+    const self = this;
+    let pending = 0;
+    let output: { name: string; count: number } | null = null;
+    return {
+      async putFuel(type: number, _metadata: unknown, count: number) {
+        const name = registry.items[type].name;
+        self.#items.set(name, (self.#items.get(name) ?? 0) - count);
+      },
+      async putInput(type: number, _metadata: unknown, count: number) {
+        const name = registry.items[type].name;
+        self.#items.set(name, (self.#items.get(name) ?? 0) - count);
+        pending = count;
+        // A real furnace cooks over time; the output appears in stages.
+        output = {
+          name: `cooked_${name}`,
+          count: Math.max(1, Math.floor(count / 2)),
+        };
+      },
+      outputItem: () => output,
+      async takeOutput() {
+        const taken = output;
+        if (taken)
+          self.#items.set(
+            taken.name,
+            (self.#items.get(taken.name) ?? 0) + taken.count,
+          );
+        output =
+          pending > (taken?.count ?? 0)
+            ? { name: taken?.name ?? "", count: pending - (taken?.count ?? 0) }
+            : null;
+        pending = 0;
+        return taken;
+      },
+      close() {
+        self.calls.push("furnace_close");
+      },
+    };
+  }
+
+  // ------------------------------------------------------------ test hooks
+
+  spawnEntity(
+    name: string,
+    position: Position,
+    extra: Partial<DoubleEntity> = {},
+  ): DoubleEntity {
+    const data = registry.entitiesByName[name];
+    const entity: DoubleEntity = {
+      id: this.#nextEntityId++,
+      name,
+      type: data?.type ?? "mob",
+      kind: data?.category,
+      position: new Vec3(position.x, position.y, position.z),
+      metadata: {},
+      ...extra,
+    };
+    this.entities[entity.id] = entity;
+    return entity;
+  }
+
+  spawnPlayer(username: string, position: Position): DoubleEntity {
+    return this.spawnEntity("player", position, {
+      name: "player",
+      type: "player",
+      username,
+      kind: undefined,
+    });
+  }
+
+  setBlock(position: Position, name: string): void {
+    this.#blocks.set(key(position), name);
+  }
+
+  give(name: string, count: number): void {
+    this.#items.set(name, (this.#items.get(name) ?? 0) + count);
+  }
+
+  held(name: string): number {
+    return this.#items.get(name) ?? 0;
+  }
+
+  containerContents(position: Position): { name: string; count: number }[] {
+    const contents = this.#containers.get(key(position)) ?? new Map();
+    return [...contents]
+      .filter(([, count]) => count > 0)
+      .map(([name, count]) => ({ name, count }));
+  }
+
+  damage(amount: number): void {
+    this.health = Math.max(0, this.health - amount);
+    this.emit("health");
+  }
+}
+
+/** A `createBot` replacement that hands back the double and spawns it. */
+export function doubleFactory(options: DoubleOptions = {}): {
+  createBot: () => MineflayerDouble;
+  bot: MineflayerDouble;
+} {
+  const bot = new MineflayerDouble(options);
+  return {
+    bot,
+    createBot: () => {
+      bot.spawn();
+      return bot;
+    },
+  };
+}

@@ -49,7 +49,14 @@ export interface EntityView {
   name: string;
   position: Position;
   distance: number;
+  /** Attacks without provocation. */
   hostile: boolean;
+  /**
+   * Harmless until provoked, lethal afterwards: wolves, polar bears, bees,
+   * iron golems. Treated as a threat only once Person has taken damage, which
+   * is the only honest signal available that one has turned on you.
+   */
+  neutral: boolean;
   passive: boolean;
   player: boolean;
   villager: boolean;
@@ -97,6 +104,10 @@ export interface WorldSnapshot {
   stuck: boolean;
   lastSafePosition: Position | null;
   connected: boolean;
+  /** True when Person lost health recently enough for a neutral mob to count. */
+  recentlyDamaged: boolean;
+  /** World tick of the last health loss, or null if none observed. */
+  lastDamageTick: number | null;
 }
 
 export interface FindBlocksQuery {
@@ -154,6 +165,14 @@ export interface Embodiment {
   findBlocks(query: FindBlocksQuery): BlockView[];
   findEntities(): EntityView[];
   containerAt(position: Position): ContainerView | null;
+  /**
+   * Reads a container's live contents, opening it if necessary.
+   *
+   * `containerAt` returns a cached view, which is empty until something has
+   * been transferred. Deciding what to withdraw needs the real contents, and
+   * against a real server the only way to learn them is to open the window.
+   */
+  inspectContainer(position: Position): Promise<ContainerView | null>;
   moveTo(position: Position, options?: MoveOptions): Promise<void>;
   dig(position: Position): Promise<ItemStack[]>;
   place(position: Position, item: string): Promise<void>;
