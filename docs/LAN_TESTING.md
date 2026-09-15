@@ -28,20 +28,54 @@ by three floor, and set `world.exploration` to a box you are happy for Person
 to work inside.
 
 ```
-uv run person-cognition --config my-world.toml    # never run directly; the runtime spawns it
 node apps/cli/src/bin/person.ts validate my-world.toml
+bash scripts/lan-check.sh my-world.toml
+node apps/cli/src/bin/person.ts observe --config my-world.toml --out first-contact.json
 node apps/cli/src/bin/person.ts run --config my-world.toml
 ```
 
+`person-cognition` is never run by hand; the runtime spawns it.
+
 ## The ladder
 
-### 1. Peaceful world, connection and observation
+### 1. Peaceful world, connection and one observation
 
-Set `difficulty` to Peaceful. Start a run with `runtime.maxDecisions = 1`.
+Set `difficulty` to Peaceful and `runtime.trainingContext` to
+`minecraft_peaceful`. Then:
 
-Check: Person connects, spawns inside the exploration bounds, and the episode
-report contains one decision with a semantic context, a goal and a routine.
-Nothing should be broken or placed yet beyond the first skill.
+```
+node apps/cli/src/bin/person.ts observe --config my-world.toml --out first-contact.json
+```
+
+`observe` connects, waits for the world to actually be usable, takes one
+observation, validates it against the protocol schema and disconnects. It runs
+no skill, so it is the smallest thing that can go wrong.
+
+Check in order:
+
+- the command exits zero and says the observation is valid;
+- connection is refused with a clear reason if the world is in creative, in the
+  wrong dimension, at the wrong difficulty, or has a frozen daylight cycle;
+- position, dimension, day phase, light level and biome match what you see;
+- `nearby` counts resources, animals and containers you can also see;
+- nothing in the printed summary looks like a placeholder.
+
+Then compare it against a fixture capture, which flags fields that are valid
+and empty:
+
+```
+node apps/cli/src/bin/person.ts observe --config examples/fixture.toml --out fixture.json
+node apps/cli/src/bin/person.ts compare fixture.json first-contact.json
+```
+
+Structural findings matter: a field present in one and missing from the other
+means the real body cannot populate something cognition expects. Value
+differences between two different worlds are ordinary. Anything marked
+`suspicious` is a field that may never have been written.
+
+Only once this is clean, start a run with `runtime.maxDecisions = 1` and check
+that the episode report contains one decision with a semantic context, a goal
+and a routine.
 
 ### 2. Each skill individually
 
@@ -72,11 +106,32 @@ Watch specifically for:
 - furnace timing, which the adapter waits on with a generous margin;
 - drops that land somewhere the collector does not reach.
 
-### 3. Evidence before and after
+### 3. Evidence, timing and prediction error after each skill
 
-After each skill, run `person inspect evidence --config my-world.toml`. The
-counts should move by exactly one attempt for the skill that ran, and the
-executed skill should be the one you watched.
+After each skill:
+
+```
+node apps/cli/src/bin/person.ts inspect evidence --config my-world.toml
+node apps/cli/src/bin/person.ts inspect predictions --config my-world.toml
+```
+
+The evidence counts should move by exactly one attempt for the skill that ran,
+and the executed skill should be the one you watched.
+
+The episode report now carries a `tickBudgets` section: runs, mean and maximum
+elapsed ticks, the split between navigation and interaction, and how close the
+run came to its budget. **This is the first time those numbers mean anything**,
+because fixture ticks are invented. Record them.
+
+A budget is only revised when the measurement shows the budget is the reason.
+Work through the alternatives first: an unrealistic budget, bad navigation, bad
+target selection, server latency, or completion evidence that is wrong. Node
+still clamps limits downward and never upward.
+
+Prediction error will be noisy at first and that is the point. A skill that
+succeeds can still have been wrong about what it would achieve, and a skill
+that fails can have been right. Look for `inverted` records on skills that
+succeeded: those are contracts that are lying.
 
 ### 4. A complete survival routine
 

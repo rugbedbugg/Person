@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 from person_planner import plan_for, relevant_skills, simulate, symbolic_state
+from person_planner.search import step_cost
 from person_skills import Condition, skill_registry
 
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -131,3 +132,72 @@ def test_emergency_reflexes_are_not_planned(state: dict[str, float]) -> None:
             assert "flee" not in plan.skill_ids
             assert "dig_in" not in plan.skill_ids
             assert "wait_safely" not in plan.skill_ids
+
+
+def test_plan_cost_accounts_for_how_much_a_step_asks_for(state: dict[str, float]) -> None:
+    """Gathering thirty-two logs is not the same price as gathering eight.
+
+    Before this was measured, every parameterisation of a plan tied on cost, so
+    the planner offered several copies of one strategy differing only in how
+    absurd the magnitude was, and the evidence for that strategy was split
+    across as many routine identities.
+    """
+    registry = skill_registry()
+    spec = registry.get("gather_wood")
+    small = step_cost(spec, {"target_amount": 8, "max_distance": 48})
+    large = step_cost(spec, {"target_amount": 32, "max_distance": 48})
+    assert large > small
+    assert step_cost(spec) == small, "the default parameters are the baseline"
+
+
+def test_the_cheapest_plan_asks_for_a_sensible_amount(state: dict[str, float]) -> None:
+    state = dict(state)
+    state["reachable_animal"] = 2.0
+    plans = plan_for(state, GOALS["cooking"], limit=3)
+    assert plans
+    hunt = next(step for step in plans[0].steps if step.skill_id == "hunt_safe_passive_animals")
+    assert hunt.parameter_map["target_amount"] == 3, (
+        "cooking two items should not begin by hunting a dozen animals"
+    )
+
+
+def test_alternative_cooking_strategies_differ_in_substance(state: dict[str, float]) -> None:
+    state = dict(state)
+    state["reachable_animal"] = 2.0
+    plans = plan_for(state, GOALS["cooking"], limit=3)
+    assert len(plans) >= 2
+    sequences = {plan.skill_ids for plan in plans}
+    assert len(sequences) >= 2, "the candidates must differ by more than a parameter"
+
+
+def test_a_plan_uses_what_person_already_has(state: dict[str, float]) -> None:
+    stocked = dict(state)
+    stocked.update({"building_materials": 40.0, "wood": 40.0})
+    plans = plan_for(stocked, GOALS["shelter"], limit=3)
+    assert plans[0].skill_ids == ("build_basic_shelter",), (
+        "gathering more of something Person is already carrying is wasted work"
+    )
+
+    fed = dict(state)
+    fed["edible_food"] = 10.0
+    food_plans = plan_for(fed, GOALS["food"], limit=3)
+    assert food_plans[0].skill_ids == ("eat_to_target",)
+
+
+def test_no_plan_repeats_a_step_without_reason(state: dict[str, float]) -> None:
+    for goal in GOALS.values():
+        for plan in plan_for(state, goal, limit=5):
+            counts = {skill: plan.skill_ids.count(skill) for skill in set(plan.skill_ids)}
+            repeated = {skill: count for skill, count in counts.items() if count > 1}
+            assert not repeated, f"{plan.skill_ids} repeats {repeated}"
+
+
+def test_an_expensive_route_to_a_cheap_goal_is_ranked_last(state: dict[str, float]) -> None:
+    """Building a house is a truthful way to end up at home, and a silly one.
+
+    The contract is not wrong, so the effect stays; cost ordering is what keeps
+    it out of the way.
+    """
+    plans = plan_for(state, [Condition("at_home", ">=", 1)], limit=4)
+    assert plans[0].skill_ids == ("return_home",)
+    assert all(plan.cost >= plans[0].cost for plan in plans[1:])

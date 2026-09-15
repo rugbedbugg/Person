@@ -1,9 +1,13 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 import { UsageError, parseArguments } from "../../apps/cli/src/bin/person.ts";
 import {
+  compareCommand,
   inspectCommand,
+  observeCommand,
   validateCommand,
 } from "../../apps/cli/src/commands.ts";
 import { REPOSITORY } from "../support/harness.ts";
@@ -124,4 +128,122 @@ test("unknown inspection targets are refused", () => {
   const result = inspectCommand("thoughts", undefined, false);
   assert.equal(result.code, 2);
   assert.match(result.output, /Unknown inspect target/);
+});
+
+test("observe and compare are parsed like the other commands", () => {
+  const observe = parseArguments([
+    "observe",
+    "--config",
+    "c.toml",
+    "--out",
+    "o.json",
+  ]);
+  assert.equal(observe.command, "observe");
+  assert.equal(observe.outputFile, "o.json");
+  const compare = parseArguments(["compare", "a.json", "b.json"]);
+  assert.equal(compare.command, "compare");
+  assert.deepEqual(compare.positional, ["a.json", "b.json"]);
+  assert.throws(() => parseArguments(["observe"]), /needs --config/);
+  assert.throws(
+    () => parseArguments(["compare", "a.json"]),
+    /reference observation/,
+  );
+  assert.throws(
+    () => parseArguments(["observe", "--config", "c", "--out"]),
+    /--out needs/,
+  );
+});
+
+test("observe takes one observation and validates it", async () => {
+  const result = await observeCommand(
+    path.join(REPOSITORY, "examples/fixture.toml"),
+    true,
+    undefined,
+  );
+  assert.equal(result.code, 0);
+  const body = JSON.parse(result.output) as {
+    valid: boolean;
+    diagnostics: string[];
+    observation: {
+      type: string;
+      vitals: { alive: boolean };
+      environment: { biome: string };
+    };
+  };
+  assert.equal(body.valid, true, body.diagnostics.join("; "));
+  assert.equal(body.observation.type, "Observation");
+  assert.equal(body.observation.vitals.alive, true);
+  assert.notEqual(
+    body.observation.environment.biome,
+    "unknown",
+    "biome must come from the world, not a default",
+  );
+});
+
+test("observe writes the capture where it is asked to", async () => {
+  const target = path.join(
+    mkdtempSync(path.join(tmpdir(), "person-observe-")),
+    "capture.json",
+  );
+  const result = await observeCommand(
+    path.join(REPOSITORY, "examples/fixture.toml"),
+    false,
+    target,
+  );
+  assert.equal(result.code, 0);
+  assert.match(result.output, /valid against the protocol schema/);
+  const written = JSON.parse(readFileSync(target, "utf8")) as { type: string };
+  assert.equal(written.type, "Observation");
+});
+
+test("compare reports structural gaps and suspicious defaults", () => {
+  const directory = mkdtempSync(path.join(tmpdir(), "person-compare-"));
+  const reference = JSON.parse(
+    readFileSync(
+      path.join(REPOSITORY, "fixtures/protocol-corpus/valid/observation.json"),
+      "utf8",
+    ),
+  ) as Record<string, unknown>;
+  const actual = JSON.parse(JSON.stringify(reference)) as Record<
+    string,
+    unknown
+  >;
+  // A real capture that is missing a block cognition depends on, and full of
+  // fields nothing ever wrote.
+  delete actual["affordances"];
+  (actual["environment"] as Record<string, unknown>)["biome"] = "unknown";
+  (actual["nearby"] as Record<string, unknown>)["resources"] = [];
+
+  const referencePath = path.join(directory, "reference.json");
+  const actualPath = path.join(directory, "actual.json");
+  writeFileSync(referencePath, JSON.stringify(reference));
+  writeFileSync(actualPath, JSON.stringify(actual));
+
+  const result = compareCommand(referencePath, actualPath, true);
+  assert.equal(result.code, 1, "a structural gap is a failure");
+  const body = JSON.parse(result.output) as {
+    structural: number;
+    suspicious: number;
+    findings: { path: string; kind: string; note: string }[];
+  };
+  assert.equal(body.structural, 1);
+  assert.ok(body.suspicious >= 2);
+  assert.ok(body.findings.some((finding) => finding.path === "/affordances"));
+  assert.ok(
+    body.findings.some(
+      (finding) =>
+        finding.kind === "suspicious" && finding.path === "/environment/biome",
+    ),
+  );
+});
+
+test("comparing an observation with itself finds nothing structural", () => {
+  const capture = path.join(
+    REPOSITORY,
+    "fixtures/protocol-corpus/valid/observation.json",
+  );
+  const result = compareCommand(capture, capture, true);
+  const body = JSON.parse(result.output) as { structural: number };
+  assert.equal(body.structural, 0);
+  assert.equal(result.code, 0);
 });

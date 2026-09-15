@@ -155,3 +155,77 @@ claim without reading the whole tree.
 | Memory, WorldModel, Affect, Language, Social, Project, Exploration providers | `apps/cognition/python/person_cognition/future_providers.py` | `test_future_providers_refuse_to_pretend_they_work` |
 | No premature implementation                                                  | every placeholder raises                                     | same                                                |
 | No LLM, no neural policy, no heavy dependencies                              | absent by construction                                       | `tests/python/test_architecture.py`                 |
+
+## Real embodiment validation (Milestone 1)
+
+| Requirement                                   | Implementation                                                | Tests                                          |
+| --------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------- |
+| Entity classification from authoritative data | `adapters/minecraft/src/classify.ts`                          | `tests/adapter/mineflayer-conformance.test.ts` |
+| Custom name read from sparse metadata         | `classify.ts` `customName`                                    | same, including the unrecognised-shape case    |
+| Hostility covers registry-unknown mobs        | `classify.ts` `EXTRA_HOSTILE_MOBS`                            | same                                           |
+| Neutral mobs threaten only after damage       | `classify.ts` `NEUTRAL_MOBS`, `SafetyKernel.threats`          | same, and `tests/safety/kernel.test.ts`        |
+| Damage memory                                 | `MineflayerEmbodiment` health handler, `FixtureWorld.#damage` | conformance suite                              |
+| Armour, biome and light read from the world   | `MineflayerEmbodiment.#armorPoints`, `#biomeAt`, `#lightAt`   | conformance suite                              |
+| Free slots from the inventory window          | `MineflayerEmbodiment.snapshot`                               | conformance suite                              |
+| Server-authoritative recipes                  | `MineflayerEmbodiment.craft`                                  | conformance suite                              |
+| Empty craft and empty smelt fail              | `craft`, `smelt`                                              | conformance suite                              |
+| Partial smelt output collected                | `smelt`                                                       | conformance suite                              |
+| Container transfer error mapping              | `containerFailure`                                            | conformance suite                              |
+| Dig tool choice and excavation safety         | `dig`                                                         | conformance suite                              |
+| Placement reference search and confirmation   | `place`                                                       | conformance suite                              |
+| Attack guard and reach                        | `attack`                                                      | conformance suite                              |
+
+## Spawn readiness and world rules
+
+| Requirement                                     | Implementation                         | Tests                                          |
+| ----------------------------------------------- | -------------------------------------- | ---------------------------------------------- |
+| Connection does not imply readiness             | `MineflayerEmbodiment.#awaitReadiness` | `tests/adapter/mineflayer-conformance.test.ts` |
+| Bounded wait, no reconnect loop                 | same, `READINESS_TIMEOUT_MS`           | same, including the never-ready case           |
+| Dimension detection                             | `#dimension`                           | same                                           |
+| Game mode, difficulty, daylight cycle validated | `#assertWorldRules`                    | same                                           |
+
+## Skill completion evidence
+
+| Requirement                                          | Implementation                                        | Tests                          |
+| ---------------------------------------------------- | ----------------------------------------------------- | ------------------------------ |
+| A craft that produced nothing is a failure           | `MineflayerEmbodiment.craft`                          | conformance suite              |
+| A smelt that produced nothing is a failure           | `smelt`                                               | conformance suite              |
+| Live container contents before deciding what to take | `inspectContainer`, `skills/impl/storage.ts`          | conformance and storage suites |
+| Partial container transfers keep what moved          | `deposit`, `withdraw`                                 | conformance suite              |
+| A refuge is only attempted where one can be dug      | `WorldSnapshot.diggableGround`, `SafetyKernel.assess` | `tests/safety/kernel.test.ts`  |
+
+## Prediction error
+
+| Requirement                                   | Implementation                                  | Tests                                                              |
+| --------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------------ |
+| Expected effects compared with observed state | `person_cognition/prediction.py`                | `apps/cognition/tests/test_prediction.py`                          |
+| Attributed to the skill that ran              | `CognitionLoop.on_skill_outcome`                | same                                                               |
+| Persisted as immutable evidence               | `prediction_error` event, schema v2             | same                                                               |
+| Schema widened compatibly                     | `SUPPORTED_EVIDENCE_SCHEMAS`                    | `packages/persistence/tests/test_persistence.py`, prediction suite |
+| Never influences policy                       | `RoutineStatistics.apply` has no case for it    | `test_prediction_errors_are_persisted_but_never_scored`            |
+| Reported                                      | `LearningSummary`, `person inspect predictions` | prediction suite                                                   |
+
+## Tick budgets
+
+| Requirement                               | Implementation                           | Tests                                            |
+| ----------------------------------------- | ---------------------------------------- | ------------------------------------------------ |
+| Time measured at the port, not per skill  | `apps/node-runtime/src/skills/timing.ts` | exercised by every skill test through the runner |
+| Navigation, interaction and waiting split | same                                     | same                                             |
+| Budget pressure per skill in the report   | `summariseTickBudgets`                   | `tests/integration/vertical-slice.test.ts`       |
+
+## Route-level protected areas
+
+| Requirement                                            | Implementation                                         | Tests                                           |
+| ------------------------------------------------------ | ------------------------------------------------------ | ----------------------------------------------- |
+| Legal endpoints, illegal straight line                 | `FixtureWorld.#findPath` via the guard                 | `tests/safety/protected-routes.test.ts`         |
+| No legal detour means refusal without partial movement | same                                                   | same                                            |
+| Replanning cannot cross a protected area               | `exclusionAreasStep` installed by `#configureMovement` | same, asserted on the exclusion function itself |
+| A protected destination is refused before planning     | `MineflayerEmbodiment.moveTo`                          | same                                            |
+
+## Reality comparison tooling
+
+| Requirement                             | Implementation                                                   | Tests                   |
+| --------------------------------------- | ---------------------------------------------------------------- | ----------------------- |
+| Capture one real observation            | `apps/cli/src/observe.ts` `captureObservation`, `person observe` | `tests/cli/cli.test.ts` |
+| Semantic difference against a reference | `compareObservations`, `person compare`                          | same                    |
+| Suspicious defaults flagged             | `SUSPICIOUS` rules                                               | same                    |
