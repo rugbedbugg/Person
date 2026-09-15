@@ -23,6 +23,12 @@ import {
 } from "./execution.ts";
 import { SKILL_IMPLEMENTATIONS } from "./impl/index.ts";
 import { inventoryDelta } from "./materials.ts";
+import {
+  budgetPressure,
+  emptyTimings,
+  instrument,
+  type SkillTimings,
+} from "./timing.ts";
 
 /**
  * Evidence keys travel over the protocol, which requires lower snake case.
@@ -61,6 +67,10 @@ export interface ExecutionResult {
   inventoryAfter: ItemStack[];
   inventoryDelta: ItemDelta[];
   preemption: EmergencyAssessment | null;
+  /** Where the time went, measured at the embodiment port. */
+  timings: SkillTimings;
+  /** Elapsed ticks as a fraction of the budget this skill was given. */
+  budgetPressure: number;
 }
 
 export interface SkillRunnerOptions {
@@ -85,7 +95,10 @@ export class SkillRunner {
   readonly #registry: SkillRegistry;
   readonly #memory: WorldMemory;
 
+  readonly #timer: ReturnType<typeof instrument>;
+
   constructor(options: SkillRunnerOptions) {
+    this.#timer = instrument(options.embodiment);
     this.#embodiment = options.embodiment;
     this.#permissions = options.permissions;
     this.#kernel = options.kernel;
@@ -104,6 +117,7 @@ export class SkillRunner {
       throw new Error(`Skill ${request.skillId} has no runtime implementation`);
 
     const start = this.#embodiment.snapshot();
+    this.#timer.reset();
     const effects: string[] = [];
     const evidenceKinds = new Set<string>();
     const evidenceDetails: Record<string, EvidenceValue> = {};
@@ -114,7 +128,7 @@ export class SkillRunner {
       spec,
       parameters: request.parameters,
       limits: request.limits,
-      embodiment: this.#embodiment,
+      embodiment: this.#timer.embodiment,
       permissions: this.#permissions,
       kernel: this.#kernel,
       memory: this.#memory,
@@ -212,6 +226,19 @@ export class SkillRunner {
     if (status === "SUCCESS" && !end.alive) status = "DEATH";
     evidenceKinds.add("elapsed_ticks");
 
+    const elapsed = Math.max(0, end.tick - start.tick);
+    const timings = this.#timer.timings ?? emptyTimings();
+    // Timing travels with the outcome so a tick budget can be revised from
+    // measurements instead of from a guess about why a skill timed out.
+    evidenceDetails["timing_navigation_ticks"] = timings.navigationTicks;
+    evidenceDetails["timing_interaction_ticks"] = timings.interactionTicks;
+    evidenceDetails["timing_waiting_ticks"] = timings.waitingTicks;
+    evidenceDetails["timing_budget_ticks"] = request.limits.maxTicks;
+    evidenceDetails["timing_budget_pressure"] = budgetPressure(
+      elapsed,
+      request.limits.maxTicks,
+    );
+
     return {
       skillId: request.skillId,
       status,
@@ -219,7 +246,7 @@ export class SkillRunner {
       effects,
       evidenceKinds: [...evidenceKinds].sort(),
       evidenceDetails,
-      elapsedTicks: Math.max(0, end.tick - start.tick),
+      elapsedTicks: elapsed,
       healthBefore: start.health,
       healthAfter: end.health,
       foodBefore: start.food,
@@ -228,6 +255,8 @@ export class SkillRunner {
       inventoryAfter: end.inventory,
       inventoryDelta: inventoryDelta(start.inventory, end.inventory),
       preemption,
+      timings,
+      budgetPressure: budgetPressure(elapsed, request.limits.maxTicks),
     };
   }
 

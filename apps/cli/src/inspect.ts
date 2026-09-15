@@ -28,6 +28,16 @@ export interface EvidenceSummary {
   }[];
   snapshots: number;
   latestSnapshotTick: number | null;
+  /** Prediction error is instrumentation; it is summarised, never scored. */
+  predictionError: {
+    recorded: number;
+    severities: Record<string, number>;
+    worst: {
+      skill: string;
+      severity: string;
+      facts: { fact: string; predicted: number; observed: number }[];
+    }[];
+  };
 }
 
 interface Counts {
@@ -81,6 +91,7 @@ export class EvidenceInspector {
       skillAttribution: [],
       snapshots: 0,
       latestSnapshotTick: null,
+      predictionError: { recorded: 0, severities: {}, worst: [] },
     };
     if (!summary.exists) return summary;
 
@@ -125,6 +136,35 @@ export class EvidenceInspector {
         const trainingContext = String(event["training_context"] ?? "");
         const contextId = String(payload["context_id"] ?? "");
 
+        if (type === "prediction_error") {
+          summary.predictionError.recorded += 1;
+          const severity = String(payload["severity"] ?? "unobserved");
+          summary.predictionError.severities[severity] =
+            (summary.predictionError.severities[severity] ?? 0) + 1;
+          if (
+            (severity === "inverted" || severity === "major") &&
+            summary.predictionError.worst.length < 10
+          )
+            summary.predictionError.worst.push({
+              skill: String(
+                payload["executed_skill"] ??
+                  payload["requested_skill"] ??
+                  "unknown",
+              ),
+              severity,
+              facts: (
+                (payload["observed"] ?? []) as {
+                  fact: string;
+                  predicted: number;
+                  observed: number;
+                }[]
+              ).map((entry) => ({
+                fact: entry.fact,
+                predicted: entry.predicted,
+                observed: entry.observed,
+              })),
+            });
+        }
         if (type === "routine_outcome") {
           const key = `${trainingContext}|${contextId}|${String(payload["routine_id"] ?? "")}`;
           const counts = routines.get(key) ?? blank();
@@ -228,6 +268,23 @@ export class EvidenceInspector {
     for (const routine of summary.routines)
       lines.push(
         `    ${routine.routineId} [${routine.trainingContext}] ${routine.contextId} attempts=${routine.attempts} successes=${routine.successes} mean=${routine.posteriorMean.toFixed(3)}`,
+      );
+    const prediction = summary.predictionError;
+    lines.push(
+      `  prediction error: ${prediction.recorded} recorded ${Object.entries(
+        prediction.severities,
+      )
+        .map(([severity, count]) => `${severity}=${count}`)
+        .join(" ")}`,
+    );
+    for (const entry of prediction.worst)
+      lines.push(
+        `    ${entry.severity} ${entry.skill}: ${entry.facts
+          .map(
+            (fact) =>
+              `${fact.fact} predicted ${fact.predicted} observed ${fact.observed}`,
+          )
+          .join("; ")}`,
       );
     lines.push("  executed-skill attribution:");
     for (const skill of summary.skillAttribution)

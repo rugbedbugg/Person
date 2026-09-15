@@ -73,8 +73,17 @@ test("an immediate threat replaces the proposal with flee at L1", async () => {
   assert.ok(verdict.reasonCodes.includes("immediate_threat"));
 });
 
-test("a hostile swarm digs in rather than running", async () => {
-  const bench = await harness({ world });
+test("a hostile swarm digs in when there is ground to dig into", async () => {
+  const bench = await harness({
+    world: {
+      ...world,
+      // A wall beside Person. Without one there is no refuge to dig.
+      blocks: [
+        { position: { x: 1, y: 64, z: 0 }, name: "dirt" },
+        { position: { x: 1, y: 65, z: 0 }, name: "dirt" },
+      ],
+    },
+  });
   for (const offset of [2, 3, 4])
     bench.world.spawn("zombie", { x: offset, y: 64, z: 1 });
   const verdict = bench.validator.validate(
@@ -84,6 +93,23 @@ test("a hostile swarm digs in rather than running", async () => {
   assert.equal(verdict.decision, "REPLACE");
   assert.equal(verdict.executedSkill, "dig_in");
   assert.ok(verdict.reasonCodes.includes("hostile_swarm"));
+  assert.ok(verdict.reasonCodes.includes("refuge_available"));
+});
+
+test("a hostile swarm on open ground runs instead of digging", async () => {
+  // Flat terrain has no wall to tunnel into. Sending Person to build a refuge
+  // that cannot exist spends the one chance it had to get away.
+  const bench = await harness({ world });
+  assert.equal(bench.world.snapshot().diggableGround, false);
+  for (const offset of [2, 3, 4])
+    bench.world.spawn("zombie", { x: offset, y: 64, z: 1 });
+  const verdict = bench.validator.validate(
+    invocation("gather_wood"),
+    bench.world.snapshot(),
+  );
+  assert.equal(verdict.decision, "REPLACE");
+  assert.equal(verdict.executedSkill, "flee");
+  assert.ok(verdict.reasonCodes.includes("no_refuge_ground"));
 });
 
 test("critical hunger with food available replaces with eat_to_target", async () => {

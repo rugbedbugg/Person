@@ -84,20 +84,16 @@ function shelterState(
 function affordances(inputs: ObservationInputs): Observation["affordances"] {
   const { snapshot, permissions, memory } = inputs;
   const here = snapshot.position;
-  const diggable = [
-    { x: here.x + 1, y: here.y, z: here.z },
-    { x: here.x - 1, y: here.y, z: here.z },
-    { x: here.x, y: here.y, z: here.z + 1 },
-    { x: here.x, y: here.y, z: here.z - 1 },
-  ].some((position) => {
-    const block = inputs.blockAt(position);
-    return (
-      block !== null &&
-      block.solid &&
-      ["dirt", "grass", "stone"].includes(block.kind) &&
-      permissions.mayEmergencyDig(position).allowed
-    );
-  });
+  // The body already worked this out for the safety kernel; asking it again
+  // here would be a second answer to the same question.
+  const diggable =
+    snapshot.diggableGround &&
+    [
+      { x: here.x + 1, y: here.y, z: here.z },
+      { x: here.x - 1, y: here.y, z: here.z },
+      { x: here.x, y: here.y, z: here.z + 1 },
+      { x: here.x, y: here.y, z: here.z - 1 },
+    ].some((position) => permissions.mayEmergencyDig(position).allowed);
 
   const home = memory.home.position;
   const floor = inputs.blockAt({ ...home, y: home.y - 1 });

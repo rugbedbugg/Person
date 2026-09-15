@@ -25,6 +25,7 @@ class LearningSummary:
         self.overrides: Counter[str] = Counter()
         self.emergencies: Counter[str] = Counter()
         self.outcomes: list[dict[str, Any]] = []
+        self.predictions: list[dict[str, Any]] = []
 
     def note_selection(self, choice: PolicyChoice) -> None:
         self.selections.append(
@@ -61,6 +62,27 @@ class LearningSummary:
             }
         )
 
+    def note_prediction(self, payload: dict[str, Any]) -> None:
+        self.predictions.append(payload)
+
+    @property
+    def prediction_severities(self) -> dict[str, int]:
+        counts: Counter[str] = Counter()
+        for record in self.predictions:
+            counts[str(record.get("severity", "unobserved"))] += 1
+        return dict(counts)
+
+    @property
+    def worst_predictions(self) -> list[dict[str, Any]]:
+        """The misses a reader should look at first."""
+        ranked = sorted(
+            self.predictions,
+            key=lambda record: {"inverted": 0, "major": 1, "unobserved": 2, "minor": 3}.get(
+                str(record.get("severity")), 4
+            ),
+        )
+        return ranked[:10]
+
     @property
     def fallback_rate(self) -> float:
         if not self.selections:
@@ -90,6 +112,11 @@ class LearningSummary:
             "selections": self.selections,
             "fallback_rate": round(self.fallback_rate, 6),
             "safety_overrides": dict(self.overrides),
+            "prediction_error": {
+                "recorded": len(self.predictions),
+                "severities": self.prediction_severities,
+                "worst": self.worst_predictions,
+            },
             "emergencies": dict(self.emergencies),
             "outcomes": self.outcomes,
             "goal_history": [
