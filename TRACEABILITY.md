@@ -229,3 +229,23 @@ claim without reading the whole tree.
 | Capture one real observation            | `apps/cli/src/observe.ts` `captureObservation`, `person observe` | `tests/cli/cli.test.ts` |
 | Semantic difference against a reference | `compareObservations`, `person compare`                          | same                    |
 | Suspicious defaults flagged             | `SUSPICIOUS` rules                                               | same                    |
+
+## Pre-LAN readiness (Milestone 1 patch)
+
+| Requirement                                               | Implementation                                                           | Tests                                                                          |
+| --------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
+| LAN port is runtime configuration, not file configuration | `packages/config/ts/override.ts` `withConnectionOverride`                | `tests/cli/observe-safety.test.ts`, `tests/cli/status.test.ts`                 |
+| `--port` and `--host` on every connecting command         | `apps/cli/src/bin/person.ts`, `runCommand`, `observeCommand`             | `tests/cli/status.test.ts`                                                     |
+| The override never reaches the file                       | `withConnectionOverride` returns a copy                                  | `test_the LAN port override never reaches the configuration file`              |
+| First-run connection diagnostics                          | `adapters/minecraft/src/diagnose.ts`                                     | `tests/adapter/connection-diagnostics.test.ts`                                 |
+| A refused login fails immediately rather than timing out  | `MineflayerEmbodiment.connect` races spawn against error, kick and close | same                                                                           |
+| Chunk data distinguished from general unreadiness         | `classifyReadiness`                                                      | `tests/adapter/mineflayer-conformance.test.ts`                                 |
+| `person observe` runs no skill and moves nothing          | `captureObservation`                                                     | `tests/cli/observe-safety.test.ts`                                             |
+| `person observe` writes no learning evidence              | same                                                                     | same                                                                           |
+| `person observe` disconnects, bounded                     | disconnect race in `captureObservation`                                  | same                                                                           |
+| `person status` read-only telemetry                       | `apps/node-runtime/src/reporting/status.ts`, `statusCommand`             | `tests/cli/status.test.ts`, `tests/architecture/architecture.test.ts`          |
+| `person status --follow` reprints only on change          | `followStatus`                                                           | `tests/cli/status.test.ts`                                                     |
+| Telemetry never reaches a decision                        | status is written by the runtime and read by the CLI only                | `tests/architecture/architecture.test.ts`                                      |
+| Operator intervention marked in evidence and status       | `PersonRuntime` episode events, `StatusWriter`                           | `tests/integration/vertical-slice.test.ts`, `tests/cli/observe-safety.test.ts` |
+| Person cannot issue a server command                      | no chat or command path exists                                           | `tests/architecture/architecture.test.ts`                                      |
+| Pre-flight separates setup from reachability              | `scripts/lan-check.sh`                                                   | run by hand; output shown in `docs/LAN_TESTING.md`                             |

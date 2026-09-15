@@ -155,11 +155,10 @@ test("observe and compare are parsed like the other commands", () => {
 });
 
 test("observe takes one observation and validates it", async () => {
-  const result = await observeCommand(
-    path.join(REPOSITORY, "examples/fixture.toml"),
-    true,
-    undefined,
-  );
+  const result = await observeCommand({
+    configPath: path.join(REPOSITORY, "examples/fixture.toml"),
+    json: true,
+  });
   assert.equal(result.code, 0);
   const body = JSON.parse(result.output) as {
     valid: boolean;
@@ -185,11 +184,11 @@ test("observe writes the capture where it is asked to", async () => {
     mkdtempSync(path.join(tmpdir(), "person-observe-")),
     "capture.json",
   );
-  const result = await observeCommand(
-    path.join(REPOSITORY, "examples/fixture.toml"),
-    false,
-    target,
-  );
+  const result = await observeCommand({
+    configPath: path.join(REPOSITORY, "examples/fixture.toml"),
+    json: false,
+    outputFile: target,
+  });
   assert.equal(result.code, 0);
   assert.match(result.output, /valid against the protocol schema/);
   const written = JSON.parse(readFileSync(target, "utf8")) as { type: string };

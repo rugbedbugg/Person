@@ -372,6 +372,43 @@ Every one of these needs a person to open a world. They are listed in the order
 8. **Death and respawn.** Death ends the episode; the recovery path does not
    exist and has not been designed.
 
+## Pre-LAN readiness patch
+
+Added after the audit above, before the first live run.
+
+**The LAN port is runtime information.** Minecraft assigns a new one every time
+a world is opened, so `--port` and `--host` override the configuration file for
+one invocation on every connecting command, and are never written back. A
+changed port never means editing a file.
+
+**Connection failures are classified.** A refused connection used to sit until
+the spawn timeout and then report that Person "did not spawn". It now races the
+spawn against the error, kick and close events and names what happened:
+`connection_refused`, `host_unresolved`, `host_unreachable`,
+`connection_timed_out`, `connection_reset`, `connection_closed`,
+`protocol_mismatch`, `identity_conflict`, `authentication_refused`,
+`login_refused`, `server_kicked`, `spawn_timeout`, `chunk_data_unavailable`,
+`world_not_ready`, plus the world-rule refusals already in place. Each carries
+an operator hint.
+
+**`person observe` is proven to only look.** A test wraps the body, records
+every call and asserts none of the twelve physical operations is among them,
+that position, inventory, health and world tick are unchanged, that no journal,
+snapshot or episode report is written, and that the command disconnects before
+returning even if the disconnect hangs.
+
+**`person status` reports what Person is doing, from outside.** The runtime
+writes a status file atomically; the command reads it. Nothing connects, and an
+architecture test asserts nothing on the decision path or in cognition can read
+it back.
+
+**Operator intervention is declared, not detected.** `--operator-intervention`
+writes a marker into the episode events and the status file, so a debug session
+cannot later be mistaken for a counted acceptance run.
+
+None of this is live validation. It is the instrumentation the first live run
+will be judged with.
+
 ## What a reader should take from this
 
 The body is meaningfully better than it was: a defect that would have crashed

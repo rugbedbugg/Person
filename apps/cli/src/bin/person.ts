@@ -2,26 +2,45 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  loadConfig,
+  parseHost,
+  parsePort,
+  type ConnectionOverride,
+} from "#config";
+import {
   compareCommand,
+  followStatus,
   inspectCommand,
   observeCommand,
   runCommand,
+  statusCommand,
   validateCommand,
 } from "../commands.ts";
 
 const USAGE = `Person: a persistent artificial inhabitant for Minecraft.
 
 Usage:
-  person run      --config <file> [--json] [--episode-id <id>]
-  person learn    --mode off|shadow|supervised --config <file> [--json]
+  person run      --config <file> [--port <n>] [--host <h>] [--json] [--episode-id <id>]
+  person learn    --mode off|shadow|supervised --config <file> [--port <n>] [--json]
+  person observe  --config <file> [--port <n>] [--host <h>] [--json] [--out <file>]
+  person status   --config <file> [--json] [--follow [--interval <ms>]]
   person validate <file> [--migrate]
   person inspect  evidence|skills|config|predictions [--config <file>] [--json]
-  person observe  --config <file> [--json] [--out <file>]
   person compare  <reference-observation.json> <actual-observation.json> [--json]
 
+Every command that connects also accepts:
+  --operator-intervention[=reason]   mark this run as contaminated by a human
+
 Notes:
+  Minecraft assigns a new port every time a world is opened to LAN, so --port
+  is runtime information rather than configuration. It overrides whatever the
+  file says, for this invocation only, and is never written back.
+
   "observe" connects, takes one observation and stops. It is the smallest thing
   that can be done against a live Minecraft world, and the right first one.
+
+  "status" reads what the runtime last wrote. It never connects, so watching
+  Person cannot change what Person does.
   "compare" diffs a captured observation against a reference and flags fields
   that look like defaults nothing ever filled in.
 
@@ -37,7 +56,14 @@ Compatibility aliases:
 
 export interface ParsedCommand {
   command:
-    "run" | "learn" | "validate" | "inspect" | "observe" | "compare" | "help";
+    | "run"
+    | "learn"
+    | "validate"
+    | "inspect"
+    | "observe"
+    | "status"
+    | "compare"
+    | "help";
   configPath?: string;
   target?: string;
   learningMode?: "off" | "shadow" | "supervised";
@@ -45,6 +71,10 @@ export interface ParsedCommand {
   migrate: boolean;
   episodeId?: string;
   outputFile?: string;
+  connection: ConnectionOverride;
+  operatorIntervention?: { reason?: string };
+  follow: boolean;
+  intervalMs: number;
   positional: string[];
 }
 
@@ -55,6 +85,9 @@ export function parseArguments(argv: string[]): ParsedCommand {
     command: "help",
     json: false,
     migrate: false,
+    connection: {},
+    follow: false,
+    intervalMs: 1000,
     positional: [],
   };
   if (argv.length === 0 || argv[0] === "--help" || argv[0] === "-h")
@@ -66,6 +99,7 @@ export function parseArguments(argv: string[]): ParsedCommand {
     "validate",
     "inspect",
     "observe",
+    "status",
     "compare",
   ] as const;
   if ((COMMANDS as readonly string[]).includes(command as string))
@@ -96,6 +130,33 @@ export function parseArguments(argv: string[]): ParsedCommand {
       if (!value || value.startsWith("--"))
         throw new UsageError("--out needs a file path");
       parsed.outputFile = value;
+    } else if (argument === "--port") {
+      const value = rest[++index];
+      if (!value || value.startsWith("--"))
+        throw new UsageError("--port needs the number Minecraft displayed");
+      parsed.connection.port = parsePort(value);
+    } else if (argument === "--host") {
+      const value = rest[++index];
+      if (!value || value.startsWith("--"))
+        throw new UsageError("--host needs a host");
+      parsed.connection.host = parseHost(value);
+    } else if (argument === "--interval") {
+      const value = Number(rest[++index]);
+      if (!Number.isInteger(value) || value < 100 || value > 60000)
+        throw new UsageError(
+          "--interval must be between 100 and 60000 milliseconds",
+        );
+      parsed.intervalMs = value;
+    } else if (argument === "--follow") parsed.follow = true;
+    else if (argument === "--operator-intervention")
+      parsed.operatorIntervention = {};
+    else if (argument?.startsWith("--operator-intervention=")) {
+      const reason = argument.slice("--operator-intervention=".length);
+      if (!reason)
+        throw new UsageError(
+          "--operator-intervention= needs a reason after the =",
+        );
+      parsed.operatorIntervention = { reason };
     } else if (argument === "--json") parsed.json = true;
     else if (argument === "--migrate") parsed.migrate = true;
     else if (argument === "--help" || argument === "-h")
@@ -119,6 +180,10 @@ export function parseArguments(argv: string[]): ParsedCommand {
   }
   if (parsed.command === "observe" && !parsed.configPath)
     throw new UsageError("person observe needs --config <file>");
+  if (parsed.command === "status" && !parsed.configPath)
+    throw new UsageError("person status needs --config <file>");
+  if (parsed.follow && parsed.command !== "status")
+    throw new UsageError("--follow only applies to person status");
   if (parsed.command === "compare" && positional.length !== 2)
     throw new UsageError(
       "person compare needs a reference observation and an actual observation",
@@ -159,13 +224,38 @@ export async function main(argv: string[]): Promise<number> {
       return result.code;
     }
     if (parsed.command === "observe") {
-      const result = await observeCommand(
-        parsed.configPath as string,
-        parsed.json,
-        parsed.outputFile,
-      );
+      const result = await observeCommand({
+        configPath: parsed.configPath as string,
+        json: parsed.json,
+        ...(parsed.outputFile ? { outputFile: parsed.outputFile } : {}),
+        connection: parsed.connection,
+        ...(parsed.operatorIntervention
+          ? { operatorIntervention: parsed.operatorIntervention }
+          : {}),
+      });
       process.stdout.write(result.output);
       return result.code;
+    }
+    if (parsed.command === "status") {
+      const config = loadConfig(parsed.configPath as string);
+      if (!parsed.follow) {
+        const result = statusCommand(config, parsed.json);
+        process.stdout.write(result.output);
+        return result.code;
+      }
+      let running = true;
+      const stop = (): void => {
+        running = false;
+      };
+      process.once("SIGINT", stop);
+      process.once("SIGTERM", stop);
+      return followStatus(
+        config,
+        parsed.json,
+        parsed.intervalMs,
+        (text) => process.stdout.write(text),
+        () => running,
+      );
     }
     if (parsed.command === "compare") {
       const result = compareCommand(
@@ -190,6 +280,10 @@ export async function main(argv: string[]): Promise<number> {
       ...(parsed.learningMode ? { learningMode: parsed.learningMode } : {}),
       json: parsed.json,
       ...(parsed.episodeId ? { episodeId: parsed.episodeId } : {}),
+      connection: parsed.connection,
+      ...(parsed.operatorIntervention
+        ? { operatorIntervention: parsed.operatorIntervention }
+        : {}),
     });
     process.stdout.write(result.output);
     return result.code;

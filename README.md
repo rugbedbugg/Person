@@ -47,12 +47,16 @@ an episode report to `runs/reports/`.
 ## Usage
 
 ```
-person run      --config <file> [--json] [--episode-id <id>]
-person learn    --mode off|shadow|supervised --config <file> [--json]
+person run      --config <file> [--port <n>] [--host <h>] [--json] [--episode-id <id>]
+person learn    --mode off|shadow|supervised --config <file> [--port <n>] [--json]
+person observe  --config <file> [--port <n>] [--host <h>] [--json] [--out <file>]
+person status   --config <file> [--json] [--follow [--interval <ms>]]
 person validate <file> [--migrate]
 person inspect  evidence|skills|config|predictions [--config <file>] [--json]
-person observe  --config <file> [--json] [--out <file>]
 person compare  <reference-observation.json> <actual-observation.json> [--json]
+
+Every connecting command also accepts:
+person ... --operator-intervention[=reason]   mark the run as contaminated
 ```
 
 `shroud` is an alias for `person`, and `shroud-train` for `person learn`, for
@@ -60,8 +64,14 @@ compatibility with the previous runtime's habits.
 
 `observe` connects, takes one observation and stops. It is the smallest thing
 that can be done against a live Minecraft world, and the right first one.
-`compare` diffs a capture against a reference and flags fields that look like
-defaults nothing ever filled in.
+`status` reads what the runtime last wrote and never connects, so watching
+Person cannot change what Person does. `compare` diffs a capture against a
+reference and flags fields that look like defaults nothing ever filled in.
+
+Minecraft assigns a new LAN port every time a world is opened, so `--port` is
+runtime information rather than configuration. It overrides the file for one
+invocation and is never written back; a changed port never means editing
+`config.toml`.
 
 ```bash
 node apps/cli/src/bin/person.ts validate examples/fixture.toml
@@ -128,9 +138,17 @@ recognised and refused rather than converted.
 ## Running against Minecraft
 
 Use a disposable world you own, opened to LAN, with a dedicated offline bot
-identity. `docs/LAN_TESTING.md` is the validation ladder; start at the top with
-`person observe`, which connects, checks the world is usable and the rules make
-sense, takes one observation and stops.
+identity. `docs/LAN_TESTING.md` opens with a **First contact** section that
+walks the whole thing once:
+
+```bash
+bash scripts/lan-check.sh my-world.toml --port <PORT>
+node apps/cli/src/bin/person.ts observe --config my-world.toml --port <PORT>
+node apps/cli/src/bin/person.ts status  --config my-world.toml
+```
+
+Person joins as an ordinary non-operator survival player. The world host keeps
+cheats; Person never gets them, and has no way to send a command at all.
 
 **Person has never been run against a Minecraft server.** The Mineflayer
 adapter has been audited against the installed client and Minecraft's own data
@@ -143,7 +161,7 @@ about what that leaves open.
 ```bash
 npm run typecheck     # tsc --noEmit
 npm run build         # tsc emit to dist/
-npm test              # Node test runner, 108 tests
+npm test              # Node test runner, 138 tests
 npm run format:check  # prettier
 
 uv run pytest         # 120 tests
