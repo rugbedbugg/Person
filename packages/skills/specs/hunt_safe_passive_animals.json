@@ -1,0 +1,61 @@
+{
+  "id": "hunt_safe_passive_animals",
+  "version": 1,
+  "category": "food",
+  "summary": "Take raw food from unnamed, untamed passive animals only.",
+  "parameters": {
+    "target_amount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16,
+      "default": 3
+    },
+    "max_distance": {
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 64,
+      "default": 32
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "reachable_animal",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "hunting_permitted",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "inventory_space",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "raw_food",
+      "op": "+=",
+      "value": 3,
+      "scalesWith": "target_amount"
+    }
+  ],
+  "possibleFailures": [
+    "no_permitted_target",
+    "unreachable_target",
+    "interrupted_by_threat",
+    "timed_out"
+  ],
+  "requiredPermissions": ["hunt_passive_animal"],
+  "costLimits": {
+    "maxTicks": 2400,
+    "maxDistance": 48,
+    "minHealth": 10
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["inventory_delta", "vitals_delta"],
+  "risk": 0.3,
+  "emergency": false
+}

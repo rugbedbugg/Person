@@ -1,0 +1,54 @@
+{
+  "id": "withdraw_owned_storage",
+  "version": 1,
+  "category": "storage",
+  "summary": "Withdraw items from a chest that Person placed itself.",
+  "parameters": {
+    "category": {
+      "type": "string",
+      "enum": ["food", "wood", "stone", "coal", "any"],
+      "default": "food"
+    },
+    "amount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "default": 4
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "owned_storage_available",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "withdrawn",
+      "op": "=",
+      "value": 1
+    },
+    {
+      "fact": "edible_food",
+      "op": "+=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "no_owned_storage",
+    "empty_container",
+    "inventory_full",
+    "timed_out"
+  ],
+  "requiredPermissions": ["withdraw_owned_storage"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 16,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["container_transfer", "inventory_delta"],
+  "risk": 0.05,
+  "emergency": false
+}

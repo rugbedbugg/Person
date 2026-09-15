@@ -1,0 +1,49 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "66666666-6666-4666-8666-666666666666",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1320,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "SkillOutcome",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "goalId": "goal_secure_food_1",
+  "routineId": "r_5f2a9c31",
+  "contextId": "h_healthy.f_low.d_day.t_immediate.hm_near.tt_none.fs_none",
+  "requestedSkill": "gather_wood",
+  "requestedParameters": {
+    "target_amount": 16,
+    "max_distance": 48
+  },
+  "requestedSkillStatus": "PREEMPTED",
+  "executedParameters": {
+    "min_clearance": 16
+  },
+  "status": "SUCCESS",
+  "emergency": true,
+  "reasonCodes": ["immediate_threat", "emergency_replacement"],
+  "effects": ["threat_cleared"],
+  "expectedEffects": [
+    {
+      "fact": "safe",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "healthBefore": 14.0,
+  "healthAfter": 12.0,
+  "foodBefore": 7.0,
+  "foodAfter": 7.0,
+  "healthCost": 2.0,
+  "resourceCost": [],
+  "inventoryDelta": [],
+  "elapsedTicks": 120,
+  "interruptReason": null,
+  "completionEvidence": {
+    "kinds": ["threat_clearance"],
+    "details": {
+      "clearance": 18
+    }
+  }
+}

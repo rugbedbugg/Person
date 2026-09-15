@@ -1,0 +1,52 @@
+{
+  "id": "repair_shelter",
+  "version": 1,
+  "category": "shelter",
+  "summary": "Replace missing blocks in an existing owned shelter until it is sealed again.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "shelter_known",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "building_materials",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "building_permitted",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "shelter_complete",
+      "op": "=",
+      "value": 1
+    },
+    {
+      "fact": "sheltered",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "missing_materials",
+    "obstructed_site",
+    "protected_area",
+    "timed_out"
+  ],
+  "requiredPermissions": ["build"],
+  "costLimits": {
+    "maxTicks": 2400,
+    "maxDistance": 8,
+    "minHealth": 6
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["placed_blocks", "shelter_verified"],
+  "risk": 0.1,
+  "emergency": false
+}

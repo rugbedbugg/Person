@@ -1,0 +1,14 @@
+{
+  "schema": "shroud-rl-v1",
+  "environment": "minecraft-survival-live-v1",
+  "actions": ["wood", "food", "planks", "axe", "build", "eat", "shelter"],
+  "alpha": 0.2,
+  "gamma": 0.98,
+  "updates": 1284,
+  "entries": [
+    [
+      [1, 2, 2, 1, 0, 0, 0, 0, 0, 0],
+      [0.1, -0.2, 0.0, 0.3, 0.0, 0.0, 0.0]
+    ]
+  ]
+}

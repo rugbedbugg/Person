@@ -1,0 +1,157 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/skill-spec.schema.json",
+  "title": "SkillSpec",
+  "description": "The contract for one bounded cognitive action. The planner reads preconditions and expectedEffects; the Node runtime enforces parameters, permissions and costLimits.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "category",
+    "summary",
+    "parameters",
+    "preconditions",
+    "expectedEffects",
+    "possibleFailures",
+    "requiredPermissions",
+    "costLimits",
+    "interruptionPolicy",
+    "completionEvidence",
+    "risk",
+    "emergency"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+    "version": { "type": "integer", "minimum": 1 },
+    "category": {
+      "enum": [
+        "emergency",
+        "food",
+        "resources",
+        "crafting",
+        "shelter",
+        "storage"
+      ]
+    },
+    "summary": { "type": "string", "minLength": 8, "maxLength": 240 },
+    "parameters": {
+      "type": "object",
+      "maxProperties": 8,
+      "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,31}$" },
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["type", "default"],
+        "properties": {
+          "type": { "enum": ["integer", "number", "boolean", "string"] },
+          "minimum": { "type": "number" },
+          "maximum": { "type": "number" },
+          "enum": {
+            "type": "array",
+            "items": { "type": "string" },
+            "minItems": 1
+          },
+          "default": { "type": ["integer", "number", "boolean", "string"] },
+          "description": { "type": "string", "maxLength": 160 }
+        }
+      }
+    },
+    "preconditions": { "$ref": "#/$defs/conditions" },
+    "expectedEffects": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fact", "op", "value"],
+        "properties": {
+          "fact": { "$ref": "#/$defs/fact" },
+          "op": { "enum": ["+=", "-=", "=", "max"] },
+          "value": { "type": "number" },
+          "scalesWith": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,31}$"
+          }
+        }
+      }
+    },
+    "possibleFailures": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 16,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" }
+    },
+    "requiredPermissions": {
+      "type": "array",
+      "maxItems": 8,
+      "items": {
+        "enum": [
+          "harvest_resource",
+          "mine_resource",
+          "build",
+          "hunt_passive_animal",
+          "place_owned_storage",
+          "deposit_owned_storage",
+          "withdraw_owned_storage",
+          "withdraw_existing_container",
+          "emergency_dig",
+          "craft",
+          "consume"
+        ]
+      }
+    },
+    "costLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxTicks", "maxDistance", "minHealth"],
+      "properties": {
+        "maxTicks": { "type": "integer", "minimum": 1, "maximum": 72000 },
+        "maxDistance": { "type": "integer", "minimum": 0, "maximum": 256 },
+        "minHealth": { "type": "number", "minimum": 0, "maximum": 20 }
+      }
+    },
+    "interruptionPolicy": {
+      "enum": ["preemptible", "atomic_step", "uninterruptible"]
+    },
+    "completionEvidence": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 8,
+      "items": {
+        "enum": [
+          "inventory_delta",
+          "harvested_blocks",
+          "placed_blocks",
+          "crafted_items",
+          "smelted_items",
+          "position_reached",
+          "threat_clearance",
+          "vitals_delta",
+          "container_transfer",
+          "shelter_verified",
+          "elapsed_ticks"
+        ]
+      }
+    },
+    "risk": { "type": "number", "minimum": 0, "maximum": 1 },
+    "emergency": { "type": "boolean" }
+  },
+  "$defs": {
+    "fact": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+    "conditions": {
+      "type": "array",
+      "maxItems": 16,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fact", "op", "value"],
+        "properties": {
+          "fact": { "$ref": "#/$defs/fact" },
+          "op": { "enum": [">=", "<=", "==", ">", "<"] },
+          "value": { "type": "number" }
+        }
+      }
+    }
+  }
+}

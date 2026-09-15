@@ -1,0 +1,67 @@
+{
+  "id": "gather_plant_food",
+  "version": 1,
+  "category": "food",
+  "summary": "Harvest permitted edible plants such as berries within range.",
+  "parameters": {
+    "target_amount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "default": 6
+    },
+    "max_distance": {
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 128,
+      "default": 48
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "reachable_plant_food",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "harvesting_permitted",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "inventory_space",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "plant_food",
+      "op": "+=",
+      "value": 6,
+      "scalesWith": "target_amount"
+    },
+    {
+      "fact": "edible_food",
+      "op": "+=",
+      "value": 6,
+      "scalesWith": "target_amount"
+    }
+  ],
+  "possibleFailures": [
+    "unreachable_resource",
+    "inventory_full",
+    "interrupted_by_threat",
+    "timed_out"
+  ],
+  "requiredPermissions": ["harvest_resource"],
+  "costLimits": {
+    "maxTicks": 2400,
+    "maxDistance": 64,
+    "minHealth": 6
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["inventory_delta", "harvested_blocks"],
+  "risk": 0.2,
+  "emergency": false
+}

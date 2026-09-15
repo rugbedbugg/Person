@@ -1,0 +1,19 @@
+[project]
+name = "person-policy"
+version = "0.1.0"
+description = "Person subsystem: person_policy"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = ["person-skills", "person-planner", "person-persistence"]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/person_policy"]
+
+[tool.uv.sources]
+person-skills = { workspace = true }
+person-planner = { workspace = true }
+person-persistence = { workspace = true }

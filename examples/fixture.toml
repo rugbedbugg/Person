@@ -1,0 +1,59 @@
+# Deterministic fixture configuration: no Minecraft server is contacted.
+configVersion = 2
+personId = "ada"
+worldId = "fixture-world-01"
+
+[runtime]
+embodiment = "fixture"
+trainingContext = "fixture"
+outputDirectory = "../runs"
+rngSeed = 20260915
+maxDecisions = 200
+maxTicks = 48000
+decisionIntervalMs = 0
+fixtureWorld = "../fixtures/worlds/vertical-slice.json"
+
+[learning]
+# Learning is off unless an operator turns it on. `person learn --mode ...` is
+# the only supported way to run with a learner in control.
+mode = "off"
+evidenceDirectory = "../runs/evidence"
+snapshotEveryEvents = 25
+explorationBonus = 0.15
+minimumSupport = 3
+
+[cognition]
+command = ["uv", "run", "person-cognition", "--config", "examples/fixture.toml"]
+startTimeoutMs = 20000
+decisionTimeoutMs = 5000
+
+[world]
+home = { x = 0, y = 64, z = 0 }
+exploration = { min = { x = -48, y = 56, z = -48 }, max = { x = 48, y = 80, z = 48 } }
+resourceAreas = [{ min = { x = -48, y = 56, z = -48 }, max = { x = 48, y = 80, z = 48 } }]
+protectedAreas = [{ min = { x = 20, y = 56, z = 20 }, max = { x = 28, y = 80, z = 28 } }]
+
+[permissions.containers.existing]
+withdraw = true
+deposit = false
+
+[permissions.containers.owned]
+withdraw = true
+deposit = true
+
+[permissions.hunting]
+passiveUnnamedAnimals = true
+namedAnimals = false
+tamedAnimals = false
+
+[permissions.players]
+combat = false
+
+[permissions.villagers]
+harm = false
+
+[permissions.building]
+enabled = true
+
+[permissions.protectedAreas]
+enforcement = "strict"

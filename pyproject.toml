@@ -1,0 +1,74 @@
+[project]
+name = "person"
+version = "0.1.0"
+description = "Person: a persistent autonomous artificial inhabitant for Minecraft (cognition side)"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+  "person-cognition",
+  "person-config",
+  "person-persistence",
+  "person-planner",
+  "person-policy",
+  "person-protocol",
+  "person-skills",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+bypass-selection = true
+
+[tool.uv.workspace]
+members = [
+  "packages/protocol",
+  "packages/skills",
+  "packages/config",
+  "packages/planner",
+  "packages/policy",
+  "packages/persistence",
+  "apps/cognition",
+]
+
+[tool.uv.sources]
+person-protocol = { workspace = true }
+person-skills = { workspace = true }
+person-config = { workspace = true }
+person-planner = { workspace = true }
+person-policy = { workspace = true }
+person-persistence = { workspace = true }
+person-cognition = { workspace = true }
+
+[dependency-groups]
+dev = ["pytest==9.1.1", "ruff==0.16.7", "mypy==2.3.1", "types-jsonschema==4.26.0.20260518"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "packages", "apps"]
+python_files = ["test_*.py"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["node_modules", "dist", ".venv"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+# The package sources are type checked strictly. Tests are checked by running
+# them; holding them to strict typing buys noise rather than safety.
+files = [
+  "packages/protocol/python",
+  "packages/skills/python",
+  "packages/config/python",
+  "packages/planner/python",
+  "packages/policy/python",
+  "packages/persistence/python",
+  "apps/cognition/python",
+]

@@ -1,0 +1,76 @@
+# Local LAN configuration for Minecraft Java Edition 1.16.1.
+# Open a disposable single-player world to LAN and put the displayed port below.
+configVersion = 2
+personId = "ada"
+worldId = "lan-test-world"
+
+[runtime]
+embodiment = "minecraft"
+trainingContext = "minecraft_peaceful"
+outputDirectory = "../runs"
+rngSeed = 20260915
+maxDecisions = 200
+maxTicks = 48000
+decisionIntervalMs = 0
+
+
+[learning]
+# Learning is off unless an operator turns it on. `person learn --mode ...` is
+# the only supported way to run with a learner in control.
+mode = "off"
+evidenceDirectory = "../runs/evidence"
+snapshotEveryEvents = 25
+explorationBonus = 0.15
+minimumSupport = 3
+
+[server]
+host = "127.0.0.1"
+port = 33759
+version = "1.16.1"
+
+[bot]
+username = "PersonAda"
+auth = "offline"
+
+[authorization]
+worldOwnerApproved = true
+dedicatedIdentity = true
+resourceAreasAreUnowned = true
+naturalDaylightCycle = true
+normalDifficulty = false
+
+[cognition]
+command = ["uv", "run", "person-cognition"]
+startTimeoutMs = 20000
+decisionTimeoutMs = 5000
+
+[world]
+home = { x = 0, y = 64, z = 0 }
+exploration = { min = { x = -48, y = 56, z = -48 }, max = { x = 48, y = 80, z = 48 } }
+resourceAreas = [{ min = { x = -48, y = 56, z = -48 }, max = { x = 48, y = 80, z = 48 } }]
+protectedAreas = [{ min = { x = 20, y = 56, z = 20 }, max = { x = 28, y = 80, z = 28 } }]
+
+[permissions.containers.existing]
+withdraw = true
+deposit = false
+
+[permissions.containers.owned]
+withdraw = true
+deposit = true
+
+[permissions.hunting]
+passiveUnnamedAnimals = true
+namedAnimals = false
+tamedAnimals = false
+
+[permissions.players]
+combat = false
+
+[permissions.villagers]
+harm = false
+
+[permissions.building]
+enabled = true
+
+[permissions.protectedAreas]
+enforcement = "strict"

@@ -1,0 +1,37 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "cccccccc-cccc-4ccc-8ccc-cccccccccccc",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "PolicyDecision",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "goalId": "goal_secure_food_1",
+  "contextId": "h_healthy.f_low.d_day.t_none.hm_near.tt_none.fs_none",
+  "routineId": "r_5f2a9c31",
+  "routineName": "establish_food_hunt",
+  "steps": [
+    "hunt_safe_passive_animals",
+    "return_home",
+    "cook_food",
+    "eat_to_target"
+  ],
+  "confidence": 0.62,
+  "reasonCodes": ["beta_posterior_mean", "safe_envelope_open"],
+  "evidenceRefs": ["66666666-6666-4666-8666-666666666666"],
+  "policyRevision": 3,
+  "learnedOrFallback": "learned",
+  "candidates": [
+    {
+      "routineId": "r_5f2a9c31",
+      "routineName": "establish_food_hunt",
+      "score": 0.71,
+      "attempts": 9,
+      "successes": 7,
+      "meanSuccess": 0.727
+    }
+  ],
+  "shadowRoutineId": null
+}

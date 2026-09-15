@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/common.schema.json",
+  "title": "Shared protocol definitions",
+  "$defs": {
+    "protocolVersion": { "const": "shroud-learning-v2" },
+    "uuid": { "type": "string", "format": "uuid" },
+    "slug": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+    "identifier": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+    "reasonCode": { "type": "string", "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+    "reasonCodes": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/reasonCode" },
+      "maxItems": 32
+    },
+    "tick": { "type": "integer", "minimum": 0, "maximum": 9007199254740991 },
+    "timestamp": { "type": "string", "format": "date-time" },
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "integer", "minimum": -30000000, "maximum": 30000000 },
+        "y": { "type": "integer", "minimum": -64, "maximum": 320 },
+        "z": { "type": "integer", "minimum": -30000000, "maximum": 30000000 }
+      }
+    },
+    "itemStack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "count"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "count": { "type": "integer", "minimum": 1, "maximum": 4096 }
+      }
+    },
+    "itemDelta": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "delta"],
+      "properties": {
+        "name": { "$ref": "#/$defs/identifier" },
+        "delta": { "type": "integer", "minimum": -4096, "maximum": 4096 }
+      }
+    },
+    "terminalStatus": {
+      "enum": [
+        "SUCCESS",
+        "FAILED",
+        "INTERRUPTED",
+        "PREEMPTED",
+        "TIMED_OUT",
+        "INVALIDATED",
+        "UNREACHABLE",
+        "DEATH",
+        "DISCONNECTED"
+      ]
+    },
+    "safetyLevel": { "enum": ["L0", "L1", "L2", "L3", "L4"] },
+    "trainingContext": {
+      "enum": ["fixture", "minecraft_peaceful", "minecraft_normal", "replay"]
+    },
+    "learningMode": { "enum": ["off", "shadow", "supervised"] },
+    "skillParameters": {
+      "type": "object",
+      "description": "Scalar-only typed parameters. No nested structures, so no command, script, or code payload can be smuggled through a skill proposal.",
+      "maxProperties": 12,
+      "propertyNames": { "$ref": "#/$defs/identifier" },
+      "additionalProperties": {
+        "type": ["integer", "number", "string", "boolean"],
+        "maxLength": 64
+      }
+    },
+    "costLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maxTicks", "maxDistance", "minHealth"],
+      "properties": {
+        "maxTicks": { "type": "integer", "minimum": 1, "maximum": 72000 },
+        "maxDistance": { "type": "integer", "minimum": 0, "maximum": 256 },
+        "minHealth": { "type": "number", "minimum": 0, "maximum": 20 }
+      }
+    },
+    "envelope": {
+      "type": "object",
+      "required": [
+        "protocolVersion",
+        "messageId",
+        "personId",
+        "sessionId",
+        "worldId",
+        "tick",
+        "timestamp",
+        "type"
+      ],
+      "properties": {
+        "protocolVersion": { "$ref": "#/$defs/protocolVersion" },
+        "messageId": { "$ref": "#/$defs/uuid" },
+        "personId": { "$ref": "#/$defs/slug" },
+        "sessionId": { "$ref": "#/$defs/uuid" },
+        "worldId": { "$ref": "#/$defs/slug" },
+        "tick": { "$ref": "#/$defs/tick" },
+        "timestamp": { "$ref": "#/$defs/timestamp" },
+        "type": { "type": "string" }
+      }
+    }
+  }
+}

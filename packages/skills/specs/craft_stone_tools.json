@@ -1,0 +1,67 @@
+{
+  "id": "craft_stone_tools",
+  "version": 1,
+  "category": "crafting",
+  "summary": "Upgrade to stone tools at an owned crafting table.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "stone",
+      "op": ">=",
+      "value": 6
+    },
+    {
+      "fact": "crafting_table",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "wood",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "stone",
+      "op": "-=",
+      "value": 6
+    },
+    {
+      "fact": "wood",
+      "op": "-=",
+      "value": 1
+    },
+    {
+      "fact": "stone_pickaxe",
+      "op": "max",
+      "value": 1
+    },
+    {
+      "fact": "stone_axe",
+      "op": "max",
+      "value": 1
+    },
+    {
+      "fact": "tool_tier",
+      "op": "max",
+      "value": 2
+    }
+  ],
+  "possibleFailures": [
+    "missing_materials",
+    "no_crafting_table",
+    "no_recipe",
+    "timed_out"
+  ],
+  "requiredPermissions": ["craft"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 8,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["crafted_items", "inventory_delta"],
+  "risk": 0.05,
+  "emergency": false
+}

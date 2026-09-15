@@ -1,0 +1,62 @@
+{
+  "id": "build_basic_shelter",
+  "version": 1,
+  "category": "shelter",
+  "summary": "Build and seal a small shelter at the active home position.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "building_materials",
+      "op": ">=",
+      "value": 25
+    },
+    {
+      "fact": "building_permitted",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "home_known",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "building_materials",
+      "op": "-=",
+      "value": 25
+    },
+    {
+      "fact": "shelter_complete",
+      "op": "=",
+      "value": 1
+    },
+    {
+      "fact": "sheltered",
+      "op": "=",
+      "value": 1
+    },
+    {
+      "fact": "at_home",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "missing_materials",
+    "obstructed_site",
+    "protected_area",
+    "timed_out"
+  ],
+  "requiredPermissions": ["build"],
+  "costLimits": {
+    "maxTicks": 3600,
+    "maxDistance": 8,
+    "minHealth": 6
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["placed_blocks", "shelter_verified"],
+  "risk": 0.15,
+  "emergency": false
+}

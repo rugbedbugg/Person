@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/emergency-event.schema.json",
+  "title": "EmergencyEvent",
+  "description": "Node took, or is taking, an action at L0/L1 that cognition cannot override.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "decisionId",
+    "level",
+    "trigger",
+    "reasonCodes",
+    "action",
+    "preemptedSkill"
+  ],
+  "properties": {
+    "type": {
+      "const": "EmergencyEvent"
+    },
+    "decisionId": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/uuid"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "level": {
+      "enum": ["L0", "L1"]
+    },
+    "trigger": {
+      "enum": [
+        "imminent_lethal_damage",
+        "lava_exposure",
+        "suffocation",
+        "hostile_swarm",
+        "immediate_threat",
+        "critical_health",
+        "critical_hunger",
+        "dangerous_path",
+        "protected_area_entry",
+        "invalid_destructive_interaction",
+        "forbidden_target",
+        "unauthorized_deposit"
+      ]
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    },
+    "action": {
+      "enum": [
+        "flee",
+        "dig_in",
+        "eat_to_target",
+        "return_home",
+        "cancel_skill",
+        "reject_proposal"
+      ]
+    },
+    "preemptedSkill": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/identifier"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

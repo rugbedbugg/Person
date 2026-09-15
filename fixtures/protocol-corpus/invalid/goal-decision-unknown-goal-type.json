@@ -1,0 +1,46 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "GoalDecision",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "goal": {
+    "goalId": "goal_secure_food_1",
+    "goalType": "TAKE_OVER_SERVER",
+    "priority": 640.0,
+    "source": "homeostasis",
+    "createdAtTick": 1200,
+    "status": "ACTIVE",
+    "completionCondition": [
+      {
+        "fact": "cooked_food",
+        "op": ">=",
+        "value": 4
+      }
+    ],
+    "suspensionReason": null
+  },
+  "reasonCodes": ["food_band_low"],
+  "stack": [
+    {
+      "goalId": "goal_secure_food_1",
+      "goalType": "TAKE_OVER_SERVER",
+      "priority": 640.0,
+      "source": "homeostasis",
+      "createdAtTick": 1200,
+      "status": "ACTIVE",
+      "completionCondition": [
+        {
+          "fact": "cooked_food",
+          "op": ">=",
+          "value": 4
+        }
+      ],
+      "suspensionReason": null
+    }
+  ]
+}

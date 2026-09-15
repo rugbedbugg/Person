@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/episode-event.schema.json",
+  "title": "EpisodeEvent",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "episodeId",
+    "phase",
+    "trainingContext",
+    "rngSeed",
+    "reasonCodes"
+  ],
+  "properties": {
+    "type": {
+      "const": "EpisodeEvent"
+    },
+    "episodeId": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "phase": {
+      "enum": ["started", "ended"]
+    },
+    "trainingContext": {
+      "$ref": "common.schema.json#/$defs/trainingContext"
+    },
+    "rngSeed": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    }
+  }
+}

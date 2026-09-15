@@ -1,0 +1,30 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "55555555-5555-4555-8555-555555555555",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "SkillStarted",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "requestedSkill": "gather_wood",
+  "executedSkill": "flee",
+  "parameters": {
+    "min_clearance": 16
+  },
+  "limits": {
+    "maxTicks": 600,
+    "maxDistance": 32,
+    "minHealth": 0
+  },
+  "startTick": 1200,
+  "startHealth": 14.0,
+  "startFood": 7.0,
+  "startInventory": [
+    {
+      "name": "oak_log",
+      "count": 3
+    }
+  ]
+}

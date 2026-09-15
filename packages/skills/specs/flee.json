@@ -1,0 +1,38 @@
+{
+  "id": "flee",
+  "version": 1,
+  "category": "emergency",
+  "summary": "Move away from hostiles and hazards until a safe clearance is reached.",
+  "parameters": {
+    "min_clearance": {
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 48,
+      "default": 16,
+      "description": "Blocks of separation from the nearest hostile."
+    }
+  },
+  "preconditions": [],
+  "expectedEffects": [
+    {
+      "fact": "safe",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["no_safe_route", "cornered", "timed_out", "death"],
+  "requiredPermissions": [],
+  "costLimits": {
+    "maxTicks": 600,
+    "maxDistance": 48,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "uninterruptible",
+  "completionEvidence": [
+    "threat_clearance",
+    "position_reached",
+    "vitals_delta"
+  ],
+  "risk": 0.35,
+  "emergency": true
+}

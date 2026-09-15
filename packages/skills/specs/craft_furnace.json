@@ -1,0 +1,52 @@
+{
+  "id": "craft_furnace",
+  "version": 1,
+  "category": "crafting",
+  "summary": "Craft a furnace from stone and place it at the active home.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "stone",
+      "op": ">=",
+      "value": 8
+    },
+    {
+      "fact": "at_home",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "building_permitted",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "stone",
+      "op": "-=",
+      "value": 8
+    },
+    {
+      "fact": "furnace_placed",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "missing_materials",
+    "no_placement_site",
+    "protected_area",
+    "timed_out"
+  ],
+  "requiredPermissions": ["craft", "build"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 8,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["crafted_items", "placed_blocks"],
+  "risk": 0.1,
+  "emergency": false
+}

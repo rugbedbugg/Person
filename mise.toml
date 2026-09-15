@@ -1,0 +1,28 @@
+[tools]
+node = "22.23.2"
+python = "3.12"
+uv = "0.12.13"
+
+[env]
+UV_PROJECT_ENVIRONMENT = ".venv"
+
+[tasks.install]
+run = ["npm ci || npm install", "uv sync --all-packages"]
+
+[tasks.typecheck]
+run = ["npx tsc --noEmit -p tsconfig.json", "uv run mypy"]
+
+[tasks.build]
+run = "npm run build"
+
+[tasks.test-node]
+run = "npm test"
+
+[tasks.test-python]
+run = "uv run pytest"
+
+[tasks.lint]
+run = ["uv run ruff check .", "uv run ruff format --check .", "npx prettier --check ."]
+
+[tasks.check]
+depends = ["typecheck", "lint", "build", "test-node", "test-python"]

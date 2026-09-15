@@ -1,0 +1,55 @@
+{
+  "id": "deposit_owned_storage",
+  "version": 1,
+  "category": "storage",
+  "summary": "Deposit surplus items into a chest that Person placed itself.",
+  "parameters": {
+    "category": {
+      "type": "string",
+      "enum": ["food", "wood", "stone", "coal", "any"],
+      "default": "any"
+    },
+    "keep": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 64,
+      "default": 8,
+      "description": "Items of the category to keep in inventory."
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "owned_storage_available",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "at_home",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "stored_surplus",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "no_owned_storage",
+    "nothing_to_deposit",
+    "container_full",
+    "timed_out"
+  ],
+  "requiredPermissions": ["deposit_owned_storage"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 8,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["container_transfer", "inventory_delta"],
+  "risk": 0.05,
+  "emergency": false
+}

@@ -1,0 +1,24 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "44444444-4444-4444-8444-444444444444",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "ValidationDecision",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "requestedSkill": "gather_wood",
+  "decision": "REPLACE",
+  "level": "L1",
+  "reasonCodes": ["immediate_threat", "emergency_replacement"],
+  "executedSkill": "flee",
+  "executedParameters": {
+    "min_clearance": 16
+  },
+  "executedLimits": {
+    "maxTicks": 600,
+    "maxDistance": 32,
+    "minHealth": 0
+  }
+}

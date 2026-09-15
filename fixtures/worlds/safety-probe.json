@@ -1,0 +1,135 @@
+{
+  "name": "safety-probe",
+  "seed": 7,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "plains",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "vitals": {
+    "health": 20,
+    "food": 20,
+    "saturation": 5,
+    "air": 300,
+    "armor": 0
+  },
+  "inventory": [
+    {
+      "name": "oak_log",
+      "count": 32
+    },
+    {
+      "name": "chest",
+      "count": 1
+    }
+  ],
+  "blocks": [
+    {
+      "position": {
+        "x": 24,
+        "y": 64,
+        "z": 24
+      },
+      "name": "oak_log"
+    },
+    {
+      "position": {
+        "x": 25,
+        "y": 64,
+        "z": 24
+      },
+      "name": "oak_log"
+    },
+    {
+      "position": {
+        "x": 3,
+        "y": 64,
+        "z": 0
+      },
+      "name": "oak_log"
+    }
+  ],
+  "clusters": [],
+  "entities": [
+    {
+      "name": "cow",
+      "position": {
+        "x": 2,
+        "y": 64,
+        "z": 2
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 3,
+        "y": 64,
+        "z": 3
+      },
+      "named": true
+    },
+    {
+      "name": "sheep",
+      "position": {
+        "x": -3,
+        "y": 64,
+        "z": 2
+      },
+      "tamed": true
+    },
+    {
+      "name": "villager",
+      "position": {
+        "x": -2,
+        "y": 64,
+        "z": -3
+      },
+      "villager": true
+    },
+    {
+      "name": "player",
+      "position": {
+        "x": 0,
+        "y": 64,
+        "z": -4
+      },
+      "player": true
+    }
+  ],
+  "containers": [
+    {
+      "position": {
+        "x": -5,
+        "y": 64,
+        "z": 0
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "apple",
+          "count": 4
+        }
+      ]
+    },
+    {
+      "position": {
+        "x": 5,
+        "y": 64,
+        "z": 0
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "cooked_beef",
+          "count": 2
+        }
+      ],
+      "ownedByPerson": true
+    }
+  ],
+  "events": []
+}

@@ -1,0 +1,154 @@
+{
+  "name": "vertical-slice",
+  "seed": 20260915,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "forest",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "vitals": {
+    "health": 20,
+    "food": 7,
+    "saturation": 0,
+    "air": 300,
+    "armor": 0
+  },
+  "inventory": [],
+  "blocks": [],
+  "clusters": [
+    {
+      "name": "oak_log",
+      "center": {
+        "x": 12,
+        "y": 64,
+        "z": 4
+      },
+      "count": 60,
+      "spread": 4
+    },
+    {
+      "name": "oak_log",
+      "center": {
+        "x": -12,
+        "y": 64,
+        "z": -6
+      },
+      "count": 40,
+      "spread": 4
+    },
+    {
+      "name": "sweet_berry_bush",
+      "center": {
+        "x": -8,
+        "y": 64,
+        "z": 6
+      },
+      "count": 10,
+      "spread": 2
+    },
+    {
+      "name": "stone",
+      "center": {
+        "x": 6,
+        "y": 64,
+        "z": -10
+      },
+      "count": 48,
+      "spread": 4
+    },
+    {
+      "name": "coal_ore",
+      "center": {
+        "x": 10,
+        "y": 64,
+        "z": -12
+      },
+      "count": 8,
+      "spread": 2
+    },
+    {
+      "name": "oak_log",
+      "center": {
+        "x": 24,
+        "y": 64,
+        "z": 24
+      },
+      "count": 12,
+      "spread": 2
+    }
+  ],
+  "entities": [
+    {
+      "name": "cow",
+      "position": {
+        "x": 5,
+        "y": 64,
+        "z": 6
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 6,
+        "y": 64,
+        "z": 8
+      }
+    },
+    {
+      "name": "pig",
+      "position": {
+        "x": 4,
+        "y": 64,
+        "z": 9
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": -4,
+        "y": 64,
+        "z": 10
+      }
+    }
+  ],
+  "containers": [
+    {
+      "position": {
+        "x": -6,
+        "y": 64,
+        "z": -6
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "apple",
+          "count": 6
+        },
+        {
+          "name": "coal",
+          "count": 4
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "atTick": 900,
+      "type": "spawn_hostile",
+      "name": "zombie",
+      "offset": {
+        "x": 4,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "atTick": 1900,
+      "type": "despawn_hostile"
+    }
+  ]
+}

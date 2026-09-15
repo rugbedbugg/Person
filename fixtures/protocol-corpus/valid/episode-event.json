@@ -1,0 +1,15 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "88888888-8888-4888-8888-888888888888",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 0,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "EpisodeEvent",
+  "episodeId": "ep_0001",
+  "phase": "started",
+  "trainingContext": "fixture",
+  "rngSeed": 20260915,
+  "reasonCodes": ["session_start"]
+}

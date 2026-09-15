@@ -1,0 +1,7 @@
+node_modules
+dist
+.venv
+runs
+uv.lock
+package-lock.json
+docs/PERSON_SPEC.md

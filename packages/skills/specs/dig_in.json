@@ -1,0 +1,53 @@
+{
+  "id": "dig_in",
+  "version": 1,
+  "category": "emergency",
+  "summary": "Excavate a two block refuge away from the threat and seal the entrance.",
+  "parameters": {
+    "depth": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 3,
+      "default": 2
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "diggable_ground",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "safe",
+      "op": "=",
+      "value": 1
+    },
+    {
+      "fact": "sheltered",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "no_diggable_ground",
+    "protected_area",
+    "timed_out",
+    "death"
+  ],
+  "requiredPermissions": ["emergency_dig"],
+  "costLimits": {
+    "maxTicks": 400,
+    "maxDistance": 4,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "uninterruptible",
+  "completionEvidence": [
+    "harvested_blocks",
+    "placed_blocks",
+    "position_reached"
+  ],
+  "risk": 0.3,
+  "emergency": true
+}

@@ -1,0 +1,191 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/skill-outcome.schema.json",
+  "title": "SkillOutcome",
+  "description": "What actually happened. requestedSkill is what cognition asked for; executedSkill is what the runtime actually ran. Learning credits executedSkill.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "decisionId",
+    "goalId",
+    "routineId",
+    "contextId",
+    "requestedSkill",
+    "requestedParameters",
+    "requestedSkillStatus",
+    "executedSkill",
+    "executedParameters",
+    "status",
+    "emergency",
+    "reasonCodes",
+    "effects",
+    "expectedEffects",
+    "healthBefore",
+    "healthAfter",
+    "foodBefore",
+    "foodAfter",
+    "healthCost",
+    "resourceCost",
+    "inventoryDelta",
+    "elapsedTicks",
+    "interruptReason",
+    "completionEvidence"
+  ],
+  "properties": {
+    "type": {
+      "const": "SkillOutcome"
+    },
+    "decisionId": {
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "goalId": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "routineId": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "contextId": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "requestedSkill": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "requestedParameters": {
+      "$ref": "common.schema.json#/$defs/skillParameters"
+    },
+    "requestedSkillStatus": {
+      "$ref": "common.schema.json#/$defs/terminalStatus"
+    },
+    "executedSkill": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/identifier"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "executedParameters": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/skillParameters"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "status": {
+      "$ref": "common.schema.json#/$defs/terminalStatus"
+    },
+    "emergency": {
+      "type": "boolean"
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    },
+    "effects": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    },
+    "expectedEffects": {
+      "description": "The SkillSpec effects the planner relied on, preserved so a later world model can compare prediction with outcome.",
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fact", "op", "value"],
+        "properties": {
+          "fact": {
+            "$ref": "common.schema.json#/$defs/identifier"
+          },
+          "op": {
+            "enum": ["+=", "-=", "=", "max"]
+          },
+          "value": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "healthBefore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "healthAfter": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "foodBefore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "foodAfter": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "healthCost": {
+      "type": "number"
+    },
+    "resourceCost": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "common.schema.json#/$defs/itemDelta"
+      }
+    },
+    "inventoryDelta": {
+      "type": "array",
+      "maxItems": 64,
+      "items": {
+        "$ref": "common.schema.json#/$defs/itemDelta"
+      }
+    },
+    "elapsedTicks": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "interruptReason": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/reasonCode"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "completionEvidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kinds", "details"],
+      "properties": {
+        "kinds": {
+          "$ref": "common.schema.json#/$defs/reasonCodes"
+        },
+        "details": {
+          "type": "object",
+          "maxProperties": 24,
+          "propertyNames": {
+            "$ref": "common.schema.json#/$defs/identifier"
+          },
+          "additionalProperties": {
+            "type": ["integer", "number", "string", "boolean", "null"],
+            "maxLength": 128
+          }
+        }
+      }
+    }
+  }
+}

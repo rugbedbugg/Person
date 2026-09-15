@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/session-hello.schema.json",
+  "title": "SessionHello",
+  "description": "Node opens a cognition session and states the immutable session facts. Node is authoritative for every field here.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "learningMode",
+    "trainingContext",
+    "policyRevision",
+    "skillLibraryRevision",
+    "rngSeed",
+    "evidenceDirectory",
+    "skillIds"
+  ],
+  "properties": {
+    "type": {
+      "const": "SessionHello"
+    },
+    "learningMode": {
+      "$ref": "common.schema.json#/$defs/learningMode"
+    },
+    "trainingContext": {
+      "$ref": "common.schema.json#/$defs/trainingContext"
+    },
+    "policyRevision": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "skillLibraryRevision": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "rngSeed": {
+      "oneOf": [
+        {
+          "type": "integer",
+          "minimum": 0
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "evidenceDirectory": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "skillIds": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "common.schema.json#/$defs/identifier"
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "id": "place_owned_chest",
+  "version": 1,
+  "category": "storage",
+  "summary": "Place a Person-owned chest next to the active home and record its provenance.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "chest_item",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "at_home",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "building_permitted",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "chest_item",
+      "op": "-=",
+      "value": 1
+    },
+    {
+      "fact": "owned_storage_available",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "no_placement_site",
+    "protected_area",
+    "missing_materials",
+    "timed_out"
+  ],
+  "requiredPermissions": ["place_owned_storage", "build"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 8,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["placed_blocks", "container_transfer"],
+  "risk": 0.05,
+  "emergency": false
+}

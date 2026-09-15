@@ -1,0 +1,64 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/skill-started.schema.json",
+  "title": "SkillStarted",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "decisionId",
+    "requestedSkill",
+    "executedSkill",
+    "parameters",
+    "limits",
+    "startTick",
+    "startHealth",
+    "startFood",
+    "startInventory"
+  ],
+  "properties": {
+    "type": {
+      "const": "SkillStarted"
+    },
+    "decisionId": {
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "requestedSkill": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "executedSkill": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "parameters": {
+      "$ref": "common.schema.json#/$defs/skillParameters"
+    },
+    "limits": {
+      "$ref": "common.schema.json#/$defs/costLimits"
+    },
+    "startTick": {
+      "$ref": "common.schema.json#/$defs/tick"
+    },
+    "startHealth": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "startFood": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 20
+    },
+    "startInventory": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "$ref": "common.schema.json#/$defs/itemStack"
+      }
+    }
+  }
+}

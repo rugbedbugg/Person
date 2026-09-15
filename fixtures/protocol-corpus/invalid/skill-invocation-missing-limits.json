@@ -1,0 +1,20 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "22222222-2222-4222-8222-222222222222",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "SkillInvocation",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "goalId": "goal_secure_food_1",
+  "routineId": "r_5f2a9c31",
+  "routineStepIndex": 0,
+  "skillId": "gather_wood",
+  "skillVersion": 1,
+  "parameters": {
+    "target_amount": 16,
+    "max_distance": 48
+  }
+}

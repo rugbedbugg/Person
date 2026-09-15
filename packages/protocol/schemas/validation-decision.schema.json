@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/validation-decision.schema.json",
+  "title": "ValidationDecision",
+  "description": "The authoritative Node verdict on a SkillInvocation. Cognition cannot produce this message.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "decisionId",
+    "requestedSkill",
+    "decision",
+    "level",
+    "reasonCodes",
+    "executedSkill",
+    "executedParameters",
+    "executedLimits"
+  ],
+  "properties": {
+    "type": {
+      "const": "ValidationDecision"
+    },
+    "decisionId": {
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "requestedSkill": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "decision": {
+      "enum": ["ACCEPT", "REJECT", "PREEMPT", "REPLACE"]
+    },
+    "level": {
+      "$ref": "common.schema.json#/$defs/safetyLevel"
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    },
+    "executedSkill": {
+      "description": "The skill Node will actually run. Null when the proposal was rejected outright.",
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/identifier"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "executedParameters": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/skillParameters"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "executedLimits": {
+      "oneOf": [
+        {
+          "$ref": "common.schema.json#/$defs/costLimits"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

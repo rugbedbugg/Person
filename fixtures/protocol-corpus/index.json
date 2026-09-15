@@ -1,0 +1,37 @@
+{
+  "description": "Shared protocol conformance corpus. The Node and Python validators must agree on every entry.",
+  "protocolVersion": "shroud-learning-v2",
+  "valid": [
+    "cognition-ready",
+    "emergency-event",
+    "episode-event",
+    "goal-decision",
+    "observation",
+    "policy-decision",
+    "session-hello",
+    "skill-invocation",
+    "skill-outcome",
+    "skill-started",
+    "validation-decision"
+  ],
+  "invalid": [
+    "emergency-event-unknown-trigger",
+    "goal-decision-unknown-goal-type",
+    "not-an-object",
+    "observation-bad-message-id",
+    "observation-health-out-of-range",
+    "observation-missing-vitals",
+    "observation-negative-tick",
+    "observation-unknown-property",
+    "policy-decision-confidence-out-of-range",
+    "skill-invocation-array-parameter",
+    "skill-invocation-command-field",
+    "skill-invocation-missing-limits",
+    "skill-invocation-nested-parameters",
+    "skill-outcome-missing-executed-skill",
+    "skill-outcome-unknown-status",
+    "unknown-message-type",
+    "unknown-protocol-version",
+    "validation-decision-unknown-verdict"
+  ]
+}

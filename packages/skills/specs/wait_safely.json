@@ -1,0 +1,39 @@
+{
+  "id": "wait_safely",
+  "version": 1,
+  "category": "emergency",
+  "summary": "Hold position inside a verified safe place until the wait budget elapses.",
+  "parameters": {
+    "ticks": {
+      "type": "integer",
+      "minimum": 20,
+      "maximum": 12000,
+      "default": 600
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "safe",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "rested",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["threat_appeared", "hazard_appeared", "timed_out"],
+  "requiredPermissions": [],
+  "costLimits": {
+    "maxTicks": 12000,
+    "maxDistance": 0,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["elapsed_ticks", "vitals_delta"],
+  "risk": 0.05,
+  "emergency": true
+}

@@ -1,0 +1,73 @@
+{
+  "id": "cook_food",
+  "version": 1,
+  "category": "food",
+  "summary": "Smelt raw food into cooked food at an owned furnace using stored fuel.",
+  "parameters": {
+    "target_amount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32,
+      "default": 3
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "raw_food",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "furnace_placed",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "fuel",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "raw_food",
+      "op": "-=",
+      "value": 3,
+      "scalesWith": "target_amount"
+    },
+    {
+      "fact": "cooked_food",
+      "op": "+=",
+      "value": 3,
+      "scalesWith": "target_amount"
+    },
+    {
+      "fact": "edible_food",
+      "op": "+=",
+      "value": 3,
+      "scalesWith": "target_amount"
+    },
+    {
+      "fact": "fuel",
+      "op": "-=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "no_furnace",
+    "no_fuel",
+    "no_raw_food",
+    "timed_out",
+    "interrupted_by_threat"
+  ],
+  "requiredPermissions": ["craft"],
+  "costLimits": {
+    "maxTicks": 2400,
+    "maxDistance": 16,
+    "minHealth": 6
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["smelted_items", "inventory_delta"],
+  "risk": 0.1,
+  "emergency": false
+}

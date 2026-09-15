@@ -1,0 +1,44 @@
+{
+  "id": "loot_permitted_container",
+  "version": 1,
+  "category": "storage",
+  "summary": "Withdraw from a pre-existing container that configuration explicitly permits. Never deposits.",
+  "parameters": {
+    "amount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 64,
+      "default": 4
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "permitted_container_nearby",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "looted",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "no_permitted_container",
+    "empty_container",
+    "inventory_full",
+    "timed_out"
+  ],
+  "requiredPermissions": ["withdraw_existing_container"],
+  "costLimits": {
+    "maxTicks": 1800,
+    "maxDistance": 48,
+    "minHealth": 6
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["container_transfer", "inventory_delta"],
+  "risk": 0.15,
+  "emergency": false
+}

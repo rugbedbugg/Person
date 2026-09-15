@@ -1,0 +1,44 @@
+{
+  "id": "return_home",
+  "version": 1,
+  "category": "emergency",
+  "summary": "Travel back to the active home position by a permitted route.",
+  "parameters": {
+    "max_distance": {
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 256,
+      "default": 128
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "home_known",
+      "op": "==",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "at_home",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": [
+    "unreachable_home",
+    "no_route",
+    "timed_out",
+    "interrupted_by_threat"
+  ],
+  "requiredPermissions": [],
+  "costLimits": {
+    "maxTicks": 2400,
+    "maxDistance": 256,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["position_reached"],
+  "risk": 0.15,
+  "emergency": true
+}

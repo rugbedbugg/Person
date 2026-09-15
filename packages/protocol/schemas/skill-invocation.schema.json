@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/skill-invocation.schema.json",
+  "title": "SkillInvocation",
+  "description": "The only physical request cognition may make. There is deliberately no free-form command, script, chat, or coordinate-primitive field: parameters are scalar-only and are checked again against the skill's own parameter schema.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "decisionId",
+    "goalId",
+    "routineId",
+    "routineStepIndex",
+    "skillId",
+    "skillVersion",
+    "parameters",
+    "limits"
+  ],
+  "properties": {
+    "type": {
+      "const": "SkillInvocation"
+    },
+    "decisionId": {
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "goalId": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "routineId": {
+      "$ref": "common.schema.json#/$defs/slug"
+    },
+    "routineStepIndex": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 63
+    },
+    "skillId": {
+      "$ref": "common.schema.json#/$defs/identifier"
+    },
+    "skillVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "parameters": {
+      "$ref": "common.schema.json#/$defs/skillParameters"
+    },
+    "limits": {
+      "$ref": "common.schema.json#/$defs/costLimits"
+    }
+  }
+}

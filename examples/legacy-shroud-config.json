@@ -1,0 +1,32 @@
+{
+  "worldId": "test-world-2026-09-13",
+  "learningMode": "routines",
+  "difficultyMode": "peaceful-training",
+  "server": { "host": "127.0.0.1", "port": 41289, "version": "1.16.1" },
+  "bot": { "username": "ShroudBot", "auth": "offline" },
+  "authorization": {
+    "worldOwnerApproved": true,
+    "dedicatedIdentity": true,
+    "resourceAreasAreUnowned": true,
+    "naturalDaylightCycle": true,
+    "normalDifficulty": false
+  },
+  "spawn": {
+    "min": { "x": -60, "y": 60, "z": 92 },
+    "max": { "x": 4, "y": 90, "z": 136 }
+  },
+  "home": { "x": -129, "y": 71, "z": 137 },
+  "exploration": {
+    "min": { "x": -176, "y": 55, "z": 64 },
+    "max": { "x": 32, "y": 100, "z": 192 }
+  },
+  "resourceAreas": [
+    {
+      "min": { "x": -176, "y": 55, "z": 64 },
+      "max": { "x": -80, "y": 100, "z": 192 }
+    }
+  ],
+  "protectedAreas": [],
+  "outputDirectory": "./runs",
+  "maxChunks": 256
+}

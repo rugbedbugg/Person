@@ -1,0 +1,62 @@
+{
+  "id": "craft_basic_tools",
+  "version": 1,
+  "category": "crafting",
+  "summary": "Craft planks, sticks, a crafting table and a wooden pickaxe and axe.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "wood",
+      "op": ">=",
+      "value": 3
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "wood",
+      "op": "-=",
+      "value": 3
+    },
+    {
+      "fact": "planks",
+      "op": "+=",
+      "value": 4
+    },
+    {
+      "fact": "crafting_table",
+      "op": "max",
+      "value": 1
+    },
+    {
+      "fact": "wooden_pickaxe",
+      "op": "max",
+      "value": 1
+    },
+    {
+      "fact": "wooden_axe",
+      "op": "max",
+      "value": 1
+    },
+    {
+      "fact": "tool_tier",
+      "op": "max",
+      "value": 1
+    },
+    {
+      "fact": "building_materials",
+      "op": "+=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["missing_materials", "no_recipe", "timed_out"],
+  "requiredPermissions": ["craft"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 8,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["crafted_items", "inventory_delta"],
+  "risk": 0.05,
+  "emergency": false
+}

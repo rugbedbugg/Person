@@ -1,0 +1,37 @@
+{
+  "id": "craft_chest",
+  "version": 1,
+  "category": "crafting",
+  "summary": "Craft a chest from planks so owned storage can be established.",
+  "parameters": {},
+  "preconditions": [
+    {
+      "fact": "wood",
+      "op": ">=",
+      "value": 2
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "wood",
+      "op": "-=",
+      "value": 2
+    },
+    {
+      "fact": "chest_item",
+      "op": "+=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["missing_materials", "no_recipe", "timed_out"],
+  "requiredPermissions": ["craft"],
+  "costLimits": {
+    "maxTicks": 1200,
+    "maxDistance": 8,
+    "minHealth": 4
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["crafted_items", "inventory_delta"],
+  "risk": 0.05,
+  "emergency": false
+}

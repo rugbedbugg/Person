@@ -1,0 +1,245 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/person-config.schema.json",
+  "title": "PersonConfig",
+  "description": "Runtime configuration. Capabilities are explicit and several of them are pinned to a single legal value so no configuration edit can turn them on.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "configVersion",
+    "personId",
+    "worldId",
+    "runtime",
+    "learning",
+    "cognition",
+    "world",
+    "permissions"
+  ],
+  "properties": {
+    "configVersion": { "const": 2 },
+    "personId": { "type": "string", "pattern": "^[a-z][a-z0-9_-]{0,31}$" },
+    "worldId": { "type": "string", "pattern": "^[A-Za-z0-9_.:-]{1,64}$" },
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["embodiment", "trainingContext", "outputDirectory"],
+      "properties": {
+        "embodiment": { "enum": ["fixture", "minecraft"] },
+        "trainingContext": {
+          "enum": [
+            "fixture",
+            "minecraft_peaceful",
+            "minecraft_normal",
+            "replay"
+          ]
+        },
+        "outputDirectory": { "type": "string", "minLength": 1 },
+        "rngSeed": { "type": ["integer", "null"], "minimum": 0 },
+        "maxDecisions": { "type": "integer", "minimum": 1, "maximum": 100000 },
+        "maxTicks": { "type": "integer", "minimum": 1 },
+        "decisionIntervalMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 60000
+        },
+        "fixtureWorld": { "type": "string", "minLength": 1 }
+      }
+    },
+    "learning": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": {
+          "enum": ["off", "shadow", "supervised"],
+          "description": "Learning never turns itself on. off is the default everywhere."
+        },
+        "evidenceDirectory": { "type": "string", "minLength": 1 },
+        "snapshotEveryEvents": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "explorationBonus": { "type": "number", "minimum": 0, "maximum": 1 },
+        "minimumSupport": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    },
+    "cognition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["command"],
+      "properties": {
+        "command": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 8,
+          "items": { "type": "string", "minLength": 1, "maxLength": 256 },
+          "description": "Argv of the cognition process. Node spawns it and stays authoritative if it dies."
+        },
+        "startTimeoutMs": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 120000
+        },
+        "decisionTimeoutMs": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 60000
+        }
+      }
+    },
+    "server": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "port", "version"],
+      "properties": {
+        "host": { "enum": ["127.0.0.1", "localhost", "::1"] },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "version": { "const": "1.16.1" }
+      }
+    },
+    "bot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["username", "auth"],
+      "properties": {
+        "username": { "type": "string", "pattern": "^[A-Za-z0-9_]{3,16}$" },
+        "auth": { "const": "offline" }
+      }
+    },
+    "authorization": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "worldOwnerApproved",
+        "dedicatedIdentity",
+        "resourceAreasAreUnowned",
+        "naturalDaylightCycle"
+      ],
+      "properties": {
+        "worldOwnerApproved": { "const": true },
+        "dedicatedIdentity": { "const": true },
+        "resourceAreasAreUnowned": { "const": true },
+        "naturalDaylightCycle": { "const": true },
+        "normalDifficulty": { "type": "boolean" }
+      }
+    },
+    "world": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["home", "exploration", "resourceAreas", "protectedAreas"],
+      "properties": {
+        "home": { "$ref": "#/$defs/position" },
+        "exploration": { "$ref": "#/$defs/box" },
+        "resourceAreas": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 32,
+          "items": { "$ref": "#/$defs/box" }
+        },
+        "protectedAreas": {
+          "type": "array",
+          "maxItems": 128,
+          "items": { "$ref": "#/$defs/box" }
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "containers",
+        "hunting",
+        "players",
+        "villagers",
+        "building",
+        "protectedAreas"
+      ],
+      "properties": {
+        "containers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["existing", "owned"],
+          "properties": {
+            "existing": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["withdraw", "deposit"],
+              "properties": {
+                "withdraw": { "type": "boolean" },
+                "deposit": {
+                  "const": false,
+                  "description": "Person never alters a container it did not place. This value has exactly one legal setting."
+                }
+              }
+            },
+            "owned": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["withdraw", "deposit"],
+              "properties": {
+                "withdraw": { "type": "boolean" },
+                "deposit": { "type": "boolean" }
+              }
+            }
+          }
+        },
+        "hunting": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["passiveUnnamedAnimals", "namedAnimals", "tamedAnimals"],
+          "properties": {
+            "passiveUnnamedAnimals": { "type": "boolean" },
+            "namedAnimals": { "const": false },
+            "tamedAnimals": { "const": false }
+          }
+        },
+        "players": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["combat"],
+          "properties": { "combat": { "const": false } }
+        },
+        "villagers": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["harm"],
+          "properties": { "harm": { "const": false } }
+        },
+        "building": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enabled"],
+          "properties": { "enabled": { "type": "boolean" } }
+        },
+        "protectedAreas": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["enforcement"],
+          "properties": { "enforcement": { "const": "strict" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "position": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["x", "y", "z"],
+      "properties": {
+        "x": { "type": "integer", "minimum": -30000000, "maximum": 30000000 },
+        "y": { "type": "integer", "minimum": -64, "maximum": 320 },
+        "z": { "type": "integer", "minimum": -30000000, "maximum": 30000000 }
+      }
+    },
+    "box": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min", "max"],
+      "properties": {
+        "min": { "$ref": "#/$defs/position" },
+        "max": { "$ref": "#/$defs/position" }
+      }
+    }
+  }
+}

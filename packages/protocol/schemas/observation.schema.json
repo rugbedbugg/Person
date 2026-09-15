@@ -1,0 +1,720 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/observation.schema.json",
+  "title": "Observation",
+  "description": "Normalized semantic world state produced by the Node runtime. Never contains raw Mineflayer objects.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": [
+    "type",
+    "observationVersion",
+    "trainingContext",
+    "vitals",
+    "environment",
+    "inventory",
+    "permissions",
+    "affordances",
+    "nearby",
+    "home",
+    "navigation",
+    "cognition",
+    "previousOutcome"
+  ],
+  "properties": {
+    "type": {
+      "const": "Observation"
+    },
+    "observationVersion": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "trainingContext": {
+      "$ref": "common.schema.json#/$defs/trainingContext"
+    },
+    "vitals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "health",
+        "food",
+        "saturation",
+        "air",
+        "armor",
+        "statusEffects",
+        "alive"
+      ],
+      "properties": {
+        "health": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "food": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "saturation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "air": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 300
+        },
+        "armor": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "statusEffects": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["name", "amplifier", "remainingTicks"],
+            "properties": {
+              "name": {
+                "$ref": "common.schema.json#/$defs/identifier"
+              },
+              "amplifier": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 255
+              },
+              "remainingTicks": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          }
+        },
+        "alive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "environment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "position",
+        "dimension",
+        "dayPhase",
+        "timeOfDay",
+        "weather",
+        "lightLevel",
+        "biome"
+      ],
+      "properties": {
+        "position": {
+          "$ref": "common.schema.json#/$defs/position"
+        },
+        "dimension": {
+          "enum": ["overworld", "nether", "end"]
+        },
+        "dayPhase": {
+          "enum": ["dawn", "day", "dusk", "night"]
+        },
+        "timeOfDay": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 23999
+        },
+        "weather": {
+          "enum": ["clear", "rain", "thunder"]
+        },
+        "lightLevel": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 15
+        },
+        "biome": {
+          "$ref": "common.schema.json#/$defs/identifier"
+        }
+      }
+    },
+    "inventory": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["items", "categories", "freeSlots"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "$ref": "common.schema.json#/$defs/itemStack"
+          }
+        },
+        "categories": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "food",
+            "raw_food",
+            "cooked_food",
+            "fuel",
+            "wood",
+            "stone",
+            "coal",
+            "tools",
+            "weapons",
+            "armor",
+            "building_materials"
+          ],
+          "properties": {
+            "food": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "raw_food": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "cooked_food": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "fuel": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "wood": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "stone": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "coal": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "tools": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "weapons": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "armor": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "building_materials": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "freeSlots": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 36
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "description": "What the runtime would currently allow. Cognition reads these instead of reading configuration, so the authoritative answer always comes from the side that enforces it.",
+      "additionalProperties": false,
+      "required": [
+        "harvest",
+        "mine",
+        "build",
+        "huntPassive",
+        "depositOwned",
+        "withdrawOwned",
+        "withdrawExisting",
+        "craft",
+        "consume"
+      ],
+      "properties": {
+        "harvest": {
+          "type": "boolean"
+        },
+        "mine": {
+          "type": "boolean"
+        },
+        "build": {
+          "type": "boolean"
+        },
+        "huntPassive": {
+          "type": "boolean"
+        },
+        "depositOwned": {
+          "type": "boolean"
+        },
+        "withdrawOwned": {
+          "type": "boolean"
+        },
+        "withdrawExisting": {
+          "type": "boolean"
+        },
+        "craft": {
+          "type": "boolean"
+        },
+        "consume": {
+          "type": "boolean"
+        }
+      }
+    },
+    "affordances": {
+      "type": "object",
+      "description": "Runtime-only knowledge the cognition process cannot derive from the rest of the observation.",
+      "additionalProperties": false,
+      "required": ["diggableGround", "shelterSite", "storageSite"],
+      "properties": {
+        "diggableGround": {
+          "type": "boolean"
+        },
+        "shelterSite": {
+          "type": "boolean"
+        },
+        "storageSite": {
+          "type": "boolean"
+        }
+      }
+    },
+    "nearby": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resources",
+        "hostiles",
+        "passiveAnimals",
+        "players",
+        "containers",
+        "workstations",
+        "hazards"
+      ],
+      "properties": {
+        "resources": {
+          "type": "array",
+          "maxItems": 256,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "name",
+              "position",
+              "distance",
+              "harvestPermitted"
+            ],
+            "properties": {
+              "kind": {
+                "enum": ["wood", "stone", "coal", "plant_food", "dirt", "other"]
+              },
+              "name": {
+                "$ref": "common.schema.json#/$defs/identifier"
+              },
+              "position": {
+                "$ref": "common.schema.json#/$defs/position"
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "harvestPermitted": {
+                "type": "boolean"
+              }
+            }
+          }
+        },
+        "hostiles": {
+          "$ref": "#/$defs/entityList"
+        },
+        "passiveAnimals": {
+          "$ref": "#/$defs/entityList"
+        },
+        "players": {
+          "$ref": "#/$defs/entityList"
+        },
+        "containers": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kind",
+              "position",
+              "distance",
+              "provenance",
+              "storageId"
+            ],
+            "properties": {
+              "kind": {
+                "enum": ["chest", "barrel", "furnace", "shulker", "other"]
+              },
+              "position": {
+                "$ref": "common.schema.json#/$defs/position"
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "provenance": {
+                "enum": ["owned", "existing"]
+              },
+              "storageId": {
+                "oneOf": [
+                  {
+                    "$ref": "common.schema.json#/$defs/slug"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "workstations": {
+          "type": "array",
+          "maxItems": 64,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "position", "distance", "provenance"],
+            "properties": {
+              "kind": {
+                "enum": ["crafting_table", "furnace", "anvil", "other"]
+              },
+              "position": {
+                "$ref": "common.schema.json#/$defs/position"
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "provenance": {
+                "enum": ["owned", "existing"]
+              }
+            }
+          }
+        },
+        "hazards": {
+          "type": "array",
+          "maxItems": 128,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "position", "distance"],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "lava",
+                  "fire",
+                  "water",
+                  "cactus",
+                  "magma",
+                  "fall",
+                  "suffocation",
+                  "other"
+                ]
+              },
+              "position": {
+                "$ref": "common.schema.json#/$defs/position"
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          }
+        }
+      }
+    },
+    "home": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeHome",
+        "homeDistance",
+        "shelterState",
+        "ownedStorage",
+        "bedKnown",
+        "foodReserve",
+        "fuelReserve"
+      ],
+      "properties": {
+        "activeHome": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["homeId", "position"],
+              "properties": {
+                "homeId": {
+                  "$ref": "common.schema.json#/$defs/slug"
+                },
+                "position": {
+                  "$ref": "common.schema.json#/$defs/position"
+                }
+              }
+            }
+          ]
+        },
+        "homeDistance": {
+          "oneOf": [
+            {
+              "type": "number",
+              "minimum": 0
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "shelterState": {
+          "enum": ["none", "partial", "complete", "breached", "unknown"]
+        },
+        "ownedStorage": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["storageId", "position", "contents"],
+            "properties": {
+              "storageId": {
+                "$ref": "common.schema.json#/$defs/slug"
+              },
+              "position": {
+                "$ref": "common.schema.json#/$defs/position"
+              },
+              "contents": {
+                "type": "array",
+                "maxItems": 64,
+                "items": {
+                  "$ref": "common.schema.json#/$defs/itemStack"
+                }
+              }
+            }
+          }
+        },
+        "bedKnown": {
+          "type": "boolean"
+        },
+        "foodReserve": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fuelReserve": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "navigation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "routeStatus",
+        "pathRisk",
+        "stuckState",
+        "returnPathKnown",
+        "lastSafePosition"
+      ],
+      "properties": {
+        "routeStatus": {
+          "enum": ["idle", "ok", "blocked", "unknown"]
+        },
+        "pathRisk": {
+          "enum": ["low", "moderate", "high"]
+        },
+        "stuckState": {
+          "enum": ["free", "slow", "stuck"]
+        },
+        "returnPathKnown": {
+          "type": "boolean"
+        },
+        "lastSafePosition": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/position"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "cognition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "activeGoal",
+        "activeRoutine",
+        "activeSkill",
+        "suspendedGoals"
+      ],
+      "properties": {
+        "activeGoal": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/slug"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "activeRoutine": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/slug"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "activeSkill": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suspendedGoals": {
+          "type": "array",
+          "maxItems": 32,
+          "items": {
+            "$ref": "common.schema.json#/$defs/slug"
+          }
+        }
+      }
+    },
+    "previousOutcome": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "requestedSkill",
+            "executedSkill",
+            "status",
+            "effects",
+            "healthCost",
+            "resourceCost",
+            "elapsedTicks",
+            "interruptReason"
+          ],
+          "properties": {
+            "requestedSkill": {
+              "$ref": "common.schema.json#/$defs/identifier"
+            },
+            "executedSkill": {
+              "oneOf": [
+                {
+                  "$ref": "common.schema.json#/$defs/identifier"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "status": {
+              "$ref": "common.schema.json#/$defs/terminalStatus"
+            },
+            "effects": {
+              "$ref": "common.schema.json#/$defs/reasonCodes"
+            },
+            "healthCost": {
+              "type": "number"
+            },
+            "resourceCost": {
+              "type": "array",
+              "maxItems": 64,
+              "items": {
+                "$ref": "common.schema.json#/$defs/itemDelta"
+              }
+            },
+            "elapsedTicks": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "interruptReason": {
+              "oneOf": [
+                {
+                  "$ref": "common.schema.json#/$defs/reasonCode"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "$defs": {
+    "entityList": {
+      "type": "array",
+      "maxItems": 128,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "entityId",
+          "name",
+          "position",
+          "distance",
+          "named",
+          "tamed",
+          "protectedTarget"
+        ],
+        "properties": {
+          "entityId": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "name": {
+            "$ref": "common.schema.json#/$defs/identifier"
+          },
+          "position": {
+            "$ref": "common.schema.json#/$defs/position"
+          },
+          "distance": {
+            "type": "number",
+            "minimum": 0
+          },
+          "named": {
+            "type": "boolean"
+          },
+          "tamed": {
+            "type": "boolean"
+          },
+          "protectedTarget": {
+            "type": "boolean",
+            "description": "True when the runtime forbids this entity as a hunting target for any reason."
+          }
+        }
+      }
+    }
+  }
+}

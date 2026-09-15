@@ -1,0 +1,9 @@
+node_modules/
+dist/
+.venv/
+runs/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/

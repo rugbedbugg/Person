@@ -1,0 +1,125 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/goal-decision.schema.json",
+  "title": "GoalDecision",
+  "description": "Cognition reports which goal is active and why, including the current goal stack.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["type", "decisionId", "goal", "reasonCodes", "stack"],
+  "properties": {
+    "type": {
+      "const": "GoalDecision"
+    },
+    "decisionId": {
+      "$ref": "common.schema.json#/$defs/uuid"
+    },
+    "goal": {
+      "$ref": "#/$defs/goal"
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    },
+    "stack": {
+      "type": "array",
+      "maxItems": 32,
+      "items": {
+        "$ref": "#/$defs/goal"
+      }
+    }
+  },
+  "$defs": {
+    "goal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "goalId",
+        "goalType",
+        "priority",
+        "source",
+        "createdAtTick",
+        "status",
+        "completionCondition",
+        "suspensionReason"
+      ],
+      "properties": {
+        "goalId": {
+          "$ref": "common.schema.json#/$defs/slug"
+        },
+        "goalType": {
+          "enum": [
+            "SURVIVE_IMMEDIATE",
+            "SECURE_FOOD",
+            "SECURE_SHELTER",
+            "ESTABLISH_TOOLS",
+            "ESTABLISH_STORAGE",
+            "RECOVER_HOME",
+            "MAINTAIN_RESERVES"
+          ]
+        },
+        "priority": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "source": {
+          "enum": [
+            "homeostasis",
+            "emergency",
+            "maintenance",
+            "self_generated",
+            "operator"
+          ]
+        },
+        "createdAtTick": {
+          "$ref": "common.schema.json#/$defs/tick"
+        },
+        "status": {
+          "enum": [
+            "QUEUED",
+            "ACTIVE",
+            "SUSPENDED",
+            "BLOCKED",
+            "COMPLETE",
+            "FAILED",
+            "ABANDONED"
+          ]
+        },
+        "completionCondition": {
+          "type": "array",
+          "maxItems": 16,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fact", "op", "value"],
+            "properties": {
+              "fact": {
+                "$ref": "common.schema.json#/$defs/identifier"
+              },
+              "op": {
+                "enum": [">=", "<=", "==", ">", "<"]
+              },
+              "value": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "suspensionReason": {
+          "oneOf": [
+            {
+              "$ref": "common.schema.json#/$defs/reasonCode"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "id": "eat_to_target",
+  "version": 1,
+  "category": "food",
+  "summary": "Eat edible food until the hunger target is reached or food runs out.",
+  "parameters": {
+    "target_food": {
+      "type": "integer",
+      "minimum": 6,
+      "maximum": 20,
+      "default": 18
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "edible_food",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "food_level",
+      "op": "max",
+      "value": 18
+    },
+    {
+      "fact": "edible_food",
+      "op": "-=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["no_food", "already_full", "interrupted_by_threat"],
+  "requiredPermissions": ["consume"],
+  "costLimits": {
+    "maxTicks": 400,
+    "maxDistance": 0,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "atomic_step",
+  "completionEvidence": ["vitals_delta", "inventory_delta"],
+  "risk": 0.05,
+  "emergency": true
+}

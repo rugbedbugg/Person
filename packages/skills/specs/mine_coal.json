@@ -1,0 +1,72 @@
+{
+  "id": "mine_coal",
+  "version": 1,
+  "category": "resources",
+  "summary": "Mine permitted coal ore with a pickaxe to build a fuel reserve.",
+  "parameters": {
+    "target_amount": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 32,
+      "default": 4
+    },
+    "max_distance": {
+      "type": "integer",
+      "minimum": 4,
+      "maximum": 128,
+      "default": 48
+    }
+  },
+  "preconditions": [
+    {
+      "fact": "reachable_coal",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "tool_tier",
+      "op": ">=",
+      "value": 1
+    },
+    {
+      "fact": "harvesting_permitted",
+      "op": "==",
+      "value": 1
+    },
+    {
+      "fact": "inventory_space",
+      "op": ">=",
+      "value": 1
+    }
+  ],
+  "expectedEffects": [
+    {
+      "fact": "coal",
+      "op": "+=",
+      "value": 4,
+      "scalesWith": "target_amount"
+    },
+    {
+      "fact": "fuel",
+      "op": "+=",
+      "value": 4,
+      "scalesWith": "target_amount"
+    }
+  ],
+  "possibleFailures": [
+    "unreachable_resource",
+    "missing_tool",
+    "inventory_full",
+    "timed_out"
+  ],
+  "requiredPermissions": ["mine_resource"],
+  "costLimits": {
+    "maxTicks": 3000,
+    "maxDistance": 64,
+    "minHealth": 8
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["inventory_delta", "harvested_blocks"],
+  "risk": 0.3,
+  "emergency": false
+}

@@ -1,0 +1,32 @@
+[project]
+name = "person-cognition"
+version = "0.1.0"
+description = "Person cognition process: context, goals, routines, decision loop, reporting"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+  "person-protocol",
+  "person-skills",
+  "person-config",
+  "person-planner",
+  "person-policy",
+  "person-persistence",
+]
+
+[project.scripts]
+person-cognition = "person_cognition.__main__:main"
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/person_cognition"]
+
+[tool.uv.sources]
+person-protocol = { workspace = true }
+person-skills = { workspace = true }
+person-config = { workspace = true }
+person-planner = { workspace = true }
+person-policy = { workspace = true }
+person-persistence = { workspace = true }

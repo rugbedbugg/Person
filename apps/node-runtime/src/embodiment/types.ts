@@ -1,0 +1,177 @@
+import type { ItemStack, Position } from "#protocol";
+
+/**
+ * The embodiment port.
+ *
+ * This is the whole surface a skill may touch. Two implementations exist: the
+ * Mineflayer adapter that drives a real Minecraft client, and the deterministic
+ * fixture world used by the test suite. Skills are written once against this
+ * interface, so a fixture test exercises the same skill code that runs against
+ * Minecraft rather than a parallel imitation of it.
+ *
+ * Nothing here is reachable from the cognition process. Python proposes a
+ * skill; only the runtime holds an Embodiment.
+ */
+
+export type BlockKind =
+  | "air"
+  | "wood"
+  | "leaves"
+  | "stone"
+  | "coal_ore"
+  | "dirt"
+  | "grass"
+  | "plant_food"
+  | "water"
+  | "lava"
+  | "fire"
+  | "cactus"
+  | "chest"
+  | "furnace"
+  | "crafting_table"
+  | "planks"
+  | "cobblestone"
+  | "bed"
+  | "other";
+
+export interface BlockView {
+  position: Position;
+  name: string;
+  kind: BlockKind;
+  solid: boolean;
+  hazard: boolean;
+  /** True when this block was placed by Person during this world's lifetime. */
+  ownedByPerson: boolean;
+}
+
+export interface EntityView {
+  entityId: number;
+  name: string;
+  position: Position;
+  distance: number;
+  hostile: boolean;
+  passive: boolean;
+  player: boolean;
+  villager: boolean;
+  named: boolean;
+  tamed: boolean;
+  ranged: boolean;
+}
+
+export interface ContainerView {
+  position: Position;
+  kind: "chest" | "barrel" | "furnace" | "shulker" | "other";
+  contents: ItemStack[];
+  /** Set when Person placed this container itself. */
+  storageId: string | null;
+}
+
+export interface StatusEffectView {
+  name: string;
+  amplifier: number;
+  remainingTicks: number;
+}
+
+export interface WorldSnapshot {
+  tick: number;
+  timeOfDay: number;
+  weather: "clear" | "rain" | "thunder";
+  dimension: "overworld" | "nether" | "end";
+  biome: string;
+  lightLevel: number;
+  position: Position;
+  health: number;
+  food: number;
+  saturation: number;
+  air: number;
+  armor: number;
+  alive: boolean;
+  statusEffects: StatusEffectView[];
+  inventory: ItemStack[];
+  freeSlots: number;
+  entities: EntityView[];
+  containers: ContainerView[];
+  /** Blocks of interest in range, already filtered to what the runtime can see. */
+  resources: BlockView[];
+  hazards: BlockView[];
+  stuck: boolean;
+  lastSafePosition: Position | null;
+  connected: boolean;
+}
+
+export interface FindBlocksQuery {
+  kinds: BlockKind[];
+  maxDistance: number;
+  limit: number;
+}
+
+export interface MoveOptions {
+  range?: number;
+  maxTicks?: number;
+}
+
+export interface CraftResult {
+  produced: ItemStack[];
+  consumed: ItemStack[];
+}
+
+export class EmbodimentError extends Error {
+  readonly reason: string;
+  constructor(reason: string, message?: string) {
+    super(message ?? reason);
+    this.name = "EmbodimentError";
+    this.reason = reason;
+  }
+}
+
+export class DisconnectedError extends EmbodimentError {
+  constructor(message = "The Minecraft connection was lost") {
+    super("disconnected", message);
+    this.name = "DisconnectedError";
+  }
+}
+
+/**
+ * A guard the runtime installs before anything physical happens. The safety
+ * kernel owns it; an embodiment must call it and must refuse the action when it
+ * throws or returns false. This is what makes protected-area enforcement hold
+ * during navigation and replanning rather than only at proposal time.
+ */
+export interface PhysicalGuard {
+  canEnter(position: Position): boolean;
+  canModify(position: Position): boolean;
+  canTargetEntity(entity: EntityView): boolean;
+}
+
+export interface Embodiment {
+  readonly kind: "fixture" | "mineflayer";
+  /** Installed by the runtime before connect(). Never supplied by cognition. */
+  setGuard(guard: PhysicalGuard): void;
+  connect(): Promise<void>;
+  disconnect(): Promise<void>;
+  snapshot(): WorldSnapshot;
+  blockAt(position: Position): BlockView | null;
+  findBlocks(query: FindBlocksQuery): BlockView[];
+  findEntities(): EntityView[];
+  containerAt(position: Position): ContainerView | null;
+  moveTo(position: Position, options?: MoveOptions): Promise<void>;
+  dig(position: Position): Promise<ItemStack[]>;
+  place(position: Position, item: string): Promise<void>;
+  craft(
+    item: string,
+    times: number,
+    tablePosition: Position | null,
+  ): Promise<CraftResult>;
+  smelt(
+    input: string,
+    times: number,
+    furnacePosition: Position,
+  ): Promise<CraftResult>;
+  consume(item: string): Promise<void>;
+  attack(entityId: number): Promise<void>;
+  deposit(position: Position, items: ItemStack[]): Promise<ItemStack[]>;
+  withdraw(position: Position, items: ItemStack[]): Promise<ItemStack[]>;
+  waitTicks(ticks: number): Promise<void>;
+  /** Registers a Person-placed container so its provenance is tracked. */
+  registerOwnedStorage(position: Position, storageId: string): void;
+}
