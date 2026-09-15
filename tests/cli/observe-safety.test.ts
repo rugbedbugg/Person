@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync, mkdtempSync, readdirSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { loadConfig, withConnectionOverride } from "#config";
@@ -113,6 +113,24 @@ test("observe only looks: no skill, no movement, no block touched", async () => 
   );
   assert.equal(after.tick, before.tick, "no world time may be spent");
   assert.equal(after.health, before.health);
+});
+
+test("observe starts no cognition process to have to shut down", async () => {
+  // Observe is a body-only command. Nothing here should ever need to spawn,
+  // wait for, or terminate the Python process, so the capture path must not
+  // reach the channel that would start one.
+  const source = readFileSync(
+    path.join(REPOSITORY, "apps/cli/src/observe.ts"),
+    "utf8",
+  );
+  assert.ok(
+    !/CognitionChannel/.test(source),
+    "observe must not open a cognition channel",
+  );
+  assert.ok(
+    !/child_process|\bspawn\(/.test(source),
+    "observe must not spawn a process",
+  );
 });
 
 test("observe writes no learning evidence at all", async () => {

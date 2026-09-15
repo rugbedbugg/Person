@@ -24,6 +24,8 @@ import {
   type MoveOptions,
   type PhysicalGuard,
   type WorldSnapshot,
+  PERCEPTION,
+  gatherResources,
 } from "#node-runtime";
 import {
   ARMOR_POINTS,
@@ -31,6 +33,7 @@ import {
   FUEL_BURN,
   HAZARD_BLOCKS,
   blockKind,
+  resolveBiome,
 } from "./registry.ts";
 import {
   EXTRA_HOSTILE_MOBS,
@@ -91,6 +94,27 @@ const SMELT_GRACE_MS = 8000;
 
 /** How long a neutral mob stays a threat after Person last lost health. */
 const DAMAGE_MEMORY_TICKS = 200;
+
+/** Minecraft account names. Mixed case and digits are ordinary. */
+const USERNAME = /^[A-Za-z0-9_]{1,16}$/;
+const UUID =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+/**
+ * Identity is reported only in a shape the protocol can carry.
+ *
+ * A name that does not fit is dropped rather than trimmed or rewritten: a
+ * mangled account name is a worse answer than no account name, and the UUID
+ * beside it still tells two people apart.
+ */
+const identity = (value: unknown): string | null =>
+  typeof value === "string" && USERNAME.test(value) ? value : null;
+
+const entityUuid = (value: unknown): string | null =>
+  typeof value === "string" && UUID.test(value) ? value.toLowerCase() : null;
+
+/** How long a clean quit is given before the socket is taken down by force. */
+const DISCONNECT_GRACE_MS = 2000;
 
 const vec = (p: Position): InstanceType<typeof Vec3> => new Vec3(p.x, p.y, p.z);
 const point = (v: { x: number; y: number; z: number }): Position => ({
@@ -409,15 +433,55 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     (bot.pathfinder as unknown as { searchRadius?: number }).searchRadius = 96;
   }
 
+  /**
+   * Ends the session and leaves nothing behind that can hold the process open.
+   *
+   * This used to quit, wait two hundred milliseconds and then end again, and
+   * the second end is why a failed `person observe` needed Ctrl-C. In
+   * `minecraft-protocol`, `Client.end` arms a thirty-second `closeTimer` that
+   * destroys the socket if it has not closed on its own, and the handler that
+   * clears that timer runs exactly once: on the first close, after which it
+   * sets `ended` and removes its own listeners. So whenever the server's close
+   * arrived inside those two hundred milliseconds, which on a LAN world it
+   * usually does, the second end armed a timer nothing would ever clear, and
+   * an otherwise finished command sat there for thirty seconds.
+   *
+   * Now the client is ended once, the close is awaited with a bound, and
+   * whatever is left is cleared explicitly. A command that has said what went
+   * wrong must be able to exit.
+   */
   async disconnect(): Promise<void> {
     this.#connected = false;
     const bot = this.#bot;
     this.#bot = null;
     if (!bot) return;
     bot.pathfinder?.setGoal(null);
+    const client = bot._client as
+      | {
+          ended?: boolean;
+          closeTimer?: NodeJS.Timeout;
+          socket?: { destroy?: () => void };
+        }
+      | undefined;
+    const closed =
+      client && client.ended !== true
+        ? once(bot, "end").then(
+            () => undefined,
+            () => undefined,
+          )
+        : Promise.resolve();
     bot.quit?.("Person session finished");
-    await delay(200);
-    bot.end?.();
+    await Promise.race([closed, delay(DISCONNECT_GRACE_MS)]);
+    if (client?.closeTimer) clearTimeout(client.closeTimer);
+    if (client?.ended === true) {
+      // Mineflayer has already run its own shutdown, physics loop included, so
+      // nothing here is still listening for a reason. An empty error handler
+      // stays behind because a socket can still fail while it is closing, and
+      // an EventEmitter with no error listener turns that into a crash.
+      bot.removeAllListeners();
+      bot.on("error", () => {});
+    }
+    client?.socket?.destroy?.();
   }
 
   // ----------------------------------------------------------------- reading
@@ -482,6 +546,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         id: number;
         name?: string;
         username?: string;
+        uuid?: string;
         type?: string;
         kind?: string;
         position?: { x: number; y: number; z: number };
@@ -490,6 +555,12 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       if (record.id === self) continue;
       if (!record.position) continue;
       const rawName = record.name ?? record.username ?? "unknown";
+      // Every player entity in Minecraft is named "player". Identity comes
+      // from the account name mineflayer took from the player list and the
+      // UUID the server sent with the spawn packet, not from the display name,
+      // and never from the entity id, which is a handle for this session only.
+      const username = identity(record.username);
+      const uuid = entityUuid(record.uuid);
       // `kind` is the minecraft-data entity category. It widens hostility
       // detection; it can never widen what Person is allowed to attack.
       const facts = classifyEntity(rawName, record.type, record.kind);
@@ -498,6 +569,8 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       views.push({
         entityId: record.id,
         name: facts.name,
+        username,
+        uuid,
         position,
         distance: distance(origin, position),
         hostile: facts.hostile,
@@ -527,14 +600,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
   #biomeAt(position: Position): string {
     const bot = this.#bot;
     if (!bot) return "unknown";
-    const biome = bot.blockAt(vec(position))?.biome;
-    const name =
-      typeof biome === "object" && biome !== null
-        ? (biome as { name?: string }).name
-        : undefined;
-    return typeof name === "string" && /^[a-z][a-z0-9_]*$/.test(name)
-      ? name
-      : "unknown";
+    return resolveBiome(bot.registry, bot.blockAt(vec(position)));
   }
 
   /**
@@ -656,25 +722,29 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         name: item.name,
         count: item.count,
       }));
+    // One search per resource category rather than one search for all of
+    // them. A combined nearest-N search standing on stone returns nothing but
+    // stone, which is what the first live observation did: fifty-five stone
+    // blocks, nine coal, and not one of the trees in sight.
     const resources = this.#connected
-      ? this.findBlocks({
-          kinds: ["wood", "stone", "coal_ore", "plant_food", "leaves"],
-          maxDistance: 48,
-          limit: 64,
-        })
+      ? gatherResources(
+          (kinds, maxDistance, limit) =>
+            this.findBlocks({ kinds, maxDistance, limit }),
+          here,
+        )
       : [];
     const hazards = this.#connected
       ? this.findBlocks({
           kinds: ["lava", "fire", "water", "cactus"],
-          maxDistance: 12,
-          limit: 32,
+          maxDistance: PERCEPTION.hazards.searchRadius,
+          limit: PERCEPTION.hazards.total,
         })
       : [];
     const containers = this.#connected
       ? this.findBlocks({
           kinds: ["chest", "furnace"],
-          maxDistance: 32,
-          limit: 16,
+          maxDistance: PERCEPTION.containers.searchRadius,
+          limit: PERCEPTION.containers.total,
         })
           .map((block) => this.containerAt(block.position))
           .filter((container): container is ContainerView => container !== null)

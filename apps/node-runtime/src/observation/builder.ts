@@ -10,6 +10,7 @@ import type { WorldSnapshot } from "../embodiment/types.ts";
 import type { PermissionGate } from "../safety/permissions.ts";
 import type { SafetyKernel } from "../safety/safety-kernel.ts";
 import { categories } from "../skills/materials.ts";
+import { PERCEPTION, resourceCategory, shapeEntities } from "./perception.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
 import type { WorldMemory } from "../runtime/world-memory.ts";
 
@@ -43,28 +44,6 @@ const dayPhase = (
   if (timeOfDay < 11000) return "day";
   if (timeOfDay < 13000) return "dusk";
   return "night";
-};
-
-const resourceKind = (
-  kind: string,
-): "wood" | "stone" | "coal" | "plant_food" | "dirt" | "other" => {
-  switch (kind) {
-    case "wood":
-      return "wood";
-    case "stone":
-    case "cobblestone":
-      return "stone";
-    case "coal_ore":
-      return "coal";
-    case "plant_food":
-    case "leaves":
-      return "plant_food";
-    case "dirt":
-    case "grass":
-      return "dirt";
-    default:
-      return "other";
-  }
 };
 
 function shelterState(
@@ -170,6 +149,11 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       provenance: "owned",
     });
 
+  // Identity is reported as strongly as the body can establish it. The entity
+  // id is a session-local handle and the display name of every player in
+  // Minecraft is literally "player", so neither survives a reconnect or tells
+  // two people apart; the username and the UUID do, and they are carried
+  // through whenever the client actually has them.
   const entityRecord = (entity: WorldSnapshot["entities"][number]) => ({
     entityId: entity.entityId,
     name: entity.name,
@@ -178,6 +162,8 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     named: entity.named,
     tamed: entity.tamed,
     protectedTarget: !permissions.mayHunt(entity).allowed,
+    ...(entity.username === null ? {} : { username: entity.username }),
+    ...(entity.uuid === null ? {} : { uuid: entity.uuid }),
   });
 
   const inventoryCategories = categories(snapshot.inventory);
@@ -230,21 +216,32 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     affordances: affordances(inputs),
     nearby: {
       resources: snapshot.resources.map((block) => ({
-        kind: resourceKind(block.kind),
+        kind: resourceCategory(block.kind),
         name: block.name,
         position: block.position,
         distance: distance(snapshot.position, block.position),
         harvestPermitted: permissions.mayHarvest(block.position).allowed,
       })),
-      hostiles: snapshot.entities
-        .filter((entity) => entity.hostile)
-        .map(entityRecord),
-      passiveAnimals: snapshot.entities
-        .filter((entity) => entity.passive)
-        .map(entityRecord),
-      players: snapshot.entities
-        .filter((entity) => entity.player)
-        .map(entityRecord),
+      hostiles: shapeEntities(
+        snapshot.entities.filter((entity) => entity.hostile),
+        { limit: PERCEPTION.entities.hostileTotal },
+      ).map(entityRecord),
+      // Passive animals are shaped to the region Person may actually walk
+      // into. The unshaped list stays in the snapshot the safety kernel and
+      // the permission gate read, so this changes what cognition is told and
+      // nothing about what it is allowed to do.
+      passiveAnimals: shapeEntities(
+        snapshot.entities.filter((entity) => entity.passive),
+        {
+          limit: PERCEPTION.entities.passiveTotal,
+          radius: PERCEPTION.entities.passiveRadius,
+          keep: (entity) => permissions.areas.permitted(entity.position),
+        },
+      ).map(entityRecord),
+      players: shapeEntities(
+        snapshot.entities.filter((entity) => entity.player),
+        { limit: PERCEPTION.entities.playerTotal },
+      ).map(entityRecord),
       containers,
       workstations,
       hazards: snapshot.hazards.map((hazard) => ({

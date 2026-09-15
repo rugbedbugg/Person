@@ -1,0 +1,173 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "3f6a1c2e-5d4b-4a77-9c10-2b8e7f0a5d31",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "Observation",
+  "observationVersion": 1,
+  "trainingContext": "fixture",
+  "vitals": {
+    "health": 14.0,
+    "food": 7.0,
+    "saturation": 0.0,
+    "air": 300,
+    "armor": 0,
+    "statusEffects": [],
+    "alive": true
+  },
+  "environment": {
+    "position": {
+      "x": 12,
+      "y": 64,
+      "z": -3
+    },
+    "dimension": "overworld",
+    "dayPhase": "day",
+    "timeOfDay": 4000,
+    "weather": "clear",
+    "lightLevel": 15,
+    "biome": "forest"
+  },
+  "inventory": {
+    "items": [
+      {
+        "name": "oak_log",
+        "count": 3
+      }
+    ],
+    "categories": {
+      "food": 0,
+      "raw_food": 0,
+      "cooked_food": 0,
+      "fuel": 0,
+      "wood": 3,
+      "stone": 0,
+      "coal": 0,
+      "tools": 0,
+      "weapons": 0,
+      "armor": 0,
+      "building_materials": 0
+    },
+    "freeSlots": 35
+  },
+  "permissions": {
+    "harvest": true,
+    "mine": true,
+    "build": true,
+    "huntPassive": true,
+    "depositOwned": true,
+    "withdrawOwned": true,
+    "withdrawExisting": true,
+    "craft": true,
+    "consume": true
+  },
+  "affordances": {
+    "diggableGround": true,
+    "shelterSite": true,
+    "storageSite": false
+  },
+  "nearby": {
+    "resources": [
+      {
+        "kind": "wood",
+        "name": "oak_log",
+        "position": {
+          "x": 18,
+          "y": 64,
+          "z": -1
+        },
+        "distance": 6.3,
+        "harvestPermitted": true
+      }
+    ],
+    "hostiles": [],
+    "passiveAnimals": [
+      {
+        "entityId": 22,
+        "name": "cow",
+        "position": {
+          "x": 15,
+          "y": 64,
+          "z": 0
+        },
+        "distance": 4.2,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false,
+        "uuid": "2c9a7b16-3d84-4b2f-9a55-71c0d3e8f4a2"
+      }
+    ],
+    "players": [
+      {
+        "entityId": 155,
+        "name": "player",
+        "position": {
+          "x": -221,
+          "y": 89,
+          "z": 150
+        },
+        "distance": 27.1,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true,
+        "username": "rugbedbugg",
+        "uuid": "8a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
+      },
+      {
+        "entityId": 161,
+        "name": "player",
+        "position": {
+          "x": -210,
+          "y": 70,
+          "z": 160
+        },
+        "distance": 9.4,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true,
+        "username": "PersonWatcher",
+        "uuid": "1f2e3d4c-5b6a-4978-8765-4321fedcba09"
+      }
+    ],
+    "containers": [],
+    "workstations": [],
+    "hazards": []
+  },
+  "home": {
+    "activeHome": {
+      "homeId": "home_a",
+      "position": {
+        "x": 10,
+        "y": 64,
+        "z": 0
+      }
+    },
+    "homeDistance": 3.6,
+    "shelterState": "none",
+    "ownedStorage": [],
+    "bedKnown": false,
+    "foodReserve": 0,
+    "fuelReserve": 0
+  },
+  "navigation": {
+    "routeStatus": "idle",
+    "pathRisk": "low",
+    "stuckState": "free",
+    "returnPathKnown": true,
+    "lastSafePosition": {
+      "x": 10,
+      "y": 64,
+      "z": 0
+    }
+  },
+  "cognition": {
+    "activeGoal": null,
+    "activeRoutine": null,
+    "activeSkill": null,
+    "suspendedGoals": []
+  },
+  "previousOutcome": null
+}

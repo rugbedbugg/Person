@@ -132,3 +132,57 @@ export const FUEL_BURN: Readonly<Record<string, number>> = Object.freeze({
   charcoal: 8,
   stick: 0.5,
 });
+
+/**
+ * The shape of a `prismarine-biome` biome as it arrives on a block.
+ *
+ * The id is always right. The name is not: see `resolveBiome`.
+ */
+export interface BiomeHandle {
+  id?: unknown;
+  name?: unknown;
+}
+
+/** Enough of `bot.registry` to resolve a biome id. */
+export interface BiomeRegistry {
+  biomes?: Record<number, { name?: unknown } | undefined> | undefined;
+}
+
+const IDENTIFIER = /^[a-z][a-z0-9_]{0,63}$/;
+
+const biomeIdentifier = (value: unknown): string | null => {
+  if (typeof value !== "string") return null;
+  const name = value.replace(/^minecraft:/, "");
+  return IDENTIFIER.test(name) ? name : null;
+};
+
+/**
+ * Resolves the biome at a block against the client's own biome registry.
+ *
+ * `block.biome.name` cannot be used, and the first live observation is how we
+ * found out: it reported `biome: "unknown"` in an ordinary loaded Overworld
+ * chunk. The cause is upstream and unconditional. `prismarine-block` builds
+ * its Biome class with `require('prismarine-biome')(registry.version)`, where
+ * `registry.version` is a Version object rather than a version string;
+ * `prismarine-biome` only treats a *string* as a version, so it takes the
+ * Version object for a registry, finds no `biomes` table on it, and returns
+ * its empty placeholder for every id. Every block therefore carries a biome
+ * whose name is the empty string and whose id is correct.
+ *
+ * So the id is what gets resolved, against the registry the client is actually
+ * running: `minecraft-data`'s table on 1.16.1, and whatever the server's
+ * dimension codec supplied on the versions that send one. No name is guessed,
+ * no biome is inferred from terrain, and a block whose chunk has not arrived
+ * still resolves to "unknown" because that is the honest answer.
+ */
+export function resolveBiome(
+  registry: BiomeRegistry | null | undefined,
+  block: { biome?: BiomeHandle | null } | null | undefined,
+): string {
+  if (!block) return "unknown";
+  const direct = biomeIdentifier(block.biome?.name);
+  if (direct) return direct;
+  const id = block.biome?.id;
+  if (typeof id !== "number" || !Number.isInteger(id)) return "unknown";
+  return biomeIdentifier(registry?.biomes?.[id]?.name) ?? "unknown";
+}

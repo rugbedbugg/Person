@@ -712,6 +712,14 @@
           "protectedTarget": {
             "type": "boolean",
             "description": "True when the runtime forbids this entity as a hunting target for any reason."
+          },
+          "username": {
+            "$ref": "common.schema.json#/$defs/minecraftUsername",
+            "description": "Present when the client knows the account name. Players always have one; mobs never do."
+          },
+          "uuid": {
+            "$ref": "common.schema.json#/$defs/uuid",
+            "description": "Present when the server sent a stable entity UUID. Survives a reconnect; entityId does not."
           }
         }
       }
