@@ -15,3 +15,4 @@ export * from "./runtime/world-memory.ts";
 export * from "./runtime/person-runtime.ts";
 export * from "./ipc/cognition-channel.ts";
 export * from "./reporting/episode-report.ts";
+export * from "./reporting/status.ts";

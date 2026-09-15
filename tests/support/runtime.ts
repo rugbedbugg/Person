@@ -17,6 +17,7 @@ export interface RuntimeRunOptions extends HarnessOptions {
   worldObject?: FixtureWorld;
   episodeId?: string;
   personId?: string;
+  operatorIntervention?: { reason?: string };
 }
 
 /** Runs a complete episode with a real cognition subprocess over stdio. */
@@ -52,6 +53,9 @@ export async function runEpisode(options: RuntimeRunOptions): Promise<{
     embodiment: world,
     cwd: REPOSITORY,
     ...(options.episodeId ? { episodeId: options.episodeId } : {}),
+    ...(options.operatorIntervention
+      ? { operatorIntervention: options.operatorIntervention }
+      : {}),
   });
   const report = await runtime.run();
   return { report, world, evidenceDirectory, outputDirectory };

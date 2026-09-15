@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import type { PersonConfig } from "#config";
+import { distance, type PersonConfig } from "#config";
 import {
   PROTOCOL_VERSION,
   envelope,
@@ -42,6 +42,7 @@ import {
   writeEpisodeReport,
   type EpisodeReport,
 } from "../reporting/episode-report.ts";
+import { StatusWriter, statusPath } from "../reporting/status.ts";
 import { WorldMemory } from "./world-memory.ts";
 
 export interface PersonRuntimeOptions {
@@ -53,6 +54,15 @@ export interface PersonRuntimeOptions {
   channel?: CognitionChannel;
   cwd?: string;
   onDiagnostic?: (kind: string, detail: Record<string, unknown>) => void;
+  /**
+   * Marks a run as contaminated by a human acting on the world.
+   *
+   * A debug run where the operator moved Person or handed it items is not an
+   * acceptance run, and the difference has to be recorded at the time. It is
+   * declared, not detected: guessing which world changes were a person would
+   * be unreliable in exactly the cases that matter.
+   */
+  operatorIntervention?: { reason?: string };
 }
 
 const negativeOnly = (deltas: ItemDelta[]): ItemDelta[] =>
@@ -105,6 +115,10 @@ export class PersonRuntime {
     suspendedGoals: [],
   };
   #previousOutcome: PreviousOutcome | null = null;
+  readonly #status: StatusWriter;
+  readonly #operatorIntervention: { flagged: boolean; reason: string | null };
+  #emergencyCount = 0;
+  #decisionCount = 0;
 
   constructor(options: PersonRuntimeOptions) {
     this.config = options.config;
@@ -138,6 +152,35 @@ export class PersonRuntime {
       registry: this.registry,
       memory: this.memory,
     });
+    this.#operatorIntervention = {
+      flagged: options.operatorIntervention !== undefined,
+      reason: options.operatorIntervention?.reason ?? null,
+    };
+    this.#status = new StatusWriter(
+      statusPath(
+        options.config.runtime.outputDirectory,
+        this.identity.worldId,
+        this.identity.personId,
+      ),
+      {
+        command: "run",
+        personId: this.identity.personId,
+        botUsername: options.config.bot?.username ?? null,
+        worldId: this.identity.worldId,
+        sessionId: this.identity.sessionId,
+        episodeId: this.#episodeId,
+        server: options.config.server ?? null,
+        embodiment: options.config.runtime.embodiment,
+        trainingContext: options.config.runtime.trainingContext,
+        learningMode: options.config.learning.mode,
+        operatorIntervention: this.#operatorIntervention,
+        home: {
+          position: this.memory.home.position,
+          distance: null,
+          shelterState: this.memory.home.shelterState,
+        },
+      },
+    );
     this.#channel =
       options.channel ??
       new CognitionChannel({
@@ -193,8 +236,14 @@ export class PersonRuntime {
     let reason: string | null = null;
 
     try {
+      this.#status.update({
+        connection: "connecting",
+        readiness: "connecting",
+      });
       await this.#embodiment.connect();
       builder.report.startTick = this.#embodiment.snapshot().tick;
+      this.#status.update({ connection: "ready", readiness: "world ready" });
+      this.#syncStatus();
       this.#channel.start();
 
       const hello: SessionHello = {
@@ -234,6 +283,7 @@ export class PersonRuntime {
           break;
         }
         decisions += 1;
+        this.#decisionCount = decisions;
         await this.#decide(builder);
         if (runtime.decisionIntervalMs > 0)
           await new Promise((resolve) =>
@@ -258,6 +308,14 @@ export class PersonRuntime {
       this.memory.save();
       await this.#channel.stop();
       await this.#embodiment.disconnect();
+      this.#status.update({
+        connection:
+          this.#status.status.connection === "failed"
+            ? "failed"
+            : "disconnected",
+        readiness: "stopped",
+        decisions: builder.report.decisions.length,
+      });
     }
 
     builder.setStorageProvenance(this.memory.ownedStorage);
@@ -273,6 +331,36 @@ export class PersonRuntime {
     return report;
   }
 
+  /** Mirrors the live facts into the status file for an operator watching. */
+  #syncStatus(
+    patch: Partial<Parameters<StatusWriter["update"]>[0]> = {},
+  ): void {
+    const snapshot = this.#embodiment.snapshot();
+    const home = this.memory.home.position;
+    this.#status.update({
+      tick: snapshot.tick,
+      dimension: snapshot.dimension,
+      position: snapshot.position,
+      health: snapshot.health,
+      food: snapshot.food,
+      lastSafePosition: snapshot.lastSafePosition,
+      home: {
+        position: home,
+        distance: distance(snapshot.position, home),
+        shelterState: this.memory.home.shelterState,
+      },
+      safety: {
+        threat: this.kernel.threatState(snapshot),
+        emergencies: this.#emergencyCount,
+        lastEmergency: this.#status.status.safety.lastEmergency,
+      },
+      goal: this.#cognitionState.activeGoal,
+      routine: this.#cognitionState.activeRoutine,
+      skill: this.#cognitionState.activeSkill,
+      ...patch,
+    });
+  }
+
   #sendEpisodeEvent(phase: "started" | "ended", reasonCodes: string[]): void {
     const event: EpisodeEvent = {
       ...this.#envelope("EpisodeEvent", this.#embodiment.snapshot().tick),
@@ -281,7 +369,11 @@ export class PersonRuntime {
       phase,
       trainingContext: this.config.runtime.trainingContext,
       rngSeed: this.config.runtime.rngSeed,
-      reasonCodes,
+      // The contamination marker travels with the evidence, so an episode
+      // recorded during a debug session can never be mistaken for a counted one.
+      reasonCodes: this.#operatorIntervention.flagged
+        ? [...reasonCodes, "operator_intervention"]
+        : reasonCodes,
     };
     this.#channel.send(event);
   }
@@ -353,6 +445,17 @@ export class PersonRuntime {
       executedLimits: verdict.executedLimits,
     };
     this.#channel.send(validation);
+    this.#syncStatus({
+      goalType: goal.goal.goalType,
+      decisions: this.#decisionCount,
+      lastValidation: {
+        decision: verdict.decision,
+        level: verdict.level,
+        requestedSkill: invocation.skillId,
+        executedSkill: verdict.executedSkill,
+        reasonCodes: verdict.reasonCodes,
+      },
+    });
 
     const requestedSpec = this.registry.has(invocation.skillId)
       ? this.registry.get(invocation.skillId)

@@ -466,3 +466,60 @@ below that rung has been climbed. The full blocker list is in
 Unchanged, and now the only thing worth doing: run the ladder against a
 disposable LAN world. Everything needed to do it, and to learn something from
 doing it, is in place.
+
+---
+
+# Milestone 1 patch: pre-LAN readiness
+
+Date: 2026-09-15. Branch `feat/lan-validation`.
+
+A small readiness patch made immediately before the first live LAN run. No new
+cognitive capability, no new skills, no planner or policy change.
+
+## Why
+
+The LAN port Minecraft assigns changes every time a world is reopened, so
+treating it as file configuration would mean editing a file before every
+session. And the first live connection is the least diagnosable moment in the
+system: nothing downstream has run, so a failure there had no evidence beyond a
+spawn timeout.
+
+## Files changed
+
+| Area                                              | Change                                                                                                                                                                                               |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/config/ts/override.ts`                  | New. `--host` and `--port` overrides applied in memory, never written back, with validation and a human description of the resulting target.                                                         |
+| `adapters/minecraft/src/diagnose.ts`              | New. Classifies connection failures into fourteen distinct reasons, each with an operator hint.                                                                                                      |
+| `adapters/minecraft/src/embodiment.ts`            | `connect` races spawn against error, kick and close, so a refused login fails at once instead of waiting out the spawn timeout. Readiness distinguishes missing chunk data from general unreadiness. |
+| `apps/node-runtime/src/embodiment/types.ts`       | `EmbodimentError` carries an operator hint.                                                                                                                                                          |
+| `apps/node-runtime/src/reporting/status.ts`       | New. Atomic status file, renderer, staleness.                                                                                                                                                        |
+| `apps/node-runtime/src/runtime/person-runtime.ts` | Writes status through the lifecycle; accepts and records an operator-intervention declaration.                                                                                                       |
+| `apps/cli/src/observe.ts`                         | Optional body injection for tests, a status snapshot, a bounded disconnect, and a much fuller human-readable observation.                                                                            |
+| `apps/cli/src/commands.ts`, `bin/person.ts`       | `--port`, `--host`, `--operator-intervention`, `person status`, `person status --follow`.                                                                                                            |
+| `scripts/lan-check.sh`                            | Rewritten to separate "local setup ready" from "server currently reachable".                                                                                                                         |
+| `docs/LAN_TESTING.md`                             | A First contact section: eleven numbered steps from opening the world to reading the result.                                                                                                         |
+
+## Deviations
+
+None. The trust boundary is untouched: `--port` is a runtime argument the
+operator supplies, telemetry is written by the runtime and read only by the
+CLI, and an architecture test asserts nothing on the decision path or in
+cognition can read it back. Person still has no way to send a chat message or a
+server command, which is also now asserted by a test.
+
+## New tests
+
+| Suite                                          | Tests   | Covers                                                                                                                                                                                                                                       |
+| ---------------------------------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/adapter/connection-diagnostics.test.ts` | 8       | Each network failure class, version mismatch, kick classification, chat-component kicks, immediate failure on a refused login, close before spawn, spawn timeout                                                                             |
+| `tests/cli/observe-safety.test.ts`             | 7       | Observe calls no physical operation and changes nothing, writes no evidence or report, records status, marks operator intervention, reports failure through status, survives a hung disconnect, and the port override never reaches the file |
+| `tests/cli/status.test.ts`                     | 10      | Flag parsing, port and host validation, operator-intervention parsing, rendering, staleness, missing store, read-only by construction, follow reprinting only on change                                                                      |
+| `tests/integration/vertical-slice.test.ts`     | 2 added | A marked run is recorded as contaminated in evidence and status; a clean run is not                                                                                                                                                          |
+| `tests/architecture/architecture.test.ts`      | 3 added | No server-command path, no teleport on the port, telemetry is one-way                                                                                                                                                                        |
+
+Totals: 138 Node tests and 120 Python tests, 258 in all.
+
+## Still true
+
+Person has never connected to a Minecraft server. This patch prepares the first
+connection; it does not perform it.

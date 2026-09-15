@@ -190,10 +190,18 @@ test("connection waits for the world, and gives up rather than hanging", async (
   );
   await late.body.disconnect();
 
+  // Chunk data is the usual thing missing, and saying so is more useful than a
+  // general "not ready": it points at the spawn area rather than at the login.
   await assert.rejects(
     () => connected({ chunkDelayTicks: 20000 }),
-    (error: unknown) =>
-      (error as { reason?: string }).reason === "world_not_ready",
+    (error: unknown) => {
+      const failure = error as { reason?: string; hint?: string };
+      return (
+        failure.reason === "chunk_data_unavailable" &&
+        typeof failure.hint === "string" &&
+        failure.hint.length > 0
+      );
+    },
   );
 });
 

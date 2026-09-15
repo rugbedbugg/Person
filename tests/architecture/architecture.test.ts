@@ -223,3 +223,94 @@ test("the Minecraft client is only reachable from the adapter", () => {
     /from "mineflayer"/,
   );
 });
+
+test("Person has no way to issue a server command", () => {
+  // A world opened to LAN gives its host cheats. Person joins as an ordinary
+  // survival player and must stay one, so nothing in the body may send chat,
+  // a slash command, or anything that would need operator status.
+  const roots = [
+    "apps/node-runtime/src",
+    "apps/cli/src",
+    "adapters/minecraft/src",
+  ];
+  const forbidden =
+    /\.chat\s*\(|bot\.chat|["'`]\/(tp|give|gamemode|op|effect|setblock|fill|summon|time set|weather|difficulty|gamerule)\b/;
+  for (const root of roots)
+    for (const file of sourceFiles(root, ".ts")) {
+      const source = readFileSync(file, "utf8");
+      const match = forbidden.exec(source);
+      assert.equal(
+        match,
+        null,
+        `${path.relative(REPOSITORY, file)} appears to issue a command: ${match?.[0]}`,
+      );
+    }
+});
+
+test("the embodiment port offers no teleport and no coordinate command", () => {
+  const port = read("apps/node-runtime/src/embodiment/types.ts");
+  for (const forbidden of [
+    "teleport",
+    "setPosition",
+    "runCommand",
+    "sendCommand",
+    "execute(",
+  ])
+    assert.ok(
+      !port.includes(forbidden),
+      `the port must not expose ${forbidden}`,
+    );
+  // moveTo takes a position because the runtime resolves it; cognition still
+  // cannot name one. That boundary is asserted on the protocol schema, not here.
+  assert.ok(port.includes("moveTo(position: Position"));
+});
+
+test("status telemetry is one-way and reaches no decision", () => {
+  // The runtime writes the status file; the CLI reads it. If anything on the
+  // decision path read it back, watching Person could change what Person does.
+  const runtime = read("apps/node-runtime/src/runtime/person-runtime.ts");
+  assert.ok(
+    runtime.includes("this.#status.update("),
+    "the runtime writes status",
+  );
+  assert.ok(
+    !runtime.includes("readStatus"),
+    "the runtime must never read telemetry back",
+  );
+
+  const decisionPath = [
+    "apps/node-runtime/src/safety",
+    "apps/node-runtime/src/skills",
+    "apps/node-runtime/src/observation",
+  ];
+  for (const root of decisionPath)
+    for (const file of sourceFiles(root, ".ts")) {
+      const source = readFileSync(file, "utf8");
+      for (const forbidden of [
+        "RuntimeStatus",
+        "readStatus",
+        "statusPath",
+        "StatusWriter",
+      ])
+        assert.ok(
+          !source.includes(forbidden),
+          `${path.relative(REPOSITORY, file)} is on the decision path and must not touch telemetry`,
+        );
+    }
+
+  // Cognition does not know the status file exists at all.
+  for (const root of ["apps/cognition/python", "packages/policy/python"])
+    for (const file of sourceFiles(root, ".py")) {
+      const source = readFileSync(file, "utf8");
+      for (const forbidden of [
+        "statusPath",
+        "RuntimeStatus",
+        "status.json",
+        "runs/status",
+      ])
+        assert.ok(
+          !source.includes(forbidden),
+          `${path.relative(REPOSITORY, file)} must not know telemetry exists`,
+        );
+    }
+});

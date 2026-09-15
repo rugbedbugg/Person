@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { FixtureWorld } from "#fixture-world";
+import { readStatus, statusPath } from "#node-runtime";
 import { REPOSITORY, temporaryDirectory } from "../support/harness.ts";
 import { runEpisode } from "../support/runtime.ts";
 
@@ -221,5 +222,86 @@ test(
         );
       },
     );
+  },
+);
+
+test(
+  "an operator-marked run is recorded as contaminated",
+  { timeout: 300000 },
+  async () => {
+    const evidenceDirectory = temporaryDirectory("person-marked-evidence-");
+    const outputDirectory = temporaryDirectory("person-marked-runs-");
+    const world = FixtureWorld.fromFile(
+      path.join(REPOSITORY, "fixtures/worlds/vertical-slice.json"),
+    );
+    const { report } = await runEpisode({
+      worldObject: world,
+      cognitionCommand: ["uv", "run", "person-cognition"],
+      evidenceDirectory,
+      outputDirectory,
+      maxDecisions: 2,
+      episodeId: "ep_marked",
+      operatorIntervention: { reason: "operator teleported to Person" },
+    });
+    assert.ok(report.decisions.length > 0);
+
+    // The marker travels with the evidence, so a debug session can never be
+    // mistaken for a counted acceptance run when the journal is read later.
+    const events = readJournal(evidenceDirectory).filter(
+      (event) =>
+        event.type === "episode_started" || event.type === "episode_ended",
+    );
+    assert.ok(events.length > 0);
+    for (const event of events)
+      assert.ok(
+        ((event.payload["reason_codes"] ?? []) as string[]).includes(
+          "operator_intervention",
+        ),
+        `${event.type} must carry the contamination marker`,
+      );
+
+    const status = readStatus(
+      statusPath(outputDirectory, report.worldId, report.personId),
+    );
+    assert.ok(status);
+    assert.equal(status.operatorIntervention.flagged, true);
+    assert.equal(
+      status.operatorIntervention.reason,
+      "operator teleported to Person",
+    );
+    assert.equal(status.command, "run");
+    assert.ok(status.decisions > 0);
+    assert.equal(
+      status.connection,
+      "disconnected",
+      "the runtime shut the body down",
+    );
+  },
+);
+
+test(
+  "an ordinary run carries no contamination marker",
+  { timeout: 300000 },
+  async () => {
+    const evidenceDirectory = temporaryDirectory("person-clean-evidence-");
+    const outputDirectory = temporaryDirectory("person-clean-runs-");
+    const world = FixtureWorld.fromFile(
+      path.join(REPOSITORY, "fixtures/worlds/vertical-slice.json"),
+    );
+    await runEpisode({
+      worldObject: world,
+      cognitionCommand: ["uv", "run", "person-cognition"],
+      evidenceDirectory,
+      outputDirectory,
+      maxDecisions: 2,
+      episodeId: "ep_clean",
+    });
+    for (const event of readJournal(evidenceDirectory))
+      assert.ok(
+        !((event.payload["reason_codes"] ?? []) as string[]).includes(
+          "operator_intervention",
+        ),
+        "a clean run must not be marked",
+      );
   },
 );

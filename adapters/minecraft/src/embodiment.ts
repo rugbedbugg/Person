@@ -38,6 +38,12 @@ import {
   classifyEntity,
   isNamed,
 } from "./classify.ts";
+import {
+  classifyConnectError,
+  classifyKick,
+  classifyReadiness,
+  type ConnectionContext,
+} from "./diagnose.ts";
 
 const { pathfinder, Movements, goals } = pathfinderPackage;
 const { Vec3 } = vec3Package;
@@ -170,6 +176,45 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     });
     this.#bot = bot;
     bot.loadPlugin(pathfinder);
+    const context: ConnectionContext = {
+      host: server.host,
+      port: server.port,
+      version: server.version,
+      username: botConfig.username,
+    };
+
+    // Before the bot spawns, a failure is the only evidence there is. It is
+    // captured here and classified, rather than being allowed to time out as
+    // an anonymous "did not spawn".
+    let loginFailure: EmbodimentError | null = null;
+    const failed = new Promise<never>((_resolve, reject) => {
+      const fail = (failure: EmbodimentError): void => {
+        loginFailure ??= failure;
+        this.#connected = false;
+        reject(failure);
+      };
+      bot.once("kicked", (reason: unknown) =>
+        fail(classifyKick(reason, context)),
+      );
+      bot.once("error", (error: unknown) =>
+        fail(classifyConnectError(error, context)),
+      );
+      bot.once("end", (reason: unknown) =>
+        fail(
+          new EmbodimentError(
+            "connection_closed",
+            `The connection to ${context.host}:${context.port} closed before Person spawned${
+              reason ? `: ${String(reason).slice(0, 120)}` : ""
+            }`,
+            "The world may have been closed, or the port belongs to a session that has ended.",
+          ),
+        ),
+      );
+    });
+    // Swallow the rejection if the race is won by the spawn; the listeners
+    // above stay installed as the long-lived handlers below.
+    failed.catch(() => {});
+
     bot.on("kicked", (reason: unknown) => {
       this.#connected = false;
       this.emit("fatal", `server_kicked: ${String(reason).slice(0, 200)}`);
@@ -190,13 +235,28 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     });
 
     const spawned = once(bot, "spawn");
-    const timer = delay(this.#connectTimeoutMs).then(() => {
-      throw new EmbodimentError(
-        "connect_timeout",
-        "Minecraft did not spawn the bot in time",
+    let spawnTimer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<never>((_resolve, reject) => {
+      spawnTimer = setTimeout(
+        () =>
+          reject(
+            new EmbodimentError(
+              "spawn_timeout",
+              `${context.host}:${context.port} accepted the connection but Person never spawned within ${this.#connectTimeoutMs}ms`,
+              "The server is reachable, so this is a login or world-loading problem rather than a wrong port.",
+            ),
+          ),
+        this.#connectTimeoutMs,
       );
+      // Deliberately not unref'd: this timer is the only thing that turns a
+      // server which accepts the socket and then says nothing into a
+      // diagnosable failure. It is cleared as soon as the race settles.
     });
-    await Promise.race([spawned, timer]);
+    try {
+      await Promise.race([spawned, failed, timedOut]);
+    } finally {
+      if (spawnTimer) clearTimeout(spawnTimer);
+    }
     await bot.waitForChunksToLoad();
     await this.#awaitReadiness();
     this.#assertWorldRules();
@@ -258,11 +318,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       await delay(250);
       gaps = missing();
     }
-    if (gaps.length > 0)
-      throw new EmbodimentError(
-        "world_not_ready",
-        `The world was still incomplete after ${READINESS_TIMEOUT_MS}ms: ${gaps.join(", ")}`,
-      );
+    if (gaps.length > 0) throw classifyReadiness(gaps, READINESS_TIMEOUT_MS);
     this.#lastHealth = bot.health ?? null;
   }
 

@@ -136,10 +136,19 @@ export interface CraftResult {
 
 export class EmbodimentError extends Error {
   readonly reason: string;
-  constructor(reason: string, message?: string) {
+  /**
+   * What an operator should try next.
+   *
+   * The first live connection is the hardest one to diagnose, because nothing
+   * downstream has run yet. A reason code tells a program what happened; the
+   * hint tells a person what to do about it.
+   */
+  readonly hint: string | null;
+  constructor(reason: string, message?: string, hint?: string) {
     super(message ?? reason);
     this.name = "EmbodimentError";
     this.reason = reason;
+    this.hint = hint ?? null;
   }
 }
 

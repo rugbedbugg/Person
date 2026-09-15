@@ -3,12 +3,15 @@ import path from "node:path";
 import type { PersonConfig } from "#config";
 import type { Observation } from "#protocol";
 import { protocolValidator } from "#protocol";
+import { distance } from "#config";
 import {
   PermissionGate,
   ProtectedAreas,
   SafetyKernel,
+  StatusWriter,
   WorldMemory,
   buildObservation,
+  statusPath,
   type Embodiment,
   type PhysicalGuard,
 } from "#node-runtime";
@@ -22,15 +25,51 @@ import { createEmbodiment } from "./embodiment.ts";
  * running a skill. Against Minecraft it is the smallest possible thing that
  * can still be wrong, which makes it the right first contact with a server.
  */
+export interface CaptureOptions {
+  operatorIntervention?: { reason?: string };
+  /** How long to allow for a clean disconnect before giving up on it. */
+  disconnectTimeoutMs?: number;
+  /**
+   * A body to use instead of building one from configuration.
+   *
+   * Exists so a test can watch every call this function makes and prove it
+   * only ever looks. Production always leaves it unset.
+   */
+  embodiment?: Embodiment;
+}
+
 export async function captureObservation(
   config: PersonConfig,
   baseDirectory: string,
+  options: CaptureOptions = {},
 ): Promise<{
   observation: Observation;
   valid: boolean;
   diagnostics: string[];
 }> {
-  const embodiment: Embodiment = await createEmbodiment(config, baseDirectory);
+  const sessionId = randomUUID();
+  const status = new StatusWriter(
+    statusPath(config.runtime.outputDirectory, config.worldId, config.personId),
+    {
+      command: "observe",
+      connection: "connecting",
+      readiness: "connecting",
+      personId: config.personId,
+      botUsername: config.bot?.username ?? null,
+      worldId: config.worldId,
+      sessionId,
+      server: config.server ?? null,
+      embodiment: config.runtime.embodiment,
+      trainingContext: config.runtime.trainingContext,
+      learningMode: config.learning.mode,
+      operatorIntervention: {
+        flagged: options.operatorIntervention !== undefined,
+        reason: options.operatorIntervention?.reason ?? null,
+      },
+    },
+  );
+  const embodiment: Embodiment =
+    options.embodiment ?? (await createEmbodiment(config, baseDirectory));
   const areas = new ProtectedAreas(config);
   const permissions = new PermissionGate(config, areas);
   const kernel = new SafetyKernel(permissions);
@@ -49,13 +88,16 @@ export async function captureObservation(
       permissions.mayHunt(entity).allowed ||
       permissions.mayDefend(entity).allowed,
   };
-  embodiment.setGuard(guard);
   try {
+    // Inside the try: installing the guard is the first thing that touches the
+    // body, and a failure there should be reported like any other.
+    embodiment.setGuard(guard);
     await embodiment.connect();
+    status.update({ connection: "ready", readiness: "world ready" });
     const observation = buildObservation({
       identity: {
         personId: config.personId,
-        sessionId: randomUUID(),
+        sessionId,
         worldId: config.worldId,
       },
       snapshot: embodiment.snapshot(),
@@ -73,13 +115,60 @@ export async function captureObservation(
       blockAt: (position) => embodiment.blockAt(position),
     });
     const result = protocolValidator().validate(observation);
+    const snapshot = embodiment.snapshot();
+    status.update({
+      tick: snapshot.tick,
+      dimension: snapshot.dimension,
+      position: snapshot.position,
+      health: snapshot.health,
+      food: snapshot.food,
+      lastSafePosition: snapshot.lastSafePosition,
+      home: {
+        position: memory.home.position,
+        distance: distance(snapshot.position, memory.home.position),
+        shelterState: memory.home.shelterState,
+      },
+      safety: {
+        threat: kernel.threatState(snapshot),
+        emergencies: 0,
+        lastEmergency: null,
+      },
+      readiness: result.valid
+        ? "observation captured"
+        : "observation rejected by schema",
+    });
     return {
       observation,
       valid: result.valid,
       diagnostics: result.diagnostics,
     };
+  } catch (error) {
+    const failure = error as { reason?: string; hint?: string | null };
+    status.update({
+      connection: "failed",
+      readiness: "stopped",
+      failureReason: failure.reason ?? "unknown_error",
+      failureHint: failure.hint ?? null,
+    });
+    throw error;
   } finally {
-    await embodiment.disconnect();
+    // A hung quit must not hold the command open. The process has to end even
+    // when the server has stopped answering.
+    const timeout = options.disconnectTimeoutMs ?? 10000;
+    let timer: NodeJS.Timeout | undefined;
+    await Promise.race([
+      embodiment.disconnect(),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, timeout);
+      }),
+    ]).finally(() => {
+      if (timer) clearTimeout(timer);
+    });
+    status.update({
+      connection:
+        status.status.connection === "failed" ? "failed" : "disconnected",
+      readiness: "stopped",
+    });
   }
 }
 
@@ -245,44 +334,150 @@ export function renderObservation(observation: Observation): string {
   const lines: string[] = [];
   const vitals = observation.vitals;
   const environment = observation.environment;
+  const nearest = <T extends { distance: number }>(
+    items: T[],
+    limit = 3,
+  ): T[] => [...items].sort((a, b) => a.distance - b.distance).slice(0, limit);
+  const away = (distance: number): string => `${distance.toFixed(1)}m`;
+
   lines.push(
     `Observation v${observation.observationVersion} (${observation.trainingContext})`,
   );
   lines.push(
-    `  vitals   health=${vitals.health} food=${vitals.food} saturation=${vitals.saturation} air=${vitals.air} armor=${vitals.armor} alive=${vitals.alive}`,
+    `  vitals    health=${vitals.health} food=${vitals.food} saturation=${vitals.saturation} air=${vitals.air} armor=${vitals.armor} alive=${vitals.alive}`,
+  );
+  if (vitals.statusEffects.length)
+    lines.push(
+      `  effects   ${vitals.statusEffects.map((effect) => `${effect.name}+${effect.amplifier}`).join(" ")}`,
+    );
+  lines.push(
+    `  world     ${environment.dimension} ${environment.dayPhase} time=${environment.timeOfDay} weather=${environment.weather} light=${environment.lightLevel} biome=${environment.biome}`,
   );
   lines.push(
-    `  world    ${environment.dimension} ${environment.dayPhase} time=${environment.timeOfDay} weather=${environment.weather} light=${environment.lightLevel} biome=${environment.biome}`,
+    `  position  ${environment.position.x},${environment.position.y},${environment.position.z}`,
   );
-  lines.push(
-    `  position ${environment.position.x},${environment.position.y},${environment.position.z}`,
-  );
+
   const categories = Object.entries(observation.inventory.categories)
     .filter(([, count]) => count > 0)
     .map(([name, count]) => `${name}=${count}`)
     .join(" ");
   lines.push(
-    `  items    ${observation.inventory.items.length} stacks, ${observation.inventory.freeSlots} free slots${categories ? ` (${categories})` : ""}`,
+    `  inventory ${observation.inventory.items.length} stacks, ${observation.inventory.freeSlots} free slots${categories ? ` (${categories})` : ""}`,
   );
+  if (observation.inventory.items.length)
+    lines.push(
+      `            ${observation.inventory.items
+        .map((item) => `${item.name}x${item.count}`)
+        .slice(0, 10)
+        .join(" ")}`,
+    );
+
   const nearby = observation.nearby;
+  lines.push("  nearby");
   lines.push(
-    `  nearby   resources=${nearby.resources.length} hostiles=${nearby.hostiles.length} animals=${nearby.passiveAnimals.length} players=${nearby.players.length} containers=${nearby.containers.length} workstations=${nearby.workstations.length} hazards=${nearby.hazards.length}`,
+    `    resources    ${nearby.resources.length}${
+      nearby.resources.length
+        ? `: ${nearest(nearby.resources)
+            .map(
+              (resource) =>
+                `${resource.name} ${away(resource.distance)}${resource.harvestPermitted ? "" : " (not permitted)"}`,
+            )
+            .join(", ")}`
+        : ""
+    }`,
   );
+  lines.push(
+    `    animals      ${nearby.passiveAnimals.length}${
+      nearby.passiveAnimals.length
+        ? `: ${nearest(nearby.passiveAnimals)
+            .map(
+              (animal) =>
+                `${animal.name} ${away(animal.distance)}${animal.protectedTarget ? " (protected)" : ""}`,
+            )
+            .join(", ")}`
+        : ""
+    }`,
+  );
+  lines.push(
+    `    threats      ${nearby.hostiles.length}${
+      nearby.hostiles.length
+        ? `: ${nearest(nearby.hostiles)
+            .map((hostile) => `${hostile.name} ${away(hostile.distance)}`)
+            .join(", ")}`
+        : ""
+    }`,
+  );
+  lines.push(
+    `    players      ${nearby.players.length}${
+      nearby.players.length
+        ? `: ${nearest(nearby.players)
+            .map((player) => `${player.name} ${away(player.distance)}`)
+            .join(", ")}`
+        : ""
+    }`,
+  );
+  lines.push(
+    `    containers   ${nearby.containers.length}${
+      nearby.containers.length
+        ? `: ${nearest(nearby.containers)
+            .map(
+              (container) =>
+                `${container.kind} ${away(container.distance)} (${container.provenance})`,
+            )
+            .join(", ")}`
+        : ""
+    }`,
+  );
+  lines.push(
+    `    workstations ${nearby.workstations.length}${
+      nearby.workstations.length
+        ? `: ${nearest(nearby.workstations)
+            .map(
+              (station) =>
+                `${station.kind} ${away(station.distance)} (${station.provenance})`,
+            )
+            .join(", ")}`
+        : ""
+    }`,
+  );
+  lines.push(
+    `    hazards      ${nearby.hazards.length}${
+      nearby.hazards.length
+        ? `: ${nearest(nearby.hazards)
+            .map((hazard) => `${hazard.kind} ${away(hazard.distance)}`)
+            .join(", ")}`
+        : ""
+    }`,
+  );
+
   const home = observation.home;
   lines.push(
-    `  home     ${home.activeHome ? `${home.activeHome.homeId} at ${home.activeHome.position.x},${home.activeHome.position.y},${home.activeHome.position.z}` : "none"} distance=${home.homeDistance ?? "unknown"} shelter=${home.shelterState} storage=${home.ownedStorage.length} foodReserve=${home.foodReserve}`,
+    `  home      ${
+      home.activeHome
+        ? `${home.activeHome.homeId} at ${home.activeHome.position.x},${home.activeHome.position.y},${home.activeHome.position.z}`
+        : "none"
+    } distance=${home.homeDistance ?? "unknown"} shelter=${home.shelterState} storage=${home.ownedStorage.length} foodReserve=${home.foodReserve} fuelReserve=${home.fuelReserve} bed=${home.bedKnown}`,
   );
   const navigation = observation.navigation;
   lines.push(
-    `  route    ${navigation.routeStatus} risk=${navigation.pathRisk} stuck=${navigation.stuckState} returnKnown=${navigation.returnPathKnown}`,
+    `  route     ${navigation.routeStatus} risk=${navigation.pathRisk} stuck=${navigation.stuckState} returnKnown=${navigation.returnPathKnown} lastSafe=${
+      navigation.lastSafePosition
+        ? `${navigation.lastSafePosition.x},${navigation.lastSafePosition.y},${navigation.lastSafePosition.z}`
+        : "unknown"
+    }`,
   );
   const permitted = Object.entries(observation.permissions)
     .filter(([, allowed]) => allowed)
     .map(([name]) => name)
     .join(",");
-  lines.push(`  allowed  ${permitted || "nothing"}`);
+  const refused = Object.entries(observation.permissions)
+    .filter(([, allowed]) => !allowed)
+    .map(([name]) => name)
+    .join(",");
+  lines.push(`  allowed   ${permitted || "nothing"}`);
+  if (refused) lines.push(`  refused   ${refused}`);
   lines.push(
-    `  can      diggableGround=${observation.affordances.diggableGround} shelterSite=${observation.affordances.shelterSite} storageSite=${observation.affordances.storageSite}`,
+    `  can       diggableGround=${observation.affordances.diggableGround} shelterSite=${observation.affordances.shelterSite} storageSite=${observation.affordances.storageSite}`,
   );
   return lines.join("\n");
 }
