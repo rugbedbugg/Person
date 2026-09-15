@@ -27,28 +27,47 @@ decisions, accepted, replaced, rejected
 learned vs fallback decisions, and the fallback rate
 successes, failures, emergencies
 health lost, resource deltas, elapsed ticks
+per-skill tick budgets: runs, mean and max elapsed, budget pressure,
+  and the split between navigation and interaction
 safety overrides with trigger, level, action and preempted skill
 storage provenance records
 goal history: queued, suspended, resumed, completed, blocked
 routine and skill statistics with posterior means
+prediction error: counts by severity, and the worst misses
 ```
 
 The fallback rate is the learning metric worth watching: high early, lower
 later, while safety overrides and critical safety violations stay where they
 are.
 
+## Prediction error
+
+Measured since Milestone 1, and deliberately inert: every skill contract's
+declared effects are compared with the symbolic state the next observation
+reports, and the result is recorded as evidence and summarised in both reports.
+It changes no decision. A test replays a journal with and without the records
+and asserts the policy statistics are identical.
+
+Severity distinguishes a contract that is wrong from a skill that failed. A
+successful skill can still have been wrong about what it would achieve, and
+that is the interesting case: it is how `eat_to_target` was found to be
+claiming it consumed a single item.
+
 ## What is not measured yet
 
-Prediction error, causal belief accuracy, transfer between environments,
-memory retention and consolidation precision are all future scope. The evidence
+Causal belief accuracy, transfer between environments, memory retention and
+consolidation precision are all future scope. The evidence
 format is designed so they can be computed later from episodes recorded now:
 expected effects are stored next to observed effects, the executed action is
 distinguishable from the requested one, every event carries world, session,
 episode and training context, and fixture episodes record their RNG seed.
 
-That is a claim about the data, not about the capability. Nothing in this
-milestone learns a world model, and the reports do not contain a prediction
-error column because nothing yet produces one.
+That is a claim about the data, not about the capability. Nothing here learns a
+world model. Prediction error is now recorded, which is the input such a model
+would need, and no model consumes it.
+
+Nothing in this suite has been run against a Minecraft server. See
+`REALITY_VALIDATION.md`.
 
 ## Held-out evaluation
 

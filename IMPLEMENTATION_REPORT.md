@@ -1,6 +1,12 @@
 # Implementation report
 
-Milestone: the Person survival vertical slice and evidence substrate.
+This report is cumulative. Milestone 0 below is the original record and is
+unchanged; Milestone 1 follows it.
+
+---
+
+# Milestone 0: survival vertical slice and evidence substrate
+
 Date: 2026-09-15.
 
 ## Implemented
@@ -351,3 +357,111 @@ After that, held-out fixture worlds and the first `WorldModelProvider`
 implementation become worth attempting. Adding memory, affect or language
 before the body is validated against a real server would build on an
 unverified foundation.
+
+---
+
+# Milestone 1: reality validation
+
+Date: 2026-09-15. Branch `feat/lan-validation`, from tag `v0.1.0-foundation`.
+
+The full account is in `REALITY_VALIDATION.md`. This section records what
+changed in the repository.
+
+## The constraint that shaped this milestone
+
+No Minecraft server was reachable: no Java process on the machine, nothing
+listening on the configured LAN port, and no way to open a world from here.
+Stages A through G of the validation order all require one.
+
+The work therefore split in two. Everything that needs a live server is
+prepared, instrumented and documented, and is reported as not run. Everything
+that does not need one was done, which turned out to be more than expected: the
+Mineflayer adapter was audited against the installed library and data sources,
+and that audit found six defects the fixture could never have shown.
+
+## Files changed
+
+| Area                                                                                                                      | Change                                                                                                                                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `adapters/minecraft/src/classify.ts`                                                                                      | New. Entity classification against the registry category, with an explicit huntable allowlist, a neutral-mob set, and custom-name extraction from sparse metadata.                                                                                                                        |
+| `adapters/minecraft/src/embodiment.ts`                                                                                    | Entity view rebuilt; dimension, biome, light, armour and free slots read from the world; readiness and world-rule validation at connect; `inspectContainer`; server-authoritative recipes; partial smelt collection; container error mapping; damage tracking; diggable-ground reporting. |
+| `adapters/minecraft/src/registry.ts`                                                                                      | Armour point table and armour slot indices for 1.16.1.                                                                                                                                                                                                                                    |
+| `apps/node-runtime/src/embodiment/types.ts`                                                                               | Port gains `inspectContainer`, `EntityView.neutral`, `WorldSnapshot.recentlyDamaged`, `lastDamageTick` and `diggableGround`.                                                                                                                                                              |
+| `apps/node-runtime/src/safety/safety-kernel.ts`                                                                           | `threats()` as the one definition of what counts; neutral mobs count once damaged; refuge chosen only where one can be dug.                                                                                                                                                               |
+| `apps/node-runtime/src/skills/impl/emergency.ts`                                                                          | Emergency skills use the kernel's threat definition rather than a second copy.                                                                                                                                                                                                            |
+| `apps/node-runtime/src/skills/impl/storage.ts`                                                                            | Withdrawals read live container contents.                                                                                                                                                                                                                                                 |
+| `apps/node-runtime/src/skills/timing.ts`                                                                                  | New. Measures where a skill's ticks go by wrapping the port.                                                                                                                                                                                                                              |
+| `apps/node-runtime/src/skills/executor.ts`                                                                                | Runs skills through the instrumented port; timing travels with the outcome.                                                                                                                                                                                                               |
+| `apps/node-runtime/src/reporting/episode-report.ts`                                                                       | Per-skill tick budget aggregation and a budget-pressure line in the summary.                                                                                                                                                                                                              |
+| `apps/cognition/python/person_cognition/prediction.py`                                                                    | New. Prediction error comparison and payload construction.                                                                                                                                                                                                                                |
+| `apps/cognition/python/person_cognition/loop.py`                                                                          | Captures the predicted state, settles it against the next observation, records it as evidence.                                                                                                                                                                                            |
+| `apps/cognition/python/person_cognition/reporting.py`                                                                     | Prediction-error summary in the learning report.                                                                                                                                                                                                                                          |
+| `packages/persistence/python/person_persistence/events.py`                                                                | Evidence schema v2, reading v1 and v2, with `prediction_error` refused under v1.                                                                                                                                                                                                          |
+| `packages/planner/python/person_planner/search.py`                                                                        | Plan cost accounts for parameter magnitude.                                                                                                                                                                                                                                               |
+| `packages/skills/specs/eat_to_target.json`                                                                                | Contract corrected from measurement.                                                                                                                                                                                                                                                      |
+| `apps/cli/src/observe.ts`                                                                                                 | New. Observation capture, semantic comparison, suspicious-default detection.                                                                                                                                                                                                              |
+| `apps/cli/src/commands.ts`, `bin/person.ts`, `inspect.ts`                                                                 | `person observe`, `person compare`, `person inspect predictions`.                                                                                                                                                                                                                         |
+| `fixtures/src/world.ts`, `blocks.ts`                                                                                      | Same contract as the adapter: neutrals, damage memory, diggable ground, `inspectContainer`.                                                                                                                                                                                               |
+| `tests/support/mineflayer-double.ts`                                                                                      | New. A Mineflayer double built on real 1.16.1 data.                                                                                                                                                                                                                                       |
+| `tests/adapter/`, `tests/safety/protected-routes.test.ts`, `apps/cognition/tests/test_prediction.py`, planner regressions | New tests, listed below.                                                                                                                                                                                                                                                                  |
+| `docs/SEMANTIC_TARGETING.md`, `REALITY_VALIDATION.md`                                                                     | New documents.                                                                                                                                                                                                                                                                            |
+| `docs/LAN_TESTING.md`                                                                                                     | Stage A and B rewritten around the new instruments.                                                                                                                                                                                                                                       |
+
+## Architecture deviations
+
+None. The trust boundary is unchanged: cognition still cannot name a
+coordinate, still cannot send a command, and still cannot influence a safety
+decision. Three additions were made inside the existing shape:
+
+1. **The embodiment port grew three fields and one method.** `neutral`,
+   `recentlyDamaged`, `diggableGround` and `inspectContainer` are all facts the
+   runtime observes and the runtime uses. None of them reaches cognition except
+   through the normalised observation, and `diggableGround` replaced a
+   duplicate computation in the observation builder rather than adding one.
+2. **The evidence schema moved to v2**, additively. v1 journals are read
+   unchanged; only new records carry v2, and a v1 record claiming a v2 event
+   type is rejected. This is the compatibility rule `migrations/README.md`
+   already described.
+3. **Prediction error is recorded but cannot act.** The statistics reducer has
+   no case for it, and a test replays a journal with and without the records to
+   prove the policy statistics are identical.
+
+## Real Minecraft findings
+
+Six defects and seven smaller corrections, all described with their evidence in
+`REALITY_VALIDATION.md`. In short: entity metadata is an object and was treated
+as an array, which would have thrown on first contact; named animals were
+therefore never detected, making a named cow a legal hunting target; hostile
+classification missed mobs the registry files as unknown; neutral mobs were
+invisible to the safety kernel; the first withdrawal from any container always
+failed; and crafting could fail on its own wood-species bookkeeping.
+
+Separately, the observation carried three fields that were structurally valid
+and semantically empty, and the planner tied on cost between parameterisations
+of the same plan, which both diluted evidence and produced absurd magnitudes.
+
+## New tests
+
+| Suite                                          | Tests              | Covers                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/adapter/mineflayer-conformance.test.ts` | 27                 | Entity metadata and classification, damage memory, readiness, world rules, dimension, armour, light, biome, free slots, crafting authority, empty-craft failure, container inspection, transfer error mapping, deposit refusal, partial smelt, dig tool choice and safety, placement references and confirmation, attack guard and reach, eating, block search with position-less palette entries |
+| `tests/safety/protected-routes.test.ts`        | 4                  | Detour around a protected strip, refusal with no legal detour and no partial movement, the pathfinder exclusion function as the replanning guarantee, refusal before any route is planned                                                                                                                                                                                                         |
+| `apps/cognition/tests/test_prediction.py`      | 12                 | Effect semantics, severity classification, unexplained changes, volatile-fact suppression, settlement on the next observation, attribution to the executed skill, unobserved predictions, persistence, and that replaying prediction records changes no policy statistic                                                                                                                          |
+| `packages/planner/tests/test_planner.py`       | 6 added            | Parameter-aware cost, sensible magnitudes, substantively different alternatives, using materials already held, no pointless repetition, expensive routes ranked last                                                                                                                                                                                                                              |
+| `tests/safety/kernel.test.ts`                  | 1 added, 1 revised | Refuge chosen only where one can be dug, and fleeing where one cannot                                                                                                                                                                                                                                                                                                                             |
+
+Totals: 103 Node tests and 120 Python tests, 223 in all, up from 173.
+
+## Manual validation remaining
+
+Unchanged in substance from Milestone 0 and now much better equipped. The
+ladder in `docs/LAN_TESTING.md` starts with `person observe`, which connects,
+validates readiness and world rules, takes one observation and stops. Nothing
+below that rung has been climbed. The full blocker list is in
+`REALITY_VALIDATION.md`.
+
+## Next milestone
+
+Unchanged, and now the only thing worth doing: run the ladder against a
+disposable LAN world. Everything needed to do it, and to learn something from
+doing it, is in place.

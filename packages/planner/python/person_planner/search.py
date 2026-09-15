@@ -97,9 +97,28 @@ def _apply(
     return successor
 
 
-def step_cost(spec: SkillSpec) -> float:
-    """Cheap, safe and quick first. Risk dominates convenience."""
-    return 1.0 + spec.risk * 4.0 + spec.max_ticks / 4000.0
+def step_cost(spec: SkillSpec, parameters: Mapping[str, ParameterValue] | None = None) -> float:
+    """Cheap, safe and quick first. Risk dominates convenience.
+
+    The magnitude of a scaling parameter is part of the cost: gathering
+    thirty-two logs really does take longer than gathering eight. Without this
+    every parameterisation of the same plan ties, and the planner offers four
+    identical strategies that differ only in how absurd the number is, which
+    also splits the evidence for one strategy across four routine identities.
+    """
+    cost = 1.0 + spec.risk * 4.0 + spec.max_ticks / 4000.0
+    if not parameters:
+        return cost
+    defaults = spec.default_parameters()
+    for name in sorted({e.scales_with for e in spec.expected_effects if e.scales_with}):
+        requested = parameters.get(name)
+        default = defaults.get(name)
+        if not isinstance(requested, int | float) or isinstance(requested, bool):
+            continue
+        if not isinstance(default, int | float) or isinstance(default, bool) or default <= 0:
+            continue
+        cost += 0.5 * max(0.0, float(requested) / float(default) - 1.0)
+    return cost
 
 
 def relevant_skills(goal: Sequence[Condition], specs: Sequence[SkillSpec]) -> list[SkillSpec]:
@@ -172,7 +191,7 @@ def _feasible(
 
 
 def _plan_cost(steps: Sequence[PlanStep], registry: SkillRegistry) -> float:
-    return sum(step_cost(registry.get(step.skill_id)) for step in steps)
+    return sum(step_cost(registry.get(step.skill_id), step.parameter_map) for step in steps)
 
 
 def _cheapest_first(
@@ -212,7 +231,7 @@ def _regress(
             options.append(
                 (
                     settles,
-                    step_cost(spec),
+                    step_cost(spec, parameters),
                     spec.id,
                     str(sorted(parameters.items())),
                     spec,
@@ -308,7 +327,7 @@ def plan_for(
             continue
         if not _is_minimal(steps, start, goal, registry):
             continue
-        cost = sum(step_cost(registry.get(step.skill_id)) for step in steps)
+        cost = sum(step_cost(registry.get(step.skill_id), step.parameter_map) for step in steps)
         risk = sum(registry.get(step.skill_id).risk for step in steps)
         ticks = sum(registry.get(step.skill_id).max_ticks for step in steps)
         scored.append(Plan(steps=steps, cost=cost, risk=risk, ticks=ticks))

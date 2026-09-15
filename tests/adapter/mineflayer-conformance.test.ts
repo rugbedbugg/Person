@@ -322,3 +322,147 @@ test("the observation reports real light rather than guessing from the clock", a
   );
   await body.disconnect();
 });
+
+test("digging equips the right tool and reports only what was collected", async () => {
+  const { body, bot } = await connected({
+    inventory: [
+      { name: "wooden_axe", count: 1 },
+      { name: "wooden_pickaxe", count: 1 },
+    ],
+    blocks: { "2,64,0": "oak_log", "3,64,0": "stone" },
+  });
+  const logs = await body.dig({ x: 2, y: 64, z: 0 });
+  assert.deepEqual(logs, [{ name: "oak_log", count: 1 }]);
+  assert.ok(bot.calls.includes("equip:wooden_axe"), "an axe for wood");
+
+  const stone = await body.dig({ x: 3, y: 64, z: 0 });
+  assert.deepEqual(
+    stone,
+    [{ name: "cobblestone", count: 1 }],
+    "stone drops cobblestone",
+  );
+  assert.ok(bot.calls.includes("equip:wooden_pickaxe"), "a pickaxe for stone");
+  await body.disconnect();
+});
+
+test("digging is refused where the neighbours make it unsafe", async () => {
+  const { body } = await connected({
+    blocks: { "2,64,0": "oak_log", "3,64,0": "lava" },
+  });
+  await assert.rejects(
+    () => body.dig({ x: 2, y: 64, z: 0 }),
+    (error: unknown) => (error as { reason?: string }).reason === "unsafe_dig",
+  );
+  await body.disconnect();
+});
+
+test("digging the block underfoot is refused", async () => {
+  const { body } = await connected();
+  await assert.rejects(
+    () => body.dig({ x: 0, y: 63, z: 0 }),
+    (error: unknown) => (error as { reason?: string }).reason === "unsafe_dig",
+  );
+  await body.disconnect();
+});
+
+test("placement finds an inert reference and confirms the block arrived", async () => {
+  const { body, bot } = await connected({
+    inventory: [{ name: "oak_planks", count: 4 }],
+  });
+  await body.place({ x: 1, y: 64, z: 0 }, "oak_planks");
+  assert.ok(bot.calls.includes("place:oak_planks"));
+  assert.equal(body.blockAt({ x: 1, y: 64, z: 0 })?.name, "oak_planks");
+  await body.disconnect();
+});
+
+test("placement against a container is refused, and so is placing into a block", async () => {
+  const { body } = await connected({
+    inventory: [{ name: "oak_planks", count: 4 }],
+    blocks: { "1,64,0": "chest", "2,64,0": "stone" },
+  });
+  // Every neighbour of this target is either air or the chest, and Person never
+  // right-clicks a container.
+  await assert.rejects(
+    () => body.place({ x: 1, y: 65, z: 0 }, "oak_planks"),
+    (error: unknown) =>
+      (error as { reason?: string }).reason === "no_placement_reference",
+  );
+  await assert.rejects(
+    () => body.place({ x: 2, y: 64, z: 0 }, "oak_planks"),
+    (error: unknown) => (error as { reason?: string }).reason === "occupied",
+  );
+  await body.disconnect();
+});
+
+test("placement without the item is refused before anything is sent", async () => {
+  const { body } = await connected();
+  await assert.rejects(
+    () => body.place({ x: 1, y: 64, z: 0 }, "oak_planks"),
+    (error: unknown) =>
+      (error as { reason?: string }).reason === "missing_item",
+  );
+  await body.disconnect();
+});
+
+test("the guard is asked before any attack, and out-of-reach targets are refused", async () => {
+  const { body, bot } = await connected();
+  const cow = bot.spawnEntity("cow", { x: 2, y: 64, z: 0 });
+  const distant = bot.spawnEntity("cow", { x: 30, y: 64, z: 0 });
+  await body.attack(cow.id);
+  assert.ok(bot.calls.some((call) => call.startsWith("attack:")));
+  await assert.rejects(
+    () => body.attack(distant.id),
+    (error: unknown) =>
+      (error as { reason?: string }).reason === "out_of_reach",
+  );
+  await assert.rejects(
+    () => body.attack(9999),
+    (error: unknown) => (error as { reason?: string }).reason === "no_target",
+  );
+
+  body.setGuard({
+    canEnter: () => true,
+    canModify: () => true,
+    canTargetEntity: () => false,
+  });
+  await assert.rejects(
+    () => body.attack(cow.id),
+    (error: unknown) =>
+      (error as { reason?: string }).reason === "forbidden_target",
+  );
+  await body.disconnect();
+});
+
+test("eating equips the food first, as the server requires", async () => {
+  const { body, bot } = await connected({
+    inventory: [{ name: "cooked_beef", count: 2 }],
+    food: 10,
+  });
+  await body.consume("cooked_beef");
+  assert.ok(bot.calls.includes("equip:cooked_beef"));
+  assert.ok(bot.calls.includes("consume:cooked_beef"));
+  await assert.rejects(
+    () => body.consume("bread"),
+    (error: unknown) =>
+      (error as { reason?: string }).reason === "missing_item",
+  );
+  await body.disconnect();
+});
+
+test("the block search survives being handed palette entries with no position", async () => {
+  // Real mineflayer calls the matcher on palette entries before it has a
+  // position for them, which is why a matcher may only look at the name.
+  const { body } = await connected({
+    blocks: { "4,64,0": "oak_log", "5,64,0": "coal_ore" },
+  });
+  const wood = body.findBlocks({ kinds: ["wood"], maxDistance: 16, limit: 8 });
+  assert.equal(wood.length, 1);
+  assert.equal(wood[0]?.name, "oak_log");
+  const ore = body.findBlocks({
+    kinds: ["coal_ore"],
+    maxDistance: 16,
+    limit: 8,
+  });
+  assert.equal(ore[0]?.kind, "coal_ore");
+  await body.disconnect();
+});
