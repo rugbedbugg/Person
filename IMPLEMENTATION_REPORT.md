@@ -601,3 +601,139 @@ green.
 These fixes have not been seen working against Minecraft. No server was
 reachable while they were made. The next live action is a second
 `person observe`.
+
+# Milestone 2: single-skill live validation harness
+
+Date: 2026-09-16. Branch: `feat/lan-validation`.
+
+## Why
+
+The second `person observe` against Minecraft came back clean: real biome,
+the operator's own username and UUID, balanced resource perception, a short
+list of nearby animals, learning off. Observation is finished.
+
+The next thing Person does is act, and the first time it acts it should be
+because a human asked for exactly one thing and watched what happened. That
+needs an instrument, and the instrument must not be a second way to run
+Person: it has to be the same safety kernel, the same permission gate, the same
+executor and the same outcome accounting an autonomous run will use later.
+
+## The invariant this milestone is really about
+
+Before this patch there was one path from a `SkillInvocation` to a
+`SkillOutcome` and it lived inside `PersonRuntime.#decide`, wound together with
+the cognition channel. A harness could not use it without starting cognition,
+and a harness that reimplemented it would be a second place to forget the
+safety kernel.
+
+So the path was extracted rather than copied. `skills/dispatch.ts` now holds
+it, `PersonRuntime` calls it, and the validation harness calls it. The
+architecture test that used to assert "person-runtime validates before it
+executes" now asserts something stronger: dispatch validates before it
+executes, there are exactly two execution sites in it, and neither the runtime
+nor the harness runs a skill or touches a skill implementation directly.
+
+## Files changed
+
+| Area                                                 | Change                                                                                                                                                                                                              |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/node-runtime/src/skills/dispatch.ts`           | New. The one road from a SkillInvocation to a SkillOutcome: validate, execute what the verdict allowed, hand over to the emergency skill on preemption, credit what ran. Extracted verbatim from the decision loop. |
+| `apps/node-runtime/src/runtime/person-runtime.ts`    | `#decide` now dispatches instead of validating and executing itself. Its hooks send the same messages to cognition in the same order as before.                                                                     |
+| `apps/node-runtime/src/validation/skill-test.ts`     | New. The harness: connect, optional operator setup, pre-observation, one dispatch, post-observation, release the body, compare effects, write the report.                                                           |
+| `apps/node-runtime/src/validation/report.ts`         | New. The validation report and its terminal summary.                                                                                                                                                                |
+| `apps/node-runtime/src/validation/effects.ts`        | New. Runs the cognition package's prediction-error comparison once over the two observations, and degrades to "inconclusive" rather than failing the run.                                                           |
+| `apps/node-runtime/src/validation/learning-state.ts` | New. Fingerprints the evidence store by content hash, so "learning unchanged" is measured rather than asserted.                                                                                                     |
+| `apps/node-runtime/src/reporting/status.ts`          | Optional `phase`, so `person status` can tell a validation run from an autonomous one and an operator-setup pause from an executing skill.                                                                          |
+| `apps/cognition/python/person_cognition/effects.py`  | New. The comparison, expressed entirely in terms of `symbolic_state` and the existing `compare`. Adds only the verdict vocabulary and the list of facts an observation cannot carry.                                |
+| `apps/cognition/python/person_cognition/__main__.py` | `--compare-effects <request>`: a one-shot analysis that returns before any loop, policy or evidence store is constructed.                                                                                           |
+| `apps/cli/src/skill-test.ts`                         | New. `person skill-test`, the operator-setup prompt, and the terminal summary.                                                                                                                                      |
+| `apps/cli/src/bin/person.ts`                         | `skill-test`, `--skill`, `--operator-setup`.                                                                                                                                                                        |
+| `fixtures/src/world.ts`                              | `disconnect` and `dropConnection` invalidate the cached snapshot. A body that still answers "connected" from a stale snapshot hides the thing the hook simulates.                                                   |
+
+## How the trust boundary is preserved
+
+- `--skill` resolves against the registry and nothing else. An unknown name is
+  refused before a connection is opened.
+- Parameters are resolved by `SkillRegistry.resolveParameters`, so the only
+  parameters that exist are the ones a SkillSpec declares, and they are scalars.
+  A test asserts no registered skill exposes anything shaped like a coordinate.
+- There is no free-form argument. The parser rejects `--command`, `--script`,
+  `--position` and the like as unknown options, which is also tested.
+- Cost limits come from the spec, not from the caller.
+- The kernel's verdict is authoritative and reported verbatim. A REJECT runs
+  nothing; a REPLACE reports the requested skill as PREEMPTED and names the
+  emergency skill that actually ran.
+- Home comes from `WorldMemory`, as it always did. Nothing in the CLI or the
+  invocation can say where home is.
+
+## Learning neutrality
+
+A validation run is not an experience. It writes no evidence, no episode
+report, and no policy snapshot, and it starts no cognition loop. The evidence
+directory is fingerprinted by content hash before and after the run and both
+fingerprints go into the report, so a run that accidentally changed learning
+state would be obvious in its own record rather than discovered later.
+
+The physical result is not discarded: it is stored separately, under
+`runs/validation/skill-tests/`, with both observations, the outcome, the safety
+decision and the effect comparison.
+
+## The effect comparison
+
+Reused, not rebuilt. `person_cognition.effects` is a thin shell over
+`person_planner.symbolic_state` and `person_cognition.prediction.compare`, the
+same pair that settles prediction error during a live run. The harness writes a
+request, runs the configured cognition command once with `--compare-effects`,
+and reads the answer back as JSON.
+
+Nothing physical crosses that boundary in either direction: the request is two
+observations and a list of declared effects, and the answer is a verdict per
+fact. A fact an Observation cannot carry (`rested`, `stored_surplus`,
+`withdrawn`, `looted`) is reported as `not_observable` rather than as a failed
+prediction, and a Python test asserts those facts really are underivable. If
+the comparison cannot run at all, every fact is `inconclusive` and the report
+says why; the skill still ran and the report is still written.
+
+## Operator setup
+
+`return_home` has to start away from home, and Person has no teleport
+capability. Rather than giving it one, `--operator-setup` pauses the run after
+connection and readiness, prints `READY FOR OPERATOR SETUP`, and waits for the
+operator to press Enter. Person is physically inert throughout: a test records
+every call made to the body and asserts none of them happened before the
+confirmation.
+
+Before the measured run begins, the state is re-checked: still connected, still
+alive, in the Overworld, inside the configured exploration area and not in a
+protected area. Any of those failing refuses the test rather than measuring
+something else. Whether the human actually moved Person is never guessed at,
+and a run that used the setup phase is recorded as operator-contaminated.
+
+## Deviations
+
+One, deliberate. The effect comparison runs a Python subprocess, which no
+other Node command does. The alternative was a second implementation of the
+comparison in Node, which would drift from the first one and quietly make a
+validation report and a prediction-error record mean different things. The
+subprocess is a pure function over two JSON documents: it starts no loop,
+reads no evidence, proposes nothing, and cannot fail the run.
+
+## New tests
+
+| Suite                                        | Tests     | Covers                                                                                                                                                                                                                                                                                              |
+| -------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `tests/validation/skill-test.test.ts`        | 19        | wait_safely and return_home end to end, unknown skill, bad parameters, REJECT, REPLACE, pre/post observations, learning unchanged, report shape, status phases, operator setup inert and explicitly confirmed, invalid setup states, disconnect mid-skill, bounded disconnect, report write failure |
+| `tests/validation/skill-test-exit.test.ts`   | 4         | The whole command in a real child process: success, refusal, operator setup answered, operator setup abandoned. Each must exit without being killed                                                                                                                                                 |
+| `tests/integration/skill-validation.test.ts` | 3         | The real comparison end to end: an effect the world confirms, one it cannot carry, and a comparison that cannot run                                                                                                                                                                                 |
+| `apps/cognition/tests/test_effects.py`       | 7         | Match, mismatch, not observable, missing post-observation, the unobservable facts really being unobservable, and the entry point never returning anything that could become a request                                                                                                               |
+| `tests/cli/cli.test.ts`                      | 2 added   | `skill-test` parsing, and that no free-form option is accepted                                                                                                                                                                                                                                      |
+| `tests/architecture/architecture.test.ts`    | rewritten | Dispatch is the only path, and neither caller bypasses it                                                                                                                                                                                                                                           |
+
+Totals: 188 Node tests and 129 Python tests, 317 in all. `mise run check` is
+green.
+
+## Still true
+
+Neither skill has been run against Minecraft through this harness. No server
+was reachable while it was built. The next live actions are `wait_safely` and
+then `return_home` with `--operator-setup`, in that order.

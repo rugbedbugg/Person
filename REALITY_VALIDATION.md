@@ -516,6 +516,9 @@ immediately.
 
 ### Live re-validation: pending
 
+**Resolved on 2026-09-16 by a second live observation. The section after this
+one records it. What follows is what was true when the four fixes were made.**
+
 No Minecraft server was reachable while these four fixes were made. No Java
 process is running and nothing is listening on a Minecraft port. The fixes are
 implemented against the real installed libraries and covered by conformance
@@ -525,3 +528,94 @@ Minecraft**. The next live action is a second `person observe`, and the things
 to check in its output are: `biome` is a real biome name, the operator appears
 under their own account name, `resources` shows a mix of categories rather than
 one, and `passiveAnimals` is a short list of animals that are actually nearby.
+
+## Second contact
+
+The second live `person observe` against the same Minecraft Java 1.16.1 LAN
+world, run by the operator on 2026-09-16. It is the run that checked the four
+first-contact corrections against Minecraft rather than against a double.
+
+Reported from that run:
+
+| Field           | Value                                     |
+| --------------- | ----------------------------------------- |
+| biome           | `plains`                                  |
+| player username | `Shroud`                                  |
+| player uuid     | `1ed03c15-b62c-33e4-8e93-cd19bc1d57e3`    |
+| resources       | stone 28, coal 12, plant_food 12, wood 12 |
+| passive animals | 8                                         |
+| position        | -218,66,164                               |
+| home distance   | 0                                         |
+| learning        | off                                       |
+
+All four corrections hold against Minecraft:
+
+- biome resolves to a real biome name from the registry rather than `unknown`;
+- the human appears under an account name and a stable UUID, not as `player`;
+- resource perception is balanced across categories instead of saturated by
+  whatever Person happens to be standing on;
+- passive animals are the ones actually nearby and inside the usable region.
+
+The observation lifecycle, spawn readiness, schema validity, configured home
+and learning-off state all held as well. This closes the observation milestone.
+It is not revisited below unless a later stage exposes a regression in it.
+
+## Single-skill live validation
+
+The stage after observation, and the first one where Person acts. One skill at
+a time, chosen by a human, run through the same safety kernel and the same
+executor an autonomous run uses.
+
+`person skill-test` exists for this. It builds one `SkillInvocation` from a
+skill that is already in the library and hands it to the shared dispatch path;
+it does not call a skill implementation, and there is no argument that can
+describe an action the library does not already contain. It takes an
+observation before and after, compares the skill's declared effects against
+them using the cognition package's own prediction-error comparison, and writes
+one report under `runs/validation/skill-tests/`.
+
+It changes nothing the learner knows. The evidence store is fingerprinted
+before and after the run and the result is in the report, so "learning
+unchanged" is a measurement rather than an assurance.
+
+### Intended order
+
+1. `wait_safely`
+2. `return_home`
+3. basic gathering
+4. crafting
+5. mining
+6. placement and building
+7. containers
+8. hunting
+
+Only the first two are prepared. Nothing below `return_home` has been started.
+
+### Status
+
+| Skill         | Fixture end to end | Live Minecraft |
+| ------------- | ------------------ | -------------- |
+| `wait_safely` | passing            | **pending**    |
+| `return_home` | passing            | **pending**    |
+
+**No Minecraft server was reachable while the harness was built.** Everything
+here was exercised against the fixture world, which implements the same
+embodiment port the Mineflayer adapter implements, and against the real
+prediction-error comparison in the cognition package. Neither skill has been
+seen running against Minecraft through this harness, and the two runs below are
+the operator's to make.
+
+```
+node apps/cli/src/bin/person.ts skill-test \
+  --config examples/person-test-world-1.toml --port <PORT> --skill wait_safely
+
+node apps/cli/src/bin/person.ts skill-test \
+  --config examples/person-test-world-1.toml --port <PORT> --skill return_home \
+  --operator-setup
+```
+
+For `return_home`, position Person 8 to 12 blocks from the configured home
+(-218,66,164) during the setup pause, using your own Minecraft controls. Person
+has no teleport capability and the CLI exposes none: the setup phase exists
+precisely so that moving Person is something a human does and declares, and the
+run is recorded as operator-contaminated when it happens.
