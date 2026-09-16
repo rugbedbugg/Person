@@ -7,16 +7,13 @@ import {
   type EmergencyEvent,
   type EpisodeEvent,
   type GoalDecision,
-  type ItemDelta,
+  type MessageType,
   type PolicyDecision,
   type PreviousOutcome,
   type SessionHello,
   type SessionIdentity,
   type SkillInvocation,
   type SkillOutcome,
-  type SkillStarted,
-  type TerminalStatus,
-  type ValidationDecision,
 } from "#protocol";
 import { skillRegistry, type SkillRegistry, type SkillSpec } from "#skills";
 import type { Embodiment, PhysicalGuard } from "../embodiment/types.ts";
@@ -31,7 +28,11 @@ import {
   type EmergencyAssessment,
 } from "../safety/safety-kernel.ts";
 import { InvocationValidator } from "../safety/validator.ts";
-import { SkillRunner, type ExecutionResult } from "../skills/executor.ts";
+import { SkillRunner } from "../skills/executor.ts";
+import {
+  dispatchSkill,
+  type DispatchDependencies,
+} from "../skills/dispatch.ts";
 import {
   CognitionChannel,
   CognitionUnavailableError,
@@ -64,24 +65,6 @@ export interface PersonRuntimeOptions {
    */
   operatorIntervention?: { reason?: string };
 }
-
-const negativeOnly = (deltas: ItemDelta[]): ItemDelta[] =>
-  deltas.filter((item) => item.delta < 0);
-
-const resolveEffects = (
-  spec: SkillSpec,
-  parameters: Readonly<Record<string, number | string | boolean>>,
-): { fact: string; op: "+=" | "-=" | "=" | "max"; value: number }[] =>
-  spec.expectedEffects.map((effect) => {
-    const scaled = effect.scalesWith
-      ? parameters[effect.scalesWith]
-      : undefined;
-    return {
-      fact: effect.fact,
-      op: effect.op,
-      value: typeof scaled === "number" ? scaled : effect.value,
-    };
-  });
 
 /**
  * The decision loop, and the place where the trust boundary is actually
@@ -211,6 +194,17 @@ export class PersonRuntime {
     tick: number,
   ): ReturnType<typeof envelope> {
     return envelope(this.identity, type as never, tick);
+  }
+
+  /** The one road to the embodiment, wired for this session. */
+  dispatchDependencies(): DispatchDependencies {
+    return {
+      registry: this.registry,
+      validator: this.validator,
+      runner: this.runner,
+      embodiment: this.#embodiment,
+      envelope: (type: MessageType, tick: number) => this.#envelope(type, tick),
+    };
   }
 
   async run(): Promise<EpisodeReport> {
@@ -428,250 +422,72 @@ export class PersonRuntime {
         .map((entry) => entry.goalId),
     };
 
-    const verdict = this.validator.validate(
+    // Everything physical goes through the one dispatch path, the same one an
+    // operator validation run uses. The hooks below only report what happened.
+    const dispatched = await dispatchSkill(
       invocation,
-      this.#embodiment.snapshot(),
-    );
-    const validation: ValidationDecision = {
-      ...this.#envelope("ValidationDecision", this.#embodiment.snapshot().tick),
-      type: "ValidationDecision",
-      decisionId: invocation.decisionId,
-      requestedSkill: invocation.skillId,
-      decision: verdict.decision,
-      level: verdict.level,
-      reasonCodes: verdict.reasonCodes,
-      executedSkill: verdict.executedSkill,
-      executedParameters: verdict.executedParameters,
-      executedLimits: verdict.executedLimits,
-    };
-    this.#channel.send(validation);
-    this.#syncStatus({
-      goalType: goal.goal.goalType,
-      decisions: this.#decisionCount,
-      lastValidation: {
-        decision: verdict.decision,
-        level: verdict.level,
-        requestedSkill: invocation.skillId,
-        executedSkill: verdict.executedSkill,
-        reasonCodes: verdict.reasonCodes,
+      {
+        goalId: goal.goal.goalId,
+        routineId: policy.routineId,
+        contextId: policy.contextId,
       },
-    });
+      this.dispatchDependencies(),
+      {
+        onValidation: (validation, verdict) => {
+          this.#channel.send(validation);
+          this.#syncStatus({
+            goalType: goal.goal.goalType,
+            decisions: this.#decisionCount,
+            lastValidation: {
+              decision: verdict.decision,
+              level: verdict.level,
+              requestedSkill: invocation.skillId,
+              executedSkill: verdict.executedSkill,
+              reasonCodes: verdict.reasonCodes,
+            },
+          });
+        },
+        onEmergency: (assessment, decisionId, preemptedSkill) => {
+          this.#sendEmergency(assessment, decisionId, preemptedSkill);
+          builder.addSafetyOverride({
+            tick: this.#embodiment.snapshot().tick,
+            level: assessment.level,
+            trigger: assessment.trigger,
+            action: assessment.action,
+            preemptedSkill,
+          });
+        },
+        onStarted: (started) => this.#channel.send(started),
+      },
+    );
 
-    const requestedSpec = this.registry.has(invocation.skillId)
-      ? this.registry.get(invocation.skillId)
-      : null;
-
-    if (verdict.emergency) {
-      this.#sendEmergency(
-        verdict.emergency,
-        invocation.decisionId,
-        verdict.decision === "REPLACE" ? invocation.skillId : null,
-      );
-      builder.addSafetyOverride({
-        tick: this.#embodiment.snapshot().tick,
-        level: verdict.emergency.level,
-        trigger: verdict.emergency.trigger,
-        action: verdict.emergency.action,
-        preemptedSkill:
-          verdict.decision === "REPLACE" ? invocation.skillId : null,
-      });
-    }
-
-    if (
-      verdict.decision === "REJECT" ||
-      !verdict.executedSkill ||
-      !verdict.executedLimits
-    ) {
-      const outcome = this.#buildOutcome({
-        invocation,
-        policy,
-        goal,
-        executedSkill: null,
-        executedParameters: null,
-        requestedSkillStatus: "INVALIDATED",
-        status: "INVALIDATED",
-        emergency: Boolean(verdict.emergency),
-        reasonCodes: verdict.reasonCodes,
-        result: null,
-        expectedEffects: requestedSpec
-          ? resolveEffects(requestedSpec, invocation.parameters)
-          : [],
-      });
-      this.#channel.send(outcome);
-      this.#record(
-        builder,
-        goal,
-        policy,
-        invocation,
-        verdict.decision,
-        verdict.level,
-        verdict.reasonCodes,
-        outcome,
-        requestedSpec,
-      );
-      return;
-    }
-
-    const started: SkillStarted = {
-      ...this.#envelope("SkillStarted", this.#embodiment.snapshot().tick),
-      type: "SkillStarted",
-      decisionId: invocation.decisionId,
-      requestedSkill: invocation.skillId,
-      executedSkill: verdict.executedSkill,
-      parameters: verdict.executedParameters ?? {},
-      limits: verdict.executedLimits,
-      startTick: this.#embodiment.snapshot().tick,
-      startHealth: this.#embodiment.snapshot().health,
-      startFood: this.#embodiment.snapshot().food,
-      startInventory: this.#embodiment.snapshot().inventory,
-    };
-    this.#channel.send(started);
-
-    let executedSkill = verdict.executedSkill;
-    let executedParameters = verdict.executedParameters ?? {};
-    let result = await this.runner.run({
-      skillId: executedSkill,
-      parameters: executedParameters,
-      limits: verdict.executedLimits,
-      emergency:
-        this.registry.get(executedSkill).emergency ||
-        Boolean(verdict.emergency),
-    });
-
-    let requestedSkillStatus: TerminalStatus =
-      verdict.decision === "REPLACE" ? "PREEMPTED" : result.status;
-    const reasonCodes = [...verdict.reasonCodes, ...result.reasonCodes];
-
-    // A skill preempted mid-flight hands control to the emergency skill. The
-    // outcome then credits what actually ran, and says explicitly that the
-    // requested skill was preempted.
-    if (result.status === "PREEMPTED" && result.preemption) {
-      const assessment = result.preemption;
-      this.#sendEmergency(assessment, invocation.decisionId, executedSkill);
-      builder.addSafetyOverride({
-        tick: this.#embodiment.snapshot().tick,
-        level: assessment.level,
-        trigger: assessment.trigger,
-        action: assessment.action,
-        preemptedSkill: executedSkill,
-      });
-      const replacement = this.validator.emergencyInvocation(assessment);
-      requestedSkillStatus = "PREEMPTED";
-      if (replacement) {
-        const emergencyResult = await this.runner.run({
-          skillId: replacement.skillId,
-          parameters: replacement.parameters,
-          limits: replacement.limits,
-          emergency: true,
-        });
-        executedSkill = replacement.skillId;
-        executedParameters = replacement.parameters;
-        reasonCodes.push(assessment.trigger, ...emergencyResult.reasonCodes);
-        result = { ...emergencyResult, preemption: assessment };
-      }
-    }
-
-    const executedSpec = this.registry.get(executedSkill);
-    const outcome = this.#buildOutcome({
-      invocation,
-      policy,
-      goal,
-      executedSkill,
-      executedParameters,
-      requestedSkillStatus,
-      status: result.status,
-      emergency: Boolean(verdict.emergency) || Boolean(result.preemption),
-      reasonCodes,
-      result,
-      expectedEffects: resolveEffects(executedSpec, executedParameters),
-    });
+    const outcome = dispatched.outcome;
     this.#channel.send(outcome);
-    this.#previousOutcome = {
-      requestedSkill: outcome.requestedSkill,
-      executedSkill: outcome.executedSkill,
-      status: outcome.status,
-      effects: outcome.effects,
-      healthCost: outcome.healthCost,
-      resourceCost: outcome.resourceCost,
-      elapsedTicks: outcome.elapsedTicks,
-      interruptReason: outcome.interruptReason,
-    };
-    this.#cognitionState = { ...this.#cognitionState, activeSkill: null };
-    this.memory.save();
+    if (dispatched.executedSkill !== null) {
+      this.#previousOutcome = {
+        requestedSkill: outcome.requestedSkill,
+        executedSkill: outcome.executedSkill,
+        status: outcome.status,
+        effects: outcome.effects,
+        healthCost: outcome.healthCost,
+        resourceCost: outcome.resourceCost,
+        elapsedTicks: outcome.elapsedTicks,
+        interruptReason: outcome.interruptReason,
+      };
+      this.#cognitionState = { ...this.#cognitionState, activeSkill: null };
+      this.memory.save();
+    }
     this.#record(
       builder,
       goal,
       policy,
       invocation,
-      verdict.decision,
-      verdict.level,
-      verdict.reasonCodes,
+      dispatched.verdict.decision,
+      dispatched.verdict.level,
+      dispatched.verdict.reasonCodes,
       outcome,
-      requestedSpec,
+      dispatched.requestedSpec,
     );
-  }
-
-  #buildOutcome(input: {
-    invocation: SkillInvocation;
-    policy: PolicyDecision;
-    goal: GoalDecision;
-    executedSkill: string | null;
-    executedParameters: Readonly<
-      Record<string, number | string | boolean>
-    > | null;
-    requestedSkillStatus: TerminalStatus;
-    status: TerminalStatus;
-    emergency: boolean;
-    reasonCodes: string[];
-    result: ExecutionResult | null;
-    expectedEffects: {
-      fact: string;
-      op: "+=" | "-=" | "=" | "max";
-      value: number;
-    }[];
-  }): SkillOutcome {
-    const snapshot = this.#embodiment.snapshot();
-    const result = input.result;
-    const interruptReason =
-      input.status === "PREEMPTED" || input.requestedSkillStatus === "PREEMPTED"
-        ? (result?.preemption?.trigger ?? "preempted")
-        : input.status === "TIMED_OUT"
-          ? "tick_budget_exceeded"
-          : null;
-    return {
-      ...this.#envelope("SkillOutcome", snapshot.tick),
-      type: "SkillOutcome",
-      decisionId: input.invocation.decisionId,
-      goalId: input.goal.goal.goalId,
-      routineId: input.policy.routineId,
-      contextId: input.policy.contextId,
-      requestedSkill: input.invocation.skillId,
-      requestedParameters: input.invocation.parameters,
-      requestedSkillStatus: input.requestedSkillStatus,
-      executedSkill: input.executedSkill,
-      executedParameters: input.executedParameters,
-      status: input.status,
-      emergency: input.emergency,
-      reasonCodes: [...new Set(input.reasonCodes)].slice(0, 32),
-      effects: result?.effects ?? [],
-      expectedEffects: input.expectedEffects,
-      healthBefore: result?.healthBefore ?? snapshot.health,
-      healthAfter: result?.healthAfter ?? snapshot.health,
-      foodBefore: result?.foodBefore ?? snapshot.food,
-      foodAfter: result?.foodAfter ?? snapshot.food,
-      healthCost: Math.max(
-        0,
-        (result?.healthBefore ?? 0) - (result?.healthAfter ?? 0),
-      ),
-      resourceCost: negativeOnly(result?.inventoryDelta ?? []),
-      inventoryDelta: result?.inventoryDelta ?? [],
-      elapsedTicks: result?.elapsedTicks ?? 0,
-      interruptReason,
-      completionEvidence: {
-        kinds: result?.evidenceKinds ?? [],
-        details: result?.evidenceDetails ?? {},
-      },
-    };
   }
 
   #record(

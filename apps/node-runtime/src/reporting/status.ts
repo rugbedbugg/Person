@@ -28,6 +28,15 @@ export interface RuntimeStatus {
   schemaVersion: number;
   updatedAt: string;
   command: string;
+  /**
+   * Which stage of the command is running.
+   *
+   * `observe` and `run` have one shape each, but a validation run has several
+   * that look identical from outside: an operator waiting to position Person
+   * and a Person mid-skill are both "connected and not moving much". Optional
+   * because a status file written before this existed is still readable.
+   */
+  phase?: string | null;
   connection: ConnectionState;
   readiness: string;
   failureReason: string | null;
@@ -91,6 +100,7 @@ const blank = (seed: Partial<RuntimeStatus>): RuntimeStatus => ({
   schemaVersion: STATUS_SCHEMA_VERSION,
   updatedAt: new Date().toISOString(),
   command: "unknown",
+  phase: null,
   connection: "starting",
   readiness: "not started",
   failureReason: null,
@@ -219,7 +229,9 @@ export function renderStatus(status: RuntimeStatus, now = Date.now()): string {
     }`,
   );
   lines.push(
-    `  session   world=${status.worldId} session=${status.sessionId.slice(0, 8)} episode=${status.episodeId ?? "none"} command=${status.command}`,
+    `  session   world=${status.worldId} session=${status.sessionId.slice(0, 8)} episode=${status.episodeId ?? "none"} command=${status.command}${
+      status.phase ? ` phase=${status.phase}` : ""
+    }`,
   );
   lines.push(
     `  server    ${status.server ? `${status.server.host}:${status.server.port} (${status.server.version})` : `none (${status.embodiment})`}`,

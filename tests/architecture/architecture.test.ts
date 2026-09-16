@@ -123,22 +123,44 @@ test("cognition may only send decisions; the runtime owns every verdict", () => 
 });
 
 test("no proposal reaches an executor without passing the validator", () => {
-  const runtime = read("apps/node-runtime/src/runtime/person-runtime.ts");
+  // There is one road from a SkillInvocation to a SkillOutcome, and both the
+  // autonomous loop and the operator's single-skill validation harness drive
+  // down it. A second road would be a second place to forget the kernel.
+  const dispatch = read("apps/node-runtime/src/skills/dispatch.ts");
   assert.ok(
-    runtime.includes("this.validator.validate("),
-    "the runtime must validate proposals",
+    dispatch.includes("deps.validator.validate("),
+    "dispatch must validate proposals",
   );
-  const executions = runtime.match(/this\.runner\.run\(/g) ?? [];
+  const executions = dispatch.match(/deps\.runner\.run\(/g) ?? [];
   assert.equal(
     executions.length,
     2,
     "exactly two execution sites: the validated proposal and the emergency replacement",
   );
-  const validationIndex = runtime.indexOf("this.validator.validate(");
   assert.ok(
-    validationIndex < runtime.indexOf("this.runner.run("),
+    dispatch.indexOf("deps.validator.validate(") <
+      dispatch.indexOf("deps.runner.run("),
     "validation must happen before execution",
   );
+
+  for (const caller of [
+    "apps/node-runtime/src/runtime/person-runtime.ts",
+    "apps/node-runtime/src/validation/skill-test.ts",
+  ]) {
+    const source = read(caller);
+    assert.ok(
+      source.includes("dispatchSkill("),
+      `${caller} must reach the executor through dispatch`,
+    );
+    assert.ok(
+      !/\.runner\.run\(/.test(source),
+      `${caller} must not run a skill directly`,
+    );
+    assert.ok(
+      !/SKILL_IMPLEMENTATIONS/.test(source),
+      `${caller} must not reach a skill implementation directly`,
+    );
+  }
 });
 
 test("the skill library and its implementations agree exactly", () => {

@@ -8,6 +8,7 @@ import {
   compareCommand,
   inspectCommand,
   observeCommand,
+  skillTestCommand,
   validateCommand,
 } from "../../apps/cli/src/commands.ts";
 import { REPOSITORY } from "../support/harness.ts";
@@ -245,4 +246,81 @@ test("comparing an observation with itself finds nothing structural", () => {
   const body = JSON.parse(result.output) as { structural: number };
   assert.equal(body.structural, 0);
   assert.equal(result.code, 0);
+});
+
+test("skill-test is parsed like the other commands, and demands a skill", () => {
+  const parsed = parseArguments([
+    "skill-test",
+    "--config",
+    "examples/fixture.toml",
+    "--skill",
+    "wait_safely",
+    "--port",
+    "51234",
+  ]);
+  assert.equal(parsed.command, "skill-test");
+  assert.equal(parsed.skillId, "wait_safely");
+  assert.equal(parsed.operatorSetup, false);
+  assert.equal(parsed.connection.port, 51234);
+
+  const setup = parseArguments([
+    "skill-test",
+    "--config",
+    "c.toml",
+    "--skill",
+    "return_home",
+    "--operator-setup",
+  ]);
+  assert.equal(setup.operatorSetup, true);
+
+  assert.throws(
+    () => parseArguments(["skill-test", "--config", "c.toml"]),
+    /needs --skill/,
+  );
+  assert.throws(
+    () => parseArguments(["skill-test", "--skill", "wait_safely"]),
+    /needs --config/,
+  );
+  assert.throws(
+    () => parseArguments(["skill-test", "--config", "c", "--skill"]),
+    /--skill needs/,
+  );
+  assert.throws(
+    () => parseArguments(["observe", "--config", "c.toml", "--operator-setup"]),
+    /--operator-setup only applies/,
+  );
+  // There is no way to describe an action the library does not already have.
+  for (const forbidden of [
+    "--command",
+    "--chat",
+    "--script",
+    "--position",
+    "--teleport",
+    "--parameters",
+  ])
+    assert.throws(
+      () =>
+        parseArguments([
+          "skill-test",
+          "--config",
+          "c.toml",
+          "--skill",
+          "wait_safely",
+          forbidden,
+          "anything",
+        ]),
+      /Unknown option/,
+      `${forbidden} must not be accepted`,
+    );
+});
+
+test("skill-test refuses a skill the library does not contain", async () => {
+  const result = await skillTestCommand({
+    configPath: path.join(REPOSITORY, "examples/fixture.toml"),
+    skillId: "teleport_home",
+    json: false,
+  });
+  assert.equal(result.code, 2);
+  assert.match(result.output, /not a registered skill/);
+  assert.match(result.output, /wait_safely/, "it lists what is available");
 });

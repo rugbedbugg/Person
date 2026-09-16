@@ -15,6 +15,7 @@ from typing import TextIO
 
 from person_config import ConfigError, load_cognition_settings
 
+from .effects import main as compare_effects
 from .loop import CognitionLoop
 
 
@@ -43,7 +44,27 @@ def main(argv: list[str] | None = None) -> int:
         "--evidence-directory",
         help="Override the evidence directory the runtime announces (tests and replay)",
     )
+    parser.add_argument(
+        "--compare-effects",
+        metavar="REQUEST",
+        help=(
+            "Compare a skill's declared effects against two observations and print the "
+            "result. A one-shot analysis for the single-skill validation harness: it "
+            "starts no cognition loop, reads no evidence, and proposes nothing."
+        ),
+    )
     arguments = parser.parse_args(argv)
+
+    if arguments.compare_effects:
+        # Deliberately before anything else is constructed. This path must not
+        # be able to become a decision: no loop, no policy, no evidence.
+        try:
+            sys.stdout.write(compare_effects(arguments.compare_effects))
+            sys.stdout.flush()
+        except (OSError, ValueError, KeyError) as error:
+            sys.stderr.write(f"person-cognition: {error}\n")
+            return 2
+        return 0
 
     settings = None
     if arguments.config:

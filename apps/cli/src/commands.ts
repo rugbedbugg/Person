@@ -31,6 +31,9 @@ import {
   resolveBase,
 } from "./observe.ts";
 
+export { skillTestCommand } from "./skill-test.ts";
+export type { SkillTestOptions, SkillTestResult } from "./skill-test.ts";
+
 export interface CommandResult {
   code: number;
   output: string;
