@@ -13,6 +13,7 @@ import {
   inspectCommand,
   observeCommand,
   runCommand,
+  skillTestCommand,
   statusCommand,
   validateCommand,
 } from "../commands.ts";
@@ -23,6 +24,8 @@ Usage:
   person run      --config <file> [--port <n>] [--host <h>] [--json] [--episode-id <id>]
   person learn    --mode off|shadow|supervised --config <file> [--port <n>] [--json]
   person observe  --config <file> [--port <n>] [--host <h>] [--json] [--out <file>]
+  person skill-test --config <file> --skill <id> [--port <n>] [--host <h>] [--json]
+                    [--operator-setup]
   person status   --config <file> [--json] [--follow [--interval <ms>]]
   person validate <file> [--migrate]
   person inspect  evidence|skills|config|predictions [--config <file>] [--json]
@@ -38,6 +41,12 @@ Notes:
 
   "observe" connects, takes one observation and stops. It is the smallest thing
   that can be done against a live Minecraft world, and the right first one.
+
+  "skill-test" validates one skill that is already in the library against the
+  same safety kernel and executor an autonomous run uses. It selects no goal,
+  runs no planner and changes nothing the learner knows. --skill accepts a
+  registered skill name and nothing else. --operator-setup pauses after
+  connecting so you can position Person yourself before the measured run.
 
   "status" reads what the runtime last wrote. It never connects, so watching
   Person cannot change what Person does.
@@ -63,10 +72,13 @@ export interface ParsedCommand {
     | "observe"
     | "status"
     | "compare"
+    | "skill-test"
     | "help";
   configPath?: string;
   target?: string;
   learningMode?: "off" | "shadow" | "supervised";
+  skillId?: string;
+  operatorSetup: boolean;
   json: boolean;
   migrate: boolean;
   episodeId?: string;
@@ -85,6 +97,7 @@ export function parseArguments(argv: string[]): ParsedCommand {
     command: "help",
     json: false,
     migrate: false,
+    operatorSetup: false,
     connection: {},
     follow: false,
     intervalMs: 1000,
@@ -101,6 +114,7 @@ export function parseArguments(argv: string[]): ParsedCommand {
     "observe",
     "status",
     "compare",
+    "skill-test",
   ] as const;
   if ((COMMANDS as readonly string[]).includes(command as string))
     parsed.command = command as (typeof COMMANDS)[number];
@@ -125,7 +139,14 @@ export function parseArguments(argv: string[]): ParsedCommand {
       if (!value || value.startsWith("--"))
         throw new UsageError("--episode-id needs a value");
       parsed.episodeId = value;
-    } else if (argument === "--out") {
+    } else if (argument === "--skill") {
+      const value = rest[++index];
+      if (!value || value.startsWith("--"))
+        throw new UsageError("--skill needs the name of a registered skill");
+      if (parsed.skillId) throw new UsageError("--skill was given twice");
+      parsed.skillId = value;
+    } else if (argument === "--operator-setup") parsed.operatorSetup = true;
+    else if (argument === "--out") {
       const value = rest[++index];
       if (!value || value.startsWith("--"))
         throw new UsageError("--out needs a file path");
@@ -178,6 +199,16 @@ export function parseArguments(argv: string[]): ParsedCommand {
         "person inspect needs a target (evidence, skills, config, predictions)",
       );
   }
+  if (parsed.command === "skill-test") {
+    if (!parsed.configPath)
+      throw new UsageError("person skill-test needs --config <file>");
+    if (!parsed.skillId)
+      throw new UsageError(
+        "person skill-test needs --skill <registered skill>",
+      );
+  }
+  if (parsed.operatorSetup && parsed.command !== "skill-test")
+    throw new UsageError("--operator-setup only applies to person skill-test");
   if (parsed.command === "observe" && !parsed.configPath)
     throw new UsageError("person observe needs --config <file>");
   if (parsed.command === "status" && !parsed.configPath)
@@ -228,6 +259,20 @@ export async function main(argv: string[]): Promise<number> {
         configPath: parsed.configPath as string,
         json: parsed.json,
         ...(parsed.outputFile ? { outputFile: parsed.outputFile } : {}),
+        connection: parsed.connection,
+        ...(parsed.operatorIntervention
+          ? { operatorIntervention: parsed.operatorIntervention }
+          : {}),
+      });
+      process.stdout.write(result.output);
+      return result.code;
+    }
+    if (parsed.command === "skill-test") {
+      const result = await skillTestCommand({
+        configPath: parsed.configPath as string,
+        skillId: parsed.skillId as string,
+        json: parsed.json,
+        operatorSetup: parsed.operatorSetup,
         connection: parsed.connection,
         ...(parsed.operatorIntervention
           ? { operatorIntervention: parsed.operatorIntervention }

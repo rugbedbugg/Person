@@ -314,11 +314,19 @@ export class FixtureWorld implements Embodiment {
 
   async disconnect(): Promise<void> {
     this.#connected = false;
+    this.#invalidate();
   }
 
-  /** Test hook: simulate the Minecraft connection dropping. */
+  /**
+   * Test hook: simulate the Minecraft connection dropping.
+   *
+   * The cached snapshot has to go with it. A body that still answers "yes, I
+   * am connected" from a snapshot taken a moment earlier would hide the very
+   * thing this hook exists to simulate.
+   */
   dropConnection(): void {
     this.#connected = false;
+    this.#invalidate();
   }
 
   // ---------------------------------------------------------------- time
