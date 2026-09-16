@@ -186,21 +186,87 @@ and a routine.
 
 ### 2. Each skill individually
 
-Give Person a starting inventory by hand where a skill needs one, and use a
-one-decision run for each. Work through the library in this order, since later
-ones depend on earlier ones:
+This is what `person skill-test` is for. It validates one skill that is already
+in the library, through the same safety kernel and the same executor an
+autonomous run uses. It selects no goal, starts no planner, and changes nothing
+the learner knows.
 
 ```
+node apps/cli/src/bin/person.ts skill-test --config my-world.toml --port <PORT> \
+  --skill wait_safely
+```
+
+`--skill` accepts a registered skill name and nothing else. There is no way to
+pass it coordinates, a command, or an action the library does not already have;
+parameters come from the skill's own specification and so do its cost limits.
+
+It prints a short summary and writes a full report under
+`runs/validation/skill-tests/`. The report holds the observation before, the
+observation after, the safety decision, the skill that actually executed, the
+outcome, the completion evidence, the effect comparison, and a content
+fingerprint of the evidence store taken before and after the run.
+
+Read four things in the summary every time:
+
+- **executed** must be the skill you asked for. If the kernel substituted
+  something, the summary says so and the run is not a validation of what you
+  asked about; find out what the kernel saw first.
+- **outcome** is the terminal status from the executor, not a judgement.
+- **effects** counts the skill's declared effects against the two observations.
+  `not observable` is a normal answer for a skill whose effect an observation
+  cannot carry, and is not a failure.
+- **learning** must say `unchanged`. If it ever says `CHANGED`, stop.
+
+#### Skills that need Person somewhere specific
+
+`return_home` has to start away from home, and Person cannot teleport. Use the
+operator setup phase:
+
+```
+node apps/cli/src/bin/person.ts skill-test --config my-world.toml --port <PORT> \
+  --skill return_home --operator-setup
+```
+
+Person connects, reaches readiness, prints `READY FOR OPERATOR SETUP` and then
+does nothing at all until you press Enter. Move it yourself during that pause,
+with your own Minecraft controls, to somewhere 8 to 12 blocks from the
+configured home. When you continue, the harness re-checks that Person is still
+connected, alive, in the Overworld and inside the configured exploration area,
+and refuses to measure anything if it is not.
+
+A run that used the setup phase is recorded as operator-contaminated, because
+it was.
+
+#### Watching from outside
+
+```
+node apps/cli/src/bin/person.ts status --config my-world.toml --follow
+```
+
+During a validation run the status says `command=skill-test` and which phase it
+is in: `operator_setup` while it is waiting for you, `executing` while the skill
+is running. As with `observe`, a stale stopped status after the run is normal.
+
+#### The order to work through
+
+The library, in dependency order, with the two prepared ones first:
+
+```
+wait_safely        return_home
 gather_wood        gather_plant_food     hunt_safe_passive_animals
 craft_basic_tools  mine_stone            mine_coal
 craft_stone_tools  craft_furnace         cook_food             eat_to_target
 build_basic_shelter  repair_shelter
 craft_chest        place_owned_chest     deposit_owned_storage
 withdraw_owned_storage  loot_permitted_container
-return_home        wait_safely           flee                  dig_in
+flee               dig_in
 ```
 
-For each: read the `SkillOutcome` in the episode report, and compare
+`wait_safely` and `return_home` are the two that have been prepared and
+fixture-tested through the harness. Nothing after them has been started, and
+none of them has been run against Minecraft yet.
+
+For each: read the `SkillOutcome` in the validation report, and compare
 `inventoryDelta`, `completionEvidence` and `elapsedTicks` against what you can
 see in the world. This is the step the fixture cannot do for you, because it is
 where Mineflayer, the server and real terrain disagree with a simulation.
@@ -270,3 +336,5 @@ its evidence should be one unbroken chain across the restart.
 - Real mob behaviour, damage, and whether the flee clearances are large enough.
 - Whether the tick budgets in the skill specs are realistic at real tick rates.
 - Death and respawn handling in a live world.
+- Every skill in the library, through `person skill-test` against a real
+  server. `wait_safely` and `return_home` are prepared; neither has been run.
