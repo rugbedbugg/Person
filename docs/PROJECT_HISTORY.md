@@ -1,0 +1,289 @@
+# PROJECT_HISTORY.md — Evidence-Based Development History
+
+**Derived from:** Git commit history (10 commits, `6b99830` → `7501194`)
+**Date:** 2026-09-19
+**HEAD:** `7501194` (feat/lan-validation)
+**Tag:** `v0.1.0-foundation` (`6b99830`)
+
+---
+
+## Commit Timeline
+
+```
+6b99830 2026-09-15 [Person]: Survival vertical slice & evidence substrate established  ← TAG v0.1.0-foundation
+7e97e54 2026-09-15 [Adapter]: Mineflayer entity, container & world-readiness handling corrected
+c219e27 2026-09-15 [Instrumentation]: Prediction error, tick timing & observation comparison added
+554ae64 2026-09-15 [Validation]: Protected-area routing tested, planner cost fixed & reality report written
+2fd7963 2026-09-15 [Docs]: Milestone 1 test totals corrected
+5e51c8c 2026-09-15 [LAN]: Port override, status telemetry & connection diagnostics added
+2d7f9d2 2026-09-15 [Observation]: Live biome, player identity, perception balance & exit hang fixed
+9caf114 2026-09-15 [Docs]: First contact results, 4 corrections & test world recorded
+1c07bc5 2026-09-16 [Validation]: Single-skill harness, shared dispatch path & operator setup added
+7501194 2026-09-16 [Docs]: Second contact results, skill validation stage & traceability recorded  ← HEAD
+```
+
+---
+
+## Phase 1: Foundation — Survival Vertical Slice & Evidence Substrate
+
+**Commit:** `6b99830` (tagged `v0.1.0-foundation`)
+**Date:** 2026-09-15
+**Scope:** 212 files, 29,029 lines added — entire initial implementation
+
+### Objective
+
+Establish the complete survival vertical slice: Node runtime + Python cognition, versioned protocol, safety kernel, 21 skills, evidence journal, deterministic fixture, and restart persistence.
+
+### Architectural Changes
+
+- **Two-process architecture:** Node (parent) spawns Python cognition over stdio
+- **Trust boundary:** Python proposes `SkillInvocation`; Node validates, executes, attributes
+- **Protocol `shroud-learning-v2`:** 11 message types, canonical JSON Schemas, dual-runtime validation
+- **Embodiment port:** Skills written once, two bodies (Mineflayer + FixtureWorld)
+- **Safety kernel (L0–L4):** Pure function of snapshot; ACCEPT/REJECT/PREEMPT/REPLACE
+- **21 skills implemented:** Emergency, Food, Resources, Crafting, Shelter, Storage
+- **Cognition:** Decision context (7 dims), homeostatic goals, goal stack, symbolic planner, routines, deterministic + evidence policy
+- **Evidence:** Append-only JSONL journal, atomic snapshots, strict restore, training-context separation
+- **CLI:** `person run|learn|validate|inspect`, `shroud`/`shroud-train` aliases
+- **Configuration:** TOML + JSON Schema, legacy V1 migration, V1 checkpoint refusal
+
+### Significant Bugs Discovered (During Implementation)
+
+- Legacy Shroud Q-learning, 7-action space, epsilon-greedy, V1 checkpoints — **discarded deliberately**
+- `src/routine-primitives.js`, `routine-learner.js`, `routine-journal.js` — built around V1 action space, **discarded**
+- Request-response lockstep (`enforceDecision`) — replaced by typed validator at trust boundary
+- `gymnasium`/`numpy` dependencies — not needed for evidence-guided learner
+- Inventory reconciliation on resume — **not reimplemented** (tracked as limitation)
+
+### Validation Improvements
+
+- Architecture tests assert: boundary integrity, no command channel, no code generation, learning off by default
+- Vertical slice integration test: full survival routine ×2 with restart, evidence chain unbroken
+- 173 tests total (71 Node + 102 Python) — all passing
+
+### Intentionally Out of Scope
+
+- Language model, neural policy, affect, social memory, projects, redstone
+- Live Minecraft validation (no server available)
+- Multi-Person support
+- SQLite (using JSONL journal + snapshots instead)
+
+---
+
+## Phase 2: Adapter Audit & Correction — Mineflayer Reality Hardening
+
+**Commits:** `7e97e54` → `554ae64` (4 commits, same day)
+**Constraint:** **No Minecraft server reachable** — all work done against installed libraries and data tables
+
+### Objective
+
+Audit Mineflayer adapter against `mineflayer` 4.39.0, `mineflayer-pathfinder` 2.4.5, `minecraft-data` 1.16.1 sources. Fix defects the fixture could never reveal.
+
+### Commits & Changes
+
+| Commit    | Focus                                | Key Changes                                                      |
+| --------- | ------------------------------------ | ---------------------------------------------------------------- |
+| `7e97e54` | Entity, container, world-readiness   | Entity metadata handling, container caching, spawn readiness     |
+| `c219e27` | Instrumentation                      | Prediction error, tick timing, observation comparison            |
+| `554ae64` | Protected-area routing, planner cost | Route detour tests, planner parameter-aware cost, reality report |
+| `2fd7963` | Docs                                 | Test totals correction                                           |
+
+### Six Critical Defects Found (Adapter Audit)
+
+| #   | Defect                                              | Impact                                                                                 | Fix                                                                |
+| --- | --------------------------------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
+| 1   | Entity metadata is sparse object, not array         | **Fatal** — `TypeError: metadata.some is not a function` on first entity with metadata | Read index 2 (custom name), handle string/chat-component/absent    |
+| 2   | Named animals never detected                        | **Safety** — named cow was legal hunting target                                        | Same fix; unrecognised shape → treat as named                      |
+| 3   | Hostile classification missed registry-unknown mobs | **Safety** — hoglins/zoglins not fled from                                             | Registry category + explicit hostile-on-sight list                 |
+| 4   | Neutral mobs invisible to safety kernel             | **Safety** — wolves/bees/golems could kill unarmoured Person                           | `neutral` classification + `recentlyDamaged` signal                |
+| 5   | First container withdrawal always failed            | **Functional** — `containerAt` returns empty cache                                     | `inspectContainer` on embodiment port; live read before withdraw   |
+| 6   | Crafting failed on wood-species bookkeeping         | **Functional** — recipe lookup used wrong wood type                                    | Server-authoritative `recipesFor()`; static table for planner only |
+
+### Smaller Corrections
+
+- `freeSlots`: `36 - stacks` → `bot.inventory.emptySlotCount()`
+- Empty craft/smelt → explicit failure (not silent success)
+- Smelting: collect output as ready (not wait for full batch)
+- Connection: wait for entity, position, chunks, clock, inventory, vitals, dimension (30s bound, no reconnect loop)
+- World rules: validate game mode, dimension, difficulty, daylight cycle
+- `dig_in`: report diggable ground; kernel prefers fleeing when none
+
+### Validation Improvements
+
+- **Mineflayer conformance double** built on real 1.16.1 data tables (27 tests)
+- **Prediction error** instrument: compares declared effects vs observed state, recorded as evidence, **inert** (changes no policy)
+- **Tick budget instrumentation:** port-wrapper measures navigation/interaction/waiting per skill
+- **Planner cost fix:** cost now scales with parameter magnitude (cooking 2 items → hunt 3, not 12)
+- **Protected-area routing tests:** detour found, no detour = refusal, replanning guard in pathfinder step exclusion
+
+### Test Count After Phase
+
+- **228 tests** (108 Node + 120 Python), up from 173
+
+---
+
+## Phase 3: Pre-LAN Readiness — Connection Instrumentation
+
+**Commit:** `5e51c8c`
+**Date:** 2026-09-15
+
+### Objective
+
+Prepare for first live LAN connection. LAN port changes every world open — must be runtime override, not file config. First connection is least diagnosable moment.
+
+### Changes
+
+- **Port/host overrides** (`--port`, `--host`) applied in memory, never written back
+- **Connection diagnostics:** 14 failure classes (refused, unresolved, timeout, reset, closed, protocol mismatch, identity conflict, auth refused, login refused, kick, spawn timeout, chunk data, world not ready)
+- **Connection races spawn against error/kick/close** — refused login fails immediately
+- **Readiness distinguishes** missing chunk data from general unreadiness
+- **`person observe`**: captures one observation, validates schema, prints, disconnects — **runs no skill, writes no evidence**
+- **`person status`**: reads atomic status file (runtime writes, CLI reads) — **never connects, one-way telemetry**
+- **Operator intervention** (`--operator-intervention`): marks episode contaminated in evidence + status
+- **Architecture tests:** no server-command path, no teleport, telemetry one-way
+
+### New Tests: 30 added (138 Node + 120 Python = 258 total)
+
+---
+
+## Phase 4: First Live Contact — Observation Validation
+
+**Commits:** `2d7f9d2` → `9caf114`
+**Date:** 2026-09-15 (hours after pre-LAN patch)
+
+### Event
+
+First successful `person observe` against Minecraft Java 1.16.1 LAN (Peaceful, disposable world).
+
+### What Worked First Time
+
+- Connection established, identity check passed
+- Spawned inside configured exploration bounds
+- Readiness held: chunks, clock, inventory, vitals, dimension all arrived
+- One observation captured, **schema-valid with no diagnostics**
+- Home reported correctly at distance 0
+- World rules accepted: survival, Peaceful, daylight cycle, Overworld
+- Clean disconnect, command exited
+
+### Four Defects Exposed (Fixture/Double Could Not Find)
+
+| #   | Defect                                                  | Root Cause                                                                                          | Fix                                                                         |
+| --- | ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| 1   | `biome` = `"unknown"` in loaded chunk                   | `prismarine-block` passes Version object to `prismarine-biome` (expects string) → empty biome table | Resolve biome from numeric ID against `bot.registry`                        |
+| 2   | Human player reported as `"player"`                     | Minecraft names all players `player`; identity in username/UUID                                     | Entity records carry `username` + `uuid` (additive protocol fields)         |
+| 3   | Perception saturated (64 stone, 0 wood)                 | Single nearest-N search standing on stone returns only stone                                        | Category-balanced resource perception: quota per category + shared overflow |
+| 4   | Passive entities = noise (80 animals, 70 out of region) | No region filtering on passive entities                                                             | Shape to permitted region + reachable, nearest-first, bounded               |
+
+### Exit Hang Fixed
+
+- `disconnect` called `client.end()` twice → `minecraft-protocol` close timer armed twice → 30s hang if server close arrived between calls
+- **Fix:** End once, await close with bound, clear timer explicitly, destroy socket if server never answers
+- **Regression test:** Child process — old code 31.5s, fixed code exits immediately
+
+### Test Artifacts
+
+- `first-contact.json` — captured observation (kept as evidence)
+- Fixture world recorded for comparison (`person compare`)
+
+---
+
+## Phase 5: Single-Skill Validation Harness
+
+**Commit:** `1c07bc5`
+**Date:** 2026-09-16
+
+### Objective
+
+Build `person skill-test` — validates one skill at a time through the **same safety kernel and executor** as autonomous runs. No planner, no goal selection, learner unchanged.
+
+### Implementation
+
+- **Single dispatch path:** `apps/node-runtime/src/skills/dispatch.ts` used by both runtime and harness
+- **Harness cannot bypass executor:** No `runner.run`, no `SKILL_IMPLEMENTATIONS` access
+- **Normal safety kernel decides:** `InvocationValidator` + `SafetyKernel` built exactly as runtime
+- **REJECT reported, nothing runs** | **REPLACE never credits requested skill**
+- **`--skill` resolves only to registered SkillSpec** (no free-form actions)
+- **Parameters validated by canonical rules** (`SkillRegistry.resolveParameters`)
+- **Cost limits from spec, clamped by validator**
+- **Pre/post observations** (both schema-valid), effects compared via prediction machinery
+- **Validation runs change no learning state:** `learningFingerprint` before/after, recorded in report
+- **Validation evidence stored separately:** `runs/validation/skill-tests/`
+- **Operator setup (`--operator-setup`):** Human moves Person during pause; recorded as contamination; explicit continuation required; invalid post-setup state refuses measured run
+- **No teleport capability added** — setup is human action
+- **Every path releases body, timers, input** (bounded disconnect, readline closed)
+
+### Skills Prepared for Harness
+
+1. `wait_safely` — fixture end-to-end passing
+2. `return_home` — fixture end-to-end passing (needs operator setup for positioning)
+
+**No skill has been run live through this harness.**
+
+---
+
+## Phase 6: Second Contact & Traceability
+
+**Commit:** `7501194` (HEAD)
+**Date:** 2026-09-16
+
+### Event
+
+Second live `person observe` against same LAN world — verified all four first-contact corrections against real Minecraft.
+
+### Results
+
+| Field           | Value                                                |
+| --------------- | ---------------------------------------------------- |
+| biome           | `plains` (real name, not `unknown`)                  |
+| player username | `Shroud`                                             |
+| player uuid     | `1ed03c15-b62c-33e4-8e93-cd19bc1d57e3`               |
+| resources       | stone 28, coal 12, plant_food 12, wood 12 (balanced) |
+| passive animals | 8 (nearby, in region, reachable)                     |
+| position        | -218, 66, 164                                        |
+| home distance   | 0                                                    |
+| learning        | off                                                  |
+
+**All four corrections hold against Minecraft.** Observation milestone closed.
+
+### Documentation Added
+
+- `TRACEABILITY.md` — requirements → code → tests mapping (14 sections, ~300 rows)
+- Updated `REALITY_VALIDATION.md` with second contact results
+- Updated `docs/LAN_TESTING.md` with single-skill validation ladder
+
+---
+
+## Summary: Major Historical Phase SHAs
+
+| Phase                         | Commit Range          | Key SHA                                |
+| ----------------------------- | --------------------- | -------------------------------------- |
+| Foundation (vertical slice)   | `6b99830`             | `6b99830` (tagged `v0.1.0-foundation`) |
+| Adapter audit & 6 defects     | `7e97e54` → `554ae64` | `7e97e54`, `c219e27`, `554ae64`        |
+| Pre-LAN readiness             | `5e51c8c`             | `5e51c8c`                              |
+| First contact (4 defects)     | `2d7f9d2`, `9caf114`  | `2d7f9d2`, `9caf114`                   |
+| Single-skill harness          | `1c07bc5`             | `1c07bc5`                              |
+| Second contact + traceability | `7501194`             | `7501194` (HEAD)                       |
+
+---
+
+## What Intentionally Remained Out of Scope (Through All Phases)
+
+- Language model integration
+- Neural policy / deep RL
+- Affect / emotion systems
+- Social memory / relationships / incidents
+- Projects (beyond goal suspension)
+- Redstone / advanced construction
+- Multi-Person architecture
+- Death/respawn/recovery loop
+- SQLite persistence
+- Live skill execution (only `observe` has run live)
+- Any capability not required for survival vertical slice
+
+---
+
+## Commit Signing
+
+All commits signed with GPG key `8BBCB014DE46077B` (Oxide 1-6 <yes.par781@gmail.com>).
+Tag `v0.1.0-foundation` also signed.
+**History must not be rewritten.**
