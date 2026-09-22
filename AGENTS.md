@@ -11,22 +11,39 @@ This is the **canonical, tool-neutral operating contract** for all coding agents
 Every agent must read and operate under these documents, in this sequence:
 
 1. **AGENTS.md** (this file) — Canonical agent contract
-2. **docs/PERSON_SPEC.md** — Architectural source of truth
+2. **docs/PERSON_SPEC.md** — Architectural source of truth. **Part 0 first**: it
+   is the frozen north star and wins wherever it disagrees with sections 1–85
 3. **docs/CURRENT_STATE.md** — Factual snapshot of what exists NOW
 4. **REALITY_VALIDATION.md** — Canonical live/fixture validation evidence
 5. **docs/OWNERSHIP.md** — Human collaboration / review boundaries
 6. **docs/decisions/** — Architectural Decision Records (as relevant)
 7. **Task-specific implementation files** — Only after the above
 
+Two distinctions matter more than anything else in those documents:
+
+- **Intended versus actual.** PERSON_SPEC says what Person is meant to become.
+  CURRENT_STATE says what exists. Never quote one as evidence for the other.
+- **Implemented versus proven.** REALITY_VALIDATION says how far anything has
+  been shown to work, and its vocabulary (section 10) is not decorative.
+
 ---
 
 ## 2. Scope Discipline
 
-- **Do not redesign Person.** Implement what the architecture specifies.
-- **Do not continue the Minecraft body-validation roadmap.** That is a separate track.
-- **Repository governance / documentation / publication work only** unless explicitly directed otherwise.
-- **No production behavior changes** without explicit human authorization.
-- **Inspect existing abstractions** before adding parallel implementations.
+- **Do the task you were given.** Deliver its full scope; do not quietly widen
+  or narrow it.
+- **Do not redesign Person.** Implement what the architecture specifies. If the
+  architecture is wrong, say so and propose an ADR; do not fix it in passing.
+- **Inspect before implementing.** Section 9. Parallel implementations of an
+  existing capability are the most common failure in this repository's history.
+- **No production behaviour change without explicit authorization.** A task
+  whose scope is documentation, audit, governance or reconciliation changes no
+  runtime behaviour. If such a task uncovers a necessary production change,
+  **stop and report it** rather than implementing it.
+- **Never weaken a test to make the suite green.** A failing architecture test
+  is a finding. Understand it, then fix the cause or report it.
+- **Do not claim a milestone is complete when part of it is blocked.** Finish
+  everything that is not blocked, then say exactly what was left and why.
 
 ---
 
@@ -44,6 +61,29 @@ These invariants are established by the repository's implementation and commit h
 | Live Minecraft validation must not be claimed unless Minecraft was actually used | `REALITY_VALIDATION.md` explicitly distinguishes fixture/adapter/live                   |
 | Fixture/conformance evidence must not be mislabeled as live evidence             | Skill matrix in `REALITY_VALIDATION.md` uses strict vocabulary                          |
 | Legacy Shroud behavior is not preserved merely for compatibility                 | `IMPLEMENTATION_REPORT.md` "Rewritten or discarded" section                             |
+
+### Frozen 2026-09-22 (Part 0 of PERSON_SPEC)
+
+These constrain work that has not started. They are not yet enforced by tests,
+which is exactly why an agent has to hold them.
+
+| Invariant                                                                            | Where it is decided                           |
+| ------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Physical truth, perception, belief, memory, knowledge and reasoning stay distinct    | PERSON_SPEC 0.3                               |
+| A motor backend's world knowledge does not become Person's perception                | PERSON_SPEC 0.4, ADR 0002                     |
+| The event store is engineering truth; Person gets recollection, not a database query | PERSON_SPEC 0.5, ADR 0003                     |
+| Baritone is motor cortex, not cognition; no command strings reach cognition          | PERSON_SPEC 0.7, ADR 0001                     |
+| Targets are runtime-issued referents, never coordinates chosen by cognition          | PERSON_SPEC 0.8, `docs/SEMANTIC_TARGETING.md` |
+| Unrestricted subjects is not unrestricted external agency                            | PERSON_SPEC 0.11, ADR 0004                    |
+| Cognitive autonomy is not environmental authority; a refusal is reported honestly    | PERSON_SPEC 0.16, ADR 0005                    |
+| Raising one capability axis must not silently raise another                          | PERSON_SPEC 0.20                              |
+| No cognition is fabricated for a period when the process did not run                 | PERSON_SPEC 0.15, ADR 0006                    |
+| Containment, self-preservation and property policy are separate concerns             | PERSON_SPEC 0.18, `docs/SAFETY.md`            |
+| Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC 0.23                              |
+
+Known disagreements between the frozen architecture and the current code are
+listed in **PERSON_SPEC section 0.24** (C1–C6). Each needs a decision before the
+code it touches is changed. **Do not resolve one silently.**
 
 ---
 
@@ -148,6 +188,10 @@ When documenting any capability, use only these terms:
 
 ---
 
-_Last updated: 2026-09-19_
-_Current HEAD: `7501194` (feat/lan-validation)_
+_Last updated: 2026-09-22_
+_Baseline for this update: `d0e9398` (feat/lan-validation)_
 _Tag: `v0.1.0-foundation` (`6b99830`)_
+
+HEAD moves. Do not trust the line above as a current-branch reference; run
+`git log -1` and read `docs/CURRENT_STATE.md` for the commit its facts were
+verified against.
