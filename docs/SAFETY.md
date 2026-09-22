@@ -110,9 +110,13 @@ protected area, so Person is never told to live somewhere it may not build.
 Enforcement point 2 is load-bearing for any future motor backend: Person must
 be able to impose an authoritative protected-region/path veto on it, covering
 planning, replanning and execution, or this enforcement point does not exist
-for that backend. Against Mineflayer that veto is a step-exclusion function the
-path search consults on every node; that is one way to satisfy the invariant,
-not the invariant itself. Which mechanism a Baritone-backed motor system uses
+for that backend. Against Mineflayer the veto is two things working together: a
+step-exclusion function the path search consults on every node, which the
+pathfinder turns into a rejection rather than a price, and a filter on the
+search's candidate moves that drops any move Person may not make. The second is
+the authoritative one, because not every movement generator consults the first
+(`docs/CURRENT_STATE.md`, C7). That is one way to satisfy the invariant, not the
+invariant itself. Which mechanism a Baritone-backed motor system uses
 is deliberately unresolved and is what the Baritone spike must determine (ADR
 0001). If no clean mechanism can enforce it without unsafe privileged leakage,
 brittle command-string control, or invasive unsupported Baritone internals, the
