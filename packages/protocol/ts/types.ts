@@ -55,49 +55,64 @@ export interface Envelope {
   type: MessageType;
 }
 
-export interface EntityRecord {
-  entityId: number;
-  name: string;
-  position: Position;
+/**
+ * Where something is, as Person perceives it.
+ *
+ * Relative to Person and qualitative, because a world coordinate is a fact
+ * about the server rather than a fact about anyone's experience. Bearings are
+ * relative to where Person is facing: Person has no compass, and a heading in
+ * degrees would be the coordinate problem in another notation.
+ */
+export interface RelativeLocation {
+  bearing:
+    | "ahead"
+    | "ahead_left"
+    | "ahead_right"
+    | "left"
+    | "right"
+    | "behind_left"
+    | "behind_right"
+    | "behind";
+  elevation: "above" | "level" | "below";
+  rangeBand: "reach" | "near" | "mid" | "far";
+  /** Straight-line distance, rounded to a tenth of a block. An estimate. */
   distance: number;
+}
+
+export interface EntityRecord extends RelativeLocation {
+  name: string;
   named: boolean;
   tamed: boolean;
   protectedTarget: boolean;
   /**
-   * Stable identity, when the body has it.
+   * The account name on the nameplate above a player's head.
    *
-   * Both are optional additions rather than required fields: an observation
-   * recorded before they existed is still a valid observation, and a mob has
-   * no account name to report.
+   * Optional rather than required: a mob has no account name, and an
+   * observation recorded before this existed is still a valid observation. The
+   * account UUID is deliberately not reported, because it is a protocol
+   * identifier rather than anything Person could perceive.
    */
   username?: string;
-  uuid?: string;
 }
 
-export interface ResourceRecord {
+export interface ResourceRecord extends RelativeLocation {
   kind: "wood" | "stone" | "coal" | "plant_food" | "dirt" | "other";
   name: string;
-  position: Position;
-  distance: number;
   harvestPermitted: boolean;
 }
 
-export interface ContainerRecord {
+export interface ContainerRecord extends RelativeLocation {
   kind: "chest" | "barrel" | "furnace" | "shulker" | "other";
-  position: Position;
-  distance: number;
   provenance: "owned" | "existing";
   storageId: string | null;
 }
 
-export interface WorkstationRecord {
+export interface WorkstationRecord extends RelativeLocation {
   kind: "crafting_table" | "furnace" | "anvil" | "other";
-  position: Position;
-  distance: number;
   provenance: "owned" | "existing";
 }
 
-export interface HazardRecord {
+export interface HazardRecord extends RelativeLocation {
   kind:
     | "lava"
     | "fire"
@@ -107,13 +122,10 @@ export interface HazardRecord {
     | "fall"
     | "suffocation"
     | "other";
-  position: Position;
-  distance: number;
 }
 
 export interface OwnedStorageView {
   storageId: string;
-  position: Position;
   contents: ItemStack[];
 }
 
@@ -146,7 +158,6 @@ export interface Observation extends Envelope {
     alive: boolean;
   };
   environment: {
-    position: Position;
     dimension: "overworld" | "nether" | "end";
     dayPhase: "dawn" | "day" | "dusk" | "night";
     timeOfDay: number;
@@ -185,7 +196,7 @@ export interface Observation extends Envelope {
     hazards: HazardRecord[];
   };
   home: {
-    activeHome: { homeId: string; position: Position } | null;
+    activeHome: { homeId: string } | null;
     homeDistance: number | null;
     shelterState: "none" | "partial" | "complete" | "breached" | "unknown";
     ownedStorage: OwnedStorageView[];
@@ -198,7 +209,6 @@ export interface Observation extends Envelope {
     pathRisk: "low" | "moderate" | "high";
     stuckState: "free" | "slow" | "stuck";
     returnPathKnown: boolean;
-    lastSafePosition: Position | null;
   };
   cognition: {
     activeGoal: string | null;

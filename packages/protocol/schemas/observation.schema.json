@@ -106,7 +106,6 @@
       "type": "object",
       "additionalProperties": false,
       "required": [
-        "position",
         "dimension",
         "dayPhase",
         "timeOfDay",
@@ -115,9 +114,6 @@
         "biome"
       ],
       "properties": {
-        "position": {
-          "$ref": "common.schema.json#/$defs/position"
-        },
         "dimension": {
           "enum": ["overworld", "nether", "end"]
         },
@@ -308,9 +304,11 @@
             "required": [
               "kind",
               "name",
-              "position",
               "distance",
-              "harvestPermitted"
+              "harvestPermitted",
+              "bearing",
+              "elevation",
+              "rangeBand"
             ],
             "properties": {
               "kind": {
@@ -319,15 +317,34 @@
               "name": {
                 "$ref": "common.schema.json#/$defs/identifier"
               },
-              "position": {
-                "$ref": "common.schema.json#/$defs/position"
-              },
               "distance": {
                 "type": "number",
                 "minimum": 0
               },
               "harvestPermitted": {
                 "type": "boolean"
+              },
+              "bearing": {
+                "type": "string",
+                "enum": [
+                  "ahead",
+                  "ahead_left",
+                  "ahead_right",
+                  "left",
+                  "right",
+                  "behind_left",
+                  "behind_right",
+                  "behind"
+                ],
+                "description": "Direction relative to where Person is facing. Person has no compass."
+              },
+              "elevation": {
+                "type": "string",
+                "enum": ["above", "level", "below"]
+              },
+              "rangeBand": {
+                "type": "string",
+                "enum": ["reach", "near", "mid", "far"]
               }
             }
           }
@@ -349,17 +366,16 @@
             "additionalProperties": false,
             "required": [
               "kind",
-              "position",
               "distance",
               "provenance",
-              "storageId"
+              "storageId",
+              "bearing",
+              "elevation",
+              "rangeBand"
             ],
             "properties": {
               "kind": {
                 "enum": ["chest", "barrel", "furnace", "shulker", "other"]
-              },
-              "position": {
-                "$ref": "common.schema.json#/$defs/position"
               },
               "distance": {
                 "type": "number",
@@ -377,6 +393,28 @@
                     "type": "null"
                   }
                 ]
+              },
+              "bearing": {
+                "type": "string",
+                "enum": [
+                  "ahead",
+                  "ahead_left",
+                  "ahead_right",
+                  "left",
+                  "right",
+                  "behind_left",
+                  "behind_right",
+                  "behind"
+                ],
+                "description": "Direction relative to where Person is facing. Person has no compass."
+              },
+              "elevation": {
+                "type": "string",
+                "enum": ["above", "level", "below"]
+              },
+              "rangeBand": {
+                "type": "string",
+                "enum": ["reach", "near", "mid", "far"]
               }
             }
           }
@@ -387,13 +425,17 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["kind", "position", "distance", "provenance"],
+            "required": [
+              "kind",
+              "distance",
+              "provenance",
+              "bearing",
+              "elevation",
+              "rangeBand"
+            ],
             "properties": {
               "kind": {
                 "enum": ["crafting_table", "furnace", "anvil", "other"]
-              },
-              "position": {
-                "$ref": "common.schema.json#/$defs/position"
               },
               "distance": {
                 "type": "number",
@@ -401,6 +443,28 @@
               },
               "provenance": {
                 "enum": ["owned", "existing"]
+              },
+              "bearing": {
+                "type": "string",
+                "enum": [
+                  "ahead",
+                  "ahead_left",
+                  "ahead_right",
+                  "left",
+                  "right",
+                  "behind_left",
+                  "behind_right",
+                  "behind"
+                ],
+                "description": "Direction relative to where Person is facing. Person has no compass."
+              },
+              "elevation": {
+                "type": "string",
+                "enum": ["above", "level", "below"]
+              },
+              "rangeBand": {
+                "type": "string",
+                "enum": ["reach", "near", "mid", "far"]
               }
             }
           }
@@ -411,7 +475,13 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["kind", "position", "distance"],
+            "required": [
+              "kind",
+              "distance",
+              "bearing",
+              "elevation",
+              "rangeBand"
+            ],
             "properties": {
               "kind": {
                 "enum": [
@@ -425,12 +495,31 @@
                   "other"
                 ]
               },
-              "position": {
-                "$ref": "common.schema.json#/$defs/position"
-              },
               "distance": {
                 "type": "number",
                 "minimum": 0
+              },
+              "bearing": {
+                "type": "string",
+                "enum": [
+                  "ahead",
+                  "ahead_left",
+                  "ahead_right",
+                  "left",
+                  "right",
+                  "behind_left",
+                  "behind_right",
+                  "behind"
+                ],
+                "description": "Direction relative to where Person is facing. Person has no compass."
+              },
+              "elevation": {
+                "type": "string",
+                "enum": ["above", "level", "below"]
+              },
+              "rangeBand": {
+                "type": "string",
+                "enum": ["reach", "near", "mid", "far"]
               }
             }
           }
@@ -458,13 +547,10 @@
             {
               "type": "object",
               "additionalProperties": false,
-              "required": ["homeId", "position"],
+              "required": ["homeId"],
               "properties": {
                 "homeId": {
                   "$ref": "common.schema.json#/$defs/slug"
-                },
-                "position": {
-                  "$ref": "common.schema.json#/$defs/position"
                 }
               }
             }
@@ -490,13 +576,10 @@
           "items": {
             "type": "object",
             "additionalProperties": false,
-            "required": ["storageId", "position", "contents"],
+            "required": ["storageId", "contents"],
             "properties": {
               "storageId": {
                 "$ref": "common.schema.json#/$defs/slug"
-              },
-              "position": {
-                "$ref": "common.schema.json#/$defs/position"
               },
               "contents": {
                 "type": "array",
@@ -524,13 +607,7 @@
     "navigation": {
       "type": "object",
       "additionalProperties": false,
-      "required": [
-        "routeStatus",
-        "pathRisk",
-        "stuckState",
-        "returnPathKnown",
-        "lastSafePosition"
-      ],
+      "required": ["routeStatus", "pathRisk", "stuckState", "returnPathKnown"],
       "properties": {
         "routeStatus": {
           "enum": ["idle", "ok", "blocked", "unknown"]
@@ -543,16 +620,6 @@
         },
         "returnPathKnown": {
           "type": "boolean"
-        },
-        "lastSafePosition": {
-          "oneOf": [
-            {
-              "$ref": "common.schema.json#/$defs/position"
-            },
-            {
-              "type": "null"
-            }
-          ]
         }
       }
     },
@@ -680,24 +747,18 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "entityId",
           "name",
-          "position",
           "distance",
           "named",
           "tamed",
-          "protectedTarget"
+          "protectedTarget",
+          "bearing",
+          "elevation",
+          "rangeBand"
         ],
         "properties": {
-          "entityId": {
-            "type": "integer",
-            "minimum": 0
-          },
           "name": {
             "$ref": "common.schema.json#/$defs/identifier"
-          },
-          "position": {
-            "$ref": "common.schema.json#/$defs/position"
           },
           "distance": {
             "type": "number",
@@ -717,9 +778,27 @@
             "$ref": "common.schema.json#/$defs/minecraftUsername",
             "description": "Present when the client knows the account name. Players always have one; mobs never do."
           },
-          "uuid": {
-            "$ref": "common.schema.json#/$defs/uuid",
-            "description": "Present when the server sent a stable entity UUID. Survives a reconnect; entityId does not."
+          "bearing": {
+            "type": "string",
+            "enum": [
+              "ahead",
+              "ahead_left",
+              "ahead_right",
+              "left",
+              "right",
+              "behind_left",
+              "behind_right",
+              "behind"
+            ],
+            "description": "Direction relative to where Person is facing. Person has no compass."
+          },
+          "elevation": {
+            "type": "string",
+            "enum": ["above", "level", "below"]
+          },
+          "rangeBand": {
+            "type": "string",
+            "enum": ["reach", "near", "mid", "far"]
           }
         }
       }

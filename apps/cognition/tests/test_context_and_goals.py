@@ -33,8 +33,8 @@ def test_context_serialisation_is_stable_and_greppable(observation: dict[str, An
 def test_equivalent_situations_share_a_context(observation: dict[str, Any]) -> None:
     nudged = deepcopy(observation)
     nudged["vitals"]["health"] += 0.4
-    nudged["environment"]["position"]["x"] += 3
     nudged["environment"]["timeOfDay"] += 200
+    nudged["environment"]["lightLevel"] = max(0, nudged["environment"]["lightLevel"] - 1)
     nudged["inventory"]["items"].append({"name": "dirt", "count": 3})
     assert context_id(nudged) == context_id(observation)
 
@@ -47,10 +47,11 @@ def test_meaningful_differences_change_the_context(observation: dict[str, Any]) 
     threatened = deepcopy(observation)
     threatened["nearby"]["hostiles"] = [
         {
-            "entityId": 1,
             "name": "zombie",
-            "position": {"x": 1, "y": 64, "z": 1},
             "distance": 3.0,
+            "bearing": "ahead",
+            "elevation": "level",
+            "rangeBand": "reach",
             "named": False,
             "tamed": False,
             "protectedTarget": True,
@@ -104,10 +105,11 @@ def test_a_threat_produces_the_highest_priority_goal(observation: dict[str, Any]
     threatened = deepcopy(observation)
     threatened["nearby"]["hostiles"] = [
         {
-            "entityId": 1,
             "name": "zombie",
-            "position": {"x": 1, "y": 64, "z": 1},
             "distance": 3.0,
+            "bearing": "ahead",
+            "elevation": "level",
+            "rangeBand": "reach",
             "named": False,
             "tamed": False,
             "protectedTarget": True,
@@ -133,9 +135,7 @@ def test_goals_suspend_and_resume_around_an_emergency(observation: dict[str, Any
     threatened = deepcopy(calm)
     threatened["nearby"]["hostiles"] = [
         {
-            "entityId": 1,
             "name": "zombie",
-            "position": {"x": 1, "y": 64, "z": 1},
             "distance": 2.0,
             "named": False,
             "tamed": False,

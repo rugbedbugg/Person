@@ -353,9 +353,6 @@ export function renderObservation(observation: Observation): string {
   lines.push(
     `  world     ${environment.dimension} ${environment.dayPhase} time=${environment.timeOfDay} weather=${environment.weather} light=${environment.lightLevel} biome=${environment.biome}`,
   );
-  lines.push(
-    `  position  ${environment.position.x},${environment.position.y},${environment.position.z}`,
-  );
 
   const categories = Object.entries(observation.inventory.categories)
     .filter(([, count]) => count > 0)
@@ -465,18 +462,12 @@ export function renderObservation(observation: Observation): string {
   const home = observation.home;
   lines.push(
     `  home      ${
-      home.activeHome
-        ? `${home.activeHome.homeId} at ${home.activeHome.position.x},${home.activeHome.position.y},${home.activeHome.position.z}`
-        : "none"
+      home.activeHome ? home.activeHome.homeId : "none"
     } distance=${home.homeDistance ?? "unknown"} shelter=${home.shelterState} storage=${home.ownedStorage.length} foodReserve=${home.foodReserve} fuelReserve=${home.fuelReserve} bed=${home.bedKnown}`,
   );
   const navigation = observation.navigation;
   lines.push(
-    `  route     ${navigation.routeStatus} risk=${navigation.pathRisk} stuck=${navigation.stuckState} returnKnown=${navigation.returnPathKnown} lastSafe=${
-      navigation.lastSafePosition
-        ? `${navigation.lastSafePosition.x},${navigation.lastSafePosition.y},${navigation.lastSafePosition.z}`
-        : "unknown"
-    }`,
+    `  route     ${navigation.routeStatus} risk=${navigation.pathRisk} stuck=${navigation.stuckState} returnKnown=${navigation.returnPathKnown}`,
   );
   const permitted = Object.entries(observation.permissions)
     .filter(([, allowed]) => allowed)

@@ -117,7 +117,6 @@ def observation() -> dict[str, Any]:
         {
             "kind": "plant_food",
             "name": "sweet_berry_bush",
-            "position": {"x": 14, "y": 64, "z": 2},
             "distance": 4.0,
             "harvestPermitted": True,
         }
