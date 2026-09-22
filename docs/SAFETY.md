@@ -107,9 +107,16 @@ enforced at four places, because validating a destination once is not enough:
 Configuration also refuses a home whose shelter footprint would overlap a
 protected area, so Person is never told to live somewhere it may not build.
 
-Enforcement point 2 is load-bearing for any future motor backend: a body that
-cannot be handed a per-step veto cannot enforce this. ADR 0001 makes that the
-first question the Baritone spike must answer.
+Enforcement point 2 is load-bearing for any future motor backend: Person must
+be able to impose an authoritative protected-region/path veto on it, covering
+planning, replanning and execution, or this enforcement point does not exist
+for that backend. Against Mineflayer that veto is a step-exclusion function the
+path search consults on every node; that is one way to satisfy the invariant,
+not the invariant itself. Which mechanism a Baritone-backed motor system uses
+is deliberately unresolved and is what the Baritone spike must determine (ADR
+0001). If no clean mechanism can enforce it without unsafe privileged leakage,
+brittle command-string control, or invasive unsupported Baritone internals, the
+spike stops and reports before broader integration.
 
 ## Capabilities
 
