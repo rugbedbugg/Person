@@ -7,7 +7,7 @@
 ## Project Documents (Read in Order)
 
 1. **AGENTS.md** — Canonical agent contract (this file points there)
-2. **docs/PERSON_SPEC.md** — Architectural source of truth
+2. **docs/PERSON_SPEC.md** — Architectural source of truth. Read **Part 0** first
 3. **docs/CURRENT_STATE.md** — Factual snapshot of what exists NOW
 4. **REALITY_VALIDATION.md** — Canonical live/fixture validation evidence
 5. **docs/OWNERSHIP.md** — Human collaboration / review boundaries
@@ -39,6 +39,12 @@
 - Safety kernel (L0–L4) is Node-only; Python cannot override
 - Requested skill ≠ executed skill — learning credits executed only
 - Validation runs change no learning state (fingerprint verified)
+- **Perception firewall** (ADR 0002): a body's world knowledge is not Person's
+- **Memory firewall** (ADR 0003): the journal is engineering truth, not recall
+- **Autonomy ≠ authority** (ADR 0005): Person may plan what the runtime refuses
+
+The known disagreements between the code and the frozen architecture are
+`docs/PERSON_SPEC.md` section 0.24, C1–C6. Do not resolve one silently.
 
 ### Implementation Discipline
 
@@ -74,3 +80,4 @@ node apps/cli/src/bin/person.ts inspect skills                      # List skill
 ---
 
 _This file is a thin adapter. The canonical contract is AGENTS.md._
+_Last updated: 2026-09-22._
