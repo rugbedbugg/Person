@@ -53,11 +53,23 @@ Binding rules:
 4. **Baritone's world knowledge stays behind the perception firewall.** Whatever
    geometry it holds internally, the observation Person receives is produced by
    `apps/node-runtime/src/observation/`, subject to ADR 0002.
-5. **The physical guard must survive the transition.** Protected-area
-   enforcement currently works because the runtime installs a step-exclusion
-   function that the path search consults on every node. A Baritone backend that
-   cannot be given an equivalent per-step veto is not acceptable, and
-   establishing that it can is the first question the spike answers.
+5. **The physical guard must survive the transition.** The invariant is:
+   Person must be able to impose an authoritative protected-region/path veto on
+   the Baritone-backed motor system, including path planning, replanning, and
+   execution. Protected-area enforcement currently satisfies this against
+   Mineflayer through a step-exclusion function the path search consults on
+   every node, but that is one implementation of the invariant, not the
+   invariant itself. The mechanism a Baritone backend uses to satisfy it is
+   deliberately unresolved and is what the spike must determine; establishing
+   that some clean mechanism exists is the first question the spike answers.
+   Acceptable mechanisms may include, without assuming any is correct: Baritone
+   public process/control APIs, goal/path shaping, movement/path validation,
+   bridge-side enforcement, supported Baritone configuration or hooks, or
+   another clean mechanism discovered during the spike. If no clean mechanism
+   can enforce the invariant without unsafe privileged leakage, brittle
+   command-string control, or invasive unsupported Baritone internals, the
+   spike stops and reports before broader integration, rather than picking the
+   least-bad unsafe option.
 6. **Mineflayer is not removed.** It stays as the reference body until Baritone
    has passed the same validation ladder, and `FixtureWorld` stays permanently.
 
@@ -102,7 +114,9 @@ and `docs/CURRENT_STATE.md` says so.
 
 ## Revisit Conditions
 
-- The spike finds that Baritone cannot be given a per-step movement veto.
+- The spike finds no clean mechanism that can enforce the protected-region/path
+  veto invariant (rule 5) without unsafe privileged leakage, brittle
+  command-string control, or invasive unsupported Baritone internals.
 - Live validation through Mineflayer completes the gathering, crafting, mining,
   placement, container and hunting stages without pathfinding being the
   dominant failure cause.
@@ -122,8 +136,13 @@ and `docs/CURRENT_STATE.md` says so.
 
 The smallest safe spike, in order, stopping at the first refusal:
 
-1. Stand a Baritone-capable client up beside the existing world and confirm it
-   accepts a per-step exclusion predicate at all. **Stop here if it does not.**
+1. Stand a Baritone-capable client up beside the existing world and establish
+   whether any clean mechanism (rule 5) can impose an authoritative
+   protected-region/path veto on it, covering planning, replanning and
+   execution. **Stop here and report if none can, rather than accepting an
+   unsafe or brittle one.** Phase 1 does not fail merely because one specific
+   API, such as a per-step exclusion predicate, turns out to be absent; it
+   fails only if no clean mechanism satisfies the invariant at all.
 2. Implement `BaritoneEmbodiment` covering `connect`, `disconnect`, `snapshot`,
    `moveTo`, `setGuard` and nothing else.
 3. Run `person skill-test --skill return_home` through it. `return_home` is the
