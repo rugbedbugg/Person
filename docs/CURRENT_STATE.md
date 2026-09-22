@@ -53,16 +53,17 @@ Python cognition  →  SkillInvocation  →  [TRUST BOUNDARY]  →  Node validat
 
 ### Skills (`packages/skills/`, `apps/node-runtime/src/skills/impl/`)
 
-**21 skills, all implemented** (architecture test asserts spec/impl sets identical, no placeholders):
+**22 skills, all implemented** (architecture test asserts spec/impl sets identical, no placeholders):
 
-| Category  | Skills                                                                                             |
-| --------- | -------------------------------------------------------------------------------------------------- |
-| Emergency | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
-| Food      | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
-| Resources | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
-| Crafting  | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
-| Shelter   | `build_basic_shelter`, `repair_shelter`                                                            |
-| Storage   | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
+| Category   | Skills                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| Emergency  | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
+| Food       | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
+| Resources  | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
+| Crafting   | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
+| Shelter    | `build_basic_shelter`, `repair_shelter`                                                            |
+| Storage    | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
+| Perception | `look_around`                                                                                      |
 
 **Terminal states:** SUCCESS, FAILED, INTERRUPTED, PREEMPTED, TIMED_OUT, INVALIDATED, UNREACHABLE, DEATH, DISCONNECTED
 
@@ -394,14 +395,48 @@ Exact position is not proprioception and is not reported.
 cognition today, so there was nothing to put behind the firewall. Vision is not
 the whole of perception, it is the whole of what is implemented.
 
+**Person can now point its senses.** Added 2026-09-22, after the firewall.
+Gaze is a motor capability and nothing more: it moves Person's head, and every
+judgement about where to point it is left above the boundary. `look_around` is
+a skill like any other: cognition proposes it, the validator
+and the safety kernel see it, and the body performs it. The vocabulary is five
+words, `forward`, `left`, `right`, `up` and `down`, and the skill takes no
+parameters at all, so there is no field in which a coordinate, an angle or an
+entity could be named. The runtime turns those words into yaw and pitch on its
+own side.
+
+`look_around` sweeps through five fixed orientations, straight ahead and 45 and
+90 degrees to each side, and returns to the heading it began with, head
+levelled. The endpoint is a fact about where the sweep started and nothing
+else.
+
+It deliberately decides nothing. A first version settled facing whichever
+orientation had the most in it, which sounds harmless and is not: "the scene
+with the most things in it is the most interesting scene" is a judgement about
+salience, and salience is cognition's. The sweep module now imports no
+perception at all, so it has no way to rank what it turns past, and a test
+asserts that it stays that way.
+
+That leaves the skill minimally useful on its own, which is right for this
+phase. Looking for something is a loop that belongs to the planner: look in a
+direction, receive an ordinary observation, reason about it, look again. That
+loop is built from `Embodiment.look`, and nothing in the planner runs it yet.
+A sweep establishes nothing about what is or is not out there, because the
+views it passed through never reached cognition.
+
+Two causes of turning are worth keeping apart, and the evidence already does:
+walking rotates Person as a side effect of going somewhere, while `look_around`
+appears in the record as a skill Person chose to run.
+
 **Behaviour changed, deliberately.** Person now misses things it would
 previously have been told about, because they are behind it, too far away, or
 behind a wall. That is what ADR 0002 predicted and wanted. It has a concrete
 consequence: `fixtures/worlds/vertical-slice.json` needed an explicit
-`spawnYaw`, because its food is behind the old default facing and Person never
-turns around on its own. **Person cannot yet look around**, and until it can,
-what it discovers depends on where it happens to face. That is the single
-largest gap this phase leaves.
+`spawnYaw`, because its food is behind the old default facing. Person could not
+turn to look at the time; it can now, though nothing in the planner yet decides
+to. Cognition integration is deliberately limited to the capability existing
+and being proposable: wiring a generic information-seeking drive into goal
+selection would be a planner change, and it is the natural next piece of work.
 
 **What is not established.** Recognition is by block and entity name, so Person
 identifies a cow as a cow with no notion of having learned what a cow is. There
