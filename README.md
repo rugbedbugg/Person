@@ -1,5 +1,7 @@
 # Person
 
+[![CI](https://github.com/rugbedbugg/Person/actions/workflows/ci.yml/badge.svg)](https://github.com/rugbedbugg/Person/actions/workflows/ci.yml)
+
 A persistent autonomous artificial inhabitant for Minecraft Java Edition 1.16.1.
 
 Person is not a chatbot attached to Minecraft, not a language model driving
@@ -16,8 +18,9 @@ happened. Learning is credited to what ran, never to what was asked for.
 
 This milestone implements the survival vertical slice and the evidence
 substrate that later work depends on. It does not implement language, memory,
-affect, social cognition, projects, or redstone; see `docs/ARCHITECTURE.md` for
-where those attach.
+belief, affect, social cognition, projects, or redstone; see
+`docs/ARCHITECTURE.md` for where those attach, and `docs/PERSON_SPEC.md` for
+what Person is intended to become.
 
 ## Installation
 
@@ -150,21 +153,24 @@ node apps/cli/src/bin/person.ts status  --config my-world.toml
 Person joins as an ordinary non-operator survival player. The world host keeps
 cheats; Person never gets them, and has no way to send a command at all.
 
-**Person has never been run against a Minecraft server.** The Mineflayer
-adapter has been audited against the installed client and Minecraft's own data
-tables, and the defects that audit found are fixed and covered by tests, but no
-claim here is a claim about a real world. `REALITY_VALIDATION.md` is explicit
-about what that leaves open.
+**Person has acted in Minecraft twice, and that is all.** Two live
+observations (2026-09-15, 2026-09-16) and three live single-skill validations
+(`wait_safely` once, `return_home` twice, 2026-09-16) have been run against a
+disposable LAN world. The other nineteen skills have never run live, no
+autonomous episode has ever run live, and every safety mechanism has been proven
+only in the fixture and against a conformance double. `REALITY_VALIDATION.md` is
+explicit about what that leaves open, and about where the evidence for those
+runs lives.
 
 ## Development and testing
 
 ```bash
 npm run typecheck     # tsc --noEmit
 npm run build         # tsc emit to dist/
-npm test              # Node test runner, 138 tests
+npm test              # Node test runner, 188 tests
 npm run format:check  # prettier
 
-uv run pytest         # 120 tests
+uv run pytest         # 129 tests
 uv run ruff check .   # lint
 uv run ruff format --check .
 uv run mypy           # strict, on package sources

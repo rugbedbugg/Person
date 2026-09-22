@@ -191,7 +191,10 @@ Status vocabulary, used strictly:
 - **Fixture**: exercised end to end in the deterministic fixture world.
 - **Adapter**: the Mineflayer code path this skill depends on is exercised
   against the conformance double, which uses real Minecraft data tables.
-- **Live**: run against a Minecraft server. **Nothing is marked live.**
+- **Live**: run against a Minecraft server. **Nothing in this matrix is marked
+  live.** Two skills have since been run live through `person skill-test`;
+  see [First live skill execution](#first-live-skill-execution). This matrix is
+  kept as the Milestone 1 record and is not retrofitted.
 
 | Skill                       | Fixture | Adapter                                   | Bugs found                                                               | Fix                                                         | Remaining caveat                                                            |
 | --------------------------- | ------- | ----------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
@@ -217,7 +220,11 @@ Status vocabulary, used strictly:
 | `withdraw_owned_storage`    | pass    | `inspectContainer`, `withdraw`            | first withdrawal always failed                                           | `inspectContainer`                                          | same                                                                        |
 | `loot_permitted_container`  | pass    | `inspectContainer`, `withdraw`            | same                                                                     | same                                                        | takes up to `amount` of every type it finds                                 |
 
-Every row's Live column is "not run".
+Every row's Live column was "not run" when this matrix was written, and the
+matrix is left that way deliberately. `wait_safely` and `return_home` have since
+been live-validated; the current per-skill live status is in
+[First live skill execution](#first-live-skill-execution) and in
+`docs/CURRENT_STATE.md`.
 
 ## Safety validation
 
@@ -358,7 +365,9 @@ Every one of these needs a person to open a world. They are listed in the order
 `docs/LAN_TESTING.md` walks them.
 
 1. **No server.** Connection, authentication, spawn validation, the readiness
-   checks and clean shutdown are untested against a real client.
+   checks and clean shutdown are untested against a real client. _Closed:_ two
+   live observations (2026-09-15, 2026-09-16) and three live skill validations
+   (2026-09-16) exercised all of it, including clean shutdown.
 2. **The conformance double is a model of the API, not the API.** It was built
    from the library source and real data tables, so it is a good model, and it
    is still a model. Anywhere it is wrong, the tests that depend on it are
@@ -366,6 +375,9 @@ Every one of these needs a person to open a world. They are listed in the order
 3. **Pathfinder on real terrain.** Route quality, path resets, and how often
    the exclusion function turns a reachable destination into an unreachable one
    are unknown. This is the single most likely source of skill failures.
+   _Partly addressed:_ two `return_home` runs crossed real terrain successfully,
+   one of them 26 blocks with a height change. Two samples in one world in
+   daylight. The blocker stands.
 4. **Server-side placement.** The adapter retries and then fails explicitly, but
    the timing was never exercised against a server that can refuse.
 5. **Furnace timing and container windows.** Both are written against the
@@ -593,17 +605,16 @@ Only the first two are prepared. Nothing below `return_home` has been started.
 
 ### Status
 
-| Skill         | Fixture end to end | Live Minecraft |
-| ------------- | ------------------ | -------------- |
-| `wait_safely` | passing            | **pending**    |
-| `return_home` | passing            | **pending**    |
+| Skill           | Fixture end to end   | Live Minecraft             |
+| --------------- | -------------------- | -------------------------- |
+| `wait_safely`   | passing              | **live-validated**, 1 run  |
+| `return_home`   | passing              | **live-validated**, 2 runs |
+| everything else | see the skill matrix | **not run**                |
 
-**No Minecraft server was reachable while the harness was built.** Everything
-here was exercised against the fixture world, which implements the same
-embodiment port the Mineflayer adapter implements, and against the real
-prediction-error comparison in the cognition package. Neither skill has been
-seen running against Minecraft through this harness, and the two runs below are
-the operator's to make.
+The paragraph that stood here said no server was reachable while the harness
+was built, and that both runs were the operator's to make. They were made, on
+2026-09-16, and the section below is the record. Nothing further down the
+intended order has been started.
 
 ```
 node apps/cli/src/bin/person.ts skill-test \
@@ -619,3 +630,121 @@ For `return_home`, position Person 8 to 12 blocks from the configured home
 has no teleport capability and the CLI exposes none: the setup phase exists
 precisely so that moving Person is something a human does and declares, and the
 run is recorded as operator-contaminated when it happens.
+
+### First live skill execution
+
+Three runs against the same Minecraft Java 1.16.1 LAN world used for the two
+observation contacts, on 2026-09-16, through `person skill-test`. These are the
+first times Person has physically acted in Minecraft.
+
+| Run                | `wait_safely`          | `return_home` (1)         | `return_home` (2)         |
+| ------------------ | ---------------------- | ------------------------- | ------------------------- |
+| test id            | `st_mu3w5z9d_78158279` | `st_mu3wadax_6a72c352`    | `st_mu3wii0a_c0010f88`    |
+| started (UTC)      | 09:21:45               | 09:25:10                  | 09:31:29                  |
+| embodiment         | `minecraft`            | `minecraft`               | `minecraft`               |
+| training context   | `minecraft_peaceful`   | `minecraft_peaceful`      | `minecraft_peaceful`      |
+| parameters         | `ticks=600`            | `max_distance=128`        | `max_distance=128`        |
+| safety verdict     | ACCEPT, L1             | ACCEPT, L1                | ACCEPT, L1                |
+| requested          | `wait_safely`          | `return_home`             | `return_home`             |
+| executed           | `wait_safely`          | `return_home`             | `return_home`             |
+| terminal status    | SUCCESS                | SUCCESS                   | SUCCESS                   |
+| skill ticks        | 1210 waiting           | 60 navigation             | 100 navigation            |
+| budget pressure    | 0.10 of 12000          | 0.03 of 2400              | 0.04 of 2400              |
+| start → end        | -218,66,164 (unmoved)  | -208,66,164 → -218,66,164 | -206,68,187 → -218,66,165 |
+| home distance      | 0 → 0                  | 10.0 → 0.0                | 26.0 → 1.0                |
+| declared effect    | `rested`               | `at_home`                 | `at_home`                 |
+| comparison verdict | not observable         | **match**                 | **match**                 |
+| operator setup     | none                   | yes, declared             | yes, declared             |
+| learning digest    | unchanged              | unchanged                 | unchanged                 |
+| policy revision    | 0 → 0                  | 0 → 0                     | 0 → 0                     |
+| disconnect         | clean                  | clean                     | clean                     |
+
+What this establishes, and only this:
+
+- The whole path works against a real server. A `SkillInvocation` was built from
+  a registered spec, validated by the kernel, executed by the runner through the
+  Mineflayer body, and attributed. Requested and executed agree in all three
+  runs, so no substitution occurred and none was hidden.
+- **`mineflayer-pathfinder` moved Person across real terrain**, twice, including
+  a 26-block route with a height change, ending adjacent to home. That was the
+  single largest open risk in the blocker list and it is now smaller, for two
+  routes, in one world, in daylight, on Peaceful.
+- The effect comparison ran live and agreed with the world. `at_home` was
+  predicted and observed; `rested` was correctly reported as something an
+  observation cannot carry rather than as a failure.
+- **Learning did not change.** The evidence directory fingerprint is byte-identical
+  before and after each run, and the policy revision did not move. That is the
+  measurement the harness exists to produce, not an assurance.
+- Both bounded disconnects were clean, so the exit-hang regression fixed before
+  first contact stayed fixed under a skill that actually does something.
+
+What it does not establish: anything about the other nineteen skills, anything
+about hostile behaviour (the world is Peaceful), anything about night, anything
+about a route the pathfinder cannot find, and anything about tick budgets, which
+remain unrevised and should be. Two navigation samples are two samples.
+
+**Provenance, stated plainly.** The evidence for the table above is the three
+validation reports written by `person skill-test` under
+`runs/validation/skill-tests/`, named
+`person-test-world-1-ada-<skill>-<testId>.json`. `runs/` is in `.gitignore`, so
+those originals are local to the operator's machine and are not in the
+repository history. They were read directly during the 2026-09-22
+reconciliation; each declares `embodiment: minecraft`, `minecraftVersion:
+1.16.1`, real world positions consistent with the second-contact capture, and
+`skillLibraryRevision: a1b54cd15bc0535c`, which matches the revision the current
+skill library computes today.
+
+**Tracked copies exist.** `docs/evidence/skill-tests/` holds all three
+reports, redacted of one local-filesystem-path field and otherwise byte-for-byte
+identical to the originals, with each tracked file's original SHA-256 recorded
+in `docs/evidence/skill-tests/README.md` so the redaction is checkable rather
+than trusted. A reader without access to the operator's machine now has the
+full reports, not just this summary.
+
+### Operator contamination in these runs
+
+Both `return_home` runs are marked `operatorSetup: true` with
+`operatorIntervention.reason` "operator positioned Person for a skill validation
+run". Person did not walk 26 blocks from home on its own; a human moved it there
+so there would be somewhere to return from. That is declared in the report
+rather than detected, which is the only mechanism available and the correct one.
+Neither run may be counted as evidence about how Person comes to be away from
+home.
+
+The `wait_safely` run has no setup and no intervention.
+
+### What is still pending
+
+The intended order continues, and nothing below `return_home` has been started:
+
+| Stage                     | Status      |
+| ------------------------- | ----------- |
+| 1. `wait_safely`          | live PASS   |
+| 2. `return_home`          | live PASS   |
+| 3. basic gathering        | **pending** |
+| 4. crafting               | **pending** |
+| 5. mining                 | **pending** |
+| 6. placement and building | **pending** |
+| 7. containers             | **pending** |
+| 8. hunting                | **pending** |
+
+### A presentation defect these runs exposed
+
+The terminal summary prints `duration 100 ticks, 56039ms` on one line. The two
+numbers measure different things: 100 is the skill's own measured tick count,
+and 56039 ms is wall clock from connect to disconnect, which includes a
+45-second operator setup pause during which nothing was measured. Reading them
+as one figure makes Person look roughly five hundred times slower than it is.
+
+This is a labelling fault in the summary, not a timing-model fault: the report
+itself records `timeline` and `elapsedTicks` as separate fields, correctly. It
+is recorded here because it is the kind of defect that quietly becomes a wrong
+number in a later document.
+
+### A telemetry gap these runs exposed
+
+`person status --follow` repeats the last cached status while a skill runs
+rather than publishing intermediate positions, so a live navigation cannot be
+watched from outside while it happens. That is understood and is a future
+telemetry improvement, not a correctness bug: the report written at the end is
+complete and correct.

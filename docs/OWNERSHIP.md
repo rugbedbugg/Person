@@ -1,8 +1,8 @@
 # OWNERSHIP.md — Human Collaboration & Review Boundaries
 
 **Status:** Conservative baseline — exact subsystem ownership may evolve as collaboration settles.
-**Date:** 2026-09-19
-**HEAD:** `7501194`
+**Date:** 2026-09-22
+**Baseline:** `d0e9398`
 
 ---
 

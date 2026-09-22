@@ -1,8 +1,20 @@
-# CURRENT_STATE.md — Factual Snapshot of Person (Commit 7501194)
+# CURRENT_STATE.md — Factual Snapshot of Person (Commit d0e9398)
 
-**Last verified against commit:** `7501194` (HEAD, feat/lan-validation)
+**Last verified against commit:** `d0e9398` (tip of `feat/lan-validation`)
+**Branch this snapshot was taken on:** `refactor/person-v1-architecture`
 **Tag:** `v0.1.0-foundation` (`6b99830`)
-**Date:** 2026-09-19
+**Date:** 2026-09-22
+
+This file is strictly factual. It describes what exists in the source tree and
+what has been run. **`docs/PERSON_SPEC.md` specifies a great deal that is not
+here**, including the perception firewall's sense model, the memory firewall's
+retrieval layer, belief, affect, language, social cognition, projects, web
+research, external chat, the Baritone motor backend and the 1.16.5 target.
+That specification's architecture was reconciled on 2026-09-22 and **changed
+no code**. None of it appears below, because none of it exists.
+
+The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
+the Baritone work (ADR 0001) and has not begun.
 
 ---
 
@@ -129,31 +141,35 @@ Parameters: scalars only. No command, script, chat, or coordinate fields possibl
 
 ## 4. Skill Library Status
 
-| Skill                     | Fixture | Adapter (Conformance)           | Live       | Notes                                  |
-| ------------------------- | ------- | ------------------------------- | ---------- | -------------------------------------- |
-| flee                      | ✅ pass | ✅ partial                      | ❌ not run | neutral mobs, threat set unified       |
-| dig_in                    | ✅ pass | ✅ dig/place                    | ❌ not run | diggable ground check added            |
-| wait_safely               | ✅ pass | ✅ waitTicks                    | ❌ not run | harness prepared                       |
-| return_home               | ✅ pass | ✅ moveTo/dig/place             | ❌ not run | harness prepared, needs operator setup |
-| gather_plant_food         | ✅ pass | ✅ findBlocks/moveTo/dig        | ❌ not run | drop collection unverified             |
-| hunt_safe_passive_animals | ✅ pass | ✅ entity classification/attack | ❌ not run | metadata crash + named animal fixed    |
-| cook_food                 | ✅ pass | ✅ smelt                        | ❌ not run | partial output + empty smelt fixed     |
-| eat_to_target             | ✅ pass | ✅ consume                      | ❌ not run | contract corrected (3 items, not 1)    |
-| gather_wood               | ✅ pass | ✅ full path                    | ❌ not run | tool durability unmodelled             |
-| mine_stone                | ✅ pass | ✅ full path                    | ❌ not run | needs exposed stone                    |
-| mine_coal                 | ✅ pass | ✅ full path                    | ❌ not run | needs exposed ore                      |
-| craft_basic_tools         | ✅ pass | ✅ craft/place                  | ❌ not run | server-authoritative recipes           |
-| craft_stone_tools         | ✅ pass | ✅ craft                        | ❌ not run | table placement unverified             |
-| craft_furnace             | ✅ pass | ✅ craft/place                  | ❌ not run | table placement unverified             |
-| craft_chest               | ✅ pass | ✅ craft                        | ❌ not run | table placement unverified             |
-| build_basic_shelter       | ✅ pass | ✅ place/blockAt                | ❌ not run | irregular terrain unverified           |
-| repair_shelter            | ✅ pass | ✅ place/blockAt                | ❌ not run | same                                   |
-| place_owned_chest         | ✅ pass | ✅ place/provenance             | ❌ not run | container entity unverified            |
-| deposit_owned_storage     | ✅ pass | ✅ deposit refusal              | ❌ not run | slot handling unverified               |
-| withdraw_owned_storage    | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run | first-withdrawal bug fixed             |
-| loot_permitted_container  | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run | takes up to amount of every type       |
+| Skill                     | Fixture | Adapter (Conformance)           | Live                      | Notes                               |
+| ------------------------- | ------- | ------------------------------- | ------------------------- | ----------------------------------- |
+| flee                      | ✅ pass | ✅ partial                      | ❌ not run                | neutral mobs, threat set unified    |
+| dig_in                    | ✅ pass | ✅ dig/place                    | ❌ not run                | diggable ground check added         |
+| wait_safely               | ✅ pass | ✅ waitTicks                    | ✅ **1 run, 2026-09-16**  | SUCCESS; no operator setup          |
+| return_home               | ✅ pass | ✅ moveTo/dig/place             | ✅ **2 runs, 2026-09-16** | SUCCESS; both operator-positioned   |
+| gather_plant_food         | ✅ pass | ✅ findBlocks/moveTo/dig        | ❌ not run                | drop collection unverified          |
+| hunt_safe_passive_animals | ✅ pass | ✅ entity classification/attack | ❌ not run                | metadata crash + named animal fixed |
+| cook_food                 | ✅ pass | ✅ smelt                        | ❌ not run                | partial output + empty smelt fixed  |
+| eat_to_target             | ✅ pass | ✅ consume                      | ❌ not run                | contract corrected (3 items, not 1) |
+| gather_wood               | ✅ pass | ✅ full path                    | ❌ not run                | tool durability unmodelled          |
+| mine_stone                | ✅ pass | ✅ full path                    | ❌ not run                | needs exposed stone                 |
+| mine_coal                 | ✅ pass | ✅ full path                    | ❌ not run                | needs exposed ore                   |
+| craft_basic_tools         | ✅ pass | ✅ craft/place                  | ❌ not run                | server-authoritative recipes        |
+| craft_stone_tools         | ✅ pass | ✅ craft                        | ❌ not run                | table placement unverified          |
+| craft_furnace             | ✅ pass | ✅ craft/place                  | ❌ not run                | table placement unverified          |
+| craft_chest               | ✅ pass | ✅ craft                        | ❌ not run                | table placement unverified          |
+| build_basic_shelter       | ✅ pass | ✅ place/blockAt                | ❌ not run                | irregular terrain unverified        |
+| repair_shelter            | ✅ pass | ✅ place/blockAt                | ❌ not run                | same                                |
+| place_owned_chest         | ✅ pass | ✅ place/provenance             | ❌ not run                | container entity unverified         |
+| deposit_owned_storage     | ✅ pass | ✅ deposit refusal              | ❌ not run                | slot handling unverified            |
+| withdraw_owned_storage    | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                | first-withdrawal bug fixed          |
+| loot_permitted_container  | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                | takes up to amount of every type    |
 
-**Status vocabulary used strictly:** Fixture / Adapter / Live (nothing marked Live)
+**Status vocabulary used strictly:** Fixture / Adapter / Live. Two skills are
+marked Live; the other nineteen are not. Live evidence is the three
+`person skill-test` reports described in `REALITY_VALIDATION.md`, which are
+local operator artifacts under `runs/` and are **not committed** (`runs/` is
+gitignored).
 
 ---
 
@@ -258,8 +274,14 @@ MemoryProvider, WorldModelProvider, AffectProvider, LanguageProvider, SocialProv
 
 **First contact (2026-09-15):** `person observe` connected, spawned in bounds, produced schema-valid observation, disconnected cleanly. 4 observation defects found and fixed.
 **Second contact (2026-09-16):** All 4 corrections verified against real Minecraft.
+**First live skill execution (2026-09-16):** three `person skill-test` runs:
+`wait_safely` once, `return_home` twice. All SUCCESS, requested and executed
+skill identical in every run, effect comparison matched `at_home` on both
+navigation runs, learning fingerprint unchanged, all disconnects clean. Details
+and provenance in `REALITY_VALIDATION.md`.
 
-**No skill has been run live against Minecraft.** `wait_safely` and `return_home` harnesses prepared; pending.
+**Nineteen of twenty-one skills have never been run live.** The next stage in
+the intended order is basic gathering, and it has not been started.
 
 ---
 
@@ -277,37 +299,151 @@ MemoryProvider, WorldModelProvider, AffectProvider, LanguageProvider, SocialProv
 
 **Milestone 1 complete:** Reality validation — adapter audited, 6 defects fixed, observation validated live (2 contacts), single-skill harness built.
 
-**Milestone 2 (current):** Single-skill live validation — `person skill-test` harness ready for `wait_safely` and `return_home`. No live runs performed yet.
+**Milestone 2, stages 1 and 2 complete:** Single-skill live validation. `wait_safely` and `return_home` run live through `person skill-test` on 2026-09-16, both SUCCESS. Stages 3–8 (gathering, crafting, mining, placement, containers, hunting) not started.
 
-**Blockers for live validation (from REALITY_VALIDATION.md):**
+**Phase 0 architecture reconciliation (2026-09-22):** documentation only. `docs/PERSON_SPEC.md` architecture frozen, six ADRs written, no production behaviour changed. **Phase 0.5 normalization (2026-09-22):** the frozen architecture was integrated into PERSON_SPEC's numbered sections in place, so it is read linearly rather than as an override layer; see `docs/PROJECT_HISTORY.md`.
 
-1. No server available in development environment
+**Remaining blockers for live validation (from REALITY_VALIDATION.md):**
+
+1. ~~No server available~~. Closed: connection, readiness and shutdown exercised live
 2. Conformance double is a model, not the real API
-3. Pathfinder on real terrain untested
+3. Pathfinder on real terrain: partly addressed (2 successful routes), still the largest risk
 4. Server-side placement/crafting/smelting/container timing untested
-5. Real mob behavior / flee adequacy unknown
-6. Tick budgets meaningless until measured live
+5. Real mob behavior / flee adequacy unknown (both live worlds were Peaceful)
+6. Tick budgets still not revised on live measurement
 7. Death/respawn not designed
+
+---
+
+## 11a. Known Deviations from the Frozen Architecture
+
+Found during the Phase 0 reconciliation on 2026-09-22, and **deliberately not
+fixed**. Each is a place where the code and `docs/PERSON_SPEC.md` disagree
+about what the right shape is. None of them is a bug in the current
+implementation. This is the canonical, full-detail record; nothing shorter
+exists elsewhere, and `docs/PERSON_SPEC.md` points here rather than repeating
+it.
+
+| ID  | Deviation                                                            | Introduced | Decision needed before            |
+| --- | -------------------------------------------------------------------- | ---------- | --------------------------------- |
+| C1  | The `Observation` carries exact coordinates to cognition             | `6b99830`  | any spatial-memory work           |
+| C2  | Protected-area entry is an L0 "hard safety" trigger                  | `6b99830`  | any change to the kernel's levels |
+| C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | the memory system, or a rename    |
+| C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing |
+| C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)     |
+| C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
+
+### C1. The observation carries exact coordinates
+
+`Observation.environment.position`, and the `position` field on every nearby
+resource, hazard, container, workstation and entity, are exact block
+coordinates delivered to cognition on every tick. `docs/PERSON_SPEC.md` section
+24.4 says coordinates should reach Person only through a deliberate inspection
+capability.
+
+Mitigating facts, established by reading the source rather than assumed: the
+cognition process never reads any of them. `person_planner.state` and
+`person_cognition.context` use `distance` and counts only, and a search for
+coordinate access across `apps/cognition/python/` and `packages/planner/python/`
+finds nothing. Cognition also cannot send a coordinate back: `SkillInvocation`
+is scalar-only and an architecture test enforces it.
+
+So the outbound half of the perception firewall (section 8) is enforced by
+contract, and the inbound half is currently enforced by nothing but the fact
+that nobody reads the field. **Decision required** before the first cognitive
+subsystem that would be tempted to read them, which is spatial memory.
+
+### C2. Protected areas are modelled as hard safety
+
+`protected_area_entry` is an L0 trigger in `safety-kernel.ts`, beside lava
+exposure and suffocation. L0 is described everywhere as hard safety, which
+frames operator containment as though it were self-preservation, and frames a
+configured fence as though it were an intrinsic property of Person.
+
+`docs/PERSON_SPEC.md` section 13 and `docs/SAFETY.md` now separate
+self-preservation, experimental containment and shared-world property policy
+conceptually. The runtime behaviour is deliberately unchanged: the fence should
+still stop Person. What is wrong is only the claim about why.
+
+**Decision required:** whether the kernel grows a containment level distinct
+from L0, or whether the distinction stays documentary. No production change has
+been made.
+
+### C3. `WorldMemory` is not memory
+
+`apps/node-runtime/src/runtime/world-memory.ts` is a runtime-owned ownership
+and placement ledger: home record, placed blocks, storage provenance, furnace
+and crafting-table positions. It is privileged engineering state that the
+observation builder reads to derive semantic facts. It is not, and must never
+become, Person's recollection (`docs/PERSON_SPEC.md` section 24).
+
+**Decision required:** rename at the next milestone that touches it, or accept
+the name and document it. Both are defensible; leaving it ambiguous is not.
+
+### C4. Skills choose their own targets
+
+Every skill picks its own target: `gather_wood` takes the nearest permitted
+tree. `docs/PERSON_SPEC.md` section 10.1 requires perceived, validated
+referents so that Person can say which tree. `docs/SEMANTIC_TARGETING.md`
+already describes the scheme and explains why it has not been built.
+
+**Not a contradiction yet.** It becomes one the moment a goal is about a
+particular thing, which is the same moment compositional actions are needed.
+
+### C5. The embodiment port is a Mineflayer-shaped port
+
+`Embodiment` exposes `moveTo`, `dig`, `place`, `craft`, `smelt`, `consume`,
+`attack`, `deposit`, `withdraw`, `waitTicks`, `inspectContainer`, `blockAt`,
+`findBlocks`, `findEntities` and `snapshot`. It is already an abstraction
+rather than a Mineflayer passthrough, and the fixture world proves a second
+implementation is possible. It is nonetheless shaped by what Mineflayer
+happens to offer: there is no `look`, no `use held item`, no generic entity
+interaction, and `snapshot()` is synchronous and total.
+
+A Baritone backend implements `moveTo` naturally and `findBlocks` naturally,
+and would want to supply far more geometry than the port asks for.
+`docs/PERSON_SPEC.md` section 8 says it must not.
+
+**Decision required before the Baritone spike**, and only about the shape of
+`snapshot()`: see ADR 0001.
+
+### C6. No belief, memory or knowledge representation exists
+
+`docs/PERSON_SPEC.md` sections 24, 25 and 26 specify episodic, semantic,
+spatial, social and autobiographical memory, consolidation, forgetting and a
+predictive-causal world model. None of it exists. The symbolic state is
+recomputed from the latest observation every tick, so Person currently has no
+way to be wrong about the world in the sense section 26 requires: it has no
+belief that could disagree with an observation.
+
+Prediction error is recorded, which is the input such a model needs, and
+nothing consumes it.
+
+**Not a contradiction, a gap.** Recorded here because the difference between
+"specified" and "implemented" is the thing this reconciliation exists to keep
+visible.
 
 ---
 
 ## 12. Known Limitations / Backlog
 
-| Limitation                                                                         | Source                   |
-| ---------------------------------------------------------------------------------- | ------------------------ |
-| Mineflayer adapter never run against real server                                   | IMPLEMENTATION_REPORT.md |
-| No dig-down skill (mine_stone/coal need exposed stone)                             | IMPLEMENTATION_REPORT.md |
-| Fixture is simulation, not Minecraft                                               | IMPLEMENTATION_REPORT.md |
-| Planner bounded (depth/branch/node caps) — may return no plan                      | IMPLEMENTATION_REPORT.md |
-| Goals: survival only (projects/social/self-generated future)                       | IMPLEMENTATION_REPORT.md |
-| Death ends episode — no respawn/recovery loop                                      | IMPLEMENTATION_REPORT.md |
-| Evidence written by cognition — last outcome missing if cognition dies mid-episode | IMPLEMENTATION_REPORT.md |
-| Inventory reconciliation on resume not reimplemented                               | IMPLEMENTATION_REPORT.md |
-| `loot_permitted_container` withdraws all types up to amount                        | IMPLEMENTATION_REPORT.md |
-| One Person per runtime (multi-Person not supported)                                | IMPLEMENTATION_REPORT.md |
-| Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md    |
-| Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md    |
-| Single-skill live validation not started                                           | REALITY_VALIDATION.md    |
+| Limitation                                                                         | Source                          |
+| ---------------------------------------------------------------------------------- | ------------------------------- |
+| Mineflayer adapter exercised live for observation and 2 skills only                | REALITY_VALIDATION.md           |
+| No dig-down skill (mine_stone/coal need exposed stone)                             | IMPLEMENTATION_REPORT.md        |
+| Fixture is simulation, not Minecraft                                               | IMPLEMENTATION_REPORT.md        |
+| Planner bounded (depth/branch/node caps) — may return no plan                      | IMPLEMENTATION_REPORT.md        |
+| Goals: survival only (projects/social/self-generated future)                       | IMPLEMENTATION_REPORT.md        |
+| Death ends episode — no respawn/recovery loop                                      | IMPLEMENTATION_REPORT.md        |
+| Evidence written by cognition — last outcome missing if cognition dies mid-episode | IMPLEMENTATION_REPORT.md        |
+| Inventory reconciliation on resume not reimplemented                               | IMPLEMENTATION_REPORT.md        |
+| `loot_permitted_container` withdraws all types up to amount                        | IMPLEMENTATION_REPORT.md        |
+| One Person per runtime (multi-Person not supported)                                | IMPLEMENTATION_REPORT.md        |
+| Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md           |
+| Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md           |
+| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started              | REALITY_VALIDATION.md           |
+| No belief, memory, affect, language, social or project system exists               | Known Deviations C6, above      |
+| Perception has no visibility, occlusion or pose model                              | PERSON_SPEC section 8, ADR 0002 |
 
 ---
 
@@ -335,18 +471,22 @@ MemoryProvider, WorldModelProvider, AffectProvider, LanguageProvider, SocialProv
 - Validation: 13
 - Observation: 4
 
-`mise run check` **PASSES** (typecheck, build, lint, test-node, test-python)
+`mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
+Verified at `d0e9398` on 2026-09-22: Node 188 pass / 0 fail, Python 129 pass.
 
 ---
 
 ## 14. Key Files for Understanding Current State
 
-| File                       | Purpose                                                           |
-| -------------------------- | ----------------------------------------------------------------- |
-| `REALITY_VALIDATION.md`    | Canonical validation evidence (fixture/adapter/live distinctions) |
-| `IMPLEMENTATION_REPORT.md` | Cumulative implementation record (Milestone 0 + 1)                |
-| `TRACEABILITY.md`          | Requirements → code → tests mapping                               |
-| `docs/LAN_TESTING.md`      | Manual validation ladder                                          |
-| `docs/EVALUATION.md`       | What automated suite proves / does not prove                      |
-| `docs/ARCHITECTURE.md`     | Process diagram, packages, decision loop                          |
-| `docs/PERSON_SPEC.md`      | Full architectural specification (source of truth)                |
+| File                         | Purpose                                                                |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `REALITY_VALIDATION.md`      | Canonical validation evidence (fixture/adapter/live distinctions)      |
+| `IMPLEMENTATION_REPORT.md`   | Cumulative implementation record (Milestone 0 + 1)                     |
+| `TRACEABILITY.md`            | Requirements → code → tests mapping                                    |
+| `docs/LAN_TESTING.md`        | Manual validation ladder                                               |
+| `docs/EVALUATION.md`         | What automated suite proves / does not prove                           |
+| `docs/ARCHITECTURE.md`       | Current and target process diagrams, packages, decision loop           |
+| `docs/PERSON_SPEC.md`        | Full architectural specification (source of truth); read top to bottom |
+| `docs/decisions/`            | ADRs 0001–0006, frozen 2026-09-22                                      |
+| `docs/SEMANTIC_TARGETING.md` | The referent scheme compositional actions will need                    |
+| `docs/evidence/skill-tests/` | Tracked copies of the three live skill-test reports, with provenance   |
