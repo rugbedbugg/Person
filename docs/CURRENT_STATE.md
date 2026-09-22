@@ -468,17 +468,35 @@ shortcutting only while `exclusionAreasStep` is non-empty, so removing them
 would silently re-enable straight-line splicing across avoided ground.
 
 **What is established.** No path the search returns contains a step whose feet
-or head block is forbidden, for cardinal walking, diagonals, jump-up, drop-down,
-move-down, ladder climbing, and parkour even when parkour is switched on. This
-holds for replanning because every search reads the guard again, and for
-shortcutting because shortcutting is off. Proved by deterministic tests against
-the real pathfinder over a synthetic world. **Not live-validated in Minecraft.**
+or head block is forbidden, nor a diagonal threading past a forbidden corner
+column, for cardinal walking, diagonals, jump-up, drop-down, move-down, ladder
+climbing, and parkour even when parkour is switched on. This holds for
+replanning because every search reads the guard again, and for shortcutting
+because shortcutting is off. Proved by deterministic tests against the real
+pathfinder over a synthetic world. **Not live-validated in Minecraft.**
 
-**What is not established.** Three things, honestly:
+**What containment means here.** A protected area is a set of whole blocks. The
+configuration schema types every coordinate as an integer, `contains` is an
+inclusive integer box test, `PhysicalGuard.canEnter` takes a block position, and
+the safety kernel samples the floored feet block. Sub-block geometry is not
+representable anywhere in the system, so the invariant is block occupancy: no
+Person-controlled movement may leave Person occupying a forbidden block. The
+avatar's collision volume is a finer thing than the contract describes, and is
+not part of this invariant.
 
-- Diagonal moves pick the cheaper of the two corner columns and the avatar's
-  hitbox may still clip the other. A region one block wide on a diagonal is the
-  case to watch.
+That distinction was examined on 2026-09-22 rather than assumed, and it changed
+one answer. A diagonal step changes x and z together, so the floored position
+passes through one of the two corner columns before arriving, whichever axis
+crosses first. Those are blocks Person occupies, so that is inside the contract,
+not a collision-volume aside. The planner was measured emitting exactly such a
+move: a diagonal from `(0,-1)` to `(1,0)` threading past a forbidden `(0,0)`.
+Since protected areas fail closed and Person does not control which axis crosses
+first, the neighbour filter now refuses a diagonal whose either corner column is
+forbidden. Person rounds such a corner in two cardinal steps instead. Ordinary
+diagonals in open ground are unaffected and are covered by a test.
+
+**What is not established.** Two things, honestly:
+
 - Containment is read when a path is searched. If a protected area were changed
   while Person was already walking, the path in flight would not be re-checked;
   the next search would honour the change. This is not reachable today because

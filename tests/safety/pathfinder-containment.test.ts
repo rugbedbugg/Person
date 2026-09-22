@@ -7,6 +7,7 @@ import {
   GROUND,
   bench,
   boxGuard,
+  cornerTrespasses,
   trespasses,
 } from "../support/pathfinder-bench.ts";
 
@@ -217,6 +218,52 @@ test("parkour cannot jump into a protected region even if it is enabled", () => 
     trespasses(result.path, guard),
     [],
     "a parkour jump must not land inside the region",
+  );
+});
+
+test("a diagonal may not thread past the corner of a protected region", () => {
+  // A diagonal changes x and z together, so the floored position passes
+  // through one of the two corner columns before arriving. Which one depends
+  // on which axis crosses its block boundary first, which is not something
+  // Person controls. Protected areas fail closed, so a diagonal with either
+  // corner forbidden must not be planned at all.
+  const block: Box = {
+    min: { x: 0, y: FEET, z: 0 },
+    max: { x: 0, y: FEET + 1, z: 0 },
+  };
+  const guard = boxGuard([block]);
+  const world = bench({ bounds: { minX: -6, maxX: 6, minZ: -6, maxZ: 6 } });
+  const start: Position = { x: -2, y: FEET, z: -2 };
+  const result = world.path(start, { x: 2, y: FEET, z: 2 }, guard);
+
+  assert.equal(result.status, "success", "a legal way past the block exists");
+  assert.deepEqual(trespasses(result.path, guard), []);
+  assert.deepEqual(
+    cornerTrespasses(start, result.path, guard),
+    [],
+    "no diagonal may thread past a forbidden corner",
+  );
+});
+
+test("ordinary diagonals are still used where nothing is protected", () => {
+  // The corner rule must not cost Person diagonal movement in open ground.
+  const world = bench({ bounds: { minX: -6, maxX: 6, minZ: -6, maxZ: 6 } });
+  const start: Position = { x: -4, y: FEET, z: -4 };
+  const result = world.path(start, { x: 4, y: FEET, z: 4 }, null);
+
+  assert.equal(result.status, "success");
+  const steps = [start, ...result.path];
+  const diagonals = steps.filter((step, i) => {
+    const previous = steps[i - 1];
+    return (
+      previous !== undefined &&
+      Math.abs(step.x - previous.x) === 1 &&
+      Math.abs(step.z - previous.z) === 1
+    );
+  });
+  assert.ok(
+    diagonals.length > 0,
+    `an open diagonal route should use diagonal steps, walked ${result.path.length}`,
   );
 });
 

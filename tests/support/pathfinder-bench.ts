@@ -173,3 +173,38 @@ export function occupied(path: Position[]): Position[] {
 export function trespasses(path: Position[], guard: PhysicalGuard): Position[] {
   return occupied(path).filter((position) => !guard.canEnter(position));
 }
+
+/**
+ * Corner columns a diagonal step would thread between, where the guard refuses
+ * one of them.
+ *
+ * A diagonal from A to B changes x and z together, so the floored position
+ * passes through `(B.x, A.z)` or `(A.x, B.z)` on the way, whichever axis
+ * crosses its block boundary first. That is a block Person occupies, so a
+ * forbidden one is a containment question rather than a geometric aside.
+ */
+export function cornerTrespasses(
+  from: Position,
+  path: Position[],
+  guard: PhysicalGuard,
+): Position[] {
+  const steps = [from, ...path];
+  const bad: Position[] = [];
+  for (let i = 1; i < steps.length; i++) {
+    const a = steps[i - 1];
+    const b = steps[i];
+    if (!a || !b) continue;
+    if (Math.abs(b.x - a.x) !== 1 || Math.abs(b.z - a.z) !== 1) continue;
+    const low = Math.min(a.y, b.y);
+    const high = Math.max(a.y, b.y) + 1;
+    for (const corner of [
+      { x: b.x, z: a.z },
+      { x: a.x, z: b.z },
+    ])
+      for (let y = low; y <= high; y++) {
+        const position = { x: corner.x, y, z: corner.z };
+        if (!guard.canEnter(position)) bad.push(position);
+      }
+  }
+  return bad;
+}

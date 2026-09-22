@@ -33,7 +33,14 @@ interface GeneratedMove {
 
 /** `getNeighbors` is real but absent from the package's type declarations. */
 interface NeighborSource {
-  getNeighbors(node: unknown): GeneratedMove[];
+  getNeighbors(node: PathNode): GeneratedMove[];
+}
+
+/** The node a move starts from. Only its block coordinates are read. */
+interface PathNode {
+  x: number;
+  y: number;
+  z: number;
 }
 
 const EXCLUSION_COST = 100;
@@ -133,11 +140,41 @@ export function occupiedBy(move: {
 }
 
 /**
+ * The two block columns a diagonal step threads between.
+ *
+ * A diagonal changes x and z together, so the floored position passes through
+ * `(to.x, from.z)` or `(from.x, to.z)` on the way, whichever axis crosses its
+ * block boundary first. That is not something Person controls, and both are
+ * positions Person occupies, so both are checked. Returns nothing for a move
+ * that is not diagonal.
+ */
+function cornersOf(from: PathNode, to: GeneratedMove): Position[] {
+  if (Math.abs(to.x - from.x) !== 1 || Math.abs(to.z - from.z) !== 1) return [];
+  const low = Math.min(from.y, to.y);
+  const high = Math.max(from.y, to.y) + 1;
+  const corners: Position[] = [];
+  for (const column of [
+    { x: to.x, z: from.z },
+    { x: from.x, z: to.z },
+  ])
+    for (let y = low; y <= high; y++)
+      corners.push({ x: column.x, y, z: column.z });
+  return corners;
+}
+
+/**
  * Wraps `getNeighbors` so the search never sees a move Person may not make.
  *
  * Dropping the move rather than pricing it means the A* search cannot choose it
  * at any cost, cannot reach it by replanning, and cannot rediscover it when the
  * containment policy is read again on the next search.
+ *
+ * A move is refused unless every block it would make Person occupy is
+ * permitted: the destination's feet and head, the columns a diagonal threads
+ * between, and anything it would break or place. Protected areas fail closed,
+ * so a diagonal whose outcome depends on which axis crosses first is refused
+ * rather than gambled on. The cost is that Person rounds the corner of a
+ * protected region in two cardinal steps instead of one diagonal.
  */
 function installNeighborFilter(
   movements: MovementPolicy,
@@ -146,10 +183,11 @@ function installNeighborFilter(
 ): void {
   const source = movements as unknown as NeighborSource;
   const generate = source.getNeighbors.bind(source);
-  source.getNeighbors = (node: unknown): GeneratedMove[] =>
+  source.getNeighbors = (node: PathNode): GeneratedMove[] =>
     generate(node).filter(
       (move) =>
         occupiedBy(move).every(permitted) &&
+        cornersOf(node, move).every(permitted) &&
         move.toBreak.every((position) => modifiable(floor(position))) &&
         move.toPlace.every((position) => modifiable(floor(position))),
     );
