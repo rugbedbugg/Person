@@ -44,7 +44,7 @@
 - **Autonomy ≠ authority** (ADR 0005): Person may plan what the runtime refuses
 
 The known disagreements between the code and the frozen architecture are
-`docs/CURRENT_STATE.md`, "Known Deviations", C1-C6. Do not resolve one silently.
+`docs/CURRENT_STATE.md`, "Known Deviations", C1-C7. Do not resolve one silently.
 
 ### Implementation Discipline
 
