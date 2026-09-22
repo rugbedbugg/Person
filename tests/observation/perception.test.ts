@@ -156,6 +156,10 @@ test("two players survive into the observation as two people", async () => {
     { x: 8, y: 64, z: 0 },
     { username: "PersonWatcher", uuid: "1f2e3d4c-5b6a-4978-8765-4321fedcba09" },
   );
+  // Both stand along the same line, and Person is looking down it: reading a
+  // nameplate is central vision, not something caught out of the corner of an
+  // eye.
+  bench.world.face({ x: 8, y: 64, z: 0 });
   const observation = observe(bench);
   const players = observation.nearby.players;
   assert.equal(players.length, 2);

@@ -40,7 +40,9 @@ function observe(bench: Harness): Observation {
 }
 
 const animals = (observation: Observation): string[] =>
-  observation.nearby.passiveAnimals.map((animal) => animal.name);
+  observation.nearby.passiveAnimals
+    .map((animal) => animal.name)
+    .filter((name): name is string => name !== undefined);
 
 test("an animal in front and unobstructed is perceived", async () => {
   const bench = await harness();
@@ -160,4 +162,69 @@ test("the physical world holds things the perceptual one does not", async () => 
     perceived.length < actual.length,
     "perception is a strict subset of what exists",
   );
+});
+
+test("the periphery reports that something is there, not what it is", async () => {
+  const bench = await harness();
+  // Straight ahead, and far enough off-axis to be out of the recognising part
+  // of the field but well inside the perceptible one.
+  bench.world.spawn("cow", { x: 0, y: 64, z: -6 });
+  bench.world.spawn("pig", { x: -6, y: 64, z: -1 });
+  bench.world.face({ x: 0, y: 64, z: -6 });
+
+  const seen = observe(bench).nearby.passiveAnimals;
+  const central = seen.filter((animal) => animal.detail === "central");
+  const peripheral = seen.filter((animal) => animal.detail === "peripheral");
+
+  assert.equal(central.length, 1, "one animal is being looked at");
+  assert.equal(central[0]?.name, "cow", "and it is recognised");
+  assert.equal(peripheral.length, 1, "the other is only noticed");
+  assert.equal(
+    peripheral[0]?.name,
+    undefined,
+    "a peripheral percept withholds what the thing is",
+  );
+  assert.ok(
+    peripheral[0]?.bearing !== undefined &&
+      peripheral[0]?.distance !== undefined,
+    "it still says where",
+  );
+});
+
+test("distance is an estimate, and a coarser one further away", async () => {
+  const bench = await harness();
+  const observation = observe(bench);
+  const every = [
+    ...observation.nearby.resources,
+    ...observation.nearby.passiveAnimals,
+    ...observation.nearby.hostiles,
+    ...observation.nearby.hazards,
+  ];
+
+  for (const percept of every) {
+    const step = percept.distance <= 8 ? 0.5 : percept.distance <= 16 ? 1 : 2;
+    assert.equal(
+      Math.round(percept.distance / step) * step,
+      percept.distance,
+      `${percept.distance} is finer than the estimate grid allows`,
+    );
+  }
+});
+
+test("percepts cannot be assembled back into a coordinate", async () => {
+  const bench = await harness();
+  bench.world.spawn("cow", { x: 3, y: 64, z: -7 });
+  bench.world.face({ x: 3, y: 64, z: -7 });
+  const observation = observe(bench);
+  const serialized = JSON.stringify(observation);
+
+  // Reconstruction needs an anchor: somewhere Person is, or a heading it is
+  // facing, or a record of how far it moved. The contract carries none of the
+  // three, so relative bearings and estimated distances compose into relative
+  // structure and never into a world position.
+  for (const anchor of ["yaw", "pitch", "position", "lastSafePosition"])
+    assert.ok(
+      !new RegExp(`"${anchor}"`).test(serialized),
+      `${anchor} would be an anchor for reconstruction`,
+    );
 });

@@ -303,12 +303,12 @@
             "additionalProperties": false,
             "required": [
               "kind",
-              "name",
               "distance",
               "harvestPermitted",
               "bearing",
               "elevation",
-              "rangeBand"
+              "rangeBand",
+              "detail"
             ],
             "properties": {
               "kind": {
@@ -345,6 +345,11 @@
               "rangeBand": {
                 "type": "string",
                 "enum": ["reach", "near", "mid", "far"]
+              },
+              "detail": {
+                "type": "string",
+                "enum": ["central", "peripheral"],
+                "description": "Whether Person was looking at this or merely aware of it. A peripheral percept withholds precise identity."
               }
             }
           }
@@ -371,7 +376,8 @@
               "storageId",
               "bearing",
               "elevation",
-              "rangeBand"
+              "rangeBand",
+              "detail"
             ],
             "properties": {
               "kind": {
@@ -415,6 +421,11 @@
               "rangeBand": {
                 "type": "string",
                 "enum": ["reach", "near", "mid", "far"]
+              },
+              "detail": {
+                "type": "string",
+                "enum": ["central", "peripheral"],
+                "description": "Whether Person was looking at this or merely aware of it. A peripheral percept withholds precise identity."
               }
             }
           }
@@ -431,7 +442,9 @@
               "provenance",
               "bearing",
               "elevation",
-              "rangeBand"
+              "rangeBand",
+              "detail",
+              "source"
             ],
             "properties": {
               "kind": {
@@ -465,6 +478,16 @@
               "rangeBand": {
                 "type": "string",
                 "enum": ["reach", "near", "mid", "far"]
+              },
+              "detail": {
+                "type": "string",
+                "enum": ["central", "peripheral"],
+                "description": "Whether Person was looking at this or merely aware of it. A peripheral percept withholds precise identity."
+              },
+              "source": {
+                "type": "string",
+                "const": "remembered",
+                "description": "Read from Person's own placement ledger rather than seen."
               }
             }
           }
@@ -480,7 +503,8 @@
               "distance",
               "bearing",
               "elevation",
-              "rangeBand"
+              "rangeBand",
+              "detail"
             ],
             "properties": {
               "kind": {
@@ -520,6 +544,11 @@
               "rangeBand": {
                 "type": "string",
                 "enum": ["reach", "near", "mid", "far"]
+              },
+              "detail": {
+                "type": "string",
+                "enum": ["central", "peripheral"],
+                "description": "Whether Person was looking at this or merely aware of it. A peripheral percept withholds precise identity."
               }
             }
           }
@@ -747,14 +776,14 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "name",
           "distance",
           "named",
           "tamed",
           "protectedTarget",
           "bearing",
           "elevation",
-          "rangeBand"
+          "rangeBand",
+          "detail"
         ],
         "properties": {
           "name": {
@@ -799,6 +828,11 @@
           "rangeBand": {
             "type": "string",
             "enum": ["reach", "near", "mid", "far"]
+          },
+          "detail": {
+            "type": "string",
+            "enum": ["central", "peripheral"],
+            "description": "Whether Person was looking at this or merely aware of it. A peripheral percept withholds precise identity."
           }
         }
       }

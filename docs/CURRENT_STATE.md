@@ -358,17 +358,31 @@ but the accident that nobody looked.
   relative to Person and qualitatively: a bearing relative to facing, an
   elevation, a coarse range band, and a distance rounded to a tenth of a block.
   There is no compass, because a heading in degrees would be the coordinate
-  problem in another notation.
+  problem in another notation. Distance is an estimate rather than a
+  measurement: half a block out to eight, whole blocks out to sixteen, two
+  beyond, which is as coarse as the thresholds cognition actually compares
+  against allow. Reconstructing a world position from a run of percepts needs
+  an anchor, and the contract carries no self position, no heading and no
+  odometry, so relative structure is all that composes.
 
 **What Person can see.** `apps/node-runtime/src/observation/vision.ts`. An eye
 at Minecraft's standing eye height, a view direction taken from yaw and pitch
-using Mineflayer's own convention, human peripheral fields of 200 degrees
-horizontally and 130 vertically, a range of 32 blocks, and an opaque-block line
-of sight test. Sub-block shapes are ignored, so a fence occludes as a full cube
+using Mineflayer's own convention, a range of 32 blocks, and an opaque-block
+line of sight test. The field has two parts, because a human one does. Out to
+200 degrees horizontally and 130 vertically Person perceives that something is
+there, roughly where, and roughly what sort of thing it is. Only within 60
+degrees horizontally and 50 vertically does it recognise what the thing
+actually is: outside that, a percept carries its coarse category, bearing,
+elevation and estimated distance, and withholds the exact block name, the
+species and any nameplate. `PERSON_SPEC` section 8 asks for semantic
+aggregation and a human-like sense model, and a cone that recognised everything
+equally out to 100 degrees would be neither. Sub-block shapes are ignored, so a fence occludes as a full cube
 does. Resources, hazards, entities and found containers are filtered through
 it. Workstations and owned storage are not: they come from Person's own
-placement ledger, so they are remembered rather than seen, and that channel is
-the one to revisit when memory exists (C6).
+placement ledger, so they are remembered rather than seen. Every workstation
+record carries `source: "remembered"` so the channel cannot be mistaken for
+current perception, and `home.ownedStorage` sits in the `home` block for the
+same reason. That is the channel to revisit when memory exists (C6).
 
 **Proprioception.** Health, food, saturation, air, armour, status effects,
 whether Person is alive, and the inventory are reported as body state rather
