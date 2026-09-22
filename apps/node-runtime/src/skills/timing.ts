@@ -10,6 +10,7 @@ import type {
   EntityView,
   FindBlocksQuery,
 } from "../embodiment/types.ts";
+import type { GazeDirection } from "../embodiment/gaze.ts";
 
 export type TimedPhase = "navigation" | "interaction" | "waiting";
 
@@ -92,6 +93,8 @@ export function instrument(embodiment: Embodiment): {
       embodiment.containerAt(position),
     inspectContainer: (position: Position): Promise<ContainerView | null> =>
       timed("inspectContainer", () => embodiment.inspectContainer(position)),
+    look: (direction: GazeDirection): Promise<void> =>
+      timed("look", () => embodiment.look(direction)),
     moveTo: (position: Position, options?: MoveOptions): Promise<void> =>
       timed("moveTo", () => embodiment.moveTo(position, options)),
     dig: (position: Position): Promise<ItemStack[]> =>

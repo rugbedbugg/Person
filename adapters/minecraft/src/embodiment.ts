@@ -22,8 +22,10 @@ import {
   type EntityView,
   type FindBlocksQuery,
   type MoveOptions,
+  type GazeDirection,
   type PhysicalGuard,
   type WorldSnapshot,
+  stepGaze,
   PERCEPTION,
   gatherResources,
 } from "#node-runtime";
@@ -1306,6 +1308,27 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       window.close();
     }
     return moved;
+  }
+
+  /**
+   * One bounded step of deliberate gaze.
+   *
+   * `bot.look` is Mineflayer's supported orientation call and it resolves once
+   * the server has been told, so awaiting it is what makes "turn, then look"
+   * an ordering rather than a hope. The yaw and pitch it takes are computed
+   * here, on the trusted side; nothing above this method ever sees an angle.
+   */
+  async look(direction: GazeDirection): Promise<void> {
+    const bot = this.bot;
+    if (!this.#connected) throw new DisconnectedError();
+    const next = stepGaze(
+      {
+        yaw: Number(bot.entity.yaw ?? 0),
+        pitch: Number(bot.entity.pitch ?? 0),
+      },
+      direction,
+    );
+    await bot.look(next.yaw, next.pitch, false);
   }
 
   async waitTicks(ticks: number): Promise<void> {

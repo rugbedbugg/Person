@@ -1,4 +1,5 @@
 import type { ItemStack, Position } from "#protocol";
+import type { GazeDirection } from "./gaze.ts";
 
 /**
  * The embodiment port.
@@ -228,6 +229,19 @@ export interface Embodiment {
   attack(entityId: number): Promise<void>;
   deposit(position: Position, items: ItemStack[]): Promise<ItemStack[]>;
   withdraw(position: Position, items: ItemStack[]): Promise<ItemStack[]>;
+  /**
+   * Points Person's senses one bounded step in a direction.
+   *
+   * The only way anything above the body changes where Person is looking. It
+   * takes a word rather than an angle, so no caller needs an absolute heading
+   * to aim, and cognition could not issue one if it tried: the direction is
+   * the whole vocabulary.
+   *
+   * Locomotion also turns Person, and that is not this. Walking somewhere
+   * leaves Person facing along its route as a side effect; calling this is
+   * Person deciding to look.
+   */
+  look(direction: GazeDirection): Promise<void>;
   waitTicks(ticks: number): Promise<void>;
   /** Registers a Person-placed container so its provenance is tracked. */
   registerOwnedStorage(position: Position, storageId: string): void;
