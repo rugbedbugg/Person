@@ -25,7 +25,13 @@ export interface ParameterSpec {
 }
 
 export type SkillCategory =
-  "emergency" | "food" | "resources" | "crafting" | "shelter" | "storage";
+  | "emergency"
+  | "food"
+  | "resources"
+  | "crafting"
+  | "shelter"
+  | "storage"
+  | "perception";
 
 export type Permission =
   | "harvest_resource"

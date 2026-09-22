@@ -1,0 +1,26 @@
+{
+  "id": "look_around",
+  "version": 1,
+  "category": "perception",
+  "summary": "Turn through a short bounded sweep and settle facing whatever showed the most.",
+  "parameters": {},
+  "preconditions": [],
+  "expectedEffects": [
+    {
+      "fact": "surveyed",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["threat_appeared", "timed_out"],
+  "requiredPermissions": [],
+  "costLimits": {
+    "maxTicks": 200,
+    "maxDistance": 0,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["elapsed_ticks"],
+  "risk": 0.02,
+  "emergency": false
+}

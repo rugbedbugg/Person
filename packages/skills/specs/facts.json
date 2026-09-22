@@ -42,6 +42,7 @@
     "rested": "1 after a completed safe wait",
     "stored_surplus": "1 after a completed deposit into owned storage",
     "withdrawn": "1 after a completed withdrawal from owned storage",
-    "looted": "1 after a completed withdrawal from a permitted pre-existing container"
+    "looted": "1 after a completed withdrawal from a permitted pre-existing container",
+    "surveyed": "1 when Person has looked around since it last had reason to"
   }
 }

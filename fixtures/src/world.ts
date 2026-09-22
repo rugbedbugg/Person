@@ -14,6 +14,8 @@ import {
   type MoveOptions,
   type PhysicalGuard,
   type WorldSnapshot,
+  type GazeDirection,
+  stepGaze,
   gatherResources,
   FOOD_VALUE,
   FUEL_VALUE,
@@ -666,6 +668,22 @@ export class FixtureWorld implements Embodiment {
     this.#yaw = Math.atan2(-dx, -dz);
     this.#pitch = Math.atan2(dy, flat);
     this.#invalidate();
+  }
+
+  /**
+   * One bounded step of deliberate gaze.
+   *
+   * The same semantic contract the Minecraft body implements, so a test that
+   * proves Person can look round a corner here is proving the shape of the
+   * thing that runs live, not a fixture convenience.
+   */
+  async look(direction: GazeDirection): Promise<void> {
+    this.#requireConnection();
+    const next = stepGaze({ yaw: this.#yaw, pitch: this.#pitch }, direction);
+    this.#yaw = next.yaw;
+    this.#pitch = next.pitch;
+    // Turning your head takes a moment, and a survey is several of them.
+    this.#advance(2);
   }
 
   /** Sets facing directly, for tests that need Person looking nowhere useful. */
