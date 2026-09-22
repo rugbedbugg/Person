@@ -326,7 +326,7 @@ it.
 
 | ID  | Deviation                                                            | Introduced | Decision needed before            |
 | --- | -------------------------------------------------------------------- | ---------- | --------------------------------- |
-| C1  | The `Observation` carries exact coordinates to cognition             | `6b99830`  | any spatial-memory work           |
+| C1  | The `Observation` carried exact coordinates (resolved)               | `6b99830`  | resolved 2026-09-22, see below    |
 | C2  | Protected-area entry is an L0 "hard safety" trigger                  | `6b99830`  | any change to the kernel's levels |
 | C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | the memory system, or a rename    |
 | C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing |
@@ -334,25 +334,68 @@ it.
 | C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
 | C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below    |
 
-### C1. The observation carries exact coordinates
+### C1. The observation carried exact coordinates
 
-`Observation.environment.position`, and the `position` field on every nearby
-resource, hazard, container, workstation and entity, are exact block
-coordinates delivered to cognition on every tick. `docs/PERSON_SPEC.md` section
-24.4 says coordinates should reach Person only through a deliberate inspection
-capability.
+**Resolved on 2026-09-22.** The structural half of the perception firewall now
+exists. Cognition no longer receives a world coordinate anywhere, and what it
+does receive is bounded by a first-person visual model rather than by whatever
+the body's block search turned up.
 
-Mitigating facts, established by reading the source rather than assumed: the
-cognition process never reads any of them. `person_planner.state` and
-`person_cognition.context` use `distance` and counts only, and a search for
-coordinate access across `apps/cognition/python/` and `packages/planner/python/`
-finds nothing. Cognition also cannot send a coordinate back: `SkillInvocation`
-is scalar-only and an architecture test enforces it.
+**What it used to be.** `Observation.environment.position` and a `position` on
+every nearby resource, hazard, container, workstation, entity and owned
+storage, plus `navigation.lastSafePosition`, the home coordinate, the
+Mineflayer `entityId` and the account `uuid`. Cognition never read any of it,
+which was established by inspection, so the firewall was enforced by nothing
+but the accident that nobody looked.
 
-So the outbound half of the perception firewall (section 8) is enforced by
-contract, and the inbound half is currently enforced by nothing but the fact
-that nobody reads the field. **Decision required** before the first cognitive
-subsystem that would be tempted to read them, which is spatial memory.
+**What replaced it.** Two contracts instead of one.
+
+- `WorldSnapshot` is the privileged one. Exact position, the eye pose, every
+  block the body found, every entity, the pathfinder's world. The safety
+  kernel, the permission gate, the physical guard, the skills and the operator
+  reports all read it, and it never crosses to cognition.
+- `Observation` is the cognition-facing one. Where something is, is reported
+  relative to Person and qualitatively: a bearing relative to facing, an
+  elevation, a coarse range band, and a distance rounded to a tenth of a block.
+  There is no compass, because a heading in degrees would be the coordinate
+  problem in another notation.
+
+**What Person can see.** `apps/node-runtime/src/observation/vision.ts`. An eye
+at Minecraft's standing eye height, a view direction taken from yaw and pitch
+using Mineflayer's own convention, human peripheral fields of 200 degrees
+horizontally and 130 vertically, a range of 32 blocks, and an opaque-block line
+of sight test. Sub-block shapes are ignored, so a fence occludes as a full cube
+does. Resources, hazards, entities and found containers are filtered through
+it. Workstations and owned storage are not: they come from Person's own
+placement ledger, so they are remembered rather than seen, and that channel is
+the one to revisit when memory exists (C6).
+
+**Proprioception.** Health, food, saturation, air, armour, status effects,
+whether Person is alive, and the inventory are reported as body state rather
+than as vision. Saturation is a hidden stat in vanilla, and is kept on the
+grounds that how recently you ate well is something a body knows about itself.
+Exact position is not proprioception and is not reported.
+
+**Hearing does not exist.** Nothing carries sound, chat or event audio into
+cognition today, so there was nothing to put behind the firewall. Vision is not
+the whole of perception, it is the whole of what is implemented.
+
+**Behaviour changed, deliberately.** Person now misses things it would
+previously have been told about, because they are behind it, too far away, or
+behind a wall. That is what ADR 0002 predicted and wanted. It has a concrete
+consequence: `fixtures/worlds/vertical-slice.json` needed an explicit
+`spawnYaw`, because its food is behind the old default facing and Person never
+turns around on its own. **Person cannot yet look around**, and until it can,
+what it discovers depends on where it happens to face. That is the single
+largest gap this phase leaves.
+
+**What is not established.** Recognition is by block and entity name, so Person
+identifies a cow as a cow with no notion of having learned what a cow is. There
+is no attention model: what survives the visual filter is capped
+deterministically and nearest-first, which bounds the output without modelling
+what Person would actually notice. A percept has no identity across ticks, so
+cognition cannot yet refer to a particular perceived thing, which is C4 and is
+deliberately untouched.
 
 ### C2. Protected areas are modelled as hard safety
 
