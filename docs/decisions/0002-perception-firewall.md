@@ -21,7 +21,7 @@ individual widening is small.
 The result of enough small widenings is an agent that cannot fail to notice
 anything, cannot be surprised, cannot form a wrong belief about where something
 is, and therefore cannot demonstrate any of the epistemic behaviour
-`docs/PERSON_SPEC.md` section 0.3 requires.
+`docs/PERSON_SPEC.md` section 26 requires.
 
 The first live observation already produced the concrete version of this
 problem in the opposite direction: a nearest-64 search standing on stone
@@ -112,8 +112,8 @@ Rule 6 is deferred. Rules 1 to 5 are in force now.
 
 | Reference                                         | Description                                         |
 | ------------------------------------------------- | --------------------------------------------------- |
-| `docs/PERSON_SPEC.md` sections 0.3, 0.4, 0.20     | Epistemic separation, the firewall, capability axes |
-| `docs/PERSON_SPEC.md` section 0.24, C1            | Coordinates currently cross the firewall            |
+| `docs/PERSON_SPEC.md` sections 26, 8, 4.1         | Epistemic separation, the firewall, capability axes |
+| `docs/CURRENT_STATE.md`, "Known Deviations", C1   | Coordinates currently cross the firewall            |
 | `apps/node-runtime/src/observation/perception.ts` | The firewall's current implementation               |
 | `REALITY_VALIDATION.md`, first contact, finding 3 | Why shaping exists                                  |
 | `2d7f9d2`                                         | Perception balance commit                           |
@@ -128,7 +128,7 @@ assumed, and cannot send one back because `SkillInvocation` is scalar-only.
 Resolving C1 means one of:
 
 - removing the coordinate fields and giving cognition a deliberate "check where
-  I am" capability, per `docs/PERSON_SPEC.md` section 0.6; or
+  I am" capability, per `docs/PERSON_SPEC.md` section 24.4; or
 - keeping them and adding an architecture test that asserts cognition does not
   read them, which makes the current accident into a checked rule.
 

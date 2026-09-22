@@ -10,8 +10,8 @@ what has been run. **`docs/PERSON_SPEC.md` specifies a great deal that is not
 here**, including the perception firewall's sense model, the memory firewall's
 retrieval layer, belief, affect, language, social cognition, projects, web
 research, external chat, the Baritone motor backend and the 1.16.5 target.
-Part 0 of that document was frozen on 2026-09-22 and **changed no code**. None
-of it appears below, because none of it exists.
+That specification's architecture was reconciled on 2026-09-22 and **changed
+no code**. None of it appears below, because none of it exists.
 
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
@@ -301,7 +301,7 @@ the intended order is basic gathering, and it has not been started.
 
 **Milestone 2, stages 1 and 2 complete:** Single-skill live validation. `wait_safely` and `return_home` run live through `person skill-test` on 2026-09-16, both SUCCESS. Stages 3–8 (gathering, crafting, mining, placement, containers, hunting) not started.
 
-**Phase 0 architecture reconciliation (2026-09-22):** documentation only. `docs/PERSON_SPEC.md` Part 0 frozen, six ADRs written, no production behaviour changed.
+**Phase 0 architecture reconciliation (2026-09-22):** documentation only. `docs/PERSON_SPEC.md` architecture frozen, six ADRs written, no production behaviour changed. **Phase 0.5 normalization (2026-09-22):** the frozen architecture was integrated into PERSON_SPEC's numbered sections in place, so it is read linearly rather than as an override layer; see `docs/PROJECT_HISTORY.md`.
 
 **Remaining blockers for live validation (from REALITY_VALIDATION.md):**
 
@@ -317,9 +317,12 @@ the intended order is basic gathering, and it has not been started.
 
 ## 11a. Known Deviations from the Frozen Architecture
 
-Found during the Phase 0 reconciliation on 2026-09-22 and **deliberately not
-fixed**. Each is a place where the code and `docs/PERSON_SPEC.md` Part 0
-disagree. Full statements are in PERSON_SPEC section 0.24; this is the index.
+Found during the Phase 0 reconciliation on 2026-09-22, and **deliberately not
+fixed**. Each is a place where the code and `docs/PERSON_SPEC.md` disagree
+about what the right shape is. None of them is a bug in the current
+implementation. This is the canonical, full-detail record; nothing shorter
+exists elsewhere, and `docs/PERSON_SPEC.md` points here rather than repeating
+it.
 
 | ID  | Deviation                                                            | Introduced | Decision needed before            |
 | --- | -------------------------------------------------------------------- | ---------- | --------------------------------- |
@@ -330,40 +333,117 @@ disagree. Full statements are in PERSON_SPEC section 0.24; this is the index.
 | C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)     |
 | C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
 
-Two facts that soften C1, both established by reading the source rather than
-assumed:
+### C1. The observation carries exact coordinates
 
-- Cognition never reads a coordinate. `person_planner.state` and
-  `person_cognition.context` use `distance` and counts only, and a search across
-  `apps/cognition/python/` and `packages/planner/python/` finds no positional
-  access.
-- Cognition cannot send one back. `SkillInvocation` is scalar-only, enforced by
-  the schema and by `tests/architecture/architecture.test.ts`.
+`Observation.environment.position`, and the `position` field on every nearby
+resource, hazard, container, workstation and entity, are exact block
+coordinates delivered to cognition on every tick. `docs/PERSON_SPEC.md` section
+24.4 says coordinates should reach Person only through a deliberate inspection
+capability.
 
-So the outbound half of the perception firewall is enforced by contract, and the
-inbound half is currently enforced only by the fact that nobody reads the field.
+Mitigating facts, established by reading the source rather than assumed: the
+cognition process never reads any of them. `person_planner.state` and
+`person_cognition.context` use `distance` and counts only, and a search for
+coordinate access across `apps/cognition/python/` and `packages/planner/python/`
+finds nothing. Cognition also cannot send a coordinate back: `SkillInvocation`
+is scalar-only and an architecture test enforces it.
+
+So the outbound half of the perception firewall (section 8) is enforced by
+contract, and the inbound half is currently enforced by nothing but the fact
+that nobody reads the field. **Decision required** before the first cognitive
+subsystem that would be tempted to read them, which is spatial memory.
+
+### C2. Protected areas are modelled as hard safety
+
+`protected_area_entry` is an L0 trigger in `safety-kernel.ts`, beside lava
+exposure and suffocation. L0 is described everywhere as hard safety, which
+frames operator containment as though it were self-preservation, and frames a
+configured fence as though it were an intrinsic property of Person.
+
+`docs/PERSON_SPEC.md` section 13 and `docs/SAFETY.md` now separate
+self-preservation, experimental containment and shared-world property policy
+conceptually. The runtime behaviour is deliberately unchanged: the fence should
+still stop Person. What is wrong is only the claim about why.
+
+**Decision required:** whether the kernel grows a containment level distinct
+from L0, or whether the distinction stays documentary. No production change has
+been made.
+
+### C3. `WorldMemory` is not memory
+
+`apps/node-runtime/src/runtime/world-memory.ts` is a runtime-owned ownership
+and placement ledger: home record, placed blocks, storage provenance, furnace
+and crafting-table positions. It is privileged engineering state that the
+observation builder reads to derive semantic facts. It is not, and must never
+become, Person's recollection (`docs/PERSON_SPEC.md` section 24).
+
+**Decision required:** rename at the next milestone that touches it, or accept
+the name and document it. Both are defensible; leaving it ambiguous is not.
+
+### C4. Skills choose their own targets
+
+Every skill picks its own target: `gather_wood` takes the nearest permitted
+tree. `docs/PERSON_SPEC.md` section 10.1 requires perceived, validated
+referents so that Person can say which tree. `docs/SEMANTIC_TARGETING.md`
+already describes the scheme and explains why it has not been built.
+
+**Not a contradiction yet.** It becomes one the moment a goal is about a
+particular thing, which is the same moment compositional actions are needed.
+
+### C5. The embodiment port is a Mineflayer-shaped port
+
+`Embodiment` exposes `moveTo`, `dig`, `place`, `craft`, `smelt`, `consume`,
+`attack`, `deposit`, `withdraw`, `waitTicks`, `inspectContainer`, `blockAt`,
+`findBlocks`, `findEntities` and `snapshot`. It is already an abstraction
+rather than a Mineflayer passthrough, and the fixture world proves a second
+implementation is possible. It is nonetheless shaped by what Mineflayer
+happens to offer: there is no `look`, no `use held item`, no generic entity
+interaction, and `snapshot()` is synchronous and total.
+
+A Baritone backend implements `moveTo` naturally and `findBlocks` naturally,
+and would want to supply far more geometry than the port asks for.
+`docs/PERSON_SPEC.md` section 8 says it must not.
+
+**Decision required before the Baritone spike**, and only about the shape of
+`snapshot()`: see ADR 0001.
+
+### C6. No belief, memory or knowledge representation exists
+
+`docs/PERSON_SPEC.md` sections 24, 25 and 26 specify episodic, semantic,
+spatial, social and autobiographical memory, consolidation, forgetting and a
+predictive-causal world model. None of it exists. The symbolic state is
+recomputed from the latest observation every tick, so Person currently has no
+way to be wrong about the world in the sense section 26 requires: it has no
+belief that could disagree with an observation.
+
+Prediction error is recorded, which is the input such a model needs, and
+nothing consumes it.
+
+**Not a contradiction, a gap.** Recorded here because the difference between
+"specified" and "implemented" is the thing this reconciliation exists to keep
+visible.
 
 ---
 
 ## 12. Known Limitations / Backlog
 
-| Limitation                                                                         | Source                    |
-| ---------------------------------------------------------------------------------- | ------------------------- |
-| Mineflayer adapter exercised live for observation and 2 skills only                | REALITY_VALIDATION.md     |
-| No dig-down skill (mine_stone/coal need exposed stone)                             | IMPLEMENTATION_REPORT.md  |
-| Fixture is simulation, not Minecraft                                               | IMPLEMENTATION_REPORT.md  |
-| Planner bounded (depth/branch/node caps) — may return no plan                      | IMPLEMENTATION_REPORT.md  |
-| Goals: survival only (projects/social/self-generated future)                       | IMPLEMENTATION_REPORT.md  |
-| Death ends episode — no respawn/recovery loop                                      | IMPLEMENTATION_REPORT.md  |
-| Evidence written by cognition — last outcome missing if cognition dies mid-episode | IMPLEMENTATION_REPORT.md  |
-| Inventory reconciliation on resume not reimplemented                               | IMPLEMENTATION_REPORT.md  |
-| `loot_permitted_container` withdraws all types up to amount                        | IMPLEMENTATION_REPORT.md  |
-| One Person per runtime (multi-Person not supported)                                | IMPLEMENTATION_REPORT.md  |
-| Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md     |
-| Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md     |
-| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started              | REALITY_VALIDATION.md     |
-| No belief, memory, affect, language, social or project system exists               | PERSON_SPEC 0.24 C6       |
-| Perception has no visibility, occlusion or pose model                              | PERSON_SPEC 0.4, ADR 0002 |
+| Limitation                                                                         | Source                          |
+| ---------------------------------------------------------------------------------- | ------------------------------- |
+| Mineflayer adapter exercised live for observation and 2 skills only                | REALITY_VALIDATION.md           |
+| No dig-down skill (mine_stone/coal need exposed stone)                             | IMPLEMENTATION_REPORT.md        |
+| Fixture is simulation, not Minecraft                                               | IMPLEMENTATION_REPORT.md        |
+| Planner bounded (depth/branch/node caps) — may return no plan                      | IMPLEMENTATION_REPORT.md        |
+| Goals: survival only (projects/social/self-generated future)                       | IMPLEMENTATION_REPORT.md        |
+| Death ends episode — no respawn/recovery loop                                      | IMPLEMENTATION_REPORT.md        |
+| Evidence written by cognition — last outcome missing if cognition dies mid-episode | IMPLEMENTATION_REPORT.md        |
+| Inventory reconciliation on resume not reimplemented                               | IMPLEMENTATION_REPORT.md        |
+| `loot_permitted_container` withdraws all types up to amount                        | IMPLEMENTATION_REPORT.md        |
+| One Person per runtime (multi-Person not supported)                                | IMPLEMENTATION_REPORT.md        |
+| Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md           |
+| Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md           |
+| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started              | REALITY_VALIDATION.md           |
+| No belief, memory, affect, language, social or project system exists               | Known Deviations C6, above      |
+| Perception has no visibility, occlusion or pose model                              | PERSON_SPEC section 8, ADR 0002 |
 
 ---
 
@@ -398,14 +478,15 @@ Verified at `d0e9398` on 2026-09-22: Node 188 pass / 0 fail, Python 129 pass.
 
 ## 14. Key Files for Understanding Current State
 
-| File                         | Purpose                                                           |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `REALITY_VALIDATION.md`      | Canonical validation evidence (fixture/adapter/live distinctions) |
-| `IMPLEMENTATION_REPORT.md`   | Cumulative implementation record (Milestone 0 + 1)                |
-| `TRACEABILITY.md`            | Requirements → code → tests mapping                               |
-| `docs/LAN_TESTING.md`        | Manual validation ladder                                          |
-| `docs/EVALUATION.md`         | What automated suite proves / does not prove                      |
-| `docs/ARCHITECTURE.md`       | Current and target process diagrams, packages, decision loop      |
-| `docs/PERSON_SPEC.md`        | Full architectural specification (source of truth); Part 0 first  |
-| `docs/decisions/`            | ADRs 0001–0006, frozen 2026-09-22                                 |
-| `docs/SEMANTIC_TARGETING.md` | The referent scheme compositional actions will need               |
+| File                         | Purpose                                                                |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `REALITY_VALIDATION.md`      | Canonical validation evidence (fixture/adapter/live distinctions)      |
+| `IMPLEMENTATION_REPORT.md`   | Cumulative implementation record (Milestone 0 + 1)                     |
+| `TRACEABILITY.md`            | Requirements → code → tests mapping                                    |
+| `docs/LAN_TESTING.md`        | Manual validation ladder                                               |
+| `docs/EVALUATION.md`         | What automated suite proves / does not prove                           |
+| `docs/ARCHITECTURE.md`       | Current and target process diagrams, packages, decision loop           |
+| `docs/PERSON_SPEC.md`        | Full architectural specification (source of truth); read top to bottom |
+| `docs/decisions/`            | ADRs 0001–0006, frozen 2026-09-22                                      |
+| `docs/SEMANTIC_TARGETING.md` | The referent scheme compositional actions will need                    |
+| `docs/evidence/skill-tests/` | Tracked copies of the three live skill-test reports, with provenance   |

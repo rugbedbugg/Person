@@ -11,8 +11,9 @@ This is the **canonical, tool-neutral operating contract** for all coding agents
 Every agent must read and operate under these documents, in this sequence:
 
 1. **AGENTS.md** (this file) — Canonical agent contract
-2. **docs/PERSON_SPEC.md** — Architectural source of truth. **Part 0 first**: it
-   is the frozen north star and wins wherever it disagrees with sections 1–85
+2. **docs/PERSON_SPEC.md** — Architectural source of truth, read top to
+   bottom. It marks every claim CURRENTLY IMPLEMENTED, PLANNED PERSON V1,
+   FUTURE SUPER-PERSON or FUTURE COMMUNITY (section 1.1)
 3. **docs/CURRENT_STATE.md** — Factual snapshot of what exists NOW
 4. **REALITY_VALIDATION.md** — Canonical live/fixture validation evidence
 5. **docs/OWNERSHIP.md** — Human collaboration / review boundaries
@@ -62,28 +63,28 @@ These invariants are established by the repository's implementation and commit h
 | Fixture/conformance evidence must not be mislabeled as live evidence             | Skill matrix in `REALITY_VALIDATION.md` uses strict vocabulary                          |
 | Legacy Shroud behavior is not preserved merely for compatibility                 | `IMPLEMENTATION_REPORT.md` "Rewritten or discarded" section                             |
 
-### Frozen 2026-09-22 (Part 0 of PERSON_SPEC)
+### Frozen 2026-09-22
 
 These constrain work that has not started. They are not yet enforced by tests,
 which is exactly why an agent has to hold them.
 
-| Invariant                                                                            | Where it is decided                           |
-| ------------------------------------------------------------------------------------ | --------------------------------------------- |
-| Physical truth, perception, belief, memory, knowledge and reasoning stay distinct    | PERSON_SPEC 0.3                               |
-| A motor backend's world knowledge does not become Person's perception                | PERSON_SPEC 0.4, ADR 0002                     |
-| The event store is engineering truth; Person gets recollection, not a database query | PERSON_SPEC 0.5, ADR 0003                     |
-| Baritone is motor cortex, not cognition; no command strings reach cognition          | PERSON_SPEC 0.7, ADR 0001                     |
-| Targets are runtime-issued referents, never coordinates chosen by cognition          | PERSON_SPEC 0.8, `docs/SEMANTIC_TARGETING.md` |
-| Unrestricted subjects is not unrestricted external agency                            | PERSON_SPEC 0.11, ADR 0004                    |
-| Cognitive autonomy is not environmental authority; a refusal is reported honestly    | PERSON_SPEC 0.16, ADR 0005                    |
-| Raising one capability axis must not silently raise another                          | PERSON_SPEC 0.20                              |
-| No cognition is fabricated for a period when the process did not run                 | PERSON_SPEC 0.15, ADR 0006                    |
-| Containment, self-preservation and property policy are separate concerns             | PERSON_SPEC 0.18, `docs/SAFETY.md`            |
-| Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC 0.23                              |
+| Invariant                                                                            | Where it is decided                                    |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------ |
+| Physical truth, perception, belief, memory, knowledge and reasoning stay distinct    | PERSON_SPEC section 26                                 |
+| A motor backend's world knowledge does not become Person's perception                | PERSON_SPEC section 8, ADR 0002                        |
+| The event store is engineering truth; Person gets recollection, not a database query | PERSON_SPEC section 24, ADR 0003                       |
+| Baritone is motor cortex, not cognition; no command strings reach cognition          | PERSON_SPEC section 6.1, ADR 0001                      |
+| Targets are runtime-issued referents, never coordinates chosen by cognition          | PERSON_SPEC section 10.1, `docs/SEMANTIC_TARGETING.md` |
+| Unrestricted subjects is not unrestricted external agency                            | PERSON_SPEC section 45.2, ADR 0004                     |
+| Cognitive autonomy is not environmental authority; a refusal is reported honestly    | PERSON_SPEC section 3, ADR 0005                        |
+| Raising one capability axis must not silently raise another                          | PERSON_SPEC section 4.1                                |
+| No cognition is fabricated for a period when the process did not run                 | PERSON_SPEC section 60, ADR 0006                       |
+| Containment, self-preservation and property policy are separate concerns             | PERSON_SPEC section 13, `docs/SAFETY.md`               |
+| Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC section 51.1                               |
 
 Known disagreements between the frozen architecture and the current code are
-listed in **PERSON_SPEC section 0.24** (C1–C6). Each needs a decision before the
-code it touches is changed. **Do not resolve one silently.**
+listed in **`docs/CURRENT_STATE.md`, "Known Deviations"** (C1-C6). Each needs a
+decision before the code it touches is changed. **Do not resolve one silently.**
 
 ---
 

@@ -27,9 +27,9 @@ true.
   container Person did not place. Today these are configured constants with one
   legal value. They stand in for social norms Person does not yet have.
 
-The third category is the one to watch. `docs/PERSON_SPEC.md` section 0.18 says
+The third category is the one to watch. `docs/PERSON_SPEC.md` section 37.1 says
 Person's morality must develop from experience rather than arrive hard-coded,
-and section 0.16 says containment and morality are separate systems. **The
+and section 3 says containment and morality are separate systems. **The
 permission gate is not Person's conscience.** When Person eventually has norms,
 they will be a cognitive system that can disagree with the gate, and the gate
 will still win. That is the intended relationship, not a temporary compromise.
@@ -66,9 +66,10 @@ always produces the same verdict; a test asserts that directly.
 
 The third row is the odd one out: leaving the exploration box is not dangerous
 to Person, and it sits at L0 because it must not be negotiable, not because it
-is a threat. That is recorded as contradiction C2 in `docs/PERSON_SPEC.md`
-section 0.24. Whether the kernel eventually grows a containment level distinct
-from L0 is an open decision; **no production change has been made for it.**
+is a threat. That is recorded as contradiction C2 in `docs/CURRENT_STATE.md`,
+"Known Deviations". Whether the kernel eventually grows a containment level
+distinct from L0 is an open decision; **no production change has been made for
+it.**
 
 ## Verdicts
 
@@ -153,8 +154,8 @@ desire -> goal -> plan -> proposed action -> capability policy -> execution
 Minecraft command authority is a separate capability axis and is off at every
 Person configuration, canonical and Super-Person alike. There is no generic
 `execute_command(string)` capability, and an architecture test asserts Person
-has no way to issue a server command. See `docs/PERSON_SPEC.md` sections 0.16
-and 0.17, and ADR 0005.
+has no way to issue a server command. See `docs/PERSON_SPEC.md` sections 3 and
+14.1, and ADR 0005.
 
 ## Operator intervention
 

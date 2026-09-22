@@ -52,12 +52,12 @@ unrestricted external agency
    self-modification, no account creation, no purchasing, no arbitrary mail, no
    control of unrelated services.
 4. **Web beliefs carry provenance.** Source identity, retrieval time, confidence
-   and corroboration, under the `EXTERNAL_WEB` class of section 0.9. A web
+   and corroboration, under the `EXTERNAL_WEB` class of section 22.2. A web
    belief is distinguishable, forever, from something Person observed or
    discovered.
 5. **Discovery claims exclude researched knowledge.** An experiment intended to
    demonstrate independent discovery is invalid if the mechanism could have been
-   read, which is why section 0.9 calls for hidden or custom mechanics.
+   read, which is why section 22.2 calls for hidden or custom mechanics.
 
 ## Consequences
 
@@ -98,8 +98,8 @@ unrestricted external agency
 
 ## Relevant Commits / Documents
 
-| Reference                                          | Description                                                    |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| `docs/PERSON_SPEC.md` sections 0.9, 0.11, 0.12, 66 | Provenance, internet access, self-knowledge, security boundary |
-| `tests/architecture/architecture.test.ts`          | No command channel, no code evaluation                         |
-| `tests/python/test_architecture.py`                | Cognition evaluates no generated code                          |
+| Reference                                           | Description                                                    |
+| --------------------------------------------------- | -------------------------------------------------------------- |
+| `docs/PERSON_SPEC.md` sections 22.2, 45.2, 28.1, 66 | Provenance, internet access, self-knowledge, security boundary |
+| `tests/architecture/architecture.test.ts`           | No command channel, no code evaluation                         |
+| `tests/python/test_architecture.py`                 | Cognition evaluates no generated code                          |

@@ -7,7 +7,7 @@
 ## Project Documents (Read in Order)
 
 1. **AGENTS.md** — Canonical agent contract (this file points there)
-2. **docs/PERSON_SPEC.md** — Architectural source of truth. Read **Part 0** first
+2. **docs/PERSON_SPEC.md** — Architectural source of truth, read top to bottom
 3. **docs/CURRENT_STATE.md** — Factual snapshot of what exists NOW
 4. **REALITY_VALIDATION.md** — Canonical live/fixture validation evidence
 5. **docs/OWNERSHIP.md** — Human collaboration / review boundaries
@@ -44,7 +44,7 @@
 - **Autonomy ≠ authority** (ADR 0005): Person may plan what the runtime refuses
 
 The known disagreements between the code and the frozen architecture are
-`docs/PERSON_SPEC.md` section 0.24, C1–C6. Do not resolve one silently.
+`docs/CURRENT_STATE.md`, "Known Deviations", C1-C6. Do not resolve one silently.
 
 ### Implementation Discipline
 
