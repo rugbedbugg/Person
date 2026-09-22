@@ -332,7 +332,7 @@ it.
 | C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing |
 | C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)     |
 | C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
-| C7  | The Mineflayer route veto is a cost preference, not a prohibition    | `6b99830`  | the next live navigation session  |
+| C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below    |
 
 ### C1. The observation carries exact coordinates
 
@@ -424,46 +424,71 @@ nothing consumes it.
 "specified" and "implemented" is the thing this reconciliation exists to keep
 visible.
 
-### C7. The Mineflayer route veto is a preference, not a prohibition
+### C7. The Mineflayer route veto did not cover every movement family
 
-Found on 2026-09-22 during the Baritone feasibility spike, by reading
-`mineflayer-pathfinder` rather than by observing a failure. Full working in
-`docs/BARITONE_FEASIBILITY.md` section 3.3.
+Found on 2026-09-22 during the Baritone feasibility spike, then **re-diagnosed
+and repaired** the same day once the real pathfinder was actually driven rather
+than read. **Resolved for the enabled movement families**, with the limits
+below. Working in `docs/BARITONE_FEASIBILITY.md` section 3.3 (corrected) and
+`tests/safety/pathfinder-containment.test.ts`.
 
-`MineflayerEmbodiment.#configureMovement` registers the physical guard as an
-`exclusionAreasStep` function returning `100` for a position the guard refuses.
-In `mineflayer-pathfinder`, that value is **added** to the movement cost
-(`cost += this.exclusionStep(block)`), and ordinary steps in the same file cost
-1 or 2. So a protected block is worth roughly 50 to 100 steps of detour, and
-the path search will cross one when the legal way round is longer than that.
-There is no infinity sentinel in that API.
+**The first diagnosis was wrong.** It read `exclusionStep` adding 100 to a move
+cost and concluded the veto was a price. It is not. Every movement generator
+that consults the exclusion ends with `if (cost > 100) return`, and base move
+costs are 1 or 2, so a forbidden step totals 101 and the move is never
+generated. Measured: against a 120-block forbidden wall, Person walks a
+124-step detour rather than a 12-step crossing that a penalty model would have
+preferred.
 
-Execution does not close the gap. `moveTo` calls `#requireGuard(target,
-"enter")` for the destination only, so the steps in between are never
-re-checked while walking. The safety kernel's L0 `protected_area_entry` fires
-on the position Person is already standing in, which is detection, not
-prevention.
+**The real defect was narrower.** Two generators in `mineflayer-pathfinder`
+2.4.5 do not participate in the exclusion at all:
 
-Two things are genuinely hard and should not be lost in the summary: breaking
-and placing inside a protected area are properly forbidden, because
-`safeToBreak` requires `exclusionBreak(block) < 100` and the adapter returns
-exactly 100. And `FixtureWorld` is strict: `#walkable` drops the node and
-`#assertEnter` re-checks every executed step, which is a true per-step veto.
+- `getMoveUp` never reads the block it climbs into. It checks the block two
+  above the node, which is the destination's head, and the destination's feet
+  block is never fetched. A ladder or vine crossing a region boundary could
+  therefore be climbed into. This family is enabled.
+- `getMoveParkourForward` adds the exclusion cost but has no `cost > 100` check,
+  and charges the cost against the block above its landing square rather than
+  the square itself. It also skips the blocks jumped over. This family is
+  disabled in Person's configuration (`allowParkour = false`), so it was latent
+  rather than live.
 
-The consequence is that the fixture body enforces the documented guarantee and
-the Minecraft body approximates it. `tests/safety/protected-routes.test.ts`
-does not catch this: its two behavioural tests run against `FixtureWorld`, and
-its Mineflayer test asserts only that the exclusion function was installed,
-because the double's `pathfinder.goto` is a no-op.
+Both were reproduced against the real search before the repair, and both now
+fail the build if the repair is removed.
 
-**Not a regression, and no test is wrong.** `docs/SAFETY.md` enforcement point
-2 and ADR 0001 binding rule 5 both state the invariant as an authoritative veto
-covering planning, replanning and execution. Against Mineflayer that is
-currently true for block modification and approximate for movement. **Decision
-required** before the next live navigation session on a world where a protected
-area has a plausible shortcut through it.
+**The repair** is in `adapters/minecraft/src/movements.ts`. Person's movement
+policy now wraps `getNeighbors`, the single point the A* search takes its
+candidate moves from, and drops any move whose destination feet or head block,
+or whose `toBreak`/`toPlace` positions, the physical guard refuses. Generators
+that ignore the exclusion cost are covered because the filter is applied after
+generation, and families that do not exist yet are covered for the same reason.
+The exclusion callbacks are kept, and are still load-bearing for two reasons:
+they hard-reject breaking and placing, and `postProcessPath` disables path
+shortcutting only while `exclusionAreasStep` is non-empty, so removing them
+would silently re-enable straight-line splicing across avoided ground.
 
----
+**What is established.** No path the search returns contains a step whose feet
+or head block is forbidden, for cardinal walking, diagonals, jump-up, drop-down,
+move-down, ladder climbing, and parkour even when parkour is switched on. This
+holds for replanning because every search reads the guard again, and for
+shortcutting because shortcutting is off. Proved by deterministic tests against
+the real pathfinder over a synthetic world. **Not live-validated in Minecraft.**
+
+**What is not established.** Three things, honestly:
+
+- Diagonal moves pick the cheaper of the two corner columns and the avatar's
+  hitbox may still clip the other. A region one block wide on a diagonal is the
+  case to watch.
+- Containment is read when a path is searched. If a protected area were changed
+  while Person was already walking, the path in flight would not be re-checked;
+  the next search would honour the change. This is not reachable today because
+  protected areas come from config and are fixed for the life of a run, so
+  there is no runtime path that tightens them mid-episode.
+- Only motor-caused entry is covered. Knockback, explosions, flowing water,
+  gravity after a support is removed, server correction, and operator teleports
+  are world-caused or external, and the L0 `protected_area_entry` assessment
+  remains the response to those. A path planner cannot make the avatar
+  incapable of appearing in a region under all Minecraft physics.
 
 ## 12. Known Limitations / Backlog
 
