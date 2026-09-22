@@ -55,9 +55,19 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 
 ## Index
 
-| ADR                                   | Title | Status | Date |
-| ------------------------------------- | ----- | ------ | ---- |
-| _(none yet — first ADR will be 0001)_ |       |        |      |
+| ADR                                                        | Title                                             | Status                             | Date       |
+| ---------------------------------------------------------- | ------------------------------------------------- | ---------------------------------- | ---------- |
+| [0001](0001-baritone-motor-backend.md)                     | Baritone as the planned primary motor backend     | Accepted (direction) / Deferred    | 2026-09-22 |
+| [0002](0002-perception-firewall.md)                        | The perception firewall                           | Accepted (rule) / Deferred (model) | 2026-09-22 |
+| [0003](0003-memory-firewall.md)                            | The memory firewall                               | Accepted (rule) / Deferred (model) | 2026-09-22 |
+| [0004](0004-external-awareness-and-research-boundary.md)   | External awareness and the research boundary      | Accepted (rule) / Deferred         | 2026-09-22 |
+| [0005](0005-cognitive-autonomy-vs-capability-authority.md) | Cognitive autonomy is not environmental authority | Accepted                           | 2026-09-22 |
+| [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                           | Accepted (rule) / Deferred         | 2026-09-22 |
+
+All six were written during the Phase 0 canonical architecture reconciliation
+(`docs/PERSON_SPEC.md`, frozen 2026-09-22). None of them changed production
+code. 0005 records an invariant that has held since `6b99830`; the other five
+constrain work that has not started.
 
 ---
 

@@ -5,6 +5,12 @@ relationship. The Python cognition process decides what Person should try to
 do. The Node runtime decides what Person is physically allowed to do, does it,
 and reports what actually happened.
 
+This file describes two things and labels which is which: the architecture that
+exists today, and the architecture `docs/PERSON_SPEC.md` describes as the
+target. Nothing in the target section is implemented.
+
+## Current architecture
+
 ```
 Python cognition
         |
@@ -17,6 +23,67 @@ Node validator  ->  safety kernel  ->  skill executor  ->  embodiment
                                                               |
                                                      Mineflayer or fixture
 ```
+
+Perception runs the other way, and is the half the diagram above has always
+left out:
+
+```
+                             embodiment
+                                  |
+                          WorldSnapshot            complete, runtime-only
+                             /        \
+              safety kernel /          \ observation builder
+              permission gate           |
+              physical guard            |  perception shaping
+                                        v
+                                  Observation      bounded, semantic
+                                        |
+============ TRUST BOUNDARY ============|============
+                                        v
+                                 Python cognition
+```
+
+The safety kernel, the permission gate and the physical guard all read the
+unshaped snapshot. Shaping the observation therefore cannot change what Person
+is permitted to do, in either direction. That is the perception firewall's
+current form; see ADR 0002.
+
+## Target architecture
+
+The direction frozen on 2026-09-22. **None of this exists.**
+
+```
+                    Person cognition
+                            |
+                 goals, projects, beliefs, memory
+                            |
+                       proposed action
+                            v
+============ TRUST BOUNDARY / CAPABILITY POLICY ============
+                            |
+              validator -> safety kernel -> executor
+                            |
+                    ---------------------
+                    |                   |
+             motor backend        perception filter     <- the firewall
+           (Baritone, or           (human-like sense
+            Mineflayer, or          model: pose, range,
+            the fixture)            occlusion, semantics)
+                    |                   ^
+                    v                   |
+                 Minecraft --------------
+```
+
+Four changes from the current picture, each with an ADR:
+
+| Change                                                   | ADR  |
+| -------------------------------------------------------- | ---- |
+| The body becomes a motor layer that may be swapped       | 0001 |
+| Perception becomes a sense model rather than a budget    | 0002 |
+| Memory gains a retrieval layer distinct from the journal | 0003 |
+| Research is a deliberate act with untrusted results      | 0004 |
+
+The trust boundary itself does not move. ADR 0005 records why.
 
 ## The invariant
 
@@ -93,8 +160,16 @@ rather than stranding a body in a hostile world.
 
 ## What is not here
 
-No language model, no neural policy, no affect, no social memory, no projects
-beyond goal suspension, no redstone. `apps/cognition/python/person_cognition/future_providers.py`
-holds the interfaces those systems will attach to. Every one of them raises
-rather than returning a plausible empty result, so nothing can mistake a
-placeholder for an implementation.
+No language model, no neural policy, no affect, no social memory, no belief
+store, no world model, no memory system, no projects beyond goal suspension, no
+redstone, no web access, no external chat.
+`apps/cognition/python/person_cognition/future_providers.py` holds the
+interfaces those systems will attach to. Every one of them raises rather than
+returning a plausible empty result, so nothing can mistake a placeholder for an
+implementation.
+
+One absence is worth naming rather than listing. Person has no beliefs. The
+symbolic state the planner reasons over is derived fresh from the latest
+observation every tick, so there is nothing that could disagree with what was
+just seen. `docs/PERSON_SPEC.md` section 26 requires that separation, and
+`docs/CURRENT_STATE.md`, "Known Deviations", records its absence as C6.
