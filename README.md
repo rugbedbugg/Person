@@ -1,5 +1,7 @@
 # Person
 
+[![CI](https://github.com/rugbedbugg/Person/actions/workflows/ci.yml/badge.svg)](https://github.com/rugbedbugg/Person/actions/workflows/ci.yml)
+
 A persistent autonomous artificial inhabitant for Minecraft Java Edition 1.16.1.
 
 Person is not a chatbot attached to Minecraft, not a language model driving
@@ -17,8 +19,8 @@ happened. Learning is credited to what ran, never to what was asked for.
 This milestone implements the survival vertical slice and the evidence
 substrate that later work depends on. It does not implement language, memory,
 belief, affect, social cognition, projects, or redstone; see
-`docs/ARCHITECTURE.md` for where those attach, and `docs/PERSON_SPEC.md` Part 0
-for what Person is intended to become.
+`docs/ARCHITECTURE.md` for where those attach, and `docs/PERSON_SPEC.md` for
+what Person is intended to become.
 
 ## Installation
 

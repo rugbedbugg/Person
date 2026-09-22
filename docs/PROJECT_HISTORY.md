@@ -327,18 +327,64 @@ No source file, no schema, no test. `mise run check` passes unchanged.
 
 ---
 
+## Phase 8: Canonicalization, Evidence Preservation, and CI
+
+**Commit:** this one
+**Date:** 2026-09-22
+**Branch:** `refactor/person-v1-architecture`
+
+### Objective
+
+A small cleanup pass before Baritone integration: fold the frozen architecture
+directly into `docs/PERSON_SPEC.md`'s numbered sections instead of carrying it
+as a separate overriding layer, preserve the live validation evidence Phase 7
+found but did not commit, and add CI. Documentation and evidence preservation
+only.
+
+### What changed
+
+- `docs/PERSON_SPEC.md` **normalized**. Phase 7's "Part 0" block (997 lines)
+  was distributed into the relevant existing numbered sections (1, 3, 4, 6, 8,
+  10, 13, 14, 22, 24, 26, 28, 30, 37, 39, 41, 45, 50, 51, 60, 61), each new
+  subsection landing beside the material it extends. No "Part 0 overrides
+  section N" note remains anywhere in the document; a reader goes through it
+  once, top to bottom. The status-tag legend (CURRENTLY IMPLEMENTED / PLANNED
+  PERSON V1 / FUTURE SUPER-PERSON / FUTURE COMMUNITY) moved to section 1.1 and
+  is used the same way throughout. The architectural contradictions (C1-C6)
+  moved out entirely, into `docs/CURRENT_STATE.md`, "Known Deviations", with
+  full text rather than an index, since that document's job is to say where
+  the code and the spec disagree. Every cross-reference to the old `0.X`
+  numbering, across `AGENTS.md`, `CLAUDE.md`, `docs/SAFETY.md`,
+  `docs/ARCHITECTURE.md` and all six ADRs, was updated to the new section
+  numbers. **No architectural decision from Phase 7 changed**; this is
+  document structure only.
+- Three local live validation reports from 2026-09-16 (`wait_safely` once,
+  `return_home` twice), found by Phase 7 but left uncommitted under
+  gitignored `runs/`, were audited for sensitive fields and copied into a
+  tracked validation-evidence directory with SHA-256 provenance recorded.
+- A CI workflow was added running the repository's own canonical check
+  command on push and pull request.
+
+### What did not change
+
+No source file, no schema, no test, no architectural decision. `mise run
+check` passes unchanged.
+
+---
+
 ## Summary: Major Historical Phase SHAs
 
-| Phase                         | Commit Range          | Key SHA                                |
-| ----------------------------- | --------------------- | -------------------------------------- |
-| Foundation (vertical slice)   | `6b99830`             | `6b99830` (tagged `v0.1.0-foundation`) |
-| Adapter audit & 6 defects     | `7e97e54` → `554ae64` | `7e97e54`, `c219e27`, `554ae64`        |
-| Pre-LAN readiness             | `5e51c8c`             | `5e51c8c`                              |
-| First contact (4 defects)     | `2d7f9d2`, `9caf114`  | `2d7f9d2`, `9caf114`                   |
-| Single-skill harness          | `1c07bc5`             | `1c07bc5`                              |
-| Second contact + traceability | `7501194`             | `7501194`                              |
-| Canonical documentation       | `d0e9398`             | `d0e9398`                              |
-| Person v1 reconciliation      | this commit           | documentation only                     |
+| Phase                          | Commit Range          | Key SHA                                |
+| ------------------------------ | --------------------- | -------------------------------------- |
+| Foundation (vertical slice)    | `6b99830`             | `6b99830` (tagged `v0.1.0-foundation`) |
+| Adapter audit & 6 defects      | `7e97e54` → `554ae64` | `7e97e54`, `c219e27`, `554ae64`        |
+| Pre-LAN readiness              | `5e51c8c`             | `5e51c8c`                              |
+| First contact (4 defects)      | `2d7f9d2`, `9caf114`  | `2d7f9d2`, `9caf114`                   |
+| Single-skill harness           | `1c07bc5`             | `1c07bc5`                              |
+| Second contact + traceability  | `7501194`             | `7501194`                              |
+| Canonical documentation        | `d0e9398`             | `d0e9398`                              |
+| Person v1 reconciliation       | `ab2ecae`             | documentation only                     |
+| Canonicalization, evidence, CI | this commit           | documentation + evidence + CI config   |
 
 ---
 
