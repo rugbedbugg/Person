@@ -48,9 +48,9 @@ mechanism question:
 And one finding on the Person side that is independent of Baritone and more
 urgent than it:
 
-- **Against the real Mineflayer body, the protected-area route veto is a
-  preference, not a prohibition.** Details in section 3.3. This is a new known
-  deviation, recorded as C7.
+- **Against the real Mineflayer body, the protected-area route veto is not
+  authoritative for every movement family.** Details in section 3.3, as corrected
+  by Phase 2. Recorded as deviation C7 and repaired in Phase 2.
 
 ## 2. What was examined
 
@@ -184,24 +184,33 @@ movements.exclusionAreasBreak.push(() => 100);
 movements.exclusionAreasPlace.push(() => 100);
 ```
 
+> **Corrected on 2026-09-22 by the Phase 2 investigation.** The reasoning below
+> was wrong on its central point, and the correction is recorded here rather
+> than quietly edited away. The claim was that the exclusion is only a cost
+> penalty. It is not: every movement generator that consults the exclusion ends
+> with `if (cost > 100) return`, and since base move costs are 1 or 2, a step
+> scored 100 totals 101 and the move is never generated. Measured against the
+> real pathfinder, Person walks a 124-step detour rather than take a
+> 12-step crossing that would have cost less under a penalty model. C7 survives,
+> but for narrower and different reasons: see `docs/CURRENT_STATE.md`, C7, and
+> the tests in `tests/safety/pathfinder-containment.test.ts`.
+
 Reading `node_modules/mineflayer-pathfinder/lib/movements.js`:
 
-- `exclusionStep(block)` sums the registered functions and the result is **added**
-  to the movement cost (`cost += this.exclusionStep(block)`, line 284 and others).
-  It is not a veto and there is no infinity sentinel.
+- `exclusionStep(block)` sums the registered functions and the result is added to
+  the movement cost (`cost += this.exclusionStep(block)`, line 284 and others).
+  What this reading missed is that the callers then test `cost > 100` and return,
+  so the addition is the input to a rejection rather than a price.
 - Ordinary movement costs in the same file are **1 to 2** per step (lines 307,
-  366, 481, 506, 530, 566).
-- Breaking is different: `safeToBreak` requires `this.exclusionBreak(block) < 100`
-  (line 273). With the adapter returning exactly 100, breaking inside a protected
-  area is genuinely forbidden.
+  366, 481, 506, 530, 566), which is what makes 100 clear the threshold.
+- Breaking: `safeToBreak` requires `this.exclusionBreak(block) < 100` (line 273).
+  With the adapter returning exactly 100, breaking inside a protected area is
+  genuinely forbidden.
 
-So today, against a real server: **modifying blocks inside a protected area is
-hard-blocked, but walking through one costs about 100, which is worth roughly 50
-to 100 ordinary steps of detour.** If the legal way around is longer than that,
-A* prefers to cut through. Execution does not catch it either, because `moveTo`
-guards only the destination, not the steps in between. The safety kernel notices
-afterwards and returns home, which is exactly the "cancel once Person has already
-entered" behaviour the Phase 1 brief rules out.
+The part of this section that survived Phase 2 is narrower: `moveTo` guards only
+the destination, not the steps in between, so nothing at execution time
+re-checks a path; and two movement generators do not participate in the
+exclusion at all, which is the real defect C7 now names.
 
 The fixture body is stricter than the real one. `FixtureWorld.#walkable` consults
 `guard.canEnter` and skips the node outright, and `#assertEnter` re-checks every
@@ -609,21 +618,21 @@ engineering data. It is not perception and must never be routed into an
 6. **Operational cost.** A graphical client per Person instance, a licensed
    account, roughly a gigabyte of game install, and a display or virtual
    framebuffer. There is no obvious CI story.
-7. **C7, and it is the near-term one.** The current Mineflayer route veto is a
-   cost preference. This is true today, in production, regardless of what happens
-   with Baritone.
+7. **C7, and it is the near-term one.** The current Mineflayer route veto does
+   not cover every movement family. True today, in production, regardless of what
+   happens with Baritone. Repaired in Phase 2; see `docs/CURRENT_STATE.md`, C7.
 
 ## 11. Recommended Phase 2
 
 The smallest next milestone, and deliberately not a Baritone milestone:
 
-**Close C7 against the body Person actually uses.** Make the Mineflayer route
-veto hard rather than preferential, and prove it against real
-`mineflayer-pathfinder` rather than a double. Concretely that means having the
-exclusion function express impossibility rather than a cost of 100, re-checking
-each step at execution time instead of only the destination, and adding a test
-that exercises the real pathfinder on a synthetic world so the guarantee is
-measured rather than assumed.
+**Close C7 against the body Person actually uses.** Prove the veto against the
+real `mineflayer-pathfinder` rather than a double, and close whichever movement
+families turn out not to honour it.
+
+(Phase 2 did this. The measurement changed the diagnosis: the exclusion already
+rejects rather than prices, and the actual gap was two generators that do not
+consult it. See `docs/CURRENT_STATE.md`, C7.)
 
 That is a small, self-contained change to a system Person already runs, it
 removes a real gap between the fixture body and the live one, and it produces

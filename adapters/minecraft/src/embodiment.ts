@@ -35,20 +35,16 @@ import {
   blockKind,
   resolveBiome,
 } from "./registry.ts";
-import {
-  EXTRA_HOSTILE_MOBS,
-  HOSTILE_CATEGORY,
-  classifyEntity,
-  isNamed,
-} from "./classify.ts";
+import { classifyEntity, isNamed } from "./classify.ts";
 import {
   classifyConnectError,
   classifyKick,
   classifyReadiness,
   type ConnectionContext,
 } from "./diagnose.ts";
+import { createGuardedMovements } from "./movements.ts";
 
-const { pathfinder, Movements, goals } = pathfinderPackage;
+const { pathfinder, goals } = pathfinderPackage;
 const { Vec3 } = vec3Package;
 
 type Bot = ReturnType<typeof mineflayer.createBot>;
@@ -390,43 +386,10 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
 
   #configureMovement(): void {
     const bot = this.bot;
-    const movements = new Movements(bot);
-    movements.canDig = false;
-    movements.allow1by1towers = false;
-    movements.allowParkour = false;
-    movements.allowSprinting = true;
-    movements.canOpenDoors = false;
-    movements.scafoldingBlocks = [];
-    movements.maxDropDown = 2;
-    movements.allowFreeMotion = false;
-    for (const name of HAZARD_BLOCKS) {
-      const id = bot.registry.blocksByName[name]?.id;
-      if (id !== undefined) movements.blocksToAvoid.add(id);
-    }
-    // The guard is consulted for every step the planner considers, so a route
-    // cannot drift into a protected area while replanning around an obstacle.
-    movements.exclusionAreasStep.push(
-      (block: { position?: Position } | Position) => {
-        const position =
-          "position" in block && block.position
-            ? block.position
-            : (block as Position);
-        return this.#guard?.canEnter(point(position)) === false ? 100 : 0;
-      },
-    );
-    movements.exclusionAreasBreak.push(() => 100);
-    movements.exclusionAreasPlace.push(() => 100);
-    // Everything the registry calls hostile, so pathfinder routes around mobs
-    // this adapter would also flee from.
-    for (const entity of bot.registry.entitiesArray as {
-      name: string;
-      category?: string;
-    }[])
-      if (
-        entity.category === HOSTILE_CATEGORY ||
-        EXTRA_HOSTILE_MOBS.has(entity.name)
-      )
-        movements.entitiesToAvoid.add(entity.name);
+    // The movement policy, including the protected-region veto, lives in
+    // movements.ts so the same configuration the live body uses is the one the
+    // containment tests exercise.
+    const movements = createGuardedMovements(bot, () => this.#guard);
     bot.pathfinder.setMovements(movements);
     bot.pathfinder.thinkTimeout = 4000;
     bot.pathfinder.tickTimeout = 20;
