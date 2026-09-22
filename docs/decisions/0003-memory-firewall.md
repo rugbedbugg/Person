@@ -87,9 +87,9 @@ Rules 1, 3, 4 and 5 are in force now. Rule 2 is deferred with the memory system.
 
 ## Relevant Commits / Documents
 
-| Reference                                       | Description                                 |
-| ----------------------------------------------- | ------------------------------------------- |
-| `docs/PERSON_SPEC.md` sections 0.5, 24, 25      | The firewall and the memory model           |
-| `docs/PERSON_SPEC.md` section 0.24, C3 and C6   | `WorldMemory`, and the absent memory system |
-| `packages/persistence/`                         | The event store                             |
-| `apps/node-runtime/src/runtime/world-memory.ts` | The ledger that is not memory               |
+| Reference                                              | Description                                 |
+| ------------------------------------------------------ | ------------------------------------------- |
+| `docs/PERSON_SPEC.md` sections 24, 25                  | The firewall and the memory model           |
+| `docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6 | `WorldMemory`, and the absent memory system |
+| `packages/persistence/`                                | The event store                             |
+| `apps/node-runtime/src/runtime/world-memory.ts`        | The ledger that is not memory               |

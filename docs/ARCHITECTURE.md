@@ -6,7 +6,7 @@ do. The Node runtime decides what Person is physically allowed to do, does it,
 and reports what actually happened.
 
 This file describes two things and labels which is which: the architecture that
-exists today, and the architecture `docs/PERSON_SPEC.md` Part 0 freezes as the
+exists today, and the architecture `docs/PERSON_SPEC.md` describes as the
 target. Nothing in the target section is implemented.
 
 ## Current architecture
@@ -171,5 +171,5 @@ implementation.
 One absence is worth naming rather than listing. Person has no beliefs. The
 symbolic state the planner reasons over is derived fresh from the latest
 observation every tick, so there is nothing that could disagree with what was
-just seen. `docs/PERSON_SPEC.md` section 0.3 requires that separation and
-section 0.24 records its absence as C6.
+just seen. `docs/PERSON_SPEC.md` section 26 requires that separation, and
+`docs/CURRENT_STATE.md`, "Known Deviations", records its absence as C6.

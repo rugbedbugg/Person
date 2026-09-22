@@ -97,10 +97,10 @@ desire -> goal -> plan -> proposed action -> CAPABILITY POLICY -> execution
 
 ## Relevant Commits / Documents
 
-| Reference                                                | Description                                 |
-| -------------------------------------------------------- | ------------------------------------------- |
-| `docs/PERSON_SPEC.md` sections 0.16, 0.13, 0.17, 0.18, 3 | The invariant and its neighbours            |
-| `apps/node-runtime/src/skills/dispatch.ts`               | The single road from proposal to outcome    |
-| `apps/node-runtime/src/safety/validator.ts`              | ACCEPT / REJECT / PREEMPT / REPLACE         |
-| `tests/safety/attribution.test.ts`                       | Requested and executed stay distinguishable |
-| `6b99830`                                                | The architecture this ADR records           |
+| Reference                                          | Description                                 |
+| -------------------------------------------------- | ------------------------------------------- |
+| `docs/PERSON_SPEC.md` sections 3, 41.1, 14.1, 37.1 | The invariant and its neighbours            |
+| `apps/node-runtime/src/skills/dispatch.ts`         | The single road from proposal to outcome    |
+| `apps/node-runtime/src/safety/validator.ts`        | ACCEPT / REJECT / PREEMPT / REPLACE         |
+| `tests/safety/attribution.test.ts`                 | Requested and executed stay distinguishable |
+| `6b99830`                                          | The architecture this ADR records           |

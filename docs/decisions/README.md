@@ -65,9 +65,9 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                           | Accepted (rule) / Deferred         | 2026-09-22 |
 
 All six were written during the Phase 0 canonical architecture reconciliation
-(`docs/PERSON_SPEC.md` Part 0). None of them changed production code. 0005
-records an invariant that has held since `6b99830`; the other five constrain
-work that has not started.
+(`docs/PERSON_SPEC.md`, frozen 2026-09-22). None of them changed production
+code. 0005 records an invariant that has held since `6b99830`; the other five
+constrain work that has not started.
 
 ---
 

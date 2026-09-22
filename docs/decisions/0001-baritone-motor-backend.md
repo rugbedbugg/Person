@@ -23,7 +23,7 @@ adversarial use behind it.
 
 The architectural risk is not technical. It is that a motor layer which knows
 the exact geometry of every loaded chunk is one refactor away from becoming
-Person's perception. `docs/PERSON_SPEC.md` section 0.4 forbids that, and ADR
+Person's perception. `docs/PERSON_SPEC.md` section 8 forbids that, and ADR
 0002 is the rule; this ADR is where the temptation actually arrives.
 
 ## Decision
@@ -110,13 +110,13 @@ and `docs/CURRENT_STATE.md` says so.
 
 ## Relevant Commits / Documents
 
-| Reference                                   | Description                       |
-| ------------------------------------------- | --------------------------------- |
-| `docs/PERSON_SPEC.md` section 0.7           | Embodiment direction              |
-| `docs/PERSON_SPEC.md` section 0.24, C5      | The port is Mineflayer-shaped     |
-| `apps/node-runtime/src/embodiment/types.ts` | The port Baritone would implement |
-| `REALITY_VALIDATION.md`, remaining blockers | Pathfinder on real terrain        |
-| ADR 0002                                    | Perception firewall               |
+| Reference                                       | Description                       |
+| ----------------------------------------------- | --------------------------------- |
+| `docs/PERSON_SPEC.md` section 6.1               | Embodiment direction              |
+| `docs/CURRENT_STATE.md`, "Known Deviations", C5 | The port is Mineflayer-shaped     |
+| `apps/node-runtime/src/embodiment/types.ts`     | The port Baritone would implement |
+| `REALITY_VALIDATION.md`, remaining blockers     | Pathfinder on real terrain        |
+| ADR 0002                                        | Perception firewall               |
 
 ## Implementation Notes
 

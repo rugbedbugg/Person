@@ -102,8 +102,8 @@ Rules 1 to 3 are in force now. Rules 4 and 5 are deferred.
 
 ## Relevant Commits / Documents
 
-| Reference                                      | Description                              |
-| ---------------------------------------------- | ---------------------------------------- |
-| `docs/PERSON_SPEC.md` sections 0.15, 61        | Lifecycle, two clocks, death             |
-| `packages/protocol/schemas/common.schema.json` | `tick` and `timestamp` on every envelope |
-| `packages/persistence/`                        | The journal the rule protects            |
+| Reference                                       | Description                              |
+| ----------------------------------------------- | ---------------------------------------- |
+| `docs/PERSON_SPEC.md` sections 60.1, 60.2, 61.1 | Lifecycle, two clocks, death             |
+| `packages/protocol/schemas/common.schema.json`  | `tick` and `timestamp` on every envelope |
+| `packages/persistence/`                         | The journal the rule protects            |
