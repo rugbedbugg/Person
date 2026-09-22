@@ -687,13 +687,19 @@ remain unrevised and should be. Two navigation samples are two samples.
 validation reports written by `person skill-test` under
 `runs/validation/skill-tests/`, named
 `person-test-world-1-ada-<skill>-<testId>.json`. `runs/` is in `.gitignore`, so
-**these artifacts are local to the operator's machine and are not in the
-repository history.** They were read directly during the 2026-09-22
+those originals are local to the operator's machine and are not in the
+repository history. They were read directly during the 2026-09-22
 reconciliation; each declares `embodiment: minecraft`, `minecraftVersion:
 1.16.1`, real world positions consistent with the second-contact capture, and
 `skillLibraryRevision: a1b54cd15bc0535c`, which matches the revision the current
-skill library computes today. A reader without access to that machine has this
-paragraph and nothing else, which is the honest state of it.
+skill library computes today.
+
+**Tracked copies exist.** `docs/evidence/skill-tests/` holds all three
+reports, redacted of one local-filesystem-path field and otherwise byte-for-byte
+identical to the originals, with each tracked file's original SHA-256 recorded
+in `docs/evidence/skill-tests/README.md` so the redaction is checkable rather
+than trusted. A reader without access to the operator's machine now has the
+full reports, not just this summary.
 
 ### Operator contamination in these runs
 
