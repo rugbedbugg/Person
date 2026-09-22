@@ -13,6 +13,8 @@ export * from "./skills/navigate.ts";
 export * from "./skills/impl/index.ts";
 export * from "./observation/perception.ts";
 export * from "./observation/builder.ts";
+export * from "./observation/vision.ts";
+export * from "./observation/relative.ts";
 export * from "./runtime/world-memory.ts";
 export * from "./runtime/person-runtime.ts";
 export * from "./ipc/cognition-channel.ts";
