@@ -7,7 +7,7 @@
   "tick": 1200,
   "timestamp": "2026-09-15T08:30:00.000Z",
   "type": "Observation",
-  "observationVersion": 1,
+  "observationVersion": 2,
   "trainingContext": "fixture",
   "vitals": {
     "health": 14.0,
@@ -19,11 +19,6 @@
     "alive": true
   },
   "environment": {
-    "position": {
-      "x": 12,
-      "y": 64,
-      "z": -3
-    },
     "dimension": "overworld",
     "dayPhase": "day",
     "timeOfDay": 4000,
@@ -74,29 +69,26 @@
       {
         "kind": "wood",
         "name": "oak_log",
-        "position": {
-          "x": 18,
-          "y": 64,
-          "z": -1
-        },
-        "distance": 6.3,
-        "harvestPermitted": true
+        "distance": 6.5,
+        "harvestPermitted": true,
+        "bearing": "ahead",
+        "elevation": "level",
+        "rangeBand": "near",
+        "detail": "central"
       }
     ],
     "hostiles": [],
     "passiveAnimals": [
       {
-        "entityId": 22,
         "name": "cow",
-        "position": {
-          "x": 15,
-          "y": 64,
-          "z": 0
-        },
-        "distance": 4.2,
+        "distance": 4.0,
         "named": false,
         "tamed": false,
-        "protectedTarget": false
+        "protectedTarget": false,
+        "bearing": "ahead",
+        "elevation": "level",
+        "rangeBand": "reach",
+        "detail": "central"
       }
     ],
     "players": [],
@@ -106,14 +98,9 @@
   },
   "home": {
     "activeHome": {
-      "homeId": "home_a",
-      "position": {
-        "x": 10,
-        "y": 64,
-        "z": 0
-      }
+      "homeId": "home_a"
     },
-    "homeDistance": 3.6,
+    "homeDistance": 3.5,
     "shelterState": "none",
     "ownedStorage": [],
     "bedKnown": false,
@@ -124,12 +111,7 @@
     "routeStatus": "idle",
     "pathRisk": "low",
     "stuckState": "free",
-    "returnPathKnown": true,
-    "lastSafePosition": {
-      "x": 10,
-      "y": 64,
-      "z": 0
-    }
+    "returnPathKnown": true
   },
   "cognition": {
     "activeGoal": null,

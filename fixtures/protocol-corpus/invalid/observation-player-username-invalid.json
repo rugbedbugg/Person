@@ -7,7 +7,7 @@
   "tick": 1200,
   "timestamp": "2026-09-15T08:30:00.000Z",
   "type": "Observation",
-  "observationVersion": 1,
+  "observationVersion": 2,
   "trainingContext": "fixture",
   "vitals": {
     "health": 14.0,
@@ -19,11 +19,6 @@
     "alive": true
   },
   "environment": {
-    "position": {
-      "x": 12,
-      "y": 64,
-      "z": -3
-    },
     "dimension": "overworld",
     "dayPhase": "day",
     "timeOfDay": 4000,
@@ -74,62 +69,52 @@
       {
         "kind": "wood",
         "name": "oak_log",
-        "position": {
-          "x": 18,
-          "y": 64,
-          "z": -1
-        },
-        "distance": 6.3,
-        "harvestPermitted": true
+        "distance": 6.5,
+        "harvestPermitted": true,
+        "bearing": "ahead",
+        "elevation": "level",
+        "rangeBand": "near",
+        "detail": "central"
       }
     ],
     "hostiles": [],
     "passiveAnimals": [
       {
-        "entityId": 22,
         "name": "cow",
-        "position": {
-          "x": 15,
-          "y": 64,
-          "z": 0
-        },
-        "distance": 4.2,
+        "distance": 4.0,
         "named": false,
         "tamed": false,
         "protectedTarget": false,
-        "uuid": "2c9a7b16-3d84-4b2f-9a55-71c0d3e8f4a2"
+        "bearing": "ahead",
+        "elevation": "level",
+        "rangeBand": "reach",
+        "detail": "central"
       }
     ],
     "players": [
       {
-        "entityId": 155,
         "name": "player",
-        "position": {
-          "x": -221,
-          "y": 89,
-          "z": 150
-        },
-        "distance": 27.1,
+        "distance": 28,
         "named": false,
         "tamed": false,
         "protectedTarget": true,
         "username": "not a username",
-        "uuid": "8a1b2c3d-4e5f-4a6b-8c7d-9e0f1a2b3c4d"
+        "bearing": "ahead",
+        "elevation": "level",
+        "rangeBand": "far",
+        "detail": "central"
       },
       {
-        "entityId": 161,
         "name": "player",
-        "position": {
-          "x": -210,
-          "y": 70,
-          "z": 160
-        },
-        "distance": 9.4,
+        "distance": 9,
         "named": false,
         "tamed": false,
         "protectedTarget": true,
         "username": "PersonWatcher",
-        "uuid": "1f2e3d4c-5b6a-4978-8765-4321fedcba09"
+        "bearing": "ahead",
+        "elevation": "level",
+        "rangeBand": "near",
+        "detail": "central"
       }
     ],
     "containers": [],
@@ -138,14 +123,9 @@
   },
   "home": {
     "activeHome": {
-      "homeId": "home_a",
-      "position": {
-        "x": 10,
-        "y": 64,
-        "z": 0
-      }
+      "homeId": "home_a"
     },
-    "homeDistance": 3.6,
+    "homeDistance": 3.5,
     "shelterState": "none",
     "ownedStorage": [],
     "bedKnown": false,
@@ -156,12 +136,7 @@
     "routeStatus": "idle",
     "pathRisk": "low",
     "stuckState": "free",
-    "returnPathKnown": true,
-    "lastSafePosition": {
-      "x": 10,
-      "y": 64,
-      "z": 0
-    }
+    "returnPathKnown": true
   },
   "cognition": {
     "activeGoal": null,

@@ -46,11 +46,17 @@ test("animals outside the region Person may enter are not reported", async () =>
   const far = bench.world.spawn("pig", { x: 200, y: 64, z: 200 });
   const observation = observe(bench);
 
-  const reported = observation.nearby.passiveAnimals.map(
-    (animal) => animal.entityId,
+  // Identified by what Person can perceive about them rather than by a
+  // Mineflayer handle, which no longer crosses the firewall.
+  const reported = observation.nearby.passiveAnimals;
+  assert.ok(
+    reported.some((animal) => animal.distance <= 8),
+    "the usable animal is reported",
   );
-  assert.ok(reported.includes(near.entityId), "the usable animal is reported");
-  assert.ok(!reported.includes(far.entityId), "the unreachable herd is not");
+  assert.ok(
+    !reported.some((animal) => animal.distance > 100),
+    "the unreachable herd is not",
+  );
 
   // The runtime still knows it exists, and still refuses it for the right
   // reason rather than because perception hid it.
@@ -70,7 +76,7 @@ test("an animal inside a protected area is not quietly made huntable", async () 
   const observation = observe(bench);
   assert.ok(
     !observation.nearby.passiveAnimals.some(
-      (animal) => animal.entityId === inside.entityId,
+      (animal) => animal.name === inside.name && animal.distance > 30,
     ),
     "a protected area is not part of the region Person may use",
   );
@@ -106,8 +112,8 @@ test("the animal list stays bounded and nearest-first", async () => {
 
   assert.equal(first.length, PERCEPTION.entities.passiveTotal);
   assert.deepEqual(
-    first.map((animal) => animal.entityId),
-    second.map((animal) => animal.entityId),
+    first.map((animal) => `${animal.name}@${animal.distance}`),
+    second.map((animal) => `${animal.name}@${animal.distance}`),
     "the same world must produce the same list",
   );
   for (let index = 1; index < first.length; index++)
@@ -150,6 +156,10 @@ test("two players survive into the observation as two people", async () => {
     { x: 8, y: 64, z: 0 },
     { username: "PersonWatcher", uuid: "1f2e3d4c-5b6a-4978-8765-4321fedcba09" },
   );
+  // Both stand along the same line, and Person is looking down it: reading a
+  // nameplate is central vision, not something caught out of the corner of an
+  // eye.
+  bench.world.face({ x: 8, y: 64, z: 0 });
   const observation = observe(bench);
   const players = observation.nearby.players;
   assert.equal(players.length, 2);
@@ -157,10 +167,12 @@ test("two players survive into the observation as two people", async () => {
     players.map((player) => player.username),
     ["rugbedbugg", "PersonWatcher"],
   );
-  assert.equal(
-    new Set(players.map((player) => player.uuid)).size,
-    2,
-    "two distinct people must not collapse into one identity",
+  // The account UUID used to be reported here. It is a protocol identifier
+  // rather than anything Person could perceive, so the nameplate name is now
+  // the whole of recognition.
+  assert.ok(
+    !JSON.stringify(players).includes("uuid"),
+    "an account UUID is not perceptible and must not be reported",
   );
   for (const player of players)
     assert.equal(player.protectedTarget, true, "players are never targets");

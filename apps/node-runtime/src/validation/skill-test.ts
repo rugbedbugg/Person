@@ -456,7 +456,7 @@ export async function runSkillValidation(
     const preResult = protocolValidator().validate(pre);
     report.preObservation = pre;
     report.preObservationValid = preResult.valid;
-    report.navigation.startPosition = pre.environment.position;
+    report.navigation.startPosition = options.embodiment.snapshot().position;
     report.navigation.homeDistanceBefore = pre.home.homeDistance;
     report.navigation.routeStatusBefore = pre.navigation.routeStatus;
     report.navigation.stuckStateBefore = pre.navigation.stuckState;
@@ -592,7 +592,7 @@ export async function runSkillValidation(
         report.postObservationReason = postResult.valid
           ? null
           : postResult.diagnostics.join("; ").slice(0, 200);
-        report.navigation.endPosition = post.environment.position;
+        report.navigation.endPosition = options.embodiment.snapshot().position;
         report.navigation.homeDistanceAfter = post.home.homeDistance;
         report.navigation.routeStatusAfter = post.navigation.routeStatus;
         report.navigation.stuckStateAfter = post.navigation.stuckState;

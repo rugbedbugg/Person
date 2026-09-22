@@ -55,49 +55,82 @@ export interface Envelope {
   type: MessageType;
 }
 
-export interface EntityRecord {
-  entityId: number;
-  name: string;
-  position: Position;
+/**
+ * Where something is, as Person perceives it.
+ *
+ * Relative to Person and qualitative, because a world coordinate is a fact
+ * about the server rather than a fact about anyone's experience. Bearings are
+ * relative to where Person is facing: Person has no compass, and a heading in
+ * degrees would be the coordinate problem in another notation.
+ */
+export interface RelativeLocation {
+  bearing:
+    | "ahead"
+    | "ahead_left"
+    | "ahead_right"
+    | "left"
+    | "right"
+    | "behind_left"
+    | "behind_right"
+    | "behind";
+  elevation: "above" | "level" | "below";
+  rangeBand: "reach" | "near" | "mid" | "far";
+  /** Estimated straight-line distance. Coarser the further away it is. */
   distance: number;
+  /**
+   * Whether Person is looking at this, or merely aware of it.
+   *
+   * Everything reported is perceptible. Only a `central` percept was close
+   * enough to the view axis to be identified: a `peripheral` one carries a
+   * bearing and a coarse category and withholds precise identity, because
+   * recognising what a thing is happens near the middle of the field.
+   */
+  detail: "central" | "peripheral";
+}
+
+export interface EntityRecord extends RelativeLocation {
+  /** The species, when Person is looking straight enough at it to tell. */
+  name?: string;
   named: boolean;
   tamed: boolean;
   protectedTarget: boolean;
   /**
-   * Stable identity, when the body has it.
+   * The account name on the nameplate above a player's head.
    *
-   * Both are optional additions rather than required fields: an observation
-   * recorded before they existed is still a valid observation, and a mob has
-   * no account name to report.
+   * Optional rather than required: a mob has no account name, and an
+   * observation recorded before this existed is still a valid observation. The
+   * account UUID is deliberately not reported, because it is a protocol
+   * identifier rather than anything Person could perceive.
    */
   username?: string;
-  uuid?: string;
 }
 
-export interface ResourceRecord {
+export interface ResourceRecord extends RelativeLocation {
   kind: "wood" | "stone" | "coal" | "plant_food" | "dirt" | "other";
-  name: string;
-  position: Position;
-  distance: number;
+  /** The exact block, when it was recognised rather than merely noticed. */
+  name?: string;
   harvestPermitted: boolean;
 }
 
-export interface ContainerRecord {
+export interface ContainerRecord extends RelativeLocation {
   kind: "chest" | "barrel" | "furnace" | "shulker" | "other";
-  position: Position;
-  distance: number;
   provenance: "owned" | "existing";
   storageId: string | null;
 }
 
-export interface WorkstationRecord {
+export interface WorkstationRecord extends RelativeLocation {
   kind: "crafting_table" | "furnace" | "anvil" | "other";
-  position: Position;
-  distance: number;
   provenance: "owned" | "existing";
+  /**
+   * Where this came from. Workstations are read out of Person's own placement
+   * ledger rather than seen, so they are reported even when Person is facing
+   * the other way, and they are the one channel in `nearby` that is not
+   * current perception. Marked so it cannot be mistaken for one.
+   */
+  source: "remembered";
 }
 
-export interface HazardRecord {
+export interface HazardRecord extends RelativeLocation {
   kind:
     | "lava"
     | "fire"
@@ -107,13 +140,10 @@ export interface HazardRecord {
     | "fall"
     | "suffocation"
     | "other";
-  position: Position;
-  distance: number;
 }
 
 export interface OwnedStorageView {
   storageId: string;
-  position: Position;
   contents: ItemStack[];
 }
 
@@ -146,7 +176,6 @@ export interface Observation extends Envelope {
     alive: boolean;
   };
   environment: {
-    position: Position;
     dimension: "overworld" | "nether" | "end";
     dayPhase: "dawn" | "day" | "dusk" | "night";
     timeOfDay: number;
@@ -185,7 +214,7 @@ export interface Observation extends Envelope {
     hazards: HazardRecord[];
   };
   home: {
-    activeHome: { homeId: string; position: Position } | null;
+    activeHome: { homeId: string } | null;
     homeDistance: number | null;
     shelterState: "none" | "partial" | "complete" | "breached" | "unknown";
     ownedStorage: OwnedStorageView[];
@@ -198,7 +227,6 @@ export interface Observation extends Envelope {
     pathRisk: "low" | "moderate" | "high";
     stuckState: "free" | "slow" | "stuck";
     returnPathKnown: boolean;
-    lastSafePosition: Position | null;
   };
   cognition: {
     activeGoal: string | null;
