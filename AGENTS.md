@@ -83,7 +83,7 @@ which is exactly why an agent has to hold them.
 | Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC section 51.1                               |
 
 Known disagreements between the frozen architecture and the current code are
-listed in **`docs/CURRENT_STATE.md`, "Known Deviations"** (C1-C6). Each needs a
+listed in **`docs/CURRENT_STATE.md`, "Known Deviations"** (C1-C7). Each needs a
 decision before the code it touches is changed. **Do not resolve one silently.**
 
 ---

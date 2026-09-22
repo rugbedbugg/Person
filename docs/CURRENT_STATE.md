@@ -332,6 +332,7 @@ it.
 | C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing |
 | C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)     |
 | C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
+| C7  | The Mineflayer route veto is a cost preference, not a prohibition    | `6b99830`  | the next live navigation session  |
 
 ### C1. The observation carries exact coordinates
 
@@ -423,6 +424,45 @@ nothing consumes it.
 "specified" and "implemented" is the thing this reconciliation exists to keep
 visible.
 
+### C7. The Mineflayer route veto is a preference, not a prohibition
+
+Found on 2026-09-22 during the Baritone feasibility spike, by reading
+`mineflayer-pathfinder` rather than by observing a failure. Full working in
+`docs/BARITONE_FEASIBILITY.md` section 3.3.
+
+`MineflayerEmbodiment.#configureMovement` registers the physical guard as an
+`exclusionAreasStep` function returning `100` for a position the guard refuses.
+In `mineflayer-pathfinder`, that value is **added** to the movement cost
+(`cost += this.exclusionStep(block)`), and ordinary steps in the same file cost
+1 or 2. So a protected block is worth roughly 50 to 100 steps of detour, and
+the path search will cross one when the legal way round is longer than that.
+There is no infinity sentinel in that API.
+
+Execution does not close the gap. `moveTo` calls `#requireGuard(target,
+"enter")` for the destination only, so the steps in between are never
+re-checked while walking. The safety kernel's L0 `protected_area_entry` fires
+on the position Person is already standing in, which is detection, not
+prevention.
+
+Two things are genuinely hard and should not be lost in the summary: breaking
+and placing inside a protected area are properly forbidden, because
+`safeToBreak` requires `exclusionBreak(block) < 100` and the adapter returns
+exactly 100. And `FixtureWorld` is strict: `#walkable` drops the node and
+`#assertEnter` re-checks every executed step, which is a true per-step veto.
+
+The consequence is that the fixture body enforces the documented guarantee and
+the Minecraft body approximates it. `tests/safety/protected-routes.test.ts`
+does not catch this: its two behavioural tests run against `FixtureWorld`, and
+its Mineflayer test asserts only that the exclusion function was installed,
+because the double's `pathfinder.goto` is a no-op.
+
+**Not a regression, and no test is wrong.** `docs/SAFETY.md` enforcement point
+2 and ADR 0001 binding rule 5 both state the invariant as an authoritative veto
+covering planning, replanning and execution. Against Mineflayer that is
+currently true for block modification and approximate for movement. **Decision
+required** before the next live navigation session on a world where a protected
+area has a plausible shortcut through it.
+
 ---
 
 ## 12. Known Limitations / Backlog
@@ -478,15 +518,16 @@ Verified at `d0e9398` on 2026-09-22: Node 188 pass / 0 fail, Python 129 pass.
 
 ## 14. Key Files for Understanding Current State
 
-| File                         | Purpose                                                                |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `REALITY_VALIDATION.md`      | Canonical validation evidence (fixture/adapter/live distinctions)      |
-| `IMPLEMENTATION_REPORT.md`   | Cumulative implementation record (Milestone 0 + 1)                     |
-| `TRACEABILITY.md`            | Requirements → code → tests mapping                                    |
-| `docs/LAN_TESTING.md`        | Manual validation ladder                                               |
-| `docs/EVALUATION.md`         | What automated suite proves / does not prove                           |
-| `docs/ARCHITECTURE.md`       | Current and target process diagrams, packages, decision loop           |
-| `docs/PERSON_SPEC.md`        | Full architectural specification (source of truth); read top to bottom |
-| `docs/decisions/`            | ADRs 0001–0006, frozen 2026-09-22                                      |
-| `docs/SEMANTIC_TARGETING.md` | The referent scheme compositional actions will need                    |
-| `docs/evidence/skill-tests/` | Tracked copies of the three live skill-test reports, with provenance   |
+| File                           | Purpose                                                                |
+| ------------------------------ | ---------------------------------------------------------------------- |
+| `REALITY_VALIDATION.md`        | Canonical validation evidence (fixture/adapter/live distinctions)      |
+| `IMPLEMENTATION_REPORT.md`     | Cumulative implementation record (Milestone 0 + 1)                     |
+| `TRACEABILITY.md`              | Requirements → code → tests mapping                                    |
+| `docs/LAN_TESTING.md`          | Manual validation ladder                                               |
+| `docs/EVALUATION.md`           | What automated suite proves / does not prove                           |
+| `docs/ARCHITECTURE.md`         | Current and target process diagrams, packages, decision loop           |
+| `docs/PERSON_SPEC.md`          | Full architectural specification (source of truth); read top to bottom |
+| `docs/decisions/`              | ADRs 0001–0006, frozen 2026-09-22                                      |
+| `docs/SEMANTIC_TARGETING.md`   | The referent scheme compositional actions will need                    |
+| `docs/evidence/skill-tests/`   | Tracked copies of the three live skill-test reports, with provenance   |
+| `docs/BARITONE_FEASIBILITY.md` | Phase 1 spike: the Baritone 1.16.5 navigation verdict and its evidence |
