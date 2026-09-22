@@ -98,6 +98,16 @@ export interface WorldSnapshot {
   biome: string;
   lightLevel: number;
   position: Position;
+  /**
+   * Where Person is looking, in radians, using Mineflayer's convention: the
+   * view direction is `(-sin(yaw)cos(pitch), sin(pitch), -cos(yaw)cos(pitch))`.
+   *
+   * This is privileged motor state. The perception layer reads it to decide
+   * what Person can see; it never crosses to cognition, because knowing your
+   * own exact heading to the radian is not something a body reports to a mind.
+   */
+  yaw: number;
+  pitch: number;
   health: number;
   food: number;
   saturation: number;
