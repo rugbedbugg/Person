@@ -47,6 +47,14 @@ export interface FixtureWorldDefinition {
   biome: string;
   groundLevel: number;
   spawn: Position;
+  /**
+   * Which way Person is facing when the world starts, in radians.
+   *
+   * Perception depends on facing, so a spawn heading is part of the scenario
+   * rather than an implementation detail. Zero faces negative Z, matching
+   * Mineflayer's convention.
+   */
+  spawnYaw?: number;
   vitals: {
     health: number;
     food: number;
@@ -70,6 +78,7 @@ export const DEFAULT_DEFINITION: FixtureWorldDefinition = {
   biome: "forest",
   groundLevel: 63,
   spawn: { x: 0, y: 64, z: 0 },
+  spawnYaw: 0,
   vitals: { health: 20, food: 20, saturation: 5, air: 300, armor: 0 },
   inventory: [],
   blocks: [],

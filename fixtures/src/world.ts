@@ -95,6 +95,9 @@ export class FixtureWorld implements Embodiment {
   #connected = false;
   #guard: PhysicalGuard | null = null;
   #lastSafePosition: Position | null = null;
+  /** Facing, in radians, using the same convention as the Minecraft body. */
+  #yaw = 0;
+  #pitch = 0;
   #lastAttackTick = -1000;
   #firedEvents = new Set<number>();
   #groundLevel: number;
@@ -106,6 +109,7 @@ export class FixtureWorld implements Embodiment {
     this.#random = new SeededRandom(this.definition.seed);
     this.#tick = this.definition.startTick;
     this.#position = { ...this.definition.spawn };
+    this.#yaw = this.definition.spawnYaw ?? 0;
     this.#health = this.definition.vitals.health;
     this.#food = this.definition.vitals.food;
     this.#saturation = this.definition.vitals.saturation;
@@ -455,6 +459,8 @@ export class FixtureWorld implements Embodiment {
       lightLevel:
         (this.definition.timeOfDay + this.#tick) % 24000 < 12000 ? 15 : 4,
       position: { ...this.#position },
+      yaw: this.#yaw,
+      pitch: this.#pitch,
       health: this.#health,
       food: this.#food,
       saturation: this.#saturation,
@@ -644,6 +650,31 @@ export class FixtureWorld implements Embodiment {
     return null;
   }
 
+  /**
+   * Turns to look at a position, as `bot.lookAt` does on the Minecraft body.
+   *
+   * Inverts Mineflayer's view-direction convention,
+   * `(-sin(yaw)cos(pitch), sin(pitch), -cos(yaw)cos(pitch))`, so the fixture
+   * and the real client agree about what "facing" means.
+   */
+  face(target: Position): void {
+    const dx = target.x - this.#position.x;
+    const dy = target.y - this.#position.y;
+    const dz = target.z - this.#position.z;
+    const flat = Math.hypot(dx, dz);
+    if (flat === 0 && dy === 0) return;
+    this.#yaw = Math.atan2(-dx, -dz);
+    this.#pitch = Math.atan2(dy, flat);
+    this.#invalidate();
+  }
+
+  /** Sets facing directly, for tests that need Person looking nowhere useful. */
+  turn(yaw: number, pitch = 0): void {
+    this.#yaw = yaw;
+    this.#pitch = pitch;
+    this.#invalidate();
+  }
+
   async moveTo(position: Position, options: MoveOptions = {}): Promise<void> {
     this.#requireConnection();
     const range = options.range ?? 0;
@@ -658,6 +689,9 @@ export class FixtureWorld implements Embodiment {
     let spent = 0;
     for (const step of route) {
       this.#assertEnter(step);
+      // A body faces where it is going. Perception depends on facing, so the
+      // fixture has to turn for the same reasons the Minecraft one does.
+      this.face(step);
       this.#position = step;
       this.#advance(4);
       spent += 4;

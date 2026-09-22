@@ -11,10 +11,12 @@ import type { PermissionGate } from "../safety/permissions.ts";
 import type { SafetyKernel } from "../safety/safety-kernel.ts";
 import { categories } from "../skills/materials.ts";
 import { PERCEPTION, resourceCategory, shapeEntities } from "./perception.ts";
+import { eyePose, visible, VISION } from "./vision.ts";
+import { estimateDistance, relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
 import type { WorldMemory } from "../runtime/world-memory.ts";
 
-export const OBSERVATION_VERSION = 1;
+export const OBSERVATION_VERSION = 2;
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -112,19 +114,38 @@ function affordances(inputs: ObservationInputs): Observation["affordances"] {
 export function buildObservation(inputs: ObservationInputs): Observation {
   const { snapshot, permissions, memory } = inputs;
   const home = memory.home.position;
-  const homeDistance = distance(snapshot.position, home);
+  const homeDistance = estimateDistance(distance(snapshot.position, home));
+  // Where Person is looking, and what that lets it see. Privileged: the pose
+  // is used here and never reported.
+  const pose = eyePose(snapshot);
+  const sighted = <T>(
+    candidates: readonly T[],
+    at: (item: T) => Position,
+    limit: number,
+  ): T[] => visible(candidates, at, pose, inputs.blockAt, { limit });
+  const located = (position: Position, span: number) =>
+    relativeTo(pose, position, span);
   const ownedKeys = new Set(
     memory.ownedStorage.map((record) => positionKey(record.position)),
   );
 
-  const containers = snapshot.containers.map((container) => {
+  // Containers are found by looking, so they are filtered by what Person can
+  // see. The ones Person placed itself are reported under `home.ownedStorage`,
+  // which is remembered rather than seen.
+  const containers = sighted(
+    snapshot.containers,
+    (container) => container.position,
+    PERCEPTION.containers.total,
+  ).map((container) => {
     const owned =
       container.storageId !== null ||
       ownedKeys.has(positionKey(container.position));
     return {
       kind: container.kind,
-      position: container.position,
-      distance: distance(snapshot.position, container.position),
+      ...located(
+        container.position,
+        distance(snapshot.position, container.position),
+      ),
       provenance: (owned ? "owned" : "existing") as "owned" | "existing",
       storageId:
         container.storageId ??
@@ -133,20 +154,30 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     };
   });
 
+  // Workstations come from Person's own placement ledger, so they are known
+  // rather than seen and are not filtered by line of sight. Until the memory
+  // system exists (C6) this is the one channel that reports a thing Person is
+  // not currently looking at, and it reports only Person's own work.
   const workstations: Observation["nearby"]["workstations"] = [];
   if (memory.craftingTablePosition)
     workstations.push({
       kind: "crafting_table",
-      position: memory.craftingTablePosition,
-      distance: distance(snapshot.position, memory.craftingTablePosition),
+      ...located(
+        memory.craftingTablePosition,
+        distance(snapshot.position, memory.craftingTablePosition),
+      ),
       provenance: "owned",
+      source: "remembered",
     });
   if (memory.furnacePosition)
     workstations.push({
       kind: "furnace",
-      position: memory.furnacePosition,
-      distance: distance(snapshot.position, memory.furnacePosition),
+      ...located(
+        memory.furnacePosition,
+        distance(snapshot.position, memory.furnacePosition),
+      ),
       provenance: "owned",
+      source: "remembered",
     });
 
   // Identity is reported as strongly as the body can establish it. The entity
@@ -154,17 +185,29 @@ export function buildObservation(inputs: ObservationInputs): Observation {
   // Minecraft is literally "player", so neither survives a reconnect or tells
   // two people apart; the username and the UUID do, and they are carried
   // through whenever the client actually has them.
-  const entityRecord = (entity: WorldSnapshot["entities"][number]) => ({
-    entityId: entity.entityId,
-    name: entity.name,
-    position: entity.position,
-    distance: entity.distance,
-    named: entity.named,
-    tamed: entity.tamed,
-    protectedTarget: !permissions.mayHunt(entity).allowed,
-    ...(entity.username === null ? {} : { username: entity.username }),
-    ...(entity.uuid === null ? {} : { uuid: entity.uuid }),
-  });
+  // What Person can tell about something it is looking at: what kind of thing
+  // it is, where it is relative to Person, and whether it is someone's. The
+  // entity id and the account UUID are protocol handles rather than anything
+  // Person could perceive, so neither is reported. A player's name is on a
+  // nameplate above their head, so that one is.
+  const entityRecord = (entity: WorldSnapshot["entities"][number]) => {
+    const where = located(entity.position, entity.distance);
+    const recognised = where.detail === "central";
+    return {
+      // Which species it is, and whose it is, are things Person reads off a
+      // thing it is looking at. In the corner of the eye there is movement at
+      // a bearing, and the list it arrived in already says whether it is a
+      // threat.
+      ...(recognised ? { name: entity.name } : {}),
+      ...where,
+      named: entity.named,
+      tamed: entity.tamed,
+      protectedTarget: !permissions.mayHunt(entity).allowed,
+      ...(recognised && entity.username !== null
+        ? { username: entity.username }
+        : {}),
+    };
+  };
 
   const inventoryCategories = categories(snapshot.inventory);
   const storedFood = memory.ownedStorage.reduce((total, record) => {
@@ -199,7 +242,6 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       alive: snapshot.alive,
     },
     environment: {
-      position: snapshot.position,
       dimension: snapshot.dimension,
       dayPhase: dayPhase(snapshot.timeOfDay),
       timeOfDay: snapshot.timeOfDay,
@@ -215,50 +257,79 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     permissions: permissions.summary() as Observation["permissions"],
     affordances: affordances(inputs),
     nearby: {
-      resources: snapshot.resources.map((block) => ({
-        kind: resourceCategory(block.kind),
-        name: block.name,
-        position: block.position,
-        distance: distance(snapshot.position, block.position),
-        harvestPermitted: permissions.mayHarvest(block.position).allowed,
-      })),
-      hostiles: shapeEntities(
-        snapshot.entities.filter((entity) => entity.hostile),
-        { limit: PERCEPTION.entities.hostileTotal },
+      resources: sighted(
+        snapshot.resources,
+        (block) => block.position,
+        PERCEPTION.resources.total,
+      ).map((block) => {
+        const where = located(
+          block.position,
+          distance(snapshot.position, block.position),
+        );
+        return {
+          kind: resourceCategory(block.kind),
+          // The coarse category survives the periphery; the exact block does
+          // not. Person can see that there is vegetation over there without
+          // being able to say it is a sweet berry bush.
+          ...(where.detail === "central" ? { name: block.name } : {}),
+          ...where,
+          harvestPermitted: permissions.mayHarvest(block.position).allowed,
+        };
+      }),
+      hostiles: sighted(
+        shapeEntities(
+          snapshot.entities.filter((entity) => entity.hostile),
+          { limit: PERCEPTION.entities.hostileTotal },
+        ),
+        (entity) => entity.position,
+        PERCEPTION.entities.hostileTotal,
       ).map(entityRecord),
       // Passive animals are shaped to the region Person may actually walk
       // into. The unshaped list stays in the snapshot the safety kernel and
       // the permission gate read, so this changes what cognition is told and
       // nothing about what it is allowed to do.
-      passiveAnimals: shapeEntities(
-        snapshot.entities.filter((entity) => entity.passive),
-        {
-          limit: PERCEPTION.entities.passiveTotal,
-          radius: PERCEPTION.entities.passiveRadius,
-          keep: (entity) => permissions.areas.permitted(entity.position),
-        },
+      passiveAnimals: sighted(
+        shapeEntities(
+          snapshot.entities.filter((entity) => entity.passive),
+          {
+            limit: PERCEPTION.entities.passiveTotal,
+            radius: PERCEPTION.entities.passiveRadius,
+            keep: (entity) => permissions.areas.permitted(entity.position),
+          },
+        ),
+        (entity) => entity.position,
+        PERCEPTION.entities.passiveTotal,
       ).map(entityRecord),
-      players: shapeEntities(
-        snapshot.entities.filter((entity) => entity.player),
-        { limit: PERCEPTION.entities.playerTotal },
+      players: sighted(
+        shapeEntities(
+          snapshot.entities.filter((entity) => entity.player),
+          { limit: PERCEPTION.entities.playerTotal },
+        ),
+        (entity) => entity.position,
+        PERCEPTION.entities.playerTotal,
       ).map(entityRecord),
       containers,
       workstations,
-      hazards: snapshot.hazards.map((hazard) => ({
+      hazards: sighted(
+        snapshot.hazards,
+        (hazard) => hazard.position,
+        PERCEPTION.hazards.total,
+      ).map((hazard) => ({
         kind: (["lava", "fire", "water", "cactus"].includes(hazard.kind)
           ? hazard.kind
           : "other") as Observation["nearby"]["hazards"][number]["kind"],
-        position: hazard.position,
-        distance: distance(snapshot.position, hazard.position),
+        ...located(
+          hazard.position,
+          distance(snapshot.position, hazard.position),
+        ),
       })),
     },
     home: {
-      activeHome: { homeId: memory.home.homeId, position: home },
+      activeHome: { homeId: memory.home.homeId },
       homeDistance,
       shelterState: shelterState(inputs),
       ownedStorage: memory.ownedStorage.map((record) => ({
         storageId: record.storageId,
-        position: record.position,
         contents:
           snapshot.containers.find(
             (candidate) =>
@@ -282,7 +353,6 @@ export function buildObservation(inputs: ObservationInputs): Observation {
         snapshot.position,
         home,
       ),
-      lastSafePosition: snapshot.lastSafePosition,
     },
     cognition: inputs.cognition,
     previousOutcome: inputs.previousOutcome,

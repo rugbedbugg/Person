@@ -605,17 +605,18 @@ entity visibility checks
 Debug and operator tooling may expose privileged state, through a separate path
 that no cognition process can read.
 
-**CURRENTLY IMPLEMENTED:** the boundary exists and is enforced in one
-direction. The runtime keeps the unshaped snapshot; the observation below is
-category-balanced, radius-bounded and count-bounded; the safety kernel and the
-permission gate read the snapshot rather than the observation, so shaping can
-never widen what Person is allowed to do. What is **not** implemented is
-occlusion, visibility, pose, or any notion that Person might fail to see
-something that is in range: the observation below still carries exact
-coordinates for Person's own position and for every nearby thing, which is a
-known deviation from this section's intent (`docs/CURRENT_STATE.md`, "Known
-Deviations", C1). Coordinates are meant to reach Person only through a
-deliberate inspection capability (section 24.4), not on every tick.
+**CURRENTLY IMPLEMENTED:** the boundary exists, and as of 2026-09-22 the sense
+model above does too. The runtime keeps the unshaped snapshot; the safety
+kernel and the permission gate read that rather than the observation, so
+shaping can never widen what Person is allowed to do. Pose, bounded range,
+occlusion and field of view are implemented, so Person can now fail to see
+something that is in range. Location reaches cognition as a bearing relative to
+facing, an elevation, a range band and an estimated distance; no coordinate
+crosses, which closes the deviation this section used to carry
+(`docs/CURRENT_STATE.md`, "Known Deviations", C1). What is **not** implemented
+is a deliberate inspection capability for coordinates (section 24.4), any
+attention model beyond a deterministic cap, and any ability for Person to turn
+and look around of its own accord.
 
 ## 8.1 Vitals
 

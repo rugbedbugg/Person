@@ -250,9 +250,7 @@ def test_exploration_is_suppressed_outside_the_safe_envelope(observation: dict[s
     dangerous = json.loads(json.dumps(observation))
     dangerous["nearby"]["hostiles"] = [
         {
-            "entityId": 5,
             "name": "zombie",
-            "position": {"x": 1, "y": 64, "z": 1},
             "distance": 2.0,
             "named": False,
             "tamed": False,
