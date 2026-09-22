@@ -396,21 +396,33 @@ cognition today, so there was nothing to put behind the firewall. Vision is not
 the whole of perception, it is the whole of what is implemented.
 
 **Person can now point its senses.** Added 2026-09-22, after the firewall.
-`look_around` is a skill like any other: cognition proposes it, the validator
+Gaze is a motor capability and nothing more: it moves Person's head, and every
+judgement about where to point it is left above the boundary. `look_around` is
+a skill like any other: cognition proposes it, the validator
 and the safety kernel see it, and the body performs it. The vocabulary is five
 words, `forward`, `left`, `right`, `up` and `down`, and the skill takes no
 parameters at all, so there is no field in which a coordinate, an angle or an
 entity could be named. The runtime turns those words into yaw and pitch on its
 own side.
 
-A survey turns through five fixed orientations, straight ahead and 45 and 90
-degrees to each side, takes one ordinary perception pass at each, and settles
-facing whichever showed the most. Nothing is merged: Person does not come back
-from a survey with a map of everything it glimpsed, because it has no memory to
-put one in (C6). What it comes back with is a different heading, and the next
-observation reports what can be seen from there through the same firewall as
-always. Walls, range and occlusion all behave during a survey exactly as they
-do at rest.
+`look_around` sweeps through five fixed orientations, straight ahead and 45 and
+90 degrees to each side, and returns to the heading it began with, head
+levelled. The endpoint is a fact about where the sweep started and nothing
+else.
+
+It deliberately decides nothing. A first version settled facing whichever
+orientation had the most in it, which sounds harmless and is not: "the scene
+with the most things in it is the most interesting scene" is a judgement about
+salience, and salience is cognition's. The sweep module now imports no
+perception at all, so it has no way to rank what it turns past, and a test
+asserts that it stays that way.
+
+That leaves the skill minimally useful on its own, which is right for this
+phase. Looking for something is a loop that belongs to the planner: look in a
+direction, receive an ordinary observation, reason about it, look again. That
+loop is built from `Embodiment.look`, and nothing in the planner runs it yet.
+A sweep establishes nothing about what is or is not out there, because the
+views it passed through never reached cognition.
 
 Two causes of turning are worth keeping apart, and the evidence already does:
 walking rotates Person as a side effect of going somewhere, while `look_around`

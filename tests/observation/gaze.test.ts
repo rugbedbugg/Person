@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
+import { readFile } from "node:fs/promises";
 import type { Observation } from "#protocol";
 import { GAZE, VISION, buildObservation, survey } from "#node-runtime";
 import { harness, type Harness } from "../support/harness.ts";
@@ -112,24 +113,66 @@ test("looking up and down changes what is perceptible vertically", async () => {
   assert.equal(after, true, "looking up brings it into the field");
 });
 
-test("a survey finds something on the left, and something on the right", async () => {
-  for (const side of [-1, 1]) {
-    const bench = await harness();
-    bench.world.turn(0);
-    // Directly beside Person, outside the field while facing forward.
-    bench.world.spawn("cow", { x: 10 * side, y: 64, z: 6 });
-    assert.equal(sees(bench, "cow"), false, "not visible facing forward");
+test("a sweep executes its bounded sequence and comes back", async () => {
+  const bench = await harness();
+  bench.world.turn(0.75, 0.4);
+  const before = bench.world.snapshot();
 
-    await survey(bench.world);
-    assert.equal(
-      sees(bench, "cow"),
-      true,
-      `the survey should have turned to the ${side < 0 ? "left" : "right"}`,
-    );
-  }
+  const result = await survey(bench.world);
+  const after = bench.world.snapshot();
+
+  assert.equal(result.orientationsSampled, GAZE.scanOrientations.length);
+  assert.ok(result.gazeSteps > result.orientationsSampled, "it really turned");
+  assert.ok(
+    Math.abs(after.yaw - before.yaw) < 1e-9,
+    "a sweep returns to the heading it started from",
+  );
+  assert.equal(after.pitch, 0, "and leaves the head level");
 });
 
-test("a survey cannot find something behind a wall", async () => {
+test("where a sweep ends does not depend on what is around", async () => {
+  // The endpoint must be a fact about where the sweep began, not about which
+  // direction happened to be full of things. An earlier version settled facing
+  // whichever orientation had the most in it, which is a salience judgement
+  // and belongs to cognition.
+  const endings: number[] = [];
+  for (const crowd of [0, 1, 40]) {
+    const bench = await harness();
+    bench.world.turn(0);
+    for (let index = 0; index < crowd; index++) {
+      const angle = (index / Math.max(1, crowd)) * Math.PI * 2;
+      bench.world.spawn("cow", {
+        x: Math.round(Math.cos(angle) * 9),
+        y: 64,
+        z: Math.round(Math.sin(angle) * 9),
+      });
+    }
+    await survey(bench.world);
+    endings.push(bench.world.snapshot().yaw);
+  }
+
+  assert.equal(
+    new Set(endings.map((yaw) => yaw.toFixed(9))).size,
+    1,
+    `an empty field and a crowd must end the same way: ${endings.join(", ")}`,
+  );
+});
+
+test("the sweep cannot rank what it sweeps past", async () => {
+  // Structural, not behavioural: the module that turns Person's head does not
+  // import the perception layer at all, so it has no way to know whether it
+  // swept past a forest or a blank wall.
+  const source = await readFile(
+    new URL("../../apps/node-runtime/src/skills/survey.ts", import.meta.url),
+    "utf8",
+  );
+  assert.ok(
+    !/observation\/vision|perceptib|visible\(/.test(source),
+    "the motor sweep must not be able to see what it is sweeping past",
+  );
+});
+
+test("looking straight at a wall does not see through it", async () => {
   const bench = await harness();
   bench.world.turn(0);
   bench.world.spawn("cow", { x: 8, y: 64, z: 0 });
@@ -137,23 +180,25 @@ test("a survey cannot find something behind a wall", async () => {
     for (let y = 64; y <= 66; y++)
       bench.world.setBlock({ x: 4, y, z }, "stone");
 
-  await survey(bench.world);
+  // Turn deliberately towards it: active gaze must not defeat occlusion.
+  await bench.world.look("right");
+  await bench.world.look("right");
   assert.equal(sees(bench, "cow"), false, "the wall is still a wall");
 });
 
-test("a survey cannot find something out of range", async () => {
+test("looking straight at something out of range does not reach it", async () => {
   const bench = await harness();
   bench.world.turn(0);
   bench.world.spawn("cow", { x: VISION.range + 12, y: 64, z: 0 });
 
-  await survey(bench.world);
+  await bench.world.look("right");
+  await bench.world.look("right");
   assert.equal(sees(bench, "cow"), false, "range is still range");
 });
 
-test("a survey is bounded in orientations and in what it yields", async () => {
+test("a sweep is bounded, and perception after it is still capped", async () => {
   const bench = await harness();
   bench.world.turn(0);
-  // A crowd, all round Person.
   for (let index = 0; index < 40; index++) {
     const angle = (index / 40) * Math.PI * 2;
     bench.world.spawn("cow", {
@@ -163,12 +208,12 @@ test("a survey is bounded in orientations and in what it yields", async () => {
     });
   }
 
-  assert.ok(GAZE.scanOrientations.length <= 8, "a survey is a finite sweep");
+  assert.ok(GAZE.scanOrientations.length <= 8, "a sweep is a finite sequence");
   await survey(bench.world);
 
   assert.ok(
     perceivedCount(bench) <= 12,
-    `a survey must not turn into a world dump: ${perceivedCount(bench)}`,
+    `perception stays capped after a sweep: ${perceivedCount(bench)}`,
   );
 });
 

@@ -5,15 +5,19 @@ import { survey } from "../survey.ts";
 /**
  * Looking around, as something Person decides to do.
  *
- * This is the only skill that changes nothing about the world. Its whole
- * effect is on Person: it ends with Person facing somewhere else, and the next
- * observation is therefore about somewhere else. Everything it learns it
- * learns through the ordinary perception path, so a wall is still a wall and
- * range is still range while it runs.
+ * This is the only skill that changes nothing, including about Person: the
+ * sweep returns to the heading it began with. What it costs is time, and what
+ * it is for is being the motor half of looking for something. The other half,
+ * deciding where to look next and what a failure to see means, belongs to the
+ * planner and is not built yet.
  *
  * It goes through dispatch like every other physical act, which is the point.
  * Gaze is motor control, and a motor capability that bypassed the validator
  * and the safety kernel would be a second way into the body.
+ *
+ * It establishes nothing about what is or is not out there. A sweep that ended
+ * with "and therefore no food exists nearby" would be the motor layer drawing
+ * an epistemic conclusion from views cognition never received.
  */
 export const lookAround: SkillImplementation = async (context) => {
   context.checkpoint();
@@ -32,12 +36,12 @@ export const lookAround: SkillImplementation = async (context) => {
   context.checkpoint();
 
   context.effect("surveyed");
-  // Engineering detail only. `settledStep` is a count of gaze steps rather
-  // than an angle, and none of this reaches cognition: it lands in the skill
-  // outcome's evidence, which is operator-facing.
+  // Engineering detail only: counts of orientations and gaze steps, never an
+  // angle, and none of it reaches cognition. It lands in the skill outcome's
+  // evidence, which is operator-facing.
   context.note("elapsed_ticks", {
     orientationsSampled: result.orientationsSampled,
-    perceptsAtSettled: result.perceptsAtSettled,
+    gazeSteps: result.gazeSteps,
   });
 };
 
