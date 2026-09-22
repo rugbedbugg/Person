@@ -36,6 +36,21 @@ export const VISION = {
   horizontalFovDegrees: 200,
   /** Total vertical field of view, in degrees. */
   verticalFovDegrees: 130,
+  /**
+   * The field within which Person recognises what a thing actually is.
+   *
+   * Peripheral vision reports that something is there, roughly where, and
+   * roughly what sort of thing it is. It does not read identity: a human can
+   * see movement and coarse form at 80 degrees off-axis and cannot tell a
+   * sweet berry bush from a leaf pile there. Reliable object recognition sits
+   * within about 30 degrees of fixation, so this is that, doubled.
+   *
+   * `PERSON_SPEC` section 8 asks for a human-like sense model with semantic
+   * aggregation, and a cone that recognised everything equally out to 100
+   * degrees would be neither.
+   */
+  centralFovDegrees: 60,
+  centralVerticalFovDegrees: 50,
   /** Eye height above the feet block. Minecraft's standing player eye height. */
   eyeHeight: 1.62,
   /** Spacing of the samples taken along a line of sight, in blocks. */
@@ -134,6 +149,22 @@ export function viewAngles(
   const lookPitch = Math.atan2(pose.look.y, lookFlat) / RADIANS;
   const targetPitch = Math.atan2(dy, targetFlat) / RADIANS;
   return { horizontal, vertical: Math.abs(targetPitch - lookPitch) };
+}
+
+/**
+ * True when the target is close enough to the view axis to be identified.
+ *
+ * Everything reported is perceptible; only what is central is recognised.
+ */
+export function inCentralVision(
+  pose: EyePose,
+  target: { x: number; y: number; z: number },
+): boolean {
+  const angles = viewAngles(pose, target);
+  return (
+    angles.horizontal <= VISION.centralFovDegrees / 2 &&
+    angles.vertical <= VISION.centralVerticalFovDegrees / 2
+  );
 }
 
 /** True when the target falls inside the field of view. */

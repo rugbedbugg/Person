@@ -75,12 +75,22 @@ export interface RelativeLocation {
     | "behind";
   elevation: "above" | "level" | "below";
   rangeBand: "reach" | "near" | "mid" | "far";
-  /** Straight-line distance, rounded to a tenth of a block. An estimate. */
+  /** Estimated straight-line distance. Coarser the further away it is. */
   distance: number;
+  /**
+   * Whether Person is looking at this, or merely aware of it.
+   *
+   * Everything reported is perceptible. Only a `central` percept was close
+   * enough to the view axis to be identified: a `peripheral` one carries a
+   * bearing and a coarse category and withholds precise identity, because
+   * recognising what a thing is happens near the middle of the field.
+   */
+  detail: "central" | "peripheral";
 }
 
 export interface EntityRecord extends RelativeLocation {
-  name: string;
+  /** The species, when Person is looking straight enough at it to tell. */
+  name?: string;
   named: boolean;
   tamed: boolean;
   protectedTarget: boolean;
@@ -97,7 +107,8 @@ export interface EntityRecord extends RelativeLocation {
 
 export interface ResourceRecord extends RelativeLocation {
   kind: "wood" | "stone" | "coal" | "plant_food" | "dirt" | "other";
-  name: string;
+  /** The exact block, when it was recognised rather than merely noticed. */
+  name?: string;
   harvestPermitted: boolean;
 }
 
@@ -110,6 +121,13 @@ export interface ContainerRecord extends RelativeLocation {
 export interface WorkstationRecord extends RelativeLocation {
   kind: "crafting_table" | "furnace" | "anvil" | "other";
   provenance: "owned" | "existing";
+  /**
+   * Where this came from. Workstations are read out of Person's own placement
+   * ledger rather than seen, so they are reported even when Person is facing
+   * the other way, and they are the one channel in `nearby` that is not
+   * current perception. Marked so it cannot be mistaken for one.
+   */
+  source: "remembered";
 }
 
 export interface HazardRecord extends RelativeLocation {

@@ -1,5 +1,10 @@
 import type { Position } from "#config";
-import { centreOf, viewAngles, type EyePose } from "./vision.ts";
+import {
+  centreOf,
+  inCentralVision,
+  viewAngles,
+  type EyePose,
+} from "./vision.ts";
 
 /**
  * Where something is, described the way a person would describe it.
@@ -89,18 +94,38 @@ export function elevationOf(pose: EyePose, position: Position): Elevation {
   return "level";
 }
 
+/**
+ * How far away something looks, as an estimate rather than a measurement.
+ *
+ * Judging distance is an ordinary perceptual act and every decision cognition
+ * makes about distance is a comparison, so a number is the useful shape. The
+ * precision is not: a tenth of a block is a survey, not a glance. Estimates
+ * get coarser with distance the way real ones do, which also means a far-off
+ * thing is reported less precisely than a near one.
+ *
+ * The grid stays fine enough near Person for the thresholds cognition actually
+ * uses, the closest of which is a hazard within 1.5 blocks.
+ */
+export function estimateDistance(distance: number): number {
+  const step = distance <= 8 ? 0.5 : distance <= 16 ? 1 : 2;
+  return Math.round(distance / step) * step;
+}
+
+/** Whether Person is looking at the thing or merely aware of it. */
+export type Detail = "central" | "peripheral";
+
 export interface RelativeLocation {
   bearing: Bearing;
   elevation: Elevation;
   rangeBand: RangeBand;
-  /**
-   * Straight-line distance, rounded to a tenth of a block.
-   *
-   * Kept because judging how far away something is is an ordinary perceptual
-   * act, and because every decision cognition makes about distance is a
-   * comparison rather than a coordinate. Rounded so it reads as an estimate.
-   */
+  /** Estimated straight-line distance. Coarser further away. */
   distance: number;
+  /**
+   * Whether this percept came from the part of the field Person can identify
+   * things in. A peripheral percept carries position and coarse category and
+   * withholds precise identity.
+   */
+  detail: Detail;
 }
 
 export function relativeTo(
@@ -112,6 +137,9 @@ export function relativeTo(
     bearing: bearingOf(pose, position),
     elevation: elevationOf(pose, position),
     rangeBand: rangeBand(distance),
-    distance: Math.round(distance * 10) / 10,
+    distance: estimateDistance(distance),
+    detail: inCentralVision(pose, centreOf(position))
+      ? "central"
+      : "peripheral",
   };
 }

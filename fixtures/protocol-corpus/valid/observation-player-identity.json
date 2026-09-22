@@ -69,48 +69,52 @@
       {
         "kind": "wood",
         "name": "oak_log",
-        "distance": 6.3,
+        "distance": 6.5,
         "harvestPermitted": true,
         "bearing": "ahead",
         "elevation": "level",
-        "rangeBand": "near"
+        "rangeBand": "near",
+        "detail": "central"
       }
     ],
     "hostiles": [],
     "passiveAnimals": [
       {
         "name": "cow",
-        "distance": 4.2,
+        "distance": 4.0,
         "named": false,
         "tamed": false,
         "protectedTarget": false,
         "bearing": "ahead",
         "elevation": "level",
-        "rangeBand": "reach"
+        "rangeBand": "reach",
+        "detail": "central"
       }
     ],
     "players": [
       {
         "name": "player",
-        "distance": 27.1,
+        "distance": 28,
         "named": false,
         "tamed": false,
         "protectedTarget": true,
         "username": "rugbedbugg",
         "bearing": "ahead",
         "elevation": "level",
-        "rangeBand": "far"
+        "rangeBand": "far",
+        "detail": "central"
       },
       {
         "name": "player",
-        "distance": 9.4,
+        "distance": 9,
         "named": false,
         "tamed": false,
         "protectedTarget": true,
         "username": "PersonWatcher",
         "bearing": "ahead",
         "elevation": "level",
-        "rangeBand": "near"
+        "rangeBand": "near",
+        "detail": "central"
       }
     ],
     "containers": [],
@@ -121,7 +125,7 @@
     "activeHome": {
       "homeId": "home_a"
     },
-    "homeDistance": 3.6,
+    "homeDistance": 3.5,
     "shelterState": "none",
     "ownedStorage": [],
     "bedKnown": false,

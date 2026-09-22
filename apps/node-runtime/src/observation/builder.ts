@@ -12,7 +12,7 @@ import type { SafetyKernel } from "../safety/safety-kernel.ts";
 import { categories } from "../skills/materials.ts";
 import { PERCEPTION, resourceCategory, shapeEntities } from "./perception.ts";
 import { eyePose, visible, VISION } from "./vision.ts";
-import { relativeTo } from "./relative.ts";
+import { estimateDistance, relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
 import type { WorldMemory } from "../runtime/world-memory.ts";
 
@@ -114,7 +114,7 @@ function affordances(inputs: ObservationInputs): Observation["affordances"] {
 export function buildObservation(inputs: ObservationInputs): Observation {
   const { snapshot, permissions, memory } = inputs;
   const home = memory.home.position;
-  const homeDistance = distance(snapshot.position, home);
+  const homeDistance = estimateDistance(distance(snapshot.position, home));
   // Where Person is looking, and what that lets it see. Privileged: the pose
   // is used here and never reported.
   const pose = eyePose(snapshot);
@@ -167,6 +167,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
         distance(snapshot.position, memory.craftingTablePosition),
       ),
       provenance: "owned",
+      source: "remembered",
     });
   if (memory.furnacePosition)
     workstations.push({
@@ -176,6 +177,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
         distance(snapshot.position, memory.furnacePosition),
       ),
       provenance: "owned",
+      source: "remembered",
     });
 
   // Identity is reported as strongly as the body can establish it. The entity
@@ -188,14 +190,24 @@ export function buildObservation(inputs: ObservationInputs): Observation {
   // entity id and the account UUID are protocol handles rather than anything
   // Person could perceive, so neither is reported. A player's name is on a
   // nameplate above their head, so that one is.
-  const entityRecord = (entity: WorldSnapshot["entities"][number]) => ({
-    name: entity.name,
-    ...located(entity.position, entity.distance),
-    named: entity.named,
-    tamed: entity.tamed,
-    protectedTarget: !permissions.mayHunt(entity).allowed,
-    ...(entity.username === null ? {} : { username: entity.username }),
-  });
+  const entityRecord = (entity: WorldSnapshot["entities"][number]) => {
+    const where = located(entity.position, entity.distance);
+    const recognised = where.detail === "central";
+    return {
+      // Which species it is, and whose it is, are things Person reads off a
+      // thing it is looking at. In the corner of the eye there is movement at
+      // a bearing, and the list it arrived in already says whether it is a
+      // threat.
+      ...(recognised ? { name: entity.name } : {}),
+      ...where,
+      named: entity.named,
+      tamed: entity.tamed,
+      protectedTarget: !permissions.mayHunt(entity).allowed,
+      ...(recognised && entity.username !== null
+        ? { username: entity.username }
+        : {}),
+    };
+  };
 
   const inventoryCategories = categories(snapshot.inventory);
   const storedFood = memory.ownedStorage.reduce((total, record) => {
@@ -249,12 +261,21 @@ export function buildObservation(inputs: ObservationInputs): Observation {
         snapshot.resources,
         (block) => block.position,
         PERCEPTION.resources.total,
-      ).map((block) => ({
-        kind: resourceCategory(block.kind),
-        name: block.name,
-        ...located(block.position, distance(snapshot.position, block.position)),
-        harvestPermitted: permissions.mayHarvest(block.position).allowed,
-      })),
+      ).map((block) => {
+        const where = located(
+          block.position,
+          distance(snapshot.position, block.position),
+        );
+        return {
+          kind: resourceCategory(block.kind),
+          // The coarse category survives the periphery; the exact block does
+          // not. Person can see that there is vegetation over there without
+          // being able to say it is a sweet berry bush.
+          ...(where.detail === "central" ? { name: block.name } : {}),
+          ...where,
+          harvestPermitted: permissions.mayHarvest(block.position).allowed,
+        };
+      }),
       hostiles: sighted(
         shapeEntities(
           snapshot.entities.filter((entity) => entity.hostile),
