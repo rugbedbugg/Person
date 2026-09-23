@@ -301,6 +301,14 @@ class GoalStack:
         if self.active_id == goal_id:
             self.active_id = None
 
+    def reopen(self, goal_id: str, tick: int) -> None:
+        """A blocked goal becomes eligible again, because what blocked it changed."""
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status != "BLOCKED":
+            return
+        self.entries[goal_id] = replace(goal, status="QUEUED", suspension_reason=None)
+        self._note(tick, goal_id, "reopened")
+
     def as_messages(self) -> list[dict[str, Any]]:
         return [
             goal.as_message()

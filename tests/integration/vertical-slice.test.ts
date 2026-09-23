@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
 import { FixtureWorld } from "#fixture-world";
-import { readStatus, statusPath } from "#node-runtime";
+import { readStatus, shelterPlan, statusPath } from "#node-runtime";
 import { REPOSITORY, temporaryDirectory } from "../support/harness.ts";
 import { runEpisode } from "../support/runtime.ts";
 
@@ -83,7 +83,22 @@ test(
 
         assert.ok(goals.has("SECURE_SHELTER"));
         assert.ok(executed.includes("gather_wood"));
-        assert.ok(executed.includes("build_basic_shelter"));
+        // What matters is that the shelter stands. Since information seeking,
+        // looking before acting costs time, and the fixture's scheduled zombie
+        // now arrives while the last blocks are going in: the kernel preempts
+        // with flee, so the call is correctly attributed to flee even though
+        // the shelter was finished. Assert the request and the world, not
+        // which skill happened to be running when the threat arrived.
+        const requested = report.decisions.map(
+          (decision) => decision.requestedSkill,
+        );
+        assert.ok(requested.includes("build_basic_shelter"));
+        assert.ok(
+          shelterPlan({ x: 0, y: 64, z: 0 }).every(
+            (position) => world.blockAt(position)?.solid === true,
+          ),
+          "the shelter is actually standing",
+        );
 
         // Every decision is explainable end to end.
         for (const decision of report.decisions) {
@@ -177,7 +192,9 @@ test(
           cognitionCommand: COGNITION,
           evidenceDirectory,
           outputDirectory,
-          maxDecisions: 8,
+          // Room for one bounded search as well as routine work: a restarted
+          // Person does not remember having looked, so it may look again.
+          maxDecisions: 16,
           learningMode: "supervised",
           episodeId: "ep_second",
         });
