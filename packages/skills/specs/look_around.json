@@ -2,7 +2,7 @@
   "id": "look_around",
   "version": 1,
   "category": "perception",
-  "summary": "Turn through a short bounded sweep and settle facing whatever showed the most.",
+  "summary": "Turn through a short fixed sweep and come back to the starting heading, head level.",
   "parameters": {},
   "preconditions": [],
   "expectedEffects": [

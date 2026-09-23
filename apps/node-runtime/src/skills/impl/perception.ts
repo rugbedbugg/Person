@@ -1,5 +1,6 @@
 import type { SkillImplementation } from "../execution.ts";
 import { SkillFailure } from "../execution.ts";
+import { GAZE_DIRECTIONS, type GazeDirection } from "../../embodiment/gaze.ts";
 import { survey } from "../survey.ts";
 
 /**
@@ -10,6 +11,9 @@ import { survey } from "../survey.ts";
  * it is for is being the motor half of looking for something. The other half,
  * deciding where to look next and what a failure to see means, belongs to the
  * planner and is not built yet.
+ *
+ * On its own it is not the way Person looks for something, because the views it
+ * passes through never reach cognition: see `look` below for that.
  *
  * It goes through dispatch like every other physical act, which is the point.
  * Gaze is motor control, and a motor capability that bypassed the validator
@@ -45,6 +49,37 @@ export const lookAround: SkillImplementation = async (context) => {
   });
 };
 
+/**
+ * One deliberate glance, and Person stays looking that way.
+ *
+ * This is the motor half of information seeking. Cognition names a direction
+ * from the closed gaze vocabulary; the runtime turns the head one step on its
+ * own side of the firewall; the next ordinary observation is taken from the
+ * new pose. Whether that glance was the right one, and whether to take
+ * another, is decided above the boundary from what the observation shows.
+ *
+ * The skill reports nothing about what came into view, and no angle. It
+ * cannot, because it never looks at the snapshot's contents: which way is
+ * worth looking is cognition's judgement, not the body's.
+ */
+export const look: SkillImplementation = async (context) => {
+  context.checkpoint();
+  const direction = context.parameters["direction"];
+  // The validator already enforced the enum; this is the executor refusing to
+  // trust that nothing between them changed.
+  if (!GAZE_DIRECTIONS.includes(direction as GazeDirection))
+    throw new SkillFailure(
+      "invalid_direction",
+      "INVALIDATED",
+      "look was asked for a direction outside the gaze vocabulary",
+    );
+  await context.embodiment.look(direction as GazeDirection);
+  context.checkpoint();
+  context.effect("looked");
+  context.note("elapsed_ticks", { gazeSteps: 1 });
+};
+
 export const perceptionSkills: Record<string, SkillImplementation> = {
   look_around: lookAround,
+  look,
 };

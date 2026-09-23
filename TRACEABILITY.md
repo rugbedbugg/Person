@@ -205,6 +205,20 @@ claim without reading the whole tree.
 | Never influences policy                       | `RoutineStatistics.apply` has no case for it    | `test_prediction_errors_are_persisted_but_never_scored`            |
 | Reported                                      | `LearningSummary`, `person inspect predictions` | prediction suite                                                   |
 
+## Information seeking
+
+| Requirement                                           | Implementation                                             | Tests                                               |
+| ----------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
+| Evidence facts are established only by perception     | `person_planner.EVIDENCE_FACTS`                            | `packages/planner/tests/test_evidence.py`           |
+| A peripheral percept is a lead, not an identification | `person_planner.state.recognised`                          | same                                                |
+| Missing evidence is named by a counterfactual         | `person_planner.evidence_needed`                           | same                                                |
+| Glances go through the ordinary skill path            | `look` spec, `skills/impl/perception.ts`, `_emit_look`     | `tests/observation/look.test.ts`, integration suite |
+| Search is bounded and ends honestly                   | `person_cognition/search.py`, `CognitionLoop._seek`        | `apps/cognition/tests/test_information_seeking.py`  |
+| Exhaustion is not absence; the goal reopens           | `NOT_FOUND`, `GoalStack.reopen`, `_reopen_unfound`         | same                                                |
+| Unperceived physical truth changes no decision        | observation-only inputs to the search                      | `tests/integration/information-seeking.test.ts`     |
+| Bearings agree with gaze directions                   | `observation/relative.ts` `side()`                         | `tests/observation/look.test.ts`                    |
+| Searches are journalled, never scored                 | `information_search` event, schema v3; `UNSCORED_ROUTINES` | persistence suite, cognition suite                  |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

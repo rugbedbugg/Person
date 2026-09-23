@@ -226,6 +226,34 @@ been live-validated; the current per-skill live status is in
 [First live skill execution](#first-live-skill-execution) and in
 `docs/CURRENT_STATE.md`.
 
+## Information seeking (fixture only)
+
+Added 2026-09-23. **TESTED IN FIXTURE. Not live-validated. Not
+conformance-tested:** the Mineflayer double has no `bot.look`.
+
+What the fixture establishes, through the real runtime, dispatch path and
+cognition process (`tests/integration/information-seeking.test.ts`):
+
+- a tree behind Person is not treated as absent: Person glances, each glance an
+  ordinary validated `look` skill, and acts once the tree is recognised;
+- with no wood in the world, every search ends within its budget of eight
+  glances, concludes `not_found_in_bounded_search`, and nothing claims absence;
+- wood beyond the range of vision, or behind an opaque wall, leaves every
+  requested skill and parameter identical to a world with no wood at all.
+
+A defect this work exposed: left and right bearings in the observation were
+mirrored since Phase 3. Fixed in the shared observation builder and covered in
+fixture. Whether a live body agrees rests on the Mineflayer adapter using the
+same yaw convention as the fixture, which is read from the code, not tested.
+
+The smallest live check that would close the bearing half of that gap needs no
+new tooling: in a disposable 1.16.1 LAN world, place a single log about eight
+blocks to Person's right, run `person observe`, and confirm the log is reported
+`right` or `ahead_right` and peripheral. Exercising a directed glance live
+needs more than exists: `person skill-test` runs a skill with its default
+parameters, which for `look` is `forward`, so a directed `look` can only be
+observed live inside a `person run` episode today.
+
 ## Safety validation
 
 Proven in the fixture and against the double:

@@ -13,13 +13,13 @@ from __future__ import annotations
 
 import sys
 from collections.abc import Callable
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
 from person_config import CognitionSettings
 from person_persistence import EvidenceEvent, EvidenceStore, new_event
-from person_planner import plan_for, symbolic_state
+from person_planner import evidence_needed, plan_for, symbolic_state
 from person_policy import (
     DeterministicPolicyProvider,
     EvidencePolicyProvider,
@@ -47,9 +47,13 @@ from .routines import (
     candidate_from_routine,
     routine_from_plan,
 )
+from .search import NOT_FOUND, SEARCH_ROUTINE_ID, InformationSearch
 
 COGNITION_VERSION = "0.1.0"
 MAX_CANDIDATES = 6
+
+#: Routines that are not strategies, so they are never scored as one.
+UNSCORED_ROUTINES = frozenset({"r_idle_wait", SEARCH_ROUTINE_ID})
 
 FAILURE_STATUSES = {"FAILED", "TIMED_OUT", "UNREACHABLE", "INVALIDATED", "DEATH", "DISCONNECTED"}
 INTERRUPT_STATUSES = {"INTERRUPTED", "PREEMPTED"}
@@ -118,6 +122,12 @@ class CognitionLoop:
         self.pending_prediction: PendingPrediction | None = None
         self.prediction_errors: list[dict[str, Any]] = []
         self._last_state: dict[str, float] = {}
+        #: The one search in progress, if any. Ephemeral: never persisted.
+        self.search: InformationSearch | None = None
+        #: Goals blocked by a search that found nothing, and the evidence that
+        #: would reopen them. Not a record of absence: the moment any of it is
+        #: seen, the goal is live again.
+        self.unfound: dict[str, tuple[str, ...]] = {}
 
     # ------------------------------------------------------------------ utils
 
@@ -249,6 +259,7 @@ class CognitionLoop:
         )
         if message["phase"] == "ended":
             self._settle_prediction(None, message["tick"])
+            self._conclude_search("abandoned", message["tick"], reason="episode_ended")
             self._finish_routine("INTERRUPTED", message["tick"], reason="episode_ended")
             if self.store is not None:
                 self.store.write_snapshot(self.statistics)
@@ -276,12 +287,15 @@ class CognitionLoop:
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
 
+        self._reopen_unfound(state, tick)
         proposals = self.goal_provider.propose(message, state, tick)
         goal = self.goals.update(proposals, state, tick)
         if goal is None:
             goal = self._idle_goal(tick)
             self.goals.update([goal], state, tick)
             goal = self.goals.active or goal
+        if self.search is not None and self.search.goal_id != goal.goal_id:
+            self._conclude_search("abandoned", tick, reason="goal_changed")
 
         if self.active is not None and (
             self.active.goal_id != goal.goal_id or self.active.finished
@@ -349,9 +363,11 @@ class CognitionLoop:
         )
         plans = [plan for plan in plans if plan.steps]
         if not plans:
-            self.goals.block(goal.goal_id, "no_feasible_plan", tick)
-            self._emit_idle(observation, goal, context_id, tick)
-            return False
+            return self._seek(observation, state, context_id, goal, tick)
+        if self.search is not None:
+            # The planner found a way from what Person now perceives. That is
+            # the whole test of whether the looking was enough.
+            self._conclude_search("satisfied", tick)
         routines = [self.library.add(routine_from_plan(goal.goal_type, plan)) for plan in plans]
         candidates = [
             candidate_from_routine(routine, self.library, state, self.registry)
@@ -535,6 +551,101 @@ class CognitionLoop:
         )
         self._emit_decision(observation, goal, context_id, self.active.steps[0], spec, tick)
 
+    # ------------------------------------------------------ information seeking
+
+    def _seek(
+        self,
+        observation: dict[str, Any],
+        state: dict[str, float],
+        context_id: str,
+        goal: Goal,
+        tick: int,
+    ) -> bool:
+        """No plan exists. Look for what is missing, or stop honestly.
+
+        Returns False, like a routine that could not start: this decision is
+        already made, either as a glance or as a safe wait.
+        """
+        search = self.search
+        if search is None:
+            purpose = evidence_needed(state, goal.completion_condition, registry=self.registry)
+            if not purpose:
+                # Seeing more would not help. This is the old, real "no plan".
+                self.goals.block(goal.goal_id, "no_feasible_plan", tick)
+                self._emit_idle(observation, goal, context_id, tick)
+                return False
+            search = InformationSearch(goal_id=goal.goal_id, purpose=purpose)
+            self.search = search
+            self._record("information_search", tick, search.payload("started"))
+
+        if search.remaining <= 0:
+            self._conclude_search("exhausted", tick, conclusion=NOT_FOUND)
+            self.goals.block(goal.goal_id, NOT_FOUND, tick)
+            self.unfound[goal.goal_id] = search.purpose
+            self._emit_idle(observation, goal, context_id, tick)
+            return False
+
+        direction = search.next_direction(observation)
+        search.record(direction)
+        self._emit_look(observation, goal, context_id, search, direction, tick)
+        return False
+
+    def _emit_look(
+        self,
+        observation: dict[str, Any],
+        goal: Goal,
+        context_id: str,
+        search: InformationSearch,
+        direction: str,
+        tick: int,
+    ) -> None:
+        spec = self.registry.get("look")
+        step = SkillStep("look", (("direction", direction),))
+        self.active = ActiveRoutine(
+            routine=Routine(
+                routine_id=SEARCH_ROUTINE_ID,
+                name="seek_evidence__look",
+                goal_type=goal.goal_type,
+                elements=(step,),
+                risk=spec.risk,
+                cost=1.0,
+                ticks=spec.max_ticks,
+            ),
+            goal_id=goal.goal_id,
+            context_id=context_id,
+            steps=(step,),
+            started_tick=tick,
+        )
+        self.library.add(self.active.routine)
+        choice = DeterministicPolicyProvider(self.policy_revision).propose(
+            observation,
+            goal,
+            [candidate_from_routine(self.active.routine, self.library, {}, self.registry)],
+            context_id,
+        )
+        self._pending_choice = replace(
+            choice,
+            reason_codes=(
+                "seeking_evidence",
+                *(f"wants_{fact}" for fact in search.purpose),
+                f"looks_remaining_{search.remaining}",
+            ),
+        )
+        self._emit_decision(observation, goal, context_id, step, spec, tick)
+
+    def _conclude_search(self, phase: str, tick: int, **extra: Any) -> None:
+        search = self.search
+        if search is None:
+            return
+        self.search = None
+        self._record("information_search", tick, search.payload(phase, **extra))
+
+    def _reopen_unfound(self, state: dict[str, float], tick: int) -> None:
+        for goal_id, purpose in list(self.unfound.items()):
+            if any(state.get(fact, 0.0) >= 1 for fact in purpose):
+                del self.unfound[goal_id]
+                self.goals.reopen(goal_id, tick)
+
     # -------------------------------------------------------------- feedback
 
     def on_validation(self, message: dict[str, Any]) -> None:
@@ -685,7 +796,7 @@ class CognitionLoop:
         active = self.active
         self.active = None
         self._pending_choice = None
-        if active is None or active.routine.routine_id == "r_idle_wait":
+        if active is None or active.routine.routine_id in UNSCORED_ROUTINES:
             return
         if status == "SUCCESS":
             self.consecutive_failures.pop(active.goal_id, None)
