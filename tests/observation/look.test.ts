@@ -122,6 +122,33 @@ test("a glance leaves Person facing the new way, unlike a sweep", async () => {
   assert.equal(cow?.name, "cow", "recognised only once it is looked at");
 });
 
+test("a bearing and a glance agree about which side is which", async () => {
+  // The planner turns towards a glimpse using the glimpse's bearing. If the
+  // observation's "left" were the body's "right", every such turn would be
+  // away from the thing. Found while building information seeking: Phase 3
+  // reported every left/right bearing mirrored, and nothing read them yet.
+  for (const [side, x] of [
+    ["right", 12],
+    ["left", -12],
+  ] as const) {
+    const bench = await harness();
+    bench.world.turn(0);
+    bench.world.spawn("cow", { x, y: 64, z: -2 });
+
+    const [glimpse] = observe(bench).nearby.passiveAnimals;
+    assert.equal(glimpse?.detail, "peripheral");
+    assert.equal(
+      glimpse?.bearing,
+      side,
+      `a cow on the ${side} is on the ${side}`,
+    );
+
+    await bench.run("look", { direction: side });
+    await bench.run("look", { direction: side });
+    assert.equal(observe(bench).nearby.passiveAnimals[0]?.bearing, "ahead");
+  }
+});
+
 test("a glance reports that it happened and nothing about what it saw", async () => {
   const bench = await harness();
   bench.world.spawn("cow", { x: 0, y: 64, z: 8 });
