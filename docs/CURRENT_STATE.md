@@ -1,9 +1,8 @@
-# CURRENT_STATE.md — Factual Snapshot of Person (Commit d0e9398)
+# CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against commit:** `d0e9398` (tip of `feat/lan-validation`)
-**Branch this snapshot was taken on:** `refactor/person-v1-architecture`
+**Last verified against:** branch `feat/information-seeking`, based on `aa9dccf` (tip of `feat/lan-validation` after PR #5)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
-**Date:** 2026-09-22
+**Date:** 2026-09-23
 
 This file is strictly factual. It describes what exists in the source tree and
 what has been run. **`docs/PERSON_SPEC.md` specifies a great deal that is not
@@ -53,7 +52,7 @@ Python cognition  →  SkillInvocation  →  [TRUST BOUNDARY]  →  Node validat
 
 ### Skills (`packages/skills/`, `apps/node-runtime/src/skills/impl/`)
 
-**22 skills, all implemented** (architecture test asserts spec/impl sets identical, no placeholders):
+**23 skills, all implemented** (architecture test asserts spec/impl sets identical, no placeholders):
 
 | Category   | Skills                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------- |
@@ -63,7 +62,7 @@ Python cognition  →  SkillInvocation  →  [TRUST BOUNDARY]  →  Node validat
 | Crafting   | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
 | Shelter    | `build_basic_shelter`, `repair_shelter`                                                            |
 | Storage    | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
-| Perception | `look_around`                                                                                      |
+| Perception | `look_around`, `look`                                                                              |
 
 **Terminal states:** SUCCESS, FAILED, INTERRUPTED, PREEMPTED, TIMED_OUT, INVALIDATED, UNREACHABLE, DEATH, DISCONNECTED
 
@@ -98,7 +97,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation)
+- **Schema versions:** new records are `person-evidence-v3`; v1 and v2 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -165,6 +165,8 @@ Parameters: scalars only. No command, script, chat, or coordinate fields possibl
 | deposit_owned_storage     | ✅ pass | ✅ deposit refusal              | ❌ not run                | slot handling unverified            |
 | withdraw_owned_storage    | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                | first-withdrawal bug fixed          |
 | loot_permitted_container  | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                | takes up to amount of every type    |
+| look_around               | ✅ pass | ❌ `bot.look` not in the double | ❌ not run                | returns to start; informs nothing   |
+| look                      | ✅ pass | ❌ `bot.look` not in the double | ❌ not run                | one gaze step; Person stays facing  |
 
 **Status vocabulary used strictly:** Fixture / Adapter / Live. Two skills are
 marked Live; the other nineteen are not. Live evidence is the three
@@ -209,6 +211,9 @@ gitignored).
 | Restart reuse (evidence survives restart) | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
 | Prediction error logging                  | IMPLEMENTED + TESTED IN FIXTURE (inert, changes no policy) |
 | Tick budget instrumentation               | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Recognition gates evidence facts          | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Missing-evidence counterfactual           | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Bounded information seeking (gaze only)   | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
 
 **Future providers (placeholder, raise not implemented):**
 MemoryProvider, WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
@@ -281,7 +286,7 @@ skill identical in every run, effect comparison matched `at_home` on both
 navigation runs, learning fingerprint unchanged, all disconnects clean. Details
 and provenance in `REALITY_VALIDATION.md`.
 
-**Nineteen of twenty-one skills have never been run live.** The next stage in
+**Twenty-one of twenty-three skills have never been run live.** The next stage in
 the intended order is basic gathering, and it has not been started.
 
 ---
@@ -417,12 +422,11 @@ salience, and salience is cognition's. The sweep module now imports no
 perception at all, so it has no way to rank what it turns past, and a test
 asserts that it stays that way.
 
-That leaves the skill minimally useful on its own, which is right for this
-phase. Looking for something is a loop that belongs to the planner: look in a
-direction, receive an ordinary observation, reason about it, look again. That
-loop is built from `Embodiment.look`, and nothing in the planner runs it yet.
-A sweep establishes nothing about what is or is not out there, because the
-views it passed through never reached cognition.
+That leaves the skill minimally useful on its own. A sweep establishes nothing
+about what is or is not out there, because the views it passed through never
+reached cognition. Looking for something is a loop that belongs to the
+planner, and since 2026-09-23 the planner runs it: see "Information seeking"
+below.
 
 Two causes of turning are worth keeping apart, and the evidence already does:
 walking rotates Person as a side effect of going somewhere, while `look_around`
@@ -432,11 +436,86 @@ appears in the record as a skill Person chose to run.
 previously have been told about, because they are behind it, too far away, or
 behind a wall. That is what ADR 0002 predicted and wanted. It has a concrete
 consequence: `fixtures/worlds/vertical-slice.json` needed an explicit
-`spawnYaw`, because its food is behind the old default facing. Person could not
-turn to look at the time; it can now, though nothing in the planner yet decides
-to. Cognition integration is deliberately limited to the capability existing
-and being proposable: wiring a generic information-seeking drive into goal
-selection would be a planner change, and it is the natural next piece of work.
+`spawnYaw`, because its food is behind the old default facing.
+
+**Information seeking.** Added 2026-09-23 on `feat/information-seeking`. The
+planner now distinguishes "not currently perceived" from "known absent".
+
+- _Evidence facts._ `reachable_wood`, `reachable_stone`, `reachable_coal`,
+  `reachable_plant_food`, `reachable_animal` and `permitted_container_nearby`
+  are the only planning facts that current perception alone establishes; no
+  skill produces them, and a test asserts that. `person_planner.EVIDENCE_FACTS`
+  names them.
+- _Recognition gates action._ Those facts now count only percepts with
+  `detail: "central"`. A peripheral percept, which carries a coarse category
+  and no identity, is a lead to look at rather than a licence to act on: an
+  animal-shaped thing at the edge of vision is not a cow. Hostiles and hazards
+  still count in the periphery, because noticing a threat needs no
+  identification. **Behaviour change:** Person now glances to recognise food
+  and trees it previously acted on unidentified.
+- _Missing evidence is named, not assumed._ When a goal has no plan,
+  `person_planner.evidence_needed` asks a counterfactual on a copy of the
+  state: had the unseen evidence facts been seen, would a plan exist? If so,
+  those facts are the purpose of a search; if not, the goal is blocked as
+  before (`no_feasible_plan`).
+- _The loop._ `person_cognition/search.py`. Each glance is one `look` skill
+  invocation (new skill, parameter `direction` from the closed five-word gaze
+  vocabulary), through the ordinary validator, kernel and dispatch path. The
+  runtime turns the head one step and Person stays facing that way, so the next
+  ordinary observation is taken from there. After each observation the planner
+  simply plans again: a plan means act, no plan means look again. Direction is
+  chosen above the firewall: towards the nearest peripheral glimpse of what is
+  sought, by its relative bearing; otherwise a sweep to the left, levelling the
+  head first if an earlier glance tilted it.
+- _Bounded._ Eight glances per search (`LOOK_BUDGET`). Seven 45-degree turns
+  cover the horizon; the eighth is room for a lead. A search ends as
+  `satisfied` (a plan exists), `exhausted`, or `abandoned` (the active goal
+  changed, or the episode ended).
+- _Exhaustion is not absence._ An exhausted search concludes
+  `not_found_in_bounded_search`, blocks the goal with that reason, and the goal
+  is reopened as soon as any of the sought evidence is recognised. No fact,
+  reason code or record claims that anything is absent, and tests search every
+  message and record for such a claim.
+- _State._ What persists between glances is the goal id, the evidence sought,
+  the budget, the words already chosen and how many steps Person has tilted its
+  own head. No angle, position, percept or handle. It lives only in the
+  cognition process and ends with the search; it is not memory (ADR 0003).
+- _Record._ Each phase of a search is journalled as an `information_search`
+  event (schema v3), instrumentation only: never scored, never read back by
+  cognition. Search routines use the fixed id `r_seek_evidence`, are not
+  scored as strategies, and carry `seeking_evidence` in the policy reason codes.
+
+A defect found and fixed on the way: **left and right bearings were mirrored.**
+`relative.ts` reported something on Person's right (positive X while facing
+negative Z, by the convention `stepGaze` and the Mineflayer adapter share) as
+`left`, and vice versa. Nothing in cognition read bearings before, so it was
+latent since Phase 3; the first planner to turn towards a glimpse turned away
+from it and oscillated. The sign is corrected in the shared observation
+builder, so both bodies are affected alike, and a test ties bearings to gaze
+directions. TESTED IN FIXTURE; not live-validated.
+
+What information seeking does **not** establish:
+
+- The target of an action is still chosen by the skill from privileged state
+  (C4). Once a recognised tree makes `gather_wood` plannable, the skill fells
+  the nearest permitted tree it knows of, which need not be the one Person saw.
+  Tests prove the _planner's_ decisions ignore unperceived wood; they do not
+  prove the _body_ does.
+- Searches do not share results. Each goal that needs the same unseen evidence
+  runs its own bounded search, and a restarted process remembers no earlier
+  search. Total looking is bounded by goals times budget, not by one budget.
+- Search is gaze only. Person does not walk anywhere to look; that needs a
+  spatial model and is not attempted.
+- Peripheral animal records still carry the `named` and `tamed` booleans,
+  although species and nameplate text are withheld. Recognition now gates
+  acting on them, so they cannot license a hunt, but the booleans themselves
+  cross the firewall in the periphery. Recorded, not changed.
+- The Mineflayer `look` path is not exercised by the conformance double, so
+  that the adapter turns the head the way `stepGaze` and the corrected
+  bearings assume is established by reading Mineflayer's convention, not by a
+  test. The smallest live check is in `REALITY_VALIDATION.md`, "Information
+  seeking".
+- None of it has been run against Minecraft.
 
 **What is not established.** Recognition is by block and entity name, so Person
 identifies a cow as a cow with no notion of having learned what a cow is. There
@@ -602,23 +681,24 @@ diagonals in open ground are unaffected and are covered by a test.
 
 ## 12. Known Limitations / Backlog
 
-| Limitation                                                                         | Source                          |
-| ---------------------------------------------------------------------------------- | ------------------------------- |
-| Mineflayer adapter exercised live for observation and 2 skills only                | REALITY_VALIDATION.md           |
-| No dig-down skill (mine_stone/coal need exposed stone)                             | IMPLEMENTATION_REPORT.md        |
-| Fixture is simulation, not Minecraft                                               | IMPLEMENTATION_REPORT.md        |
-| Planner bounded (depth/branch/node caps) — may return no plan                      | IMPLEMENTATION_REPORT.md        |
-| Goals: survival only (projects/social/self-generated future)                       | IMPLEMENTATION_REPORT.md        |
-| Death ends episode — no respawn/recovery loop                                      | IMPLEMENTATION_REPORT.md        |
-| Evidence written by cognition — last outcome missing if cognition dies mid-episode | IMPLEMENTATION_REPORT.md        |
-| Inventory reconciliation on resume not reimplemented                               | IMPLEMENTATION_REPORT.md        |
-| `loot_permitted_container` withdraws all types up to amount                        | IMPLEMENTATION_REPORT.md        |
-| One Person per runtime (multi-Person not supported)                                | IMPLEMENTATION_REPORT.md        |
-| Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md           |
-| Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md           |
-| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started              | REALITY_VALIDATION.md           |
-| No belief, memory, affect, language, social or project system exists               | Known Deviations C6, above      |
-| Perception has no visibility, occlusion or pose model                              | PERSON_SPEC section 8, ADR 0002 |
+| Limitation                                                                         | Source                     |
+| ---------------------------------------------------------------------------------- | -------------------------- |
+| Mineflayer adapter exercised live for observation and 2 skills only                | REALITY_VALIDATION.md      |
+| No dig-down skill (mine_stone/coal need exposed stone)                             | IMPLEMENTATION_REPORT.md   |
+| Fixture is simulation, not Minecraft                                               | IMPLEMENTATION_REPORT.md   |
+| Planner bounded (depth/branch/node caps) — may return no plan                      | IMPLEMENTATION_REPORT.md   |
+| Goals: survival only (projects/social/self-generated future)                       | IMPLEMENTATION_REPORT.md   |
+| Death ends episode — no respawn/recovery loop                                      | IMPLEMENTATION_REPORT.md   |
+| Evidence written by cognition — last outcome missing if cognition dies mid-episode | IMPLEMENTATION_REPORT.md   |
+| Inventory reconciliation on resume not reimplemented                               | IMPLEMENTATION_REPORT.md   |
+| `loot_permitted_container` withdraws all types up to amount                        | IMPLEMENTATION_REPORT.md   |
+| One Person per runtime (multi-Person not supported)                                | IMPLEMENTATION_REPORT.md   |
+| Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md      |
+| Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md      |
+| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started              | REALITY_VALIDATION.md      |
+| No belief, memory, affect, language, social or project system exists               | Known Deviations C6, above |
+| No attention model: perception is capped deterministically, nearest first          | Known Deviations C1, above |
+| Information seeking is gaze only, per goal, and forgets across restarts            | Known Deviations C1, above |
 
 ---
 
@@ -626,11 +706,12 @@ diagonals in open ground are unaffected and are covered by a test.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 188     | 188     |
-| Python (all) | 129     | 129     |
-| **Total**    | **317** | **317** |
+| Node (all)   | 242     | 242     |
+| Python (all) | 148     | 148     |
+| **Total**    | **390** | **390** |
 
-**Coverage by area:**
+**Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
+not recounted since:**
 
 - Protocol: 47 (Node + Python)
 - Skills: 14
@@ -647,7 +728,8 @@ diagonals in open ground are unaffected and are covered by a test.
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified at `d0e9398` on 2026-09-22: Node 188 pass / 0 fail, Python 129 pass.
+Verified on `feat/information-seeking` on 2026-09-23: Node 242 pass / 0 fail,
+Python 148 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5.
 
 ---
 

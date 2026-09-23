@@ -614,9 +614,12 @@ something that is in range. Location reaches cognition as a bearing relative to
 facing, an elevation, a range band and an estimated distance; no coordinate
 crosses, which closes the deviation this section used to carry
 (`docs/CURRENT_STATE.md`, "Known Deviations", C1). What is **not** implemented
-is a deliberate inspection capability for coordinates (section 24.4), any
-attention model beyond a deterministic cap, and any ability for Person to turn
-and look around of its own accord.
+is a deliberate inspection capability for coordinates (section 24.4) and any
+attention model beyond a deterministic cap. Person can point its gaze with a
+closed five-word vocabulary, and the planner uses it to look for evidence a
+goal needs before giving the goal up, a bounded search that concludes "not
+found" and never "absent" (`docs/CURRENT_STATE.md`, Known Deviations, C1).
+Only recognised percepts, in central vision, count as evidence to act on.
 
 ## 8.1 Vitals
 

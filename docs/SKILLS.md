@@ -49,14 +49,15 @@ vocabulary, and the registry refuses a spec that invents one.
 
 ## The library
 
-| Category  | Skills                                                                                             |
-| --------- | -------------------------------------------------------------------------------------------------- |
-| Emergency | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
-| Food      | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
-| Resources | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
-| Crafting  | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
-| Shelter   | `build_basic_shelter`, `repair_shelter`                                                            |
-| Storage   | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
+| Category   | Skills                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| Emergency  | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
+| Food       | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
+| Resources  | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
+| Crafting   | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
+| Shelter    | `build_basic_shelter`, `repair_shelter`                                                            |
+| Storage    | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
+| Perception | `look_around`, `look`                                                                              |
 
 ## One implementation, two bodies
 
