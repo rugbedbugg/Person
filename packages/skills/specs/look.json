@@ -1,0 +1,33 @@
+{
+  "id": "look",
+  "version": 1,
+  "category": "perception",
+  "summary": "Turn the head one step in a named direction and stay facing that way, so the next observation is taken from there.",
+  "parameters": {
+    "direction": {
+      "type": "string",
+      "enum": ["forward", "left", "right", "up", "down"],
+      "default": "forward",
+      "description": "Where to look, relative to where Person is facing now. No angle, no target."
+    }
+  },
+  "preconditions": [],
+  "expectedEffects": [
+    {
+      "fact": "looked",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "possibleFailures": ["invalid_direction", "timed_out"],
+  "requiredPermissions": [],
+  "costLimits": {
+    "maxTicks": 40,
+    "maxDistance": 0,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "preemptible",
+  "completionEvidence": ["elapsed_ticks"],
+  "risk": 0.01,
+  "emergency": false
+}

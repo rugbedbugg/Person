@@ -65,7 +65,9 @@ export function rangeBand(distance: number): RangeBand {
  *
  * The horizontal angle from `viewAngles` is unsigned, so the side is recovered
  * from the sign of the cross product of the view direction and the target
- * direction in the horizontal plane.
+ * direction in the horizontal plane. Positive means the target is to Person's
+ * left, in the same sense `stepGaze` means by "left": facing negative Z, left
+ * is negative X. The two must agree, or a turn towards a glimpse turns away.
  */
 function side(pose: EyePose, target: { x: number; z: number }): number {
   const dx = target.x - pose.eye.x;
@@ -77,7 +79,7 @@ export function bearingOf(pose: EyePose, position: Position): Bearing {
   const centre = centreOf(position);
   const { horizontal } = viewAngles(pose, centre);
   if (horizontal <= AHEAD) return "ahead";
-  const left = side(pose, centre) < 0;
+  const left = side(pose, centre) > 0;
   if (horizontal <= SIDE) return left ? "ahead_left" : "ahead_right";
   if (horizontal <= BEHIND) return left ? "left" : "right";
   if (horizontal < 180 - AHEAD) return left ? "behind_left" : "behind_right";

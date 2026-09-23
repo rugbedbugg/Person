@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v2"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v3"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -23,6 +23,7 @@ EVIDENCE_SCHEMA_VERSION = "person-evidence-v2"
 SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v1",
     "person-evidence-v2",
+    "person-evidence-v3",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -39,10 +40,15 @@ EVENT_TYPES: tuple[str, ...] = (
     "death",
     #: Instrumentation only. Never scored, never fed back into policy.
     "prediction_error",
+    #: Instrumentation only: why Person looked, and what the looking concluded.
+    #: Engineering truth for the operator, never scored, never recalled.
+    "information_search",
 )
 
 #: Event types introduced after the first evidence schema version.
 V2_EVENT_TYPES: frozenset[str] = frozenset({"prediction_error"})
+#: Event types introduced with the third.
+V3_EVENT_TYPES: frozenset[str] = frozenset({"information_search"})
 
 REQUIRED_FIELDS: tuple[str, ...] = (
     "event_id",
@@ -117,6 +123,8 @@ class EvidenceEvent:
         if document["type"] not in EVENT_TYPES:
             raise EvidenceError(f"Unknown evidence event type {document['type']!r}")
         if schema == "person-evidence-v1" and document["type"] in V2_EVENT_TYPES:
+            raise EvidenceError(f"Event type {document['type']!r} cannot claim schema {schema!r}")
+        if schema != "person-evidence-v3" and document["type"] in V3_EVENT_TYPES:
             raise EvidenceError(f"Event type {document['type']!r} cannot claim schema {schema!r}")
         if not isinstance(document["payload"], dict):
             raise EvidenceError("Evidence payload must be an object")

@@ -111,6 +111,18 @@ def test_unknown_schema_versions_are_refused(tmp_path: Path) -> None:
         EvidenceEvent.from_json(document)
 
 
+def test_older_journals_still_read_and_new_events_cannot_backdate_themselves() -> None:
+    document = make_event(1).to_json()
+    for schema in ("person-evidence-v1", "person-evidence-v2"):
+        assert EvidenceEvent.from_json({**document, "schema_version": schema}).tick == 1
+
+    search = {**document, "type": "information_search", "payload": {"phase": "started"}}
+    assert EvidenceEvent.from_json(search).schema_version == "person-evidence-v3"
+    for schema in ("person-evidence-v1", "person-evidence-v2"):
+        with pytest.raises(EvidenceError):
+            EvidenceEvent.from_json({**search, "schema_version": schema})
+
+
 def test_snapshots_are_atomic_and_checksummed(tmp_path: Path) -> None:
     snapshots = SnapshotStore(tmp_path)
     path = snapshots.write(

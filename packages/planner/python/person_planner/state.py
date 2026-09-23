@@ -4,6 +4,12 @@ The planner reasons over a flat table of named numbers, not over the
 observation itself. Keeping the derivation in one readable function is what
 makes a plan inspectable: every precondition in every SkillSpec names a fact
 that appears here.
+
+Some of those facts are evidence: only current perception can establish them,
+and no skill claims to produce them. A count of zero for one of them means
+"not seen", and nothing more. `evidence_percepts` names the percepts behind
+each, including the ones in the corner of the eye, which are leads rather than
+identifications and never count towards the fact itself.
 """
 
 from __future__ import annotations
@@ -15,6 +21,43 @@ PLANT_FOOD = {"apple", "sweet_berries", "carrot"}
 
 def _count(items: list[dict[str, Any]], predicate: Any) -> int:
     return sum(item["count"] for item in items if predicate(item["name"]))
+
+
+def evidence_percepts(observation: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+    """Every percept that bears on each evidence fact, central or peripheral.
+
+    Relevance is decided here, above the firewall, from what the observation
+    says: the body never marks anything as interesting.
+    """
+    nearby = observation["nearby"]
+    permissions = observation["permissions"]
+
+    def resources(kind: str) -> list[dict[str, Any]]:
+        return [
+            resource
+            for resource in nearby["resources"]
+            if resource["kind"] == kind and resource["harvestPermitted"]
+        ]
+
+    return {
+        "reachable_wood": resources("wood"),
+        "reachable_stone": resources("stone"),
+        "reachable_coal": resources("coal"),
+        "reachable_plant_food": resources("plant_food"),
+        "reachable_animal": [
+            animal for animal in nearby["passiveAnimals"] if not animal["protectedTarget"]
+        ],
+        "permitted_container_nearby": [
+            container
+            for container in nearby["containers"]
+            if container["provenance"] == "existing" and permissions["withdrawExisting"]
+        ],
+    }
+
+
+def recognised(percepts: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Only what Person is looking at is identified well enough to act on."""
+    return [percept for percept in percepts if percept["detail"] == "central"]
 
 
 def symbolic_state(observation: dict[str, Any]) -> dict[str, float]:
@@ -36,12 +79,10 @@ def symbolic_state(observation: dict[str, Any]) -> dict[str, float]:
     home_distance = home["homeDistance"]
     at_home = home_distance is not None and home_distance <= 2
 
-    def resources(kind: str) -> int:
-        return sum(
-            1
-            for resource in nearby["resources"]
-            if resource["kind"] == kind and resource["harvestPermitted"]
-        )
+    evidence = {
+        fact: float(len(recognised(percepts)))
+        for fact, percepts in evidence_percepts(observation).items()
+    }
 
     tool_tier = 0
     for item in items:
@@ -90,20 +131,10 @@ def symbolic_state(observation: dict[str, Any]) -> dict[str, float]:
         "at_home": 1.0 if at_home else 0.0,
         "furnace_placed": 1.0 if owned_furnace else 0.0,
         "owned_storage_available": 1.0 if home["ownedStorage"] else 0.0,
-        "permitted_container_nearby": float(
-            sum(
-                1
-                for container in nearby["containers"]
-                if container["provenance"] == "existing" and permissions["withdrawExisting"]
-            )
-        ),
-        "reachable_wood": float(resources("wood")),
-        "reachable_stone": float(resources("stone")),
-        "reachable_coal": float(resources("coal")),
-        "reachable_plant_food": float(resources("plant_food")),
-        "reachable_animal": float(
-            sum(1 for animal in nearby["passiveAnimals"] if not animal["protectedTarget"])
-        ),
+        # Evidence: recognised percepts only. Hostiles and hazards above count
+        # in the periphery too, because noticing a threat needs no
+        # identification, while acting on a target does.
+        **evidence,
         "diggable_ground": 1.0 if affordances["diggableGround"] else 0.0,
         "harvesting_permitted": 1.0 if permissions["harvest"] else 0.0,
         "building_permitted": 1.0 if permissions["build"] else 0.0,
