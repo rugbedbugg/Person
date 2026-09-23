@@ -168,6 +168,10 @@ def observation() -> dict[str, Any]:
             "kind": "plant_food",
             "name": "sweet_berry_bush",
             "distance": 4.0,
+            "bearing": "ahead",
+            "elevation": "below",
+            "rangeBand": "reach",
+            "detail": "central",
             "harvestPermitted": True,
         }
     )
@@ -266,7 +270,7 @@ def test_prediction_errors_are_persisted_but_never_scored(
     events = list(EvidenceJournal(tmp_path / "journal").read())
     recorded = [event for event in events if event.type == "prediction_error"]
     assert len(recorded) == 1
-    assert recorded[0].schema_version == "person-evidence-v2"
+    assert recorded[0].schema_version == "person-evidence-v3"
     assert recorded[0].payload["decision_id"] == invocation["decisionId"]
 
     # Replaying the whole journal must leave the policy statistics untouched by
