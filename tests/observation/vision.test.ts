@@ -191,6 +191,48 @@ test("the periphery reports that something is there, not what it is", async () =
   );
 });
 
+test("whose a thing is, like what it is, is read off a thing Person looks at", async () => {
+  const bench = await harness();
+  // A tamed, named animal is the case that matters: in the periphery it must
+  // look exactly like any other animal there, because telling them apart
+  // takes the recognition only central vision has.
+  bench.world.spawn(
+    "cow",
+    { x: 0, y: 64, z: -6 },
+    { named: true, tamed: true },
+  );
+  bench.world.spawn(
+    "pig",
+    { x: -6, y: 64, z: -1 },
+    { named: true, tamed: true },
+  );
+  bench.world.spawn("sheep", { x: 6, y: 64, z: -1 });
+  bench.world.face({ x: 0, y: 64, z: -6 });
+
+  const seen = observe(bench).nearby.passiveAnimals;
+  const central = seen.filter((animal) => animal.detail === "central");
+  const peripheral = seen.filter((animal) => animal.detail === "peripheral");
+
+  assert.equal(central.length, 1);
+  assert.equal(
+    central[0]?.named,
+    true,
+    "a recognised animal's nametag is read",
+  );
+  assert.equal(central[0]?.tamed, true);
+  assert.equal(central[0]?.protectedTarget, true);
+  assert.equal(peripheral.length, 2, "both side animals are noticed");
+  for (const animal of peripheral) {
+    for (const key of ["name", "named", "tamed", "protectedTarget"])
+      assert.ok(!(key in animal), `a peripheral percept must not carry ${key}`);
+  }
+  assert.deepEqual(
+    Object.keys(peripheral[0] ?? {}).sort(),
+    Object.keys(peripheral[1] ?? {}).sort(),
+    "an owned animal and an unowned one are indistinguishable in the periphery",
+  );
+});
+
 test("distance is an estimate, and a coarser one further away", async () => {
   const bench = await harness();
   const observation = observe(bench);

@@ -91,9 +91,15 @@ export interface RelativeLocation {
 export interface EntityRecord extends RelativeLocation {
   /** The species, when Person is looking straight enough at it to tell. */
   name?: string;
-  named: boolean;
-  tamed: boolean;
-  protectedTarget: boolean;
+  /**
+   * Whose it is, and whether the runtime would let Person hunt it. Like the
+   * species, these are present only on a `central` percept: a nametag or a
+   * collar is read off a thing Person is looking at, and the hunting verdict
+   * is derived from them.
+   */
+  named?: boolean;
+  tamed?: boolean;
+  protectedTarget?: boolean;
   /**
    * The account name on the nameplate above a player's head.
    *

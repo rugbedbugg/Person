@@ -16,7 +16,12 @@ import { estimateDistance, relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
 import type { WorldMemory } from "../runtime/world-memory.ts";
 
-export const OBSERVATION_VERSION = 2;
+/**
+ * Raised whenever what an observation means changes, so evidence recorded
+ * under one contract is never read as the other. 2: relative percepts replaced
+ * coordinates. 3: a peripheral entity no longer says whose it is.
+ */
+export const OBSERVATION_VERSION = 3;
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -197,12 +202,18 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       // Which species it is, and whose it is, are things Person reads off a
       // thing it is looking at. In the corner of the eye there is movement at
       // a bearing, and the list it arrived in already says whether it is a
-      // threat.
-      ...(recognised ? { name: entity.name } : {}),
+      // threat. Whether the runtime would let Person hunt it is withheld with
+      // them, because the verdict is computed from exactly those facts and
+      // would give them away.
       ...where,
-      named: entity.named,
-      tamed: entity.tamed,
-      protectedTarget: !permissions.mayHunt(entity).allowed,
+      ...(recognised
+        ? {
+            name: entity.name,
+            named: entity.named,
+            tamed: entity.tamed,
+            protectedTarget: !permissions.mayHunt(entity).allowed,
+          }
+        : {}),
       ...(recognised && entity.username !== null
         ? { username: entity.username }
         : {}),
