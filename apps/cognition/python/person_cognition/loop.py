@@ -38,7 +38,11 @@ from person_skills import SkillRegistry, skill_registry
 
 from .context import decision_context
 from .goals import Goal, GoalStack, SurvivalGoalProvider
+from .memory import Cue, Memory, MemoryStore, Recalled
+from .memory import encoding as remembering
+from .memory.episodes import EpisodeDraft
 from .prediction import PendingPrediction, build_payload
+from .reducers import CognitiveReducers
 from .reporting import LearningSummary
 from .routines import (
     Routine,
@@ -98,6 +102,11 @@ class CognitionLoop:
         self._write = write or (lambda line: sys.stdout.write(line))
         self._log = log or (lambda line: sys.stderr.write(line + "\n"))
         self.statistics = RoutineStatistics()
+        #: Every episode Person has encoded, rebuilt from the journal. The loop
+        #: reaches it only through `self.memory`, never directly.
+        self.memory_store = MemoryStore()
+        self.reducers = CognitiveReducers(self.statistics, self.memory_store)
+        self.memory = Memory(self.memory_store, training_context="fixture")
         self.goal_provider = SurvivalGoalProvider()
         self.goals = GoalStack()
         self.library = RoutineLibrary()
@@ -166,7 +175,7 @@ class CognitionLoop:
             payload=payload,
             previous_event_id=self.previous_event_id,
         )
-        self.store.append(event, self.statistics)
+        self.store.append(event, self.reducers)
         self.previous_event_id = event.event_id
         return event
 
@@ -226,7 +235,9 @@ class CognitionLoop:
             directory,
             snapshot_every=self.settings.snapshot_every_events if self.settings else 50,
         )
-        report = self.store.restore(self.statistics)
+        report = self.store.restore(self.reducers)
+        # Working memory starts empty: the past comes back only when cued.
+        self.memory = Memory(self.memory_store, training_context=self.training_context)
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
@@ -255,6 +266,7 @@ class CognitionLoop:
                 "rng_seed": message["rngSeed"],
                 "training_context": message["trainingContext"],
                 "learning_mode": self.learning_mode,
+                "experienced_ticks": self.memory.now,
             },
         )
         if message["phase"] == "ended":
@@ -262,7 +274,7 @@ class CognitionLoop:
             self._conclude_search("abandoned", message["tick"], reason="episode_ended")
             self._finish_routine("INTERRUPTED", message["tick"], reason="episode_ended")
             if self.store is not None:
-                self.store.write_snapshot(self.statistics)
+                self.store.write_snapshot(self.reducers)
                 self.summary.write(
                     self.store.directory,
                     statistics=self.statistics,
@@ -286,6 +298,7 @@ class CognitionLoop:
         # the last skill claimed it would do.
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
+        self._remember(self.memory.experience(message), tick)
 
         self._reopen_unfound(state, tick)
         proposals = self.goal_provider.propose(message, state, tick)
@@ -575,6 +588,22 @@ class CognitionLoop:
                 self._emit_idle(observation, goal, context_id, tick)
                 return False
             search = InformationSearch(goal_id=goal.goal_id, purpose=purpose)
+            # Trying to remember is part of looking. What comes back is
+            # reported, and changes nothing about where Person looks: with no
+            # sense of place, "I searched before" cannot mean "I searched here".
+            recalled = self._recall(
+                Cue.about(
+                    *remembering.evidence_subjects(purpose),
+                    purpose="search",
+                    kinds=("searched", "perceived"),
+                ),
+                tick,
+            )
+            search.recalled = tuple(item.episode.memory_id for item in recalled)
+            search.recalls_unfound = any(
+                item.episode.kind == "searched" and item.episode.detail("conclusion") == NOT_FOUND
+                for item in recalled
+            )
             self.search = search
             self._record("information_search", tick, search.payload("started"))
 
@@ -629,6 +658,7 @@ class CognitionLoop:
                 "seeking_evidence",
                 *(f"wants_{fact}" for fact in search.purpose),
                 f"looks_remaining_{search.remaining}",
+                *(("recalls_unfound_search",) if search.recalls_unfound else ()),
             ),
         )
         self._emit_decision(observation, goal, context_id, step, spec, tick)
@@ -639,6 +669,11 @@ class CognitionLoop:
             return
         self.search = None
         self._record("information_search", tick, search.payload(phase, **extra))
+        if phase in {"exhausted", "satisfied"}:
+            conclusion = NOT_FOUND if phase == "exhausted" else "found"
+            self._remember(
+                [remembering.searched(search.purpose, conclusion, len(search.looks), None)], tick
+            )
 
     def _reopen_unfound(self, state: dict[str, float], tick: int) -> None:
         for goal_id, purpose in list(self.unfound.items()):
@@ -670,7 +705,7 @@ class CognitionLoop:
         )
 
     def on_emergency(self, message: dict[str, Any]) -> None:
-        self._record(
+        event = self._record(
             "emergency_override",
             message["tick"],
             {
@@ -685,6 +720,11 @@ class CognitionLoop:
             message["decisionId"],
         )
         self.summary.note_emergency(message["trigger"])
+        self._remember(
+            [remembering.endangered(message, event.event_id if event else None)],
+            message["tick"],
+            message["decisionId"],
+        )
 
     def on_skill_outcome(self, message: dict[str, Any]) -> None:
         status = message["status"]
@@ -725,6 +765,9 @@ class CognitionLoop:
         }
         event = self._record(event_type, message["tick"], payload, message["decisionId"])
         self.summary.note_outcome(message)
+        experience = remembering.acted(message, self.registry, event.event_id if event else None)
+        if experience is not None:
+            self._remember([experience], message["tick"], message["decisionId"])
 
         pending = self.pending_prediction
         if pending is not None and pending.decision_id == message["decisionId"]:
@@ -775,6 +818,30 @@ class CognitionLoop:
 
         active.failure_modes.append(status.lower())
         self._finish_routine("INTERRUPTED", message["tick"], reason="skill_interrupted")
+
+    # ---------------------------------------------------------------- memory
+
+    def _remember(
+        self, drafts: list[EpisodeDraft], tick: int, decision_id: str | None = None
+    ) -> None:
+        """Encode experience. The journal records it; the store is rebuilt from that."""
+        for draft in drafts:
+            event = self._record("memory_encoded", tick, self.memory.payload(draft), decision_id)
+            if event is not None:
+                self.memory.encoded(event.event_id)
+
+    def _recall(self, cue: Cue, tick: int) -> tuple[Recalled, ...]:
+        recalled = self.memory.recall(cue)
+        self._record(
+            "memory_recalled",
+            tick,
+            {
+                "cue": cue.to_json(),
+                "recalled": [item.episode.memory_id for item in recalled],
+                "considered": self.memory.last_considered,
+            },
+        )
+        return recalled
 
     def _settle_prediction(self, state: dict[str, float] | None, tick: int) -> None:
         """Record how far the skill contract was from what actually happened.

@@ -7,6 +7,11 @@ tiny: a speculative abstraction that guesses wrong is worse than no abstraction.
 
 Any attempt to use one raises, rather than returning a plausible-looking empty
 result that could be mistaken for a working implementation.
+
+Memory used to be reserved here, as `MemoryProvider.retrieve(query, limit)`.
+It is implemented now, in `person_cognition.memory`, and deliberately not with
+that signature: an arbitrary query with a caller-chosen limit is the database
+access ADR 0003 forbids. Recall takes a typed `Cue` (ADR 0007).
 """
 
 from __future__ import annotations
@@ -22,19 +27,6 @@ class NotYetImplemented(NotImplementedError):
             f"{provider} is a future interface; it is scheduled for {milestone} "
             "and has no implementation in this milestone."
         )
-
-
-@runtime_checkable
-class MemoryProvider(Protocol):
-    """Working, episodic, semantic, spatial and autobiographical memory."""
-
-    def store(self, record: dict[str, Any]) -> str: ...
-
-    def retrieve(self, query: dict[str, Any], limit: int) -> list[dict[str, Any]]: ...
-
-    def consolidate(self) -> int: ...
-
-    def forget_or_decay(self, now_tick: int) -> int: ...
 
 
 @runtime_checkable
@@ -91,22 +83,6 @@ class ExplorationProvider(Protocol):
     """Epistemic exploration: what is worth finding out, and how safely."""
 
     def propose_experiment(self, state: dict[str, float]) -> dict[str, Any] | None: ...
-
-
-class UnimplementedMemoryProvider:
-    milestone = "Phase 7, memory and consolidation"
-
-    def store(self, record: dict[str, Any]) -> str:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-    def retrieve(self, query: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-    def consolidate(self) -> int:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-    def forget_or_decay(self, now_tick: int) -> int:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
 
 
 class UnimplementedWorldModelProvider:
@@ -170,7 +146,6 @@ class UnimplementedExplorationProvider:
 
 
 FUTURE_PROVIDERS = {
-    "MemoryProvider": UnimplementedMemoryProvider,
     "WorldModelProvider": UnimplementedWorldModelProvider,
     "AffectProvider": UnimplementedAffectProvider,
     "LanguageProvider": UnimplementedLanguageProvider,

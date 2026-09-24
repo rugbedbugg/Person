@@ -200,7 +200,17 @@ def test_the_search_state_has_no_room_for_geometry() -> None:
     # and why. There is no field in which an angle, a position or a body
     # handle could be kept, so none can leak into a later decision.
     fields = {field.name for field in dataclasses.fields(InformationSearch)}
-    assert fields == {"goal_id", "purpose", "budget", "looks", "pitch_steps"}
+    # `recalled` holds memory identifiers and `recalls_unfound` a flag: what
+    # Person remembered, never where anything is.
+    assert fields == {
+        "goal_id",
+        "purpose",
+        "budget",
+        "looks",
+        "pitch_steps",
+        "recalled",
+        "recalls_unfound",
+    }
     for forbidden in ("yaw", "pitch_deg", "position", "coord", "heading", "entity", "x", "z"):
         assert forbidden not in fields
 

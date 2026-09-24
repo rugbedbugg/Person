@@ -71,6 +71,10 @@ class InformationSearch:
     budget: int = LOOK_BUDGET
     looks: list[str] = field(default_factory=list)
     pitch_steps: int = 0
+    #: Memories recalled when the search began. Reported, not acted on.
+    recalled: tuple[str, ...] = ()
+    #: Whether one of them was an earlier search that found nothing.
+    recalls_unfound: bool = False
 
     @property
     def remaining(self) -> int:
@@ -115,5 +119,6 @@ class InformationSearch:
             "purpose": list(self.purpose),
             "budget": self.budget,
             "looks": list(self.looks),
+            "recalled": list(self.recalled),
             **extra,
         }
