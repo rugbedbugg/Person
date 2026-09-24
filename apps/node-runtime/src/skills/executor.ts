@@ -13,7 +13,7 @@ import type {
   EmergencyAssessment,
   SafetyKernel,
 } from "../safety/safety-kernel.ts";
-import type { WorldMemory } from "../runtime/world-memory.ts";
+import type { PlacementLedger } from "../runtime/placement-ledger.ts";
 import {
   BudgetExceededError,
   PreemptedError,
@@ -78,7 +78,7 @@ export interface SkillRunnerOptions {
   permissions: PermissionGate;
   kernel: SafetyKernel;
   registry: SkillRegistry;
-  memory: WorldMemory;
+  ledger: PlacementLedger;
 }
 
 /**
@@ -93,7 +93,7 @@ export class SkillRunner {
   readonly #permissions: PermissionGate;
   readonly #kernel: SafetyKernel;
   readonly #registry: SkillRegistry;
-  readonly #memory: WorldMemory;
+  readonly #ledger: PlacementLedger;
 
   readonly #timer: ReturnType<typeof instrument>;
 
@@ -103,11 +103,11 @@ export class SkillRunner {
     this.#permissions = options.permissions;
     this.#kernel = options.kernel;
     this.#registry = options.registry;
-    this.#memory = options.memory;
+    this.#ledger = options.ledger;
   }
 
-  get memory(): WorldMemory {
-    return this.#memory;
+  get ledger(): PlacementLedger {
+    return this.#ledger;
   }
 
   async run(request: ExecutionRequest): Promise<ExecutionResult> {
@@ -131,7 +131,7 @@ export class SkillRunner {
       embodiment: this.#timer.embodiment,
       permissions: this.#permissions,
       kernel: this.#kernel,
-      memory: this.#memory,
+      ledger: this.#ledger,
       emergency: request.emergency,
       snapshot: () => this.#embodiment.snapshot(),
       elapsedTicks: () => this.#embodiment.snapshot().tick - start.tick,
@@ -182,7 +182,7 @@ export class SkillRunner {
         return value;
       },
       flag: (name) => request.parameters[name] === true,
-      home: (): Position => this.#memory.home.position,
+      home: (): Position => this.#ledger.home.position,
     };
 
     let status: TerminalStatus = "SUCCESS";

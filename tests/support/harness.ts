@@ -9,7 +9,7 @@ import {
   ProtectedAreas,
   SafetyKernel,
   SkillRunner,
-  WorldMemory,
+  PlacementLedger,
   InvocationValidator,
   type ExecutionResult,
   type PhysicalGuard,
@@ -89,7 +89,7 @@ export function baseConfig(options: HarnessOptions = {}): PersonConfig {
 export interface Harness {
   world: FixtureWorld;
   config: PersonConfig;
-  memory: WorldMemory;
+  ledger: PlacementLedger;
   permissions: PermissionGate;
   kernel: SafetyKernel;
   validator: InvocationValidator;
@@ -108,7 +108,7 @@ export async function harness(options: HarnessOptions = {}): Promise<Harness> {
     ? FixtureWorld.fromFile(path.join(REPOSITORY, options.worldFile))
     : new FixtureWorld(options.world ?? {});
   const registry = skillRegistry();
-  const memory = new WorldMemory(
+  const ledger = new PlacementLedger(
     config.worldId,
     config.personId,
     config.world.home,
@@ -133,13 +133,13 @@ export async function harness(options: HarnessOptions = {}): Promise<Harness> {
     permissions,
     kernel,
     registry,
-    memory,
+    ledger,
   });
 
   return {
     world,
     config,
-    memory,
+    ledger,
     permissions,
     kernel,
     validator,

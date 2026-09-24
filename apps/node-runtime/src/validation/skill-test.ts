@@ -22,7 +22,7 @@ import { InvocationValidator } from "../safety/validator.ts";
 import { dispatchSkill } from "../skills/dispatch.ts";
 import { implementedSkillIds } from "../skills/impl/index.ts";
 import { SkillRunner } from "../skills/executor.ts";
-import { WorldMemory } from "../runtime/world-memory.ts";
+import { PlacementLedger } from "../runtime/placement-ledger.ts";
 import { compareEffects, type EffectComparison } from "./effects.ts";
 import { learningChanged, learningFingerprint } from "./learning-state.ts";
 import {
@@ -274,7 +274,7 @@ export async function runSkillValidation(
   const permissions = new PermissionGate(config, areas);
   const kernel = new SafetyKernel(permissions);
   const validator = new InvocationValidator(registry, permissions, kernel);
-  const memory = WorldMemory.load(
+  const ledger = PlacementLedger.load(
     config.runtime.outputDirectory,
     identity.worldId,
     identity.personId,
@@ -285,7 +285,7 @@ export async function runSkillValidation(
     permissions,
     kernel,
     registry,
-    memory,
+    ledger,
   });
   const guard: PhysicalGuard = {
     canEnter: (position) => permissions.mayEnter(position).allowed,
@@ -296,7 +296,7 @@ export async function runSkillValidation(
       permissions.mayHunt(entity).allowed ||
       permissions.mayDefend(entity).allowed,
   };
-  report.navigation.homePosition = memory.home.position;
+  report.navigation.homePosition = ledger.home.position;
 
   const before = learningFingerprint(config.learning.evidenceDirectory);
   report.learning.evidenceBefore = before;
@@ -325,9 +325,9 @@ export async function runSkillValidation(
       policyRevision: before.policyRevision,
       skill: options.skillId,
       home: {
-        position: memory.home.position,
+        position: ledger.home.position,
         distance: null,
-        shelterState: memory.home.shelterState,
+        shelterState: ledger.home.shelterState,
       },
       operatorIntervention: report.operatorIntervention,
     },
@@ -346,9 +346,9 @@ export async function runSkillValidation(
       food: snapshot.food,
       lastSafePosition: snapshot.lastSafePosition,
       home: {
-        position: memory.home.position,
-        distance: distance(snapshot.position, memory.home.position),
-        shelterState: memory.home.shelterState,
+        position: ledger.home.position,
+        distance: distance(snapshot.position, ledger.home.position),
+        shelterState: ledger.home.shelterState,
       },
       safety: {
         threat: kernel.threatState(snapshot),
@@ -365,7 +365,7 @@ export async function runSkillValidation(
       snapshot: options.embodiment.snapshot(),
       permissions,
       kernel,
-      memory,
+      ledger,
       trainingContext: config.runtime.trainingContext,
       cognition: {
         activeGoal: null,
@@ -406,15 +406,15 @@ export async function runSkillValidation(
       const here = options.embodiment.snapshot();
       emit("operator_setup", {
         position: here.position,
-        home: memory.home.position,
+        home: ledger.home.position,
       });
       // Person does nothing at all from here until the operator says go. The
       // body still experiences Minecraft, which is not the same as acting.
       await options.confirmSetup({
         skillId: options.skillId,
         position: here.position,
-        home: memory.home.position,
-        homeDistance: distance(here.position, memory.home.position),
+        home: ledger.home.position,
+        homeDistance: distance(here.position, ledger.home.position),
       });
       report.timeline.setupCompletedAt = new Date().toISOString();
     }
@@ -564,7 +564,7 @@ export async function runSkillValidation(
     report.completionEvidence = outcome.completionEvidence;
     report.expectedEffects = outcome.expectedEffects;
     report.observedEffects = outcome.effects;
-    memory.save();
+    ledger.save();
 
     syncStatus({
       phase: "post_observation",

@@ -41,7 +41,7 @@ invent one.
 
 The pieces that would carry this already exist in spirit:
 
-- `WorldMemory` already issues `storageId` values with provenance, and the
+- `PlacementLedger` already issues `storageId` values with provenance, and the
   observation already reports them. That is the first real object identifier
   in the system, and it was introduced for ownership rather than targeting.
 - `Observation.home.activeHome.homeId` is the first place identifier.
@@ -72,7 +72,7 @@ A place registry in the runtime, persisted alongside the existing storage
 provenance; identifier fields in the observation for each referable thing; an
 optional `target*` parameter on the skills where it means something; and
 resolution plus permission checking in the validator. Roughly the size of the
-existing `WorldMemory`, not a subsystem.
+existing `PlacementLedger`, not a subsystem.
 
 ## Why it is not being built now
 
