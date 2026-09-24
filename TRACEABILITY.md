@@ -211,6 +211,7 @@ claim without reading the whole tree.
 | ----------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------- |
 | Evidence facts are established only by perception     | `person_planner.EVIDENCE_FACTS`                            | `packages/planner/tests/test_evidence.py`           |
 | A peripheral percept is a lead, not an identification | `person_planner.state.recognised`                          | same                                                |
+| The periphery does not say whose a thing is           | `entityRecord` in `observation/builder.ts`, entity schema  | `tests/observation/vision.test.ts`, protocol corpus |
 | Missing evidence is named by a counterfactual         | `person_planner.evidence_needed`                           | same                                                |
 | Glances go through the ordinary skill path            | `look` spec, `skills/impl/perception.ts`, `_emit_look`     | `tests/observation/look.test.ts`, integration suite |
 | Search is bounded and ends honestly                   | `person_cognition/search.py`, `CognitionLoop._seek`        | `apps/cognition/tests/test_information_seeking.py`  |

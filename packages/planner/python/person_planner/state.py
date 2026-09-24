@@ -44,8 +44,12 @@ def evidence_percepts(observation: dict[str, Any]) -> dict[str, list[dict[str, A
         "reachable_stone": resources("stone"),
         "reachable_coal": resources("coal"),
         "reachable_plant_food": resources("plant_food"),
+        # Whose an animal is shows only on one Person is looking at, so a shape
+        # in the periphery stays a lead until it is recognised as someone's.
         "reachable_animal": [
-            animal for animal in nearby["passiveAnimals"] if not animal["protectedTarget"]
+            animal
+            for animal in nearby["passiveAnimals"]
+            if animal["detail"] == "peripheral" or not animal["protectedTarget"]
         ],
         "permitted_container_nearby": [
             container

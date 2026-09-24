@@ -95,7 +95,10 @@ test("protections on the animals that remain visible are unchanged", async () =>
   bench.world.spawn("cow", { x: 4, y: 64, z: 0 });
   bench.world.spawn("cow", { x: 5, y: 64, z: 0 }, { named: true });
   bench.world.spawn("wolf", { x: 6, y: 64, z: 0 }, { tamed: true });
+  // Whose an animal is shows only on one Person is looking at.
+  bench.world.face({ x: 5, y: 64, z: 0 });
   const animals = observe(bench).nearby.passiveAnimals;
+  assert.ok(animals.every((animal) => animal.detail === "central"));
   const plain = animals.find((animal) => !animal.named && !animal.tamed);
   const named = animals.find((animal) => animal.named);
   assert.ok(plain && named);
