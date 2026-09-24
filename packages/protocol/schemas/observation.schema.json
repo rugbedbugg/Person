@@ -775,16 +775,7 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": [
-          "distance",
-          "named",
-          "tamed",
-          "protectedTarget",
-          "bearing",
-          "elevation",
-          "rangeBand",
-          "detail"
-        ],
+        "required": ["distance", "bearing", "elevation", "rangeBand", "detail"],
         "properties": {
           "name": {
             "$ref": "common.schema.json#/$defs/identifier"
@@ -833,6 +824,37 @@
             "type": "string",
             "enum": ["central", "peripheral"],
             "description": "Whether Person was looking at this or merely aware of it. A peripheral percept withholds precise identity."
+          }
+        },
+        "if": {
+          "properties": {
+            "detail": {
+              "const": "central"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "named": {
+              "type": "boolean"
+            },
+            "tamed": {
+              "type": "boolean"
+            },
+            "protectedTarget": {
+              "type": "boolean"
+            }
+          },
+          "required": ["named", "tamed", "protectedTarget"]
+        },
+        "else": {
+          "description": "In the periphery there is something at a bearing. What it is and whose it is are withheld, and so is the hunting verdict derived from them.",
+          "properties": {
+            "name": false,
+            "named": false,
+            "tamed": false,
+            "protectedTarget": false,
+            "username": false
           }
         }
       }
