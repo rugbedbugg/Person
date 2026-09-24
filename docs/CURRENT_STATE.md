@@ -506,10 +506,14 @@ What information seeking does **not** establish:
   search. Total looking is bounded by goals times budget, not by one budget.
 - Search is gaze only. Person does not walk anywhere to look; that needs a
   spatial model and is not attempted.
-- Peripheral animal records still carry the `named` and `tamed` booleans,
-  although species and nameplate text are withheld. Recognition now gates
-  acting on them, so they cannot license a hunt, but the booleans themselves
-  cross the firewall in the periphery. Recorded, not changed.
+- ~~Peripheral animal records still carry the `named` and `tamed` booleans.~~
+  Fixed in `fix/peripheral-semantic-leak`: a peripheral entity now carries
+  only its location fields. `named`, `tamed` and `protectedTarget` (the
+  hunting verdict, computed from them) are present only on a `central`
+  percept, the schema rejects them in the periphery, and
+  `observationVersion` is 3. A peripheral animal stays a search lead until it
+  is recognised as someone's. The safety gate still reads the unshaped
+  snapshot, so what Person may do is unchanged.
 - The Mineflayer `look` path is not exercised by the conformance double, so
   that the adapter turns the head the way `stepGaze` and the corrected
   bearings assume is established by reading Mineflayer's convention, not by a
@@ -706,9 +710,9 @@ diagonals in open ground are unaffected and are covered by a test.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 242     | 242     |
-| Python (all) | 148     | 148     |
-| **Total**    | **390** | **390** |
+| Node (all)   | 243     | 243     |
+| Python (all) | 151     | 151     |
+| **Total**    | **394** | **394** |
 
 **Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
 not recounted since:**
@@ -728,8 +732,9 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `feat/information-seeking` on 2026-09-23: Node 242 pass / 0 fail,
-Python 148 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5.
+Verified on `fix/peripheral-semantic-leak` on 2026-09-24: Node 243 pass / 0
+fail, Python 151 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+242 / 148 after PR #6.
 
 ---
 

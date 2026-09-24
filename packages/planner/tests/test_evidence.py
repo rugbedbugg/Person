@@ -49,9 +49,14 @@ def wood(detail: str, bearing: str = "ahead") -> dict[str, Any]:
     return percept(detail, bearing, kind="wood", harvestPermitted=True, **named)
 
 
-def animal(detail: str, bearing: str = "ahead") -> dict[str, Any]:
-    named = {"name": "cow"} if detail == "central" else {}
-    return percept(detail, bearing, named=False, tamed=False, protectedTarget=False, **named)
+def animal(detail: str, bearing: str = "ahead", *, protected: bool = False) -> dict[str, Any]:
+    # Species, ownership and the hunting verdict derived from ownership are
+    # all read off a thing Person is looking at; the periphery carries none.
+    if detail == "central":
+        return percept(
+            detail, bearing, name="cow", named=protected, tamed=False, protectedTarget=protected
+        )
+    return percept(detail, bearing)
 
 
 def test_a_recognised_tree_is_evidence_of_wood(observation: dict[str, Any]) -> None:
@@ -77,10 +82,7 @@ def test_movement_in_the_periphery_is_still_enough_to_be_wary(
 ) -> None:
     # Recognition gates acting on a thing, not noticing a threat. Something
     # hostile at the edge of vision still makes Person unsafe.
-    observation["nearby"]["hostiles"] = [
-        percept("peripheral", "behind_left", named=False, tamed=False, protectedTarget=True)
-        | {"distance": 5.0}
-    ]
+    observation["nearby"]["hostiles"] = [percept("peripheral", "behind_left") | {"distance": 5.0}]
     assert symbolic_state(observation)["safe"] == 0
 
 
@@ -91,6 +93,20 @@ def test_peripheral_percepts_remain_available_as_leads(observation: dict[str, An
     leads = evidence_percepts(observation)
     assert [item["bearing"] for item in leads["reachable_wood"]] == ["left"]
     assert [item["bearing"] for item in leads["reachable_animal"]] == ["right"]
+
+
+def test_whose_an_animal_is_decides_only_once_it_is_recognised(
+    observation: dict[str, Any],
+) -> None:
+    # A shape in the periphery could be anyone's; it is worth turning towards.
+    # Once recognised as someone's, it is neither evidence nor a lead.
+    observation["nearby"]["passiveAnimals"] = [
+        animal("peripheral", "left"),
+        animal("central", protected=True),
+    ]
+    leads = evidence_percepts(observation)["reachable_animal"]
+    assert [item["detail"] for item in leads] == ["peripheral"]
+    assert symbolic_state(observation)["reachable_animal"] == 0
 
 
 def test_a_plan_blocked_only_by_what_is_out_of_view_names_the_missing_evidence(
