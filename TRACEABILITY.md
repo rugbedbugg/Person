@@ -150,11 +150,11 @@ claim without reading the whole tree.
 
 ## Future interfaces
 
-| Requirement                                                                  | Implementation                                               | Tests                                               |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
-| Memory, WorldModel, Affect, Language, Social, Project, Exploration providers | `apps/cognition/python/person_cognition/future_providers.py` | `test_future_providers_refuse_to_pretend_they_work` |
-| No premature implementation                                                  | every placeholder raises                                     | same                                                |
-| No LLM, no neural policy, no heavy dependencies                              | absent by construction                                       | `tests/python/test_architecture.py`                 |
+| Requirement                                                          | Implementation                                               | Tests                                               |
+| -------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
+| WorldModel, Affect, Language, Social, Project, Exploration providers | `apps/cognition/python/person_cognition/future_providers.py` | `test_future_providers_refuse_to_pretend_they_work` |
+| No premature implementation                                          | every placeholder raises                                     | same                                                |
+| No LLM, no neural policy, no heavy dependencies                      | absent by construction                                       | `tests/python/test_architecture.py`                 |
 
 ## Real embodiment validation (Milestone 1)
 
@@ -219,6 +219,25 @@ claim without reading the whole tree.
 | Unperceived physical truth changes no decision        | observation-only inputs to the search                      | `tests/integration/information-seeking.test.ts`     |
 | Bearings agree with gaze directions                   | `observation/relative.ts` `side()`                         | `tests/observation/look.test.ts`                    |
 | Searches are journalled, never scored                 | `information_search` event, schema v3; `UNSCORED_ROUTINES` | persistence suite, cognition suite                  |
+
+## Memory (ADR 0007)
+
+| Requirement                                               | Implementation                                     | Tests                                                            |
+| --------------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------- |
+| The store is rebuilt from encoded episodes only           | `MemoryStore.apply`, `CognitiveReducers`           | `test_only_encoded_episodes_can_become_memories`                 |
+| Encoding copies a whitelist, never a message              | `person_cognition/memory/encoding.py`              | `test_encoding_copies_only_whitelisted_fields`, integration      |
+| Unperceived physical truth never becomes a memory         | encoding reads only cognition-facing messages      | `tests/integration/memory.test.ts`                               |
+| Recall is a typed cue, no free-form query or limit        | `Cue`, `Memory.recall`                             | `test_recall_takes_a_typed_cue_and_nothing_else`, architecture   |
+| At most three memories per recall                         | `RECALL_LIMIT`, `rank`                             | `test_a_relevant_cue_retrieves_a_small_bounded_subset`           |
+| Relevance gates; recency and salience rank                | `RecallRules`                                      | `test_recent_and_salient_...`, `test_relevance_gates_...`        |
+| Forgetting is inaccessibility, never erasure              | `RecallRules.threshold`; the store has no delete   | `test_old_memories_become_inaccessible_without_being_erased`     |
+| Provenance survives persistence                           | `Provenance`, `memory_encoded` payload             | `test_restart_keeps_memories_and_their_provenance_...`           |
+| Memories are never refreshed from the world               | frozen `Episode`; no update path                   | `test_stale_memory_is_not_overwritten_by_what_is_true_now`       |
+| Recall is labelled memory and never becomes perception    | `Recalled.source`; planner reads observations only | `test_recall_is_labelled_memory_and_never_becomes_perception`    |
+| A restart does not inject the store                       | `WorkingMemory` unpersisted; recall only on cue    | `test_restart_does_not_inject_the_store`, integration            |
+| No invented referent for an action (C4)                   | `encoding.acted` keeps no target                   | `test_an_action_on_some_tree_...`, integration                   |
+| A fruitless search is remembered as not found, not absent | `encoding.searched`, `NOT_FOUND`                   | `test_a_search_that_found_nothing_is_remembered_as_exactly_that` |
+| Fixture and live memories never mix                       | `MemoryStore.episodes_in`                          | `test_fixture_memories_never_surface_in_a_live_world`            |
 
 ## Tick budgets
 
