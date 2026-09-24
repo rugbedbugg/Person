@@ -212,7 +212,7 @@ export const digIn: SkillImplementation = async (context) => {
   if (material && context.permissions.mayBuild(cover).allowed) {
     try {
       await context.embodiment.place(cover, material);
-      context.memory.recordPlacement(cover);
+      context.ledger.recordPlacement(cover);
       context.note("placed_blocks", { sealed_with: material });
     } catch {
       // An unsealed refuge is still better than standing in the open.

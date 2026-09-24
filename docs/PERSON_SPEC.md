@@ -1563,8 +1563,8 @@ guaranteed to be perfect.
 **CURRENTLY IMPLEMENTED:** the engineering half only. The append-only evidence
 journal (section 23), the snapshots and the provenance records are the full
 event store, and they are read by the statistics reducer, not by anything that
-could be called recollection. `WorldMemory`
-(`apps/node-runtime/src/runtime/world-memory.ts`) is a runtime-owned ownership
+could be called recollection. `PlacementLedger`
+(`apps/node-runtime/src/runtime/placement-ledger.ts`, formerly `WorldMemory`) is a runtime-owned ownership
 and placement ledger, not Person's memory, and the naming is misleading enough
 to be worth saying twice. Nothing in this section 24 is implemented; see
 `docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6.

@@ -118,7 +118,7 @@ export const cookFood: SkillImplementation = async (context) => {
   const target = context.number("target_amount");
   const snapshot = context.snapshot();
   const furnace =
-    context.memory.furnacePosition ??
+    context.ledger.furnacePosition ??
     context.embodiment
       .findBlocks({ kinds: ["furnace"], maxDistance: 16, limit: 4 })
       .find((block) => block.ownedByPerson)?.position ??

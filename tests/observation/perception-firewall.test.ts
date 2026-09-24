@@ -29,7 +29,7 @@ function observe(bench: Harness): Observation {
     snapshot: bench.world.snapshot(),
     permissions: bench.permissions,
     kernel: bench.kernel,
-    memory: bench.memory,
+    ledger: bench.ledger,
     trainingContext: "fixture",
     cognition: {
       activeGoal: null,
@@ -179,4 +179,19 @@ test("what the runtime knows is strictly larger than what it reports", async () 
 
   assert.equal(known.length, 2, "the body knows about both");
   assert.equal(reported.length, 1, "Person is only looking at one of them");
+});
+
+test("what the ledger supplies is labelled as the ledger, never as recollection", async () => {
+  const bench = await harness();
+  bench.ledger.craftingTablePosition = { x: 0, y: 64, z: 6 };
+  bench.ledger.furnacePosition = { x: 2, y: 64, z: 6 };
+  const workstations = observe(bench).nearby.workstations;
+
+  assert.equal(workstations.length, 2, "both are reported, seen or not");
+  for (const workstation of workstations)
+    assert.equal(workstation.source, "placement_ledger");
+  assert.ok(
+    !JSON.stringify(observe(bench)).includes("remembered"),
+    "nothing the runtime supplies may claim to be remembered",
+  );
 });

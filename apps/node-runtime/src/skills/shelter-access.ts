@@ -38,10 +38,10 @@ export async function openShelterEntrance(
   for (const position of shelterEntrance(home)) {
     const block = context.embodiment.blockAt(position);
     if (!block || !block.solid) continue;
-    if (!block.ownedByPerson && !context.memory.isOwnedBlock(position))
+    if (!block.ownedByPerson && !context.ledger.isOwnedBlock(position))
       return false;
     await context.embodiment.dig(position);
-    context.memory.placedBlocks.delete(
+    context.ledger.placedBlocks.delete(
       `${position.x},${position.y},${position.z}`,
     );
     opened = true;
@@ -61,7 +61,7 @@ export async function sealShelterEntrance(
     const material = buildingItem(context);
     if (!material) return false;
     await context.embodiment.place(position, material);
-    context.memory.recordPlacement(position);
+    context.ledger.recordPlacement(position);
   }
   return true;
 }

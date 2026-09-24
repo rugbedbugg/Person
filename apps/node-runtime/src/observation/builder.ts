@@ -14,14 +14,15 @@ import { PERCEPTION, resourceCategory, shapeEntities } from "./perception.ts";
 import { eyePose, visible, VISION } from "./vision.ts";
 import { estimateDistance, relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
-import type { WorldMemory } from "../runtime/world-memory.ts";
+import type { PlacementLedger } from "../runtime/placement-ledger.ts";
 
 /**
  * Raised whenever what an observation means changes, so evidence recorded
  * under one contract is never read as the other. 2: relative percepts replaced
- * coordinates. 3: a peripheral entity no longer says whose it is.
+ * coordinates. 3: a peripheral entity no longer says whose it is. 4: ledger
+ * workstations say they come from the placement ledger, not from memory.
  */
-export const OBSERVATION_VERSION = 3;
+export const OBSERVATION_VERSION = 4;
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -35,7 +36,7 @@ export interface ObservationInputs {
   snapshot: WorldSnapshot;
   permissions: PermissionGate;
   kernel: SafetyKernel;
-  memory: WorldMemory;
+  ledger: PlacementLedger;
   trainingContext: TrainingContext;
   cognition: CognitionState;
   previousOutcome: PreviousOutcome | null;
@@ -56,19 +57,19 @@ const dayPhase = (
 function shelterState(
   inputs: ObservationInputs,
 ): Observation["home"]["shelterState"] {
-  const home = inputs.memory.home.position;
+  const home = inputs.ledger.home.position;
   const plan = shelterPlan(home);
   const present = plan.filter(
     (position) => inputs.blockAt(position)?.solid === true,
   ).length;
   if (present === plan.length) return "complete";
-  if (inputs.memory.home.shelterState === "complete") return "breached";
-  if (present > 0 && inputs.memory.placedBlocks.size > 0) return "partial";
+  if (inputs.ledger.home.shelterState === "complete") return "breached";
+  if (present > 0 && inputs.ledger.placedBlocks.size > 0) return "partial";
   return "none";
 }
 
 function affordances(inputs: ObservationInputs): Observation["affordances"] {
-  const { snapshot, permissions, memory } = inputs;
+  const { snapshot, permissions, ledger } = inputs;
   const here = snapshot.position;
   // The body already worked this out for the safety kernel; asking it again
   // here would be a second answer to the same question.
@@ -81,7 +82,7 @@ function affordances(inputs: ObservationInputs): Observation["affordances"] {
       { x: here.x, y: here.y, z: here.z - 1 },
     ].some((position) => permissions.mayEmergencyDig(position).allowed);
 
-  const home = memory.home.position;
+  const home = ledger.home.position;
   const floor = inputs.blockAt({ ...home, y: home.y - 1 });
   const shelterSite =
     floor?.solid === true &&
@@ -117,8 +118,8 @@ function affordances(inputs: ObservationInputs): Observation["affordances"] {
  * permissions, so the answer always comes from the side that enforces it.
  */
 export function buildObservation(inputs: ObservationInputs): Observation {
-  const { snapshot, permissions, memory } = inputs;
-  const home = memory.home.position;
+  const { snapshot, permissions, ledger } = inputs;
+  const home = ledger.home.position;
   const homeDistance = estimateDistance(distance(snapshot.position, home));
   // Where Person is looking, and what that lets it see. Privileged: the pose
   // is used here and never reported.
@@ -131,12 +132,12 @@ export function buildObservation(inputs: ObservationInputs): Observation {
   const located = (position: Position, span: number) =>
     relativeTo(pose, position, span);
   const ownedKeys = new Set(
-    memory.ownedStorage.map((record) => positionKey(record.position)),
+    ledger.ownedStorage.map((record) => positionKey(record.position)),
   );
 
   // Containers are found by looking, so they are filtered by what Person can
   // see. The ones Person placed itself are reported under `home.ownedStorage`,
-  // which is remembered rather than seen.
+  // which comes from the placement ledger rather than from sight.
   const containers = sighted(
     snapshot.containers,
     (container) => container.position,
@@ -154,35 +155,36 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       provenance: (owned ? "owned" : "existing") as "owned" | "existing",
       storageId:
         container.storageId ??
-        memory.storageAt(container.position)?.storageId ??
+        ledger.storageAt(container.position)?.storageId ??
         null,
     };
   });
 
   // Workstations come from Person's own placement ledger, so they are known
-  // rather than seen and are not filtered by line of sight. Until the memory
-  // system exists (C6) this is the one channel that reports a thing Person is
-  // not currently looking at, and it reports only Person's own work.
+  // rather than seen and are not filtered by line of sight. This is the one
+  // channel in `nearby` that reports a thing Person is not currently looking
+  // at, it reports only Person's own work, and it is runtime bookkeeping, not
+  // Person's memory: recollection reaches cognition by its own bounded path.
   const workstations: Observation["nearby"]["workstations"] = [];
-  if (memory.craftingTablePosition)
+  if (ledger.craftingTablePosition)
     workstations.push({
       kind: "crafting_table",
       ...located(
-        memory.craftingTablePosition,
-        distance(snapshot.position, memory.craftingTablePosition),
+        ledger.craftingTablePosition,
+        distance(snapshot.position, ledger.craftingTablePosition),
       ),
       provenance: "owned",
-      source: "remembered",
+      source: "placement_ledger",
     });
-  if (memory.furnacePosition)
+  if (ledger.furnacePosition)
     workstations.push({
       kind: "furnace",
       ...located(
-        memory.furnacePosition,
-        distance(snapshot.position, memory.furnacePosition),
+        ledger.furnacePosition,
+        distance(snapshot.position, ledger.furnacePosition),
       ),
       provenance: "owned",
-      source: "remembered",
+      source: "placement_ledger",
     });
 
   // Identity is reported as strongly as the body can establish it. The entity
@@ -221,7 +223,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
   };
 
   const inventoryCategories = categories(snapshot.inventory);
-  const storedFood = memory.ownedStorage.reduce((total, record) => {
+  const storedFood = ledger.ownedStorage.reduce((total, record) => {
     const container = snapshot.containers.find(
       (candidate) =>
         positionKey(candidate.position) === positionKey(record.position),
@@ -336,10 +338,10 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       })),
     },
     home: {
-      activeHome: { homeId: memory.home.homeId },
+      activeHome: { homeId: ledger.home.homeId },
       homeDistance,
       shelterState: shelterState(inputs),
-      ownedStorage: memory.ownedStorage.map((record) => ({
+      ownedStorage: ledger.ownedStorage.map((record) => ({
         storageId: record.storageId,
         contents:
           snapshot.containers.find(
@@ -347,7 +349,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
               positionKey(candidate.position) === positionKey(record.position),
           )?.contents ?? [],
       })),
-      bedKnown: memory.home.bedKnown,
+      bedKnown: ledger.home.bedKnown,
       foodReserve: storedFood,
       fuelReserve: inventoryCategories["fuel"] ?? 0,
     },

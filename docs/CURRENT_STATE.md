@@ -330,15 +330,15 @@ implementation. This is the canonical, full-detail record; nothing shorter
 exists elsewhere, and `docs/PERSON_SPEC.md` points here rather than repeating
 it.
 
-| ID  | Deviation                                                            | Introduced | Decision needed before            |
-| --- | -------------------------------------------------------------------- | ---------- | --------------------------------- |
-| C1  | The `Observation` carried exact coordinates (resolved)               | `6b99830`  | resolved 2026-09-22, see below    |
-| C2  | Protected-area entry is an L0 "hard safety" trigger                  | `6b99830`  | any change to the kernel's levels |
-| C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | the memory system, or a rename    |
-| C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing |
-| C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)     |
-| C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
-| C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below    |
+| ID  | Deviation                                                            | Introduced | Decision needed before                  |
+| --- | -------------------------------------------------------------------- | ---------- | --------------------------------------- |
+| C1  | The `Observation` carried exact coordinates (resolved)               | `6b99830`  | resolved 2026-09-22, see below          |
+| C2  | Protected-area entry is an L0 "hard safety" trigger                  | `6b99830`  | any change to the kernel's levels       |
+| C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | **Resolved**: renamed `PlacementLedger` |
+| C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing       |
+| C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)           |
+| C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person        |
+| C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below          |
 
 ### C1. The observation carried exact coordinates
 
@@ -385,10 +385,11 @@ aggregation and a human-like sense model, and a cone that recognised everything
 equally out to 100 degrees would be neither. Sub-block shapes are ignored, so a fence occludes as a full cube
 does. Resources, hazards, entities and found containers are filtered through
 it. Workstations and owned storage are not: they come from Person's own
-placement ledger, so they are remembered rather than seen. Every workstation
-record carries `source: "remembered"` so the channel cannot be mistaken for
-current perception, and `home.ownedStorage` sits in the `home` block for the
-same reason. That is the channel to revisit when memory exists (C6).
+placement ledger, so they are recorded rather than seen. Every workstation
+record carries `source: "placement_ledger"` so the channel cannot be mistaken
+for current perception or for a recollection, and `home.ownedStorage` sits in
+the `home` block for the same reason. Person's own memory reaches cognition by
+a separate, bounded path (ADR 0007).
 
 **Proprioception.** Health, food, saturation, air, armour, status effects,
 whether Person is alive, and the inventory are reported as body state rather
@@ -545,16 +546,22 @@ still stop Person. What is wrong is only the claim about why.
 from L0, or whether the distinction stays documentary. No production change has
 been made.
 
-### C3. `WorldMemory` is not memory
+### C3. `WorldMemory` is not memory — RESOLVED
 
-`apps/node-runtime/src/runtime/world-memory.ts` is a runtime-owned ownership
+`apps/node-runtime/src/runtime/world-memory.ts` was a runtime-owned ownership
 and placement ledger: home record, placed blocks, storage provenance, furnace
 and crafting-table positions. It is privileged engineering state that the
 observation builder reads to derive semantic facts. It is not, and must never
 become, Person's recollection (`docs/PERSON_SPEC.md` section 24).
 
-**Decision required:** rename at the next milestone that touches it, or accept
-the name and document it. Both are defensible; leaving it ambiguous is not.
+**Decided (operator, 2026-09-24): rename.** It is now `PlacementLedger` in
+`runtime/placement-ledger.ts`, and every variable that held it is `ledger`.
+Workstations read from it reach cognition marked
+`source: "placement_ledger"` (they were marked `"remembered"`), and
+`observationVersion` is 4, so nothing the runtime supplies can be mistaken
+for a recollection. The persisted file keeps its name
+(`world-<world>-<person>.json`) so existing ledgers still load. "Memory" in
+this repository now means Person's cognitive memory only (ADR 0007).
 
 ### C4. Skills choose their own targets
 

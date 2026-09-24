@@ -25,7 +25,7 @@ const MATCHERS: Record<Category, (name: string) => boolean> = {
 function ownedContainers(context: SkillContext): ContainerView[] {
   const origin = context.snapshot().position;
   const known = new Set(
-    context.memory.ownedStorage.map((record) => positionKey(record.position)),
+    context.ledger.ownedStorage.map((record) => positionKey(record.position)),
   );
   return context
     .snapshot()
@@ -70,7 +70,7 @@ export const placeOwnedChest: SkillImplementation = async (context) => {
   await approach(context, site);
   context.checkpoint();
   await context.embodiment.place(site, "chest");
-  const record = context.memory.recordStorage(
+  const record = context.ledger.recordStorage(
     site,
     `place_owned_chest@tick:${context.snapshot().tick}`,
     context.snapshot().dimension,
@@ -134,7 +134,7 @@ export const depositOwnedStorage: SkillImplementation = async (context) => {
       "FAILED",
       "The container accepted nothing",
     );
-  const record = context.memory.storageAt(container.position);
+  const record = context.ledger.storageAt(container.position);
   if (record) record.lastVerified = new Date().toISOString();
   context.effect("surplus_stored");
   context.note("container_transfer", {
