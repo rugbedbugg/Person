@@ -1,6 +1,6 @@
 # ADR 0003: The memory firewall
 
-**Status:** Accepted (rule), Deferred (retrieval model)
+**Status:** Accepted (rule), retrieval model proposed in ADR 0007
 **Date:** 2026-09-22
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -50,7 +50,8 @@ second only.
    positions. It is privileged engineering state read by the observation
    builder, and it must not become a recollection path.
 
-Rules 1, 3, 4 and 5 are in force now. Rule 2 is deferred with the memory system.
+Rules 1, 3, 4 and 5 are in force now. Rule 2 was deferred with the memory
+system; ADR 0007 proposes the retrieval model that implements it.
 
 ## Consequences
 
