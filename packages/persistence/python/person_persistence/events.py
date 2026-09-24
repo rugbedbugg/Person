@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v3"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v4"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -24,6 +24,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v1",
     "person-evidence-v2",
     "person-evidence-v3",
+    "person-evidence-v4",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -43,12 +44,28 @@ EVENT_TYPES: tuple[str, ...] = (
     #: Instrumentation only: why Person looked, and what the looking concluded.
     #: Engineering truth for the operator, never scored, never recalled.
     "information_search",
+    #: An episode entered Person's memory. The memory store is rebuilt from
+    #: these and from nothing else (ADR 0007). Never scored.
+    "memory_encoded",
+    #: A cue Person recalled with, and which memories came back.
+    #: Instrumentation only: recalling changes nothing in the store.
+    "memory_recalled",
 )
 
 #: Event types introduced after the first evidence schema version.
 V2_EVENT_TYPES: frozenset[str] = frozenset({"prediction_error"})
 #: Event types introduced with the third.
 V3_EVENT_TYPES: frozenset[str] = frozenset({"information_search"})
+#: Event types introduced with the fourth.
+V4_EVENT_TYPES: frozenset[str] = frozenset({"memory_encoded", "memory_recalled"})
+
+#: The first schema each later event type may appear under. A record cannot
+#: claim a schema older than its own type, so history cannot be backdated.
+INTRODUCED_IN: dict[str, str] = {
+    **dict.fromkeys(V2_EVENT_TYPES, "person-evidence-v2"),
+    **dict.fromkeys(V3_EVENT_TYPES, "person-evidence-v3"),
+    **dict.fromkeys(V4_EVENT_TYPES, "person-evidence-v4"),
+}
 
 REQUIRED_FIELDS: tuple[str, ...] = (
     "event_id",
@@ -122,9 +139,10 @@ class EvidenceEvent:
             )
         if document["type"] not in EVENT_TYPES:
             raise EvidenceError(f"Unknown evidence event type {document['type']!r}")
-        if schema == "person-evidence-v1" and document["type"] in V2_EVENT_TYPES:
-            raise EvidenceError(f"Event type {document['type']!r} cannot claim schema {schema!r}")
-        if schema != "person-evidence-v3" and document["type"] in V3_EVENT_TYPES:
+        introduced = INTRODUCED_IN.get(document["type"])
+        if introduced is not None and SUPPORTED_EVIDENCE_SCHEMAS.index(
+            schema
+        ) < SUPPORTED_EVIDENCE_SCHEMAS.index(introduced):
             raise EvidenceError(f"Event type {document['type']!r} cannot claim schema {schema!r}")
         if not isinstance(document["payload"], dict):
             raise EvidenceError("Evidence payload must be an object")
