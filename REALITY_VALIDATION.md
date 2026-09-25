@@ -345,6 +345,30 @@ The smallest live checkpoint: a short `person run` in a disposable 1.16.1 LAN
 world with a hostile briefly in view, then read the journal's
 `affect_appraised` records. That has not been done.
 
+## Learned effect reliability (fixture only)
+
+Added 2026-09-26 (ADR 0011). **TESTED IN FIXTURE. Not live-validated.**
+
+What the fixture establishes (`apps/cognition/tests/test_effect_learning.py`,
+`tests/integration/effect-learning.test.ts`): genuine attempts judged on felt
+effects support or contradict a skill's contract; refusals, kernel takeovers,
+preemptions, missing prerequisites and unobserved outcomes teach nothing;
+beliefs never reach certainty from one outcome, reverse under contrary
+evidence, and keep strength apart from estimate; `off` learns nothing,
+`shadow` learns only into a table no decision can see, `supervised` learns
+into the active table, whose bounded term can change a close routine choice
+and never makes a refused option win; beliefs survive restart; routine
+statistics, memory and affect are untouched. In supervised learning, hidden
+lava behind a wall and a +1000 X shift leave the learned evidence identical.
+Four mutations (a capability denial counted as failure, reported success
+trusted over felt effect, one failure forcing zero, shadow beliefs exposed to
+the planner) each make a test fail.
+
+The smallest live checkpoint: a short supervised `person run` in a
+disposable 1.16.1 LAN world in which Person gathers wood, then read the
+journal's `effect_evidence` records against what visibly happened. That has
+not been done.
+
 ## Safety validation
 
 Proven in the fixture and against the double:
