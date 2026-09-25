@@ -71,8 +71,10 @@ test("a push across a containment boundary is enforced, and only felt by Person"
   assert.equal(felt.selfMotion.continuity, "continuous");
   assert.equal(felt.selfMotion.translation.band, "short", "Person felt a push");
   const serialized = JSON.stringify(felt);
-  for (const leaked of ['"x"', '"z"', "protected_area", "22", "boundary"])
+  for (const leaked of ['"x"', '"z"', "protected_area", "boundary"])
     assert.ok(!serialized.includes(leaked), `${leaked} reached cognition`);
+  // Nor the body's coordinates as bare numbers (identifiers are strings).
+  assert.ok(!/[:,\[]\s*(22|24)(\.0+)?\s*[,}\]]/.test(serialized));
 });
 
 test("what cognition is doing or believes changes no enforcement", async () => {

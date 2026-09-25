@@ -189,6 +189,9 @@ class SurvivalGoalProvider:
                 ["tool_tier_below_stone"],
             )
 
+        # Storage serves basic reserves and inventory capacity, which are needs
+        # (`PERSON_SPEC` section 17). The `improve_home` project also has it as
+        # a milestone, at higher priority, when Person commits to its home.
         if state.get("owned_storage_available", 0) < 1:
             add(
                 "ESTABLISH_STORAGE",
