@@ -16,7 +16,7 @@ show for it.
 
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
@@ -44,6 +44,9 @@ class ScoredCandidate:
     score: float
     counts: OutcomeCounts
     reasons: tuple[str, ...]
+    #: The learned effect-reliability term included in `score` (ADR 0011),
+    #: kept separately so it can be inspected. Zero unless one was supplied.
+    learned_effect: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -109,6 +112,7 @@ class DeterministicPolicyProvider:
         *,
         home: str = "unknown",
         tolerance: float = 1.0,
+        reliability: Callable[[tuple[str, ...]], float] | None = None,
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
@@ -221,7 +225,11 @@ class EvidencePolicyProvider:
         *,
         home: str = "unknown",
         tolerance: float = 1.0,
+        reliability: Callable[[tuple[str, ...]], float] | None = None,
     ) -> PolicyChoice:
+        """Choose a routine. `reliability` scores a routine's steps from learned
+        effect beliefs; the loop supplies it only when the learning mode lets
+        learned beliefs act (ADR 0011)."""
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
         envelope = safe_envelope(observation, self.thresholds, home=home)
@@ -233,7 +241,12 @@ class EvidencePolicyProvider:
             value, reasons = self.score(
                 candidate, counts, envelope_open=bool(envelope), tolerance=tolerance
             )
-            scored.append(ScoredCandidate(candidate, value, counts, reasons))
+            learned = reliability(candidate.steps) if reliability is not None else 0.0
+            if learned:
+                reasons = (*reasons, "learned_effect_reliability")
+            scored.append(
+                ScoredCandidate(candidate, value + learned, counts, reasons, learned_effect=learned)
+            )
         scored.sort(
             key=lambda entry: (
                 -entry.score,
