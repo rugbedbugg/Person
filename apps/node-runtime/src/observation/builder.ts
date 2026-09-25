@@ -14,6 +14,7 @@ import { PERCEPTION, resourceCategory, shapeEntities } from "./perception.ts";
 import { eyePose, visible, VISION } from "./vision.ts";
 import { estimateDistance, relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
+import { poseOf, selfMotion, type SelfMotion } from "./self-motion.ts";
 import type { PlacementLedger } from "../runtime/placement-ledger.ts";
 
 /**
@@ -21,8 +22,9 @@ import type { PlacementLedger } from "../runtime/placement-ledger.ts";
  * under one contract is never read as the other. 2: relative percepts replaced
  * coordinates. 3: a peripheral entity no longer says whose it is. 4: ledger
  * workstations say they come from the placement ledger, not from memory.
+ * 5: `selfMotion`, a coarse relative sense of Person's own movement.
  */
-export const OBSERVATION_VERSION = 4;
+export const OBSERVATION_VERSION = 5;
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -43,6 +45,12 @@ export interface ObservationInputs {
   blockAt: (
     position: Position,
   ) => { solid: boolean; hazard: boolean; kind: string } | null;
+  /**
+   * What Person felt of its own motion since the previous observation
+   * (ADR 0008). A caller with no sense, such as a one-off `person observe`,
+   * leaves it out and the observation says the sense has only just started.
+   */
+  selfMotion?: SelfMotion;
 }
 
 const dayPhase = (
@@ -245,6 +253,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     type: "Observation",
     observationVersion: OBSERVATION_VERSION,
     trainingContext: inputs.trainingContext,
+    selfMotion: inputs.selfMotion ?? selfMotion(null, poseOf(snapshot)),
     vitals: {
       health: snapshot.health,
       food: snapshot.food,

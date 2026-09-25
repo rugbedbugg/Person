@@ -14,6 +14,7 @@
     "type",
     "observationVersion",
     "trainingContext",
+    "selfMotion",
     "vitals",
     "environment",
     "inventory",
@@ -35,6 +36,68 @@
     },
     "trainingContext": {
       "$ref": "common.schema.json#/$defs/trainingContext"
+    },
+    "selfMotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["continuity", "translation", "rotation", "vertical"],
+      "description": "Person's felt sense of its own motion since the previous observation, relative to its facing then (ADR 0008). No absolute position or heading.",
+      "properties": {
+        "continuity": {
+          "enum": ["start", "continuous", "discontinuous"]
+        },
+        "translation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["direction", "band", "distance"],
+          "properties": {
+            "direction": {
+              "enum": [
+                "ahead",
+                "ahead_left",
+                "ahead_right",
+                "left",
+                "right",
+                "behind_left",
+                "behind_right",
+                "behind",
+                "none",
+                "unknown"
+              ]
+            },
+            "band": {
+              "enum": ["none", "tiny", "short", "moderate", "far", "unknown"]
+            },
+            "distance": {
+              "oneOf": [
+                {
+                  "type": "number",
+                  "minimum": 0
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        },
+        "rotation": {
+          "enum": [
+            "none",
+            "slight_left",
+            "left",
+            "sharp_left",
+            "about_face",
+            "sharp_right",
+            "right",
+            "slight_right",
+            "unknown"
+          ]
+        },
+        "vertical": {
+          "enum": ["level", "up", "down", "unknown"]
+        }
+      }
     },
     "vitals": {
       "type": "object",

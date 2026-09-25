@@ -45,6 +45,7 @@ import {
 } from "../reporting/episode-report.ts";
 import { StatusWriter, statusPath } from "../reporting/status.ts";
 import { PlacementLedger } from "./placement-ledger.ts";
+import { SelfMotionSense } from "../observation/self-motion.ts";
 
 export interface PersonRuntimeOptions {
   config: PersonConfig;
@@ -98,6 +99,8 @@ export class PersonRuntime {
     suspendedGoals: [],
   };
   #previousOutcome: PreviousOutcome | null = null;
+  /** Person's sense of its own motion, for the life of this session. */
+  readonly #selfMotion = new SelfMotionSense();
   readonly #status: StatusWriter;
   readonly #operatorIntervention: { flagged: boolean; reason: string | null };
   #emergencyCount = 0;
@@ -402,6 +405,7 @@ export class PersonRuntime {
       cognition: this.#cognitionState,
       previousOutcome: this.#previousOutcome,
       blockAt: (position) => this.#embodiment.blockAt(position),
+      selfMotion: this.#selfMotion.sense(snapshot),
     });
     this.#channel.send(observation);
 
