@@ -64,7 +64,7 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0005](0005-cognitive-autonomy-vs-capability-authority.md) | Cognitive autonomy is not environmental authority | Accepted                           | 2026-09-22 |
 | [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                           | Accepted (rule) / Deferred         | 2026-09-22 |
 | [0007](0007-episodic-memory-and-bounded-recall.md)         | Episodic memory and bounded recall                | Accepted                           | 2026-09-24 |
-| [0008](0008-self-motion-and-cognitive-places.md)           | Self-motion and cognitive places                  | Proposed                           | 2026-09-25 |
+| [0008](0008-self-motion-and-cognitive-places.md)           | Self-motion and cognitive places                  | Accepted                           | 2026-09-25 |
 
 All six were written during the Phase 0 canonical architecture reconciliation
 (`docs/PERSON_SPEC.md`, frozen 2026-09-22). None of them changed production

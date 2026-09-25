@@ -1,12 +1,18 @@
 # ADR 0008: Self-motion and cognitive places
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-25), including rule 19
 **Date:** 2026-09-25
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Operator decision:** Option 1, bounded proprioceptive self-motion (2026-09-25)
 
 ---
+
+> **Operator decision, 2026-09-25: accepted, rule 19 included.**
+> `not_found_in_bounded_search` at believed place P is evidence only about that
+> search at P: not that the resource is absent at P, nearby, or anywhere.
+> Changing the believed place therefore changes whether the earlier result
+> applies. The numbers in this ADR are current implementation parameters.
 
 ## Context
 
