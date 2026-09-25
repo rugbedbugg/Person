@@ -117,7 +117,7 @@ def test_older_journals_still_read_and_new_events_cannot_backdate_themselves() -
         assert EvidenceEvent.from_json({**document, "schema_version": schema}).tick == 1
 
     search = {**document, "type": "information_search", "payload": {"phase": "started"}}
-    assert EvidenceEvent.from_json(search).schema_version == "person-evidence-v6"
+    assert EvidenceEvent.from_json(search).schema_version == "person-evidence-v7"
     for schema in ("person-evidence-v3", "person-evidence-v4", "person-evidence-v5"):
         assert EvidenceEvent.from_json({**search, "schema_version": schema}).tick == 1
     for schema in ("person-evidence-v1", "person-evidence-v2"):
@@ -126,22 +126,27 @@ def test_older_journals_still_read_and_new_events_cannot_backdate_themselves() -
 
     for kind in ("memory_encoded", "memory_recalled"):
         memory = {**document, "type": kind, "payload": {}}
-        assert EvidenceEvent.from_json(memory).schema_version == "person-evidence-v6"
+        assert EvidenceEvent.from_json(memory).schema_version == "person-evidence-v7"
         assert EvidenceEvent.from_json({**memory, "schema_version": "person-evidence-v4"})
         for schema in ("person-evidence-v1", "person-evidence-v2", "person-evidence-v3"):
             with pytest.raises(EvidenceError):
                 EvidenceEvent.from_json({**memory, "schema_version": schema})
 
+    affect = {**document, "type": "affect_appraised", "payload": {}}
+    assert EvidenceEvent.from_json(affect).schema_version == "person-evidence-v7"
+    with pytest.raises(EvidenceError):
+        EvidenceEvent.from_json({**affect, "schema_version": "person-evidence-v6"})
+
     for kind in ("project_started", "project_changed"):
         project = {**document, "type": kind, "payload": {}}
-        assert EvidenceEvent.from_json(project).schema_version == "person-evidence-v6"
+        assert EvidenceEvent.from_json(project).schema_version == "person-evidence-v7"
         for schema in ("person-evidence-v4", "person-evidence-v5"):
             with pytest.raises(EvidenceError):
                 EvidenceEvent.from_json({**project, "schema_version": schema})
 
     for kind in ("place_formed", "place_visited"):
         place = {**document, "type": kind, "payload": {}}
-        assert EvidenceEvent.from_json(place).schema_version == "person-evidence-v6"
+        assert EvidenceEvent.from_json(place).schema_version == "person-evidence-v7"
         for schema in ("person-evidence-v3", "person-evidence-v4"):
             with pytest.raises(EvidenceError):
                 EvidenceEvent.from_json({**place, "schema_version": schema})

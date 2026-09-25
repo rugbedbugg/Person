@@ -41,6 +41,10 @@ class Goal:
     completion_condition: tuple[Condition, ...]
     suspension_reason: str | None = None
     reason_codes: tuple[str, ...] = ()
+    #: The priority the drive or project gave it, before affect (ADR 0010).
+    base_priority: float | None = None
+    #: What affect added or took away. `priority` = base + this.
+    affect_bias: float = 0.0
 
     def as_message(self) -> dict[str, Any]:
         return {
@@ -235,8 +239,12 @@ class GoalStack:
     entries: dict[str, Goal] = field(default_factory=dict)
     active_id: str | None = None
     history: list[tuple[int, str, str]] = field(default_factory=list)
+    #: Every event ever noted, so a reader can find the new ones although
+    #: `history` is trimmed.
+    noted: int = 0
 
     def _note(self, tick: int, goal_id: str, event: str) -> None:
+        self.noted += 1
         self.history.append((tick, goal_id, event))
         if len(self.history) > 512:
             del self.history[:-512]

@@ -36,6 +36,17 @@ from person_protocol import (
 )
 from person_skills import SkillRegistry, skill_registry
 
+from .affect import (
+    Affect,
+    AffectRecord,
+    Appraisal,
+    appraise_goal,
+    appraise_harm,
+    appraise_outcome,
+    appraise_project,
+    appraise_search,
+    appraise_threat,
+)
 from .context import decision_context
 from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .memory import Cue, Memory, MemoryStore, Recalled
@@ -113,8 +124,17 @@ class CognitionLoop:
         #: Projects Person has taken up, rebuilt from its own records.
         self.project_book = ProjectBook()
         self.projects = ProjectManager(self.project_book)
+        #: Person's affect, rebuilt from its own appraisals (ADR 0010).
+        self.affect_record = AffectRecord()
+        self.affect = Affect(self.affect_record)
+        self._felt_health: float | None = None
+        self._goal_events_seen = 0
         self.reducers = CognitiveReducers(
-            self.statistics, self.memory_store, self.spatial_map, self.project_book
+            self.statistics,
+            self.memory_store,
+            self.spatial_map,
+            self.project_book,
+            self.affect_record,
         )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -258,6 +278,8 @@ class CognitionLoop:
         # Projects persist; which of them still apply is checked when Person
         # next observes the world, not assumed.
         self.projects = ProjectManager(self.project_book)
+        # Affect persists too, and settles only as experienced time passes.
+        self.affect = Affect(self.affect_record)
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
@@ -324,6 +346,7 @@ class CognitionLoop:
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
         self._remember(self.memory.experience(message), tick)
+        self._appraise_body(message, tick)
 
         self._reopen_unfound(state, tick)
         self._deliberate_projects(message, state, tick)
@@ -331,8 +354,13 @@ class CognitionLoop:
         project_goal = self.projects.goal(state, tick)
         if project_goal is not None:
             proposals.append(project_goal)
+        # Affect adjusts the candidates that already exist, within a tight
+        # bound, and records how much; it adds none and removes none.
+        proposals = [self._biased(proposal) for proposal in proposals]
         goal = self.goals.update(proposals, state, tick)
-        self._record_changes(self.projects.track(self.goals, state, self.memory.now), tick)
+        changes = self.projects.track(self.goals, state, self.memory.now)
+        self._record_changes(changes, tick)
+        self._appraise_progress(changes, tick)
         if goal is None:
             goal = self._idle_goal(tick)
             self.goals.update([goal], state, tick)
@@ -418,7 +446,12 @@ class CognitionLoop:
         ]
         try:
             choice = self._policy().propose(
-                observation, goal, candidates, context_id, home=self.home
+                observation,
+                goal,
+                candidates,
+                context_id,
+                home=self.home,
+                tolerance=self.affect.tolerance(),
             )
         except NoCandidatesError:
             self.goals.block(goal.goal_id, "no_candidate_routine", tick)
@@ -491,6 +524,10 @@ class CognitionLoop:
                 "goal_id": goal.goal_id,
                 "goal_type": goal.goal_type,
                 "priority": goal.priority,
+                "base_priority": goal.base_priority
+                if goal.base_priority is not None
+                else goal.priority,
+                "affect_bias": goal.affect_bias,
                 "context_id": context_id,
                 "reason_codes": list(goal.reason_codes),
                 "stack": [entry["goalId"] for entry in self.goals.as_messages()],
@@ -733,6 +770,7 @@ class CognitionLoop:
         self._record("information_search", tick, search.payload(phase, **extra))
         if phase in {"exhausted", "satisfied"}:
             conclusion = NOT_FOUND if phase == "exhausted" else "found"
+            self._feel(appraise_search(conclusion), tick)
             self._remember(
                 [remembering.searched(search.purpose, conclusion, len(search.looks), None)],
                 tick,
@@ -836,6 +874,7 @@ class CognitionLoop:
         }
         event = self._record(event_type, message["tick"], payload, message["decisionId"])
         self.summary.note_outcome(message)
+        self._feel(appraise_outcome(message), message["tick"])
         experience = remembering.acted(message, self.registry, event.event_id if event else None)
         if experience is not None:
             succeeded = message["status"] == "SUCCESS"
@@ -900,6 +939,45 @@ class CognitionLoop:
 
         active.failure_modes.append(status.lower())
         self._finish_routine("INTERRUPTED", message["tick"], reason="skill_interrupted")
+
+    # ---------------------------------------------------------------- affect
+
+    def _feel(self, appraisal: Appraisal | None, tick: int) -> None:
+        """Apply one appraisal and journal its full causal record."""
+        if appraisal is None:
+            return
+        self._record("affect_appraised", tick, self.affect.feel(appraisal, self.memory.now))
+
+    def _appraise_body(self, observation: dict[str, Any], tick: int) -> None:
+        """What the world and the body feel like now: threat perceived, harm felt."""
+        self.affect.advance(self.memory.now)
+        self._feel(appraise_threat(observation), tick)
+        health = float(observation["vitals"]["health"])
+        if self._felt_health is not None:
+            self._feel(appraise_harm(self._felt_health - health), tick)
+        self._felt_health = health
+
+    def _appraise_progress(self, changes: list[tuple[str, dict[str, Any]]], tick: int) -> None:
+        """Goals reached or blocked, and projects advanced or given up."""
+        new = min(self.goals.noted - self._goal_events_seen, len(self.goals.history))
+        self._goal_events_seen = self.goals.noted
+        for _when, goal_id, event in self.goals.history[len(self.goals.history) - new :]:
+            goal = self.goals.entries.get(goal_id)
+            if goal is not None:
+                self._feel(appraise_goal(event, goal.goal_type), tick)
+        for _kind, payload in changes:
+            project = payload["project"]
+            self._feel(appraise_project(payload["change"], project["kind"]), tick)
+
+    def _biased(self, goal: Goal) -> Goal:
+        facts = frozenset(condition.fact for condition in goal.completion_condition)
+        bias = self.affect.bias(facts, goal.source)
+        return replace(
+            goal,
+            base_priority=goal.priority,
+            affect_bias=bias,
+            priority=round(min(1000.0, max(0.0, goal.priority + bias)), 3),
+        )
 
     # -------------------------------------------------------------- projects
 
