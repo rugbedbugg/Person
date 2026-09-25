@@ -18,7 +18,6 @@ from typing import Any
 class EnvelopeThresholds:
     health: float = 16.0
     food: float = 14.0
-    max_home_distance: float = 96.0
     min_light: int = 7
 
 
@@ -32,12 +31,16 @@ class EnvelopeVerdict:
 
 
 def safe_envelope(
-    observation: dict[str, Any], thresholds: EnvelopeThresholds | None = None
+    observation: dict[str, Any],
+    thresholds: EnvelopeThresholds | None = None,
+    *,
+    home: str = "unknown",
 ) -> EnvelopeVerdict:
+    """Whether Person can afford to explore. `home` is its own belief (C8)."""
     limits = thresholds or EnvelopeThresholds()
     vitals = observation["vitals"]
     nearby = observation["nearby"]
-    home = observation["home"]
+    shelter = observation["home"]
     environment = observation["environment"]
     reasons: list[str] = []
 
@@ -52,13 +55,12 @@ def safe_envelope(
     if any(hazard["distance"] <= 3 for hazard in nearby["hazards"]):
         reasons.append("hazard_nearby")
 
-    distance = home["homeDistance"]
-    if distance is not None and distance > limits.max_home_distance:
+    if home == "far":
         reasons.append("too_far_from_home")
     if not observation["navigation"]["returnPathKnown"]:
         reasons.append("return_path_unknown")
 
-    sheltered = home["shelterState"] == "complete" and (distance is not None and distance <= 2)
+    sheltered = shelter["shelterState"] == "complete" and home == "at_home"
     dark = environment["dayPhase"] == "night" or environment["lightLevel"] < limits.min_light
     if dark and not sheltered:
         reasons.append("darkness_without_shelter")

@@ -64,12 +64,19 @@ def recognised(percepts: list[dict[str, Any]]) -> list[dict[str, Any]]:
     return [percept for percept in percepts if percept["detail"] == "central"]
 
 
-def symbolic_state(observation: dict[str, Any]) -> dict[str, float]:
+def symbolic_state(observation: dict[str, Any], *, home: str = "unknown") -> dict[str, float]:
+    """The planner's facts: from the observation, and Person's belief about home.
+
+    `home` is Person's own relation to its home place (`at_home`, `near`,
+    `far`, `unknown`), derived from its spatial model. The observation no
+    longer carries a distance to home (C8), so without that belief Person is
+    not taken to be at home.
+    """
     inventory = observation["inventory"]
     items = inventory["items"]
     categories = inventory["categories"]
     nearby = observation["nearby"]
-    home = observation["home"]
+    home_record = observation["home"]
     permissions = observation["permissions"]
     affordances = observation["affordances"]
     vitals = observation["vitals"]
@@ -79,9 +86,8 @@ def symbolic_state(observation: dict[str, Any]) -> dict[str, float]:
     immediate_threat = any(entity["distance"] <= 7 for entity in hostiles)
     close_hazard = any(hazard["distance"] <= 2 for hazard in hazards)
 
-    shelter_state = home["shelterState"]
-    home_distance = home["homeDistance"]
-    at_home = home_distance is not None and home_distance <= 2
+    shelter_state = home_record["shelterState"]
+    at_home = home == "at_home"
 
     evidence = {
         fact: float(len(recognised(percepts)))
@@ -131,10 +137,10 @@ def symbolic_state(observation: dict[str, Any]) -> dict[str, float]:
         "sheltered": 1.0 if (shelter_state == "complete" and at_home) else 0.0,
         "shelter_complete": 1.0 if shelter_state == "complete" else 0.0,
         "shelter_known": 1.0 if shelter_state in {"complete", "partial", "breached"} else 0.0,
-        "home_known": 1.0 if home["activeHome"] is not None else 0.0,
+        "home_known": 1.0 if home_record["activeHome"] is not None else 0.0,
         "at_home": 1.0 if at_home else 0.0,
         "furnace_placed": 1.0 if owned_furnace else 0.0,
-        "owned_storage_available": 1.0 if home["ownedStorage"] else 0.0,
+        "owned_storage_available": 1.0 if home_record["ownedStorage"] else 0.0,
         # Evidence: recognised percepts only. Hostiles and hazards above count
         # in the periphery too, because noticing a threat needs no
         # identification, while acting on a target does.

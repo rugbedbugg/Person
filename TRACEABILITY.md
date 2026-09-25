@@ -254,6 +254,17 @@ claim without reading the whole tree.
 | Home is where Person built its shelter                    | `settle("shelter", label="home")`                | `test_home_is_where_person_built_its_shelter`                       |
 | Search memory is keyed by place: shorter, never absence   | `revisit_budget`, `_seek`, `_reopen_unfound`     | `test_returning_to_a_searched_place_...`, `test_the_same_place_...` |
 
+## Cognitive home (C8)
+
+| Requirement                                             | Implementation                                      | Tests                                                                                                        |
+| ------------------------------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| No home distance reaches cognition                      | observation builder and schema                      | `test_the_observation_carries_no_home_distance`, `tests/safety/containment-and-belief.test.ts`, architecture |
+| `at_home` is Person's belief                            | `Spatial.home_relation`, `symbolic_state(home=...)` | `test_without_a_belief_person_is_not_taken_to_be_home`                                                       |
+| Doubt makes home uncertain                              | `home_relation` drift rule                          | `test_enough_doubt_makes_home_unknown_...`, `test_being_lost_makes_home_unknown`                             |
+| The night return follows belief, not the body           | `SurvivalGoalProvider.propose(home=...)`            | `test_the_night_return_follows_belief_not_the_body`                                                          |
+| Containment enforces on the body, independent of belief | `SafetyKernel.assess`                               | `tests/safety/containment-and-belief.test.ts`                                                                |
+| Exact home distance is operator-only                    | `physicalHomeDistanceBefore/After`                  | `tests/validation/skill-test.test.ts`, `tests/integration/skill-validation.test.ts`                          |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |
