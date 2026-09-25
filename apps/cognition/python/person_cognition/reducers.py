@@ -1,9 +1,10 @@
 """Everything cognition rebuilds from the journal after a restart.
 
-Four reducers read the same journal for different things: the routine
+Five reducers read the same journal for different things: the routine
 statistics read outcomes, the memory store reads encoded episodes, the
 spatial map reads the places Person formed and revisited, and the project
-book reads the projects Person took up. None
+book reads the projects Person took up, and the affect record reads
+appraisals. None
 sees the other's state, and each ignores the events it has no case for.
 """
 
@@ -15,6 +16,7 @@ from typing import Any
 from person_persistence import EvidenceEvent
 from person_policy import RoutineStatistics
 
+from .affect import AffectRecord
 from .memory import MemoryStore
 from .projects import ProjectBook
 from .spatial import SpatialMap
@@ -27,23 +29,27 @@ class CognitiveReducers:
         memory: MemoryStore,
         spatial: SpatialMap,
         projects: ProjectBook,
+        affect: AffectRecord,
     ) -> None:
         self.statistics = statistics
         self.memory = memory
         self.spatial = spatial
         self.projects = projects
+        self.affect = affect
 
     def reset(self) -> None:
         self.statistics.reset()
         self.memory.reset()
         self.spatial.reset()
         self.projects.reset()
+        self.affect.reset()
 
     def apply(self, event: EvidenceEvent) -> None:
         self.statistics.apply(event)
         self.memory.apply(event)
         self.spatial.apply(event)
         self.projects.apply(event)
+        self.affect.apply(event)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -51,6 +57,7 @@ class CognitiveReducers:
             "memory": self.memory.to_json(),
             "spatial": self.spatial.to_json(),
             "projects": self.projects.to_json(),
+            "affect": self.affect.to_json(),
         }
 
     def load_json(self, body: Mapping[str, Any]) -> None:
@@ -60,3 +67,4 @@ class CognitiveReducers:
         self.memory.load_json(body["memory"])
         self.spatial.load_json(body["spatial"])
         self.projects.load_json(body["projects"])
+        self.affect.load_json(body["affect"])

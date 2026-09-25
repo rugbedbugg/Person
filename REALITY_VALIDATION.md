@@ -326,6 +326,25 @@ The smallest live checkpoint: a short `person run` in a disposable 1.16.1 LAN
 world after Person has built its shelter, then read the journal for
 `project_started` and `project_changed`. That has not been done.
 
+## Affect (fixture only)
+
+Added 2026-09-25 (ADR 0010). **TESTED IN FIXTURE. Not live-validated.**
+Affect lives entirely in cognition and adds no body behaviour.
+
+What the fixture establishes (`apps/cognition/tests/test_affect.py`,
+`tests/integration/affect.test.ts`): lava in view raises unease; the same
+lava behind an opaque wall leaves affect identical to a world with no lava;
+the same life 1000 blocks along X gives identical affect records; harm felt
+through health is appraised; success and repeated failure move affect in
+opposite directions; affect decays in experienced time and survives a
+restart; the priority bias stays within ±25, is never applied to urgent
+goals, adds no goal, and different histories change which of two near-tied
+goals is chosen; unease lowers exploration tolerance and calm restores it.
+
+The smallest live checkpoint: a short `person run` in a disposable 1.16.1 LAN
+world with a hostile briefly in view, then read the journal's
+`affect_appraised` records. That has not been done.
+
 ## Safety validation
 
 Proven in the fixture and against the double:

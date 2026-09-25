@@ -20,6 +20,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from person_cognition.affect import BIAS_LIMIT
 from person_cognition.projects import (
     BLOCKS_TO_ABANDON,
     PROJECT_PRIORITY,
@@ -129,7 +130,16 @@ def test_a_calm_person_with_a_home_takes_up_improving_it(
     assert active["goalId"] == f"goal_{project['project_id']}"
     assert active["goalType"] == "ESTABLISH_STORAGE", "the shelter milestone is already met"
     assert active["source"] == "self_generated"
-    assert active["priority"] == PROJECT_PRIORITY
+    # The project's own priority, plus at most the bounded affect term, with
+    # both parts journalled separately (ADR 0010).
+    assert abs(active["priority"] - PROJECT_PRIORITY) <= BIAS_LIMIT
+    selected = [
+        record
+        for record in records(tmp_path, "goal_selected")
+        if record["goal_id"] == active["goalId"]
+    ][-1]
+    assert selected["base_priority"] == PROJECT_PRIORITY
+    assert selected["priority"] == round(PROJECT_PRIORITY + selected["affect_bias"], 3)
 
 
 @pytest.mark.parametrize("pressure", ["hungry", "threatened", "night", "homeless"])
