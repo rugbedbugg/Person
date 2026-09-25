@@ -212,7 +212,10 @@ def test_the_spatial_model_reads_no_absolute_or_ledger_state() -> None:
     # Person's sense of place is integrated from felt motion (ADR 0008). The
     # package must not be able to see a coordinate, a heading, the runtime's
     # home distance, or the journal, whatever the observation happens to hold.
-    package = REPOSITORY / "apps/cognition/python/person_cognition/spatial"
+    cognition = REPOSITORY / "apps/cognition/python/person_cognition"
+    # Projects are anchored to places in the same model and are held to the
+    # same rule (Phase D).
+    sources = [*(cognition / "spatial").rglob("*.py"), cognition / "projects.py"]
     forbidden = {
         "homeDistance",
         "yaw",
@@ -225,7 +228,7 @@ def test_the_spatial_model_reads_no_absolute_or_ledger_state() -> None:
         "open",
         "read_text",
     }
-    for path in package.rglob("*.py"):
+    for path in sources:
         source = path.read_text(encoding="utf-8")
         # Identifiers and string literals, which is where a field would be
         # read; prose in comments and docstrings may name what is excluded.

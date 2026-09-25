@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `fix/cognitive-home`, based on `afebba8` (tip of `feat/lan-validation` after PR #9)
+**Last verified against:** branch `feat/autonomous-projects`, based on `14b8613` (tip of `feat/lan-validation` after PR #10)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-25
 
@@ -89,6 +89,7 @@ Two implementations, same skill code:
 - **Routines:** Content-derived stable identifiers, nesting supported
 - **Policy:** DeterministicFallback + EvidencePolicy (Beta posterior, risk-dominant scoring, safe envelope)
 - **Learning modes:** off / shadow / supervised (never auto-enabled)
+- **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
 
@@ -99,8 +100,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`)
-- **Schema versions:** new records are `person-evidence-v5`; v1 to v4 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone)
+- **Schema versions:** new records are `person-evidence-v6`; v1 to v5 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -197,33 +198,34 @@ gitignored).
 
 ## 6. Cognition / Planning / Learning Status
 
-| Component                                  | Status                                                     |
-| ------------------------------------------ | ---------------------------------------------------------- |
-| Decision context (7 dimensions)            | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Homeostatic survival goals                 | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Goal stack (suspend/resume)                | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Symbolic planner (preconditions/effects)   | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Routine model (nesting, stable IDs)        | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Deterministic fallback policy              | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Evidence policy (Beta posterior)           | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Safe exploration envelope                  | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Learning modes (off/shadow/supervised)     | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Evidence journal (append-only, chained)    | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Atomic snapshots + restore                 | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Restart reuse (evidence survives restart)  | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
-| Prediction error logging                   | IMPLEMENTED + TESTED IN FIXTURE (inert, changes no policy) |
-| Tick budget instrumentation                | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Recognition gates evidence facts           | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Missing-evidence counterfactual            | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Bounded information seeking (gaze only)    | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
-| Episodic memory, legitimate inputs only    | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
-| Bounded cued recall (typed `Cue`, max 3)   | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Memory survives restart; mind starts empty | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
-| Forgetting as inaccessibility (no erasure) | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Self-motion percept (relative, quantized)  | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Path integration with growing doubt        | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Cognitive places, routes, recognition      | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
-| Place-keyed search memory (shorter search) | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Component                                              | Status                                                     |
+| ------------------------------------------------------ | ---------------------------------------------------------- |
+| Decision context (7 dimensions)                        | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Homeostatic survival goals                             | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Goal stack (suspend/resume)                            | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Symbolic planner (preconditions/effects)               | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Routine model (nesting, stable IDs)                    | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Deterministic fallback policy                          | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Evidence policy (Beta posterior)                       | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Safe exploration envelope                              | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Learning modes (off/shadow/supervised)                 | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Evidence journal (append-only, chained)                | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Atomic snapshots + restore                             | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Restart reuse (evidence survives restart)              | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Prediction error logging                               | IMPLEMENTED + TESTED IN FIXTURE (inert, changes no policy) |
+| Tick budget instrumentation                            | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Recognition gates evidence facts                       | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Missing-evidence counterfactual                        | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Bounded information seeking (gaze only)                | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Episodic memory, legitimate inputs only                | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Bounded cued recall (typed `Cue`, max 3)               | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Memory survives restart; mind starts empty             | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Forgetting as inaccessibility (no erasure)             | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Self-motion percept (relative, quantized)              | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Path integration with growing doubt                    | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Cognitive places, routes, recognition                  | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Place-keyed search memory (shorter search)             | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Persistent projects: start, interrupt, resume, abandon | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
 
 **Future providers (placeholder, raise not implemented):**
 WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
@@ -798,9 +800,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 264     | 264     |
-| Python (all) | 211     | 211     |
-| **Total**    | **475** | **475** |
+| Node (all)   | 265     | 265     |
+| Python (all) | 223     | 223     |
+| **Total**    | **488** | **488** |
 
 **Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
 not recounted since:**
@@ -820,10 +822,10 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `fix/cognitive-home` on 2026-09-25: Node 264 pass / 0 fail,
-Python 211 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+Verified on `feat/autonomous-projects` on 2026-09-25: Node 265 pass / 0
+fail, Python 223 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
-261 / 197 after PR #9.
+261 / 197 after PR #9; 264 / 211 after PR #10.
 
 ---
 
