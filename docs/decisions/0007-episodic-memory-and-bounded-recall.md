@@ -1,12 +1,23 @@
 # ADR 0007: Episodic memory and bounded recall
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-25)
 **Date:** 2026-09-24
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Settles:** ADR 0003 rule 2 (the retrieval model), for the foundation
 
 ---
+
+> **Operator decision, 2026-09-25: accepted.** The accepted commitments are
+> the boundaries: the evidence store is not Person's memory; memory forms only
+> from legitimate cognitive experience; recall is by bounded typed cue; there
+> is no arbitrary database search; inaccessibility is not deletion;
+> provenance is kept; memory is not perception; memory is not belief; no C4
+> referent is invented; persistence does not imply automatic recall. The
+> numbers below (`RECALL_LIMIT`, the half-life, the salience stretch, the
+> threshold, the salience table, the working-memory capacity, the refractory
+> period, the cue-subject cap) are current implementation parameters, not
+> architectural decisions, and may be retuned without a new ADR.
 
 ## Context
 
@@ -54,8 +65,9 @@ foundation that keeps them now.
    `Memory.recall(cue)`, where a `Cue` names subjects and episode kinds from
    closed vocabularies. There is no text query, no caller-chosen limit, no
    enumeration, and no method that returns the store.
-4. **Recall is small.** Every recall returns at most `RECALL_LIMIT` memories
-   (3). A cue that matches more returns the best of them, never all.
+4. **Recall is small.** Every recall returns at most a small fixed number of
+   memories (currently `RECALL_LIMIT` = 3, a parameter). A cue that matches
+   more returns the best of them, never all.
 5. **Ranking is inspectable.** A memory's score is its cue relevance times its
    accessibility. Relevance is the fraction of the cue's subjects the episode
    is about, and zero relevance excludes it. Accessibility decays with
