@@ -247,3 +247,15 @@ def test_the_loop_reaches_places_only_through_its_spatial_sense() -> None:
     )
     for forbidden in ("spatial_map.places(", "spatial_map._places", ".estimate = "):
         assert forbidden not in source, f"the loop must not edit the map: {forbidden}"
+
+
+def test_no_cognition_code_reads_a_home_distance() -> None:
+    # C8: the observation carries no distance to home, and nothing on the
+    # cognition side may look for one. Whether Person is home is its belief.
+    for path in python_sources():
+        source = path.read_text(encoding="utf-8")
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            # A field lookup is a short literal; prose may name what is gone.
+            short = token.type == tokenize.STRING and len(token.string) < 40
+            if short and "homeDistance" in token.string:
+                raise AssertionError(f"{path.relative_to(REPOSITORY)} reads homeDistance")

@@ -681,13 +681,16 @@ structures
 
 ```text
 activeHome
-homeDistance
 shelterIntegrity
 ownedStorage
 bedKnown
 foodReserve
 fuelReserve
 ```
+
+`homeDistance` was removed on 2026-09-25 (C8). How far Person is from home is
+its own belief, from its spatial model (section 24.4, ADR 0008); exact
+physical distance stays with the trusted runtime and operator tooling.
 
 ## 8.6 Navigation State
 

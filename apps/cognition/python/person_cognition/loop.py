@@ -112,6 +112,8 @@ class CognitionLoop:
         self.reducers = CognitiveReducers(self.statistics, self.memory_store, self.spatial_map)
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
+        #: Person's belief about where it is relative to home (C8).
+        self.home = "unknown"
         self.goal_provider = SurvivalGoalProvider()
         self.goals = GoalStack()
         self.library = RoutineLibrary()
@@ -301,19 +303,21 @@ class CognitionLoop:
 
     def on_observation(self, message: dict[str, Any]) -> None:
         tick = message["tick"]
-        state = symbolic_state(message)
-        context = decision_context(message)
+        # Where Person is comes first: its sense of place decides whether it
+        # believes it is home, and what it notices is remembered there.
+        self.spatial.feel(message["selfMotion"], frozenset(remembering.noticed(message)))
+        self.home, _ = self.spatial.home_relation()
+        state = symbolic_state(message, home=self.home)
+        context = decision_context(message, self.home)
         context_id = context.identifier()
         # The first thing a new observation is good for is settling whatever
         # the last skill claimed it would do.
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
-        # Where Person is comes first, so what it notices is remembered there.
-        self.spatial.feel(message["selfMotion"], frozenset(remembering.noticed(message)))
         self._remember(self.memory.experience(message), tick)
 
         self._reopen_unfound(state, tick)
-        proposals = self.goal_provider.propose(message, state, tick)
+        proposals = self.goal_provider.propose(message, state, tick, home=self.home)
         goal = self.goals.update(proposals, state, tick)
         if goal is None:
             goal = self._idle_goal(tick)
@@ -399,7 +403,9 @@ class CognitionLoop:
             for routine in routines
         ]
         try:
-            choice = self._policy().propose(observation, goal, candidates, context_id)
+            choice = self._policy().propose(
+                observation, goal, candidates, context_id, home=self.home
+            )
         except NoCandidatesError:
             self.goals.block(goal.goal_id, "no_candidate_routine", tick)
             self._emit_idle(observation, goal, context_id, tick)
@@ -818,13 +824,16 @@ class CognitionLoop:
         self.summary.note_outcome(message)
         experience = remembering.acted(message, self.registry, event.event_id if event else None)
         if experience is not None:
-            built_home = (
-                message["executedSkill"] == "build_basic_shelter" and message["status"] == "SUCCESS"
-            )
+            succeeded = message["status"] == "SUCCESS"
+            built_home = message["executedSkill"] == "build_basic_shelter" and succeeded
+            # Having gone home, Person believes it is home: a belief from its
+            # own action's outcome, which labels the place it is at and moves
+            # no estimate. The runtime's home position never comes up.
+            went_home = message["executedSkill"] == "return_home" and succeeded
             where = self._settle(
                 "shelter" if built_home else "action",
                 message["tick"],
-                label="home" if built_home else None,
+                label="home" if (built_home or went_home) else None,
             )
             self._remember([experience], message["tick"], message["decisionId"], place=where)
 

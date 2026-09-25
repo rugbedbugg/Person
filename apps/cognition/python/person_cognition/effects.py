@@ -34,7 +34,11 @@ Verdict = Literal["match", "mismatch", "not_observable", "inconclusive"]
 #: record that a transient action completed rather than anything about the
 #: world. A skill that promises one of them is not making a checkable claim, and
 #: reporting that as a failed prediction would be wrong.
-UNOBSERVABLE_FACTS: frozenset[str] = frozenset({"rested", "stored_surplus", "withdrawn", "looted"})
+#: `at_home` and `sheltered` are Person's belief about where it is (C8), which
+#: an observation alone cannot establish.
+UNOBSERVABLE_FACTS: frozenset[str] = frozenset(
+    {"rested", "stored_surplus", "withdrawn", "looted", "at_home", "sheltered"}
+)
 
 
 def _verdict(fact: str, severity: str) -> Verdict:

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/spatial-model`, based on `0a281f0` (tip of `feat/lan-validation` after PR #8)
+**Last verified against:** branch `fix/cognitive-home`, based on `afebba8` (tip of `feat/lan-validation` after PR #9)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-25
 
@@ -349,7 +349,7 @@ it.
 | C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)           |
 | C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person        |
 | C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below          |
-| C8  | `home.homeDistance` is a drift-free homing channel                   | `6b99830`  | any behaviour that should use places    |
+| C8  | `home.homeDistance` was a drift-free homing channel (resolved)       | `6b99830`  | resolved 2026-09-25, see below          |
 
 ### C1. The observation carried exact coordinates
 
@@ -734,24 +734,38 @@ diagonals in open ground are unaffected and are covered by a test.
   remains the response to those. A path planner cannot make the avatar
   incapable of appearing in a region under all Minecraft physics.
 
-### C8. `homeDistance` is a drift-free homing channel
+### C8. `homeDistance` was a drift-free homing channel — RESOLVED
 
 Found during the Phase C audit (2026-09-25). `Observation.home.homeDistance`
-is the runtime's estimate of the straight-line distance from Person to its
+was the runtime's estimate of the straight-line distance from Person to its
 configured home, computed from exact positions, at any range, through walls,
-with no drift. It predates the spatial model and carries more spatial
-certainty than ADR 0008 allows a sense of place to have.
+with no drift: more spatial certainty than ADR 0008 allows a sense of place.
 
-It is load-bearing and has not been touched: the planner's `at_home` fact,
-the night return-home goal, the safety envelope's distance limit and the
-decision context's home band all read it. The spatial model does not read it
-(an architecture test enforces that), and Person's own "home" is the place in
-which it experienced building its shelter.
+**Decided (operator, 2026-09-25): retire it from cognition.** Exact physical
+home distance may exist in trusted containment and operator tooling. It is
+not a Person sense.
 
-**Decision required:** either keep it as a deliberately learned homing sense,
-with its own ADR saying why a drift-free one is acceptable, or move its
-consumers onto Person's places and retire it. Removing it silently would
-change survival behaviour, so neither has been done.
+- It is gone from the observation and the schema rejects it
+  (`observationVersion` 6).
+- Person's relation to home (`at_home`, `near`, `far`, `unknown`) is derived
+  from its own places and accumulated doubt (`Spatial.home_relation`). It is
+  `near` or `far` only when that holds whichever way the drift has gone.
+  Home is the place Person labelled home when it built its shelter or
+  successfully went home.
+- That relation drives the planner's `at_home` and `sheltered` facts, the
+  night return-home goal (`far` at night), the decision context's home band,
+  and the cognition-side exploration envelope (`far` closes it).
+- The trusted runtime never had a home-distance safety rule: containment is
+  the exploration and protected areas, enforced on the exact position, and
+  unchanged. The one exact home distance left is the operator's
+  `navigation.physicalHomeDistanceBefore/After` in skill-test reports.
+- Tests prove the separation both ways: corrupting Person's estimate changes
+  its home belief and goals without moving the body; pushing the body across
+  a containment boundary changes enforcement and reaches Person only as a
+  felt push. Moving the whole world +1000 X changes nothing in cognition.
+
+`navigation.returnPathKnown` remains: it is a permission fact (whether the
+runtime would allow a direct route home), not a distance.
 
 ## 12. Known Limitations / Backlog
 
@@ -774,7 +788,6 @@ change survival behaviour, so neither has been done.
 | Memory changes one decision: how long a search at a recognised place lasts            | ADR 0007, ADR 0008         |
 | Place recognition is by drifting estimate and coarse scene only; no landmark identity | ADR 0008, C4               |
 | A small teleport inside the locomotion bound is felt as ordinary motion               | ADR 0008                   |
-| `homeDistance` gives a drift-free homing distance beside the spatial model            | Known Deviations C8, above |
 | Actions are remembered without their referent until C4 is resolved                    | ADR 0007, C4               |
 | No attention model: perception is capped deterministically, nearest first             | Known Deviations C1, above |
 | Information seeking is gaze only and per goal                                         | Known Deviations C1        |
@@ -785,9 +798,9 @@ change survival behaviour, so neither has been done.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 261     | 261     |
-| Python (all) | 197     | 197     |
-| **Total**    | **458** | **458** |
+| Node (all)   | 264     | 264     |
+| Python (all) | 211     | 211     |
+| **Total**    | **475** | **475** |
 
 **Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
 not recounted since:**
@@ -807,9 +820,10 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `feat/spatial-model` on 2026-09-25: Node 261 pass / 0 fail,
-Python 197 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
-242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8.
+Verified on `fix/cognitive-home` on 2026-09-25: Node 264 pass / 0 fail,
+Python 211 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
+261 / 197 after PR #9.
 
 ---
 

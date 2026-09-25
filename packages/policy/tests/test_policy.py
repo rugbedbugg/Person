@@ -270,5 +270,6 @@ def test_the_envelope_closes_in_darkness_without_shelter(observation: dict[str, 
     night["environment"]["lightLevel"] = 2
     assert "darkness_without_shelter" in safe_envelope(night).reasons
     night["home"]["shelterState"] = "complete"
-    night["home"]["homeDistance"] = 0.5
-    assert safe_envelope(night)
+    # Sheltered means a complete shelter and Person believing it is home (C8).
+    assert "darkness_without_shelter" in safe_envelope(night, home="near").reasons
+    assert safe_envelope(night, home="at_home")
