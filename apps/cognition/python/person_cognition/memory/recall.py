@@ -38,8 +38,15 @@ class Cue:
     subjects: frozenset[str]
     purpose: str
     kinds: frozenset[str] = field(default=KINDS)
+    #: A cognitive place from Person's own map (ADR 0008). Memories formed
+    #: there count as more relevant; memories from elsewhere still count.
+    place: str | None = None
 
     def __post_init__(self) -> None:
+        if self.place is not None and (
+            not isinstance(self.place, str) or not self.place.startswith("place_")
+        ):
+            raise MemoryRecordError("a cue's place is one of Person's own place identifiers")
         for name, values, vocabulary in (
             ("subjects", self.subjects, SUBJECTS),
             ("kinds", self.kinds, KINDS),
@@ -59,11 +66,18 @@ class Cue:
             raise MemoryRecordError(f"unknown recall purpose {self.purpose!r}")
 
     @classmethod
-    def about(cls, *subjects: str, purpose: str, kinds: Iterable[str] | None = None) -> Cue:
+    def about(
+        cls,
+        *subjects: str,
+        purpose: str,
+        kinds: Iterable[str] | None = None,
+        place: str | None = None,
+    ) -> Cue:
         return cls(
             subjects=frozenset(subjects),
             purpose=purpose,
             kinds=frozenset(kinds) if kinds is not None else KINDS,
+            place=place,
         )
 
     def to_json(self) -> dict[str, object]:
@@ -71,6 +85,7 @@ class Cue:
             "subjects": sorted(self.subjects),
             "kinds": sorted(self.kinds),
             "purpose": self.purpose,
+            "place": self.place,
         }
 
 
@@ -96,11 +111,20 @@ class RecallRules:
         half_life = self.base_half_life * (1.0 + self.salience_stretch * episode.salience)
         return float(0.5 ** (age / half_life))
 
-    @staticmethod
-    def relevance(episode: Episode, cue: Cue) -> float:
+    #: How relevant a memory from somewhere else is to a cue about a place.
+    elsewhere: float = 0.3
+
+    def relevance(self, episode: Episode, cue: Cue) -> float:
         if episode.kind not in cue.kinds:
             return 0.0
-        return len(cue.subjects.intersection(episode.subjects)) / len(cue.subjects)
+        about = len(cue.subjects.intersection(episode.subjects)) / len(cue.subjects)
+        if cue.place is None:
+            return about
+        # A memory Person believes it formed at the cued place counts as far
+        # as that belief was confident; one from anywhere else counts less.
+        if episode.place_id == cue.place:
+            return about * max(self.elsewhere, episode.place_confidence)
+        return about * self.elsewhere
 
 
 @dataclass(frozen=True, slots=True)

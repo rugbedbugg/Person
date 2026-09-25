@@ -161,12 +161,15 @@ rather than stranding a body in a hostile world.
 ## What is not here
 
 No language model, no neural policy, no affect, no social memory, no belief
-store, no world model, no semantic or spatial memory, no projects beyond goal
+store, no world model, no semantic memory, no landmark identity, no projects beyond goal
 suspension, no redstone, no web access, no external chat. Episodic memory
 exists (`apps/cognition/python/person_cognition/memory/`, ADR 0007): it is
 encoded from cognition-facing experience, rebuilt from the journal's
 `memory_encoded` records, and reached only by a typed cue that returns at most
-three memories.
+three memories. A first sense of place exists too
+(`apps/cognition/python/person_cognition/spatial/`, ADR 0008): cognition
+integrates a coarse relative self-motion percept into places and routes of its
+own, with no coordinate anywhere in it.
 `apps/cognition/python/person_cognition/future_providers.py` holds the
 interfaces those systems will attach to. Every one of them raises rather than
 returning a plausible empty result, so nothing can mistake a placeholder for an

@@ -124,6 +124,10 @@ class Episode:
     salience: float
     details: Mapping[str, Any] = field(default_factory=dict)
     provenance: Provenance = field(default_factory=lambda: Provenance("perceived"))
+    #: The cognitive place Person believed it was at, and how strongly
+    #: (ADR 0008). Person's own belief, never a runtime location.
+    place_id: str | None = None
+    place_confidence: float = 0.0
 
     def detail(self, key: str) -> Any:
         return self.details.get(key)
@@ -140,6 +144,8 @@ class Episode:
             "salience": self.salience,
             "details": dict(self.details),
             "provenance": self.provenance.to_json(),
+            "place_id": self.place_id,
+            "place_confidence": self.place_confidence,
         }
 
     @classmethod
@@ -155,4 +161,6 @@ class Episode:
             salience=float(body["salience"]),
             details=dict(body["details"]),
             provenance=Provenance.from_json(body["provenance"]),
+            place_id=body.get("place_id"),
+            place_confidence=float(body.get("place_confidence", 0.0)),
         )

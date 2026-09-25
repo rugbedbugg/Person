@@ -62,6 +62,8 @@ class MemoryStore:
                 salience=float(payload["salience"]),
                 details=dict(payload["details"]),
                 provenance=Provenance.from_json(payload["provenance"]),
+                place_id=(payload.get("place") or {}).get("place_id"),
+                place_confidence=float((payload.get("place") or {}).get("confidence", 0.0)),
             )
             self._add(episode)
         elif event.type == "episode_ended" and "experienced_ticks" in payload:
@@ -194,10 +196,13 @@ class Memory:
         self._in_view = frozenset(found)
         return drafts
 
-    def payload(self, draft: EpisodeDraft) -> dict[str, Any]:
-        """The journal payload for a draft, stamped with time and salience."""
+    def payload(
+        self, draft: EpisodeDraft, place: Mapping[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """The journal payload for a draft, stamped with time, salience and place."""
         novel = not self._store.familiar(self.training_context, draft.subjects)
         return {
+            "place": dict(place) if place else None,
             "kind": draft.kind,
             "subjects": list(draft.subjects),
             "experienced_tick": self._now,

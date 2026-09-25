@@ -201,7 +201,8 @@ def test_the_search_state_has_no_room_for_geometry() -> None:
     # handle could be kept, so none can leak into a later decision.
     fields = {field.name for field in dataclasses.fields(InformationSearch)}
     # `recalled` holds memory identifiers and `recalls_unfound` a flag: what
-    # Person remembered, never where anything is.
+    # Person remembered, never where anything is. `place` is a cognitive place
+    # identifier and a confidence, and `revisit` a confidence (ADR 0008).
     assert fields == {
         "goal_id",
         "purpose",
@@ -210,6 +211,8 @@ def test_the_search_state_has_no_room_for_geometry() -> None:
         "pitch_steps",
         "recalled",
         "recalls_unfound",
+        "place",
+        "revisit",
     }
     for forbidden in ("yaw", "pitch_deg", "position", "coord", "heading", "entity", "x", "z"):
         assert forbidden not in fields

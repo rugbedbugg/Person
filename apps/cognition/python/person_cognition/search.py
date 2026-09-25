@@ -47,6 +47,22 @@ MAX_PITCH_STEPS = 2
 #: What a search concludes when it runs out. Deliberately not "absent".
 NOT_FOUND = "not_found_in_bounded_search"
 
+#: The fewest glances a search spends at a place Person believes it already
+#: searched fruitlessly: enough to notice that something changed. A parameter.
+REVISIT_MIN_LOOKS = 2
+
+
+def revisit_budget(confidence: float) -> int:
+    """Glances for a search, given confidence that this place was searched before.
+
+    Full budget with no such memory, shrinking linearly to the minimum as the
+    belief that it is the same place approaches certainty, which it never
+    reaches. The evidence justifies a shorter look, never no look.
+    """
+    confidence = max(0.0, min(1.0, confidence))
+    return LOOK_BUDGET - round((LOOK_BUDGET - REVISIT_MIN_LOOKS) * confidence)
+
+
 _LEFT = {"ahead_left", "left", "behind_left", "behind"}
 _RIGHT = {"ahead_right", "right", "behind_right"}
 
@@ -75,6 +91,10 @@ class InformationSearch:
     recalled: tuple[str, ...] = ()
     #: Whether one of them was an earlier search that found nothing.
     recalls_unfound: bool = False
+    #: The cognitive place Person believed it searched from (ADR 0008).
+    place: dict[str, Any] | None = None
+    #: Confidence that this place was searched fruitlessly before.
+    revisit: float = 0.0
 
     @property
     def remaining(self) -> int:
@@ -120,5 +140,7 @@ class InformationSearch:
             "budget": self.budget,
             "looks": list(self.looks),
             "recalled": list(self.recalled),
+            "place": self.place,
+            "revisit": self.revisit,
             **extra,
         }

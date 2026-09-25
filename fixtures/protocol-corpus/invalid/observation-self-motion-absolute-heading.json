@@ -17,7 +17,8 @@
       "distance": 0
     },
     "rotation": "none",
-    "vertical": "level"
+    "vertical": "level",
+    "yaw": 1.57
   },
   "vitals": {
     "health": 14.0,

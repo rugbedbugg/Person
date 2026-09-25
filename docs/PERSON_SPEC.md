@@ -1622,6 +1622,13 @@ confidence
 remembered significance
 ```
 
+**CURRENTLY IMPLEMENTED (ADR 0008, fixture only):** a first spatial memory
+built from a coarse, relative sense of Person's own motion. Places are
+Person's own records, recognised with a confidence from a drifting estimate
+and a coarse scene signature; routes are relations between them; there is no
+global map and no coordinate. Landmark identity and named descriptions such
+as the ones below are not implemented.
+
 For example:
 
 ```text

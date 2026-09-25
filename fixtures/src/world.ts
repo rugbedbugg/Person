@@ -686,6 +686,21 @@ export class FixtureWorld implements Embodiment {
     this.#advance(2);
   }
 
+  /**
+   * Moves Person's body without walking, for tests of what Person feels when
+   * something other than its own legs moves it: a push, a current, a server
+   * correction, a teleport.
+   */
+  teleport(position: Position): void {
+    this.#position = { ...position };
+    this.#invalidate();
+  }
+
+  /** Lets world time pass without Person doing anything. */
+  pass(ticks: number): void {
+    this.#advance(ticks);
+  }
+
   /** Sets facing directly, for tests that need Person looking nowhere useful. */
   turn(yaw: number, pitch = 0): void {
     this.#yaw = yaw;
