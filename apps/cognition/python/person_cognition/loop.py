@@ -48,6 +48,7 @@ from .affect import (
     appraise_threat,
 )
 from .context import decision_context
+from .effect_learning import EffectBeliefs, admitted_to, classify, reliability_term
 from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
@@ -129,12 +130,15 @@ class CognitionLoop:
         self.affect = Affect(self.affect_record)
         self._felt_health: float | None = None
         self._goal_events_seen = 0
+        #: Learned reliability of skill effects, active and shadow (ADR 0011).
+        self.effect_beliefs = EffectBeliefs()
         self.reducers = CognitiveReducers(
             self.statistics,
             self.memory_store,
             self.spatial_map,
             self.project_book,
             self.affect_record,
+            self.effect_beliefs,
         )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -452,6 +456,7 @@ class CognitionLoop:
                 context_id,
                 home=self.home,
                 tolerance=self.affect.tolerance(),
+                reliability=self._reliability(),
             )
         except NoCandidatesError:
             self.goals.block(goal.goal_id, "no_candidate_routine", tick)
@@ -487,6 +492,7 @@ class CognitionLoop:
                     {
                         "routine_id": scored.candidate.routine_id,
                         "score": round(scored.score, 6),
+                        "learned_effect": scored.learned_effect,
                         "attempts": scored.counts.attempts,
                         "successes": scored.counts.successes,
                     }
@@ -897,6 +903,8 @@ class CognitionLoop:
             # only thing there is any point predicting.
             pending.expected_effects = tuple(message["expectedEffects"])
             pending.status = status
+            pending.requested_status = str(message["requestedSkillStatus"])
+            pending.reason_codes = tuple(str(code) for code in message["reasonCodes"])
             pending.emergency = bool(message["emergency"])
             pending.elapsed_ticks = int(message["elapsedTicks"])
             pending.health_cost = float(message["healthCost"])
@@ -939,6 +947,52 @@ class CognitionLoop:
 
         active.failure_modes.append(status.lower())
         self._finish_routine("INTERRUPTED", message["tick"], reason="skill_interrupted")
+
+    # --------------------------------------------------------- effect beliefs
+
+    def _learn_effects(
+        self,
+        pending: PendingPrediction,
+        state: dict[str, float] | None,
+        prediction_event: str | None,
+        tick: int,
+    ) -> None:
+        """Classify a settled prediction per declared effect, and journal it.
+
+        Every trial is recorded, informative or not, with its reason. What the
+        learning mode admits it to is fixed at the moment of writing: nothing
+        under `off`, the shadow table under `shadow`, the active table under
+        `supervised`.
+        """
+        trials = classify(
+            requested=pending.requested_skill,
+            executed=pending.executed_skill,
+            status=pending.status,
+            requested_status=pending.requested_status,
+            emergency=pending.emergency,
+            reason_codes=pending.reason_codes,
+            expected_effects=pending.expected_effects,
+            state_before=pending.state_before,
+            state_after=state,
+        )
+        destination = admitted_to(self.learning_mode)
+        for trial in trials:
+            self._record(
+                "effect_evidence",
+                tick,
+                {
+                    **trial.to_json(),
+                    "admitted_to": destination if trial.verdict != "inconclusive" else "none",
+                    "prediction_event_id": prediction_event,
+                },
+                pending.decision_id,
+            )
+
+    def _reliability(self) -> Any:
+        """The learned term for routine scoring, only when beliefs may act."""
+        if self.learning_mode != "supervised":
+            return None
+        return reliability_term(self.effect_beliefs, self.registry, self.training_context)
 
     # ---------------------------------------------------------------- affect
 
@@ -1072,7 +1126,8 @@ class CognitionLoop:
         payload = build_payload(pending, state)
         self.prediction_errors.append(payload)
         self.summary.note_prediction(payload)
-        self._record("prediction_error", tick, payload, pending.decision_id)
+        record = self._record("prediction_error", tick, payload, pending.decision_id)
+        self._learn_effects(pending, state, record.event_id if record else None, tick)
 
     def _finish_routine(self, status: str, tick: int, *, reason: str) -> None:
         active = self.active

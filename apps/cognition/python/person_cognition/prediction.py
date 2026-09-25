@@ -4,9 +4,11 @@ Every SkillSpec declares its expected effects, and the planner reasons with
 them as if they were true. This module measures how true they actually are.
 
 It is instrumentation, not a learner. Nothing here feeds back into routine
-selection in this milestone: the records exist so a later world model can be
-built on measurements rather than on guesses, and so that a contract which is
-quietly wrong shows up as data instead of as unexplained failures.
+selection directly: the records exist so a contract which is quietly wrong
+shows up as data instead of as unexplained failures. Since ADR 0011 the
+effect learner (`effect_learning.py`) reads the same comparison, classifies
+which trials were genuine and evaluable, and keeps its own beliefs; routine
+statistics still never see prediction error.
 
 Both sides of the comparison are expressed in the symbolic planning state. That
 keeps one taxonomy of what an item means, owned by the runtime that classifies
@@ -99,6 +101,10 @@ class PendingPrediction:
     executed_skill: str | None = None
     expected_effects: tuple[dict[str, Any], ...] = ()
     status: str | None = None
+    #: What became of the requested skill, and why, for deciding whether this
+    #: was a genuine attempt at all (ADR 0011).
+    requested_status: str | None = None
+    reason_codes: tuple[str, ...] = ()
     emergency: bool = False
     elapsed_ticks: int = 0
     health_cost: float = 0.0

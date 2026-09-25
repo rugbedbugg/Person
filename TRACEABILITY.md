@@ -293,6 +293,20 @@ claim without reading the whole tree.
 | Memory salience untouched                                     | ADR 0007 constants                                 | `test_memory_salience_and_recall_are_untouched_by_affect`                   |
 | Same evidence, same affect, wherever the world is             | frame-free inputs                                  | `tests/integration/affect.test.ts`                                          |
 
+## Learned effect reliability (ADR 0011)
+
+| Requirement                                     | Implementation                                       | Tests                                                                                        |
+| ----------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Only genuine, evaluable attempts teach          | `attempt_reason`, `classify`, `EVALUABLE_FACTS`      | `test_what_was_not_a_genuine_attempt_...`, `test_beliefs_ledger_facts_...`                   |
+| One outcome is not certainty; evidence reverses | Beta(1,1) estimate, `strength`                       | `test_one_outcome_is_not_certainty`, `test_later_contradicting_evidence_...`                 |
+| Unknown differs from balanced                   | no estimate without evidence                         | `test_no_experience_is_not_the_same_as_balanced_experience`                                  |
+| Keyed by skill and fact, never target (C4)      | `Trial`, `EffectBelief`                              | `test_trials_and_beliefs_are_keyed_by_skill_and_fact_only`                                   |
+| Learning mode decides where evidence goes       | `admitted_to`, `EffectBeliefs` tables                | `test_off_learns_nothing_shadow_only_shadow_...`, `test_shadow_learning_changes_no_decision` |
+| Bounded, separately recorded policy term        | `reliability_term`, `ScoredCandidate.learned_effect` | `test_supported_reliability_can_change_a_close_choice_...`                                   |
+| Beliefs persist; the mind is not filled         | reducer over `effect_evidence`                       | `test_active_beliefs_survive_restart_...`                                                    |
+| Statistics, memory and affect untouched         | reducers ignore `effect_evidence`                    | `test_routine_statistics_memory_and_affect_ignore_effect_evidence`                           |
+| Same felt evidence, same learning               | frame-free inputs                                    | `tests/integration/effect-learning.test.ts`                                                  |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

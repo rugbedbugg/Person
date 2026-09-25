@@ -1,10 +1,10 @@
 """Everything cognition rebuilds from the journal after a restart.
 
-Five reducers read the same journal for different things: the routine
+Six reducers read the same journal for different things: the routine
 statistics read outcomes, the memory store reads encoded episodes, the
 spatial map reads the places Person formed and revisited, and the project
-book reads the projects Person took up, and the affect record reads
-appraisals. None
+book reads the projects Person took up, the affect record reads
+appraisals, and the effect beliefs read classified prediction evidence. None
 sees the other's state, and each ignores the events it has no case for.
 """
 
@@ -17,6 +17,7 @@ from person_persistence import EvidenceEvent
 from person_policy import RoutineStatistics
 
 from .affect import AffectRecord
+from .effect_learning import EffectBeliefs
 from .memory import MemoryStore
 from .projects import ProjectBook
 from .spatial import SpatialMap
@@ -30,12 +31,14 @@ class CognitiveReducers:
         spatial: SpatialMap,
         projects: ProjectBook,
         affect: AffectRecord,
+        effects: EffectBeliefs,
     ) -> None:
         self.statistics = statistics
         self.memory = memory
         self.spatial = spatial
         self.projects = projects
         self.affect = affect
+        self.effects = effects
 
     def reset(self) -> None:
         self.statistics.reset()
@@ -43,6 +46,7 @@ class CognitiveReducers:
         self.spatial.reset()
         self.projects.reset()
         self.affect.reset()
+        self.effects.reset()
 
     def apply(self, event: EvidenceEvent) -> None:
         self.statistics.apply(event)
@@ -50,6 +54,7 @@ class CognitiveReducers:
         self.spatial.apply(event)
         self.projects.apply(event)
         self.affect.apply(event)
+        self.effects.apply(event)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -58,6 +63,7 @@ class CognitiveReducers:
             "spatial": self.spatial.to_json(),
             "projects": self.projects.to_json(),
             "affect": self.affect.to_json(),
+            "effects": self.effects.to_json(),
         }
 
     def load_json(self, body: Mapping[str, Any]) -> None:
@@ -68,3 +74,4 @@ class CognitiveReducers:
         self.spatial.load_json(body["spatial"])
         self.projects.load_json(body["projects"])
         self.affect.load_json(body["affect"])
+        self.effects.load_json(body["effects"])

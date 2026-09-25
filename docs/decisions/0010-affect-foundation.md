@@ -1,6 +1,6 @@
 # ADR 0010: Affect as a bounded bias on cognition
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-26)
 **Date:** 2026-09-25
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -9,6 +9,13 @@ tolerance, bounded; not on memory salience; rule-based; no relationships
 (2026-09-25)
 
 ---
+
+> **Operator decision, 2026-09-26: accepted.** The architecture is accepted:
+> experienced event, deterministic appraisal, continuous bounded affect,
+> bounded cognitive bias, ordinary cognition. The appraisal weights, decay and
+> recovery constants, the ±25 cap, the 0.5-1.25 exploration factor, the three
+> current dimensions and the neutral temperament values are implementation
+> parameters, not architectural laws.
 
 ## Context
 

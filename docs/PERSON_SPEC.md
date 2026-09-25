@@ -1770,6 +1770,11 @@ so that catastrophic forgetting is detected instead of hidden by continuously ch
 
 # 26. World Model
 
+**CURRENTLY IMPLEMENTED (ADR 0011, fixture only):** one narrow learned belief,
+the reliability of each skill's declared effects, learned from audited
+prediction error with explicit uncertainty and gated by learning mode. No
+general world model, causal hypotheses or experiments exist.
+
 The architecture must never collapse six concepts that this section, and every
 section that touches belief or memory, depends on being kept distinct:
 
