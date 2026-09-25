@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v4"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v5"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -25,6 +25,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v2",
     "person-evidence-v3",
     "person-evidence-v4",
+    "person-evidence-v5",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -50,6 +51,11 @@ EVENT_TYPES: tuple[str, ...] = (
     #: A cue Person recalled with, and which memories came back.
     #: Instrumentation only: recalling changes nothing in the store.
     "memory_recalled",
+    #: Person formed a cognitive place, in its own frame (ADR 0008). The
+    #: spatial model is rebuilt from these and `place_visited` alone.
+    "place_formed",
+    #: Person believed it was back at a place it had formed.
+    "place_visited",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -58,6 +64,8 @@ V2_EVENT_TYPES: frozenset[str] = frozenset({"prediction_error"})
 V3_EVENT_TYPES: frozenset[str] = frozenset({"information_search"})
 #: Event types introduced with the fourth.
 V4_EVENT_TYPES: frozenset[str] = frozenset({"memory_encoded", "memory_recalled"})
+#: Event types introduced with the fifth.
+V5_EVENT_TYPES: frozenset[str] = frozenset({"place_formed", "place_visited"})
 
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
@@ -65,6 +73,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V2_EVENT_TYPES, "person-evidence-v2"),
     **dict.fromkeys(V3_EVENT_TYPES, "person-evidence-v3"),
     **dict.fromkeys(V4_EVENT_TYPES, "person-evidence-v4"),
+    **dict.fromkeys(V5_EVENT_TYPES, "person-evidence-v5"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
