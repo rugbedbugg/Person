@@ -215,7 +215,13 @@ def test_the_spatial_model_reads_no_absolute_or_ledger_state() -> None:
     cognition = REPOSITORY / "apps/cognition/python/person_cognition"
     # Projects are anchored to places in the same model and are held to the
     # same rule (Phase D).
-    sources = [*(cognition / "spatial").rglob("*.py"), cognition / "projects.py"]
+    sources = [
+        *(cognition / "spatial").rglob("*.py"),
+        cognition / "projects.py",
+        cognition / "affect.py",
+        # Learned effect beliefs come from felt outcomes only (ADR 0011).
+        cognition / "effect_learning.py",
+    ]
     forbidden = {
         "homeDistance",
         "yaw",
