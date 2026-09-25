@@ -166,10 +166,46 @@ export interface PreviousOutcome {
   interruptReason: string | null;
 }
 
+/**
+ * Person's felt sense of its own motion since the previous observation, in
+ * the frame of its facing at that observation (ADR 0008). Coarse, relative,
+ * and with no absolute position or heading anywhere in it.
+ */
+export interface SelfMotionPercept {
+  continuity: "start" | "continuous" | "discontinuous";
+  translation: {
+    direction:
+      | "ahead"
+      | "ahead_left"
+      | "ahead_right"
+      | "left"
+      | "right"
+      | "behind_left"
+      | "behind_right"
+      | "behind"
+      | "none"
+      | "unknown";
+    band: "none" | "tiny" | "short" | "moderate" | "far" | "unknown";
+    distance: number | null;
+  };
+  rotation:
+    | "none"
+    | "slight_left"
+    | "left"
+    | "sharp_left"
+    | "about_face"
+    | "sharp_right"
+    | "right"
+    | "slight_right"
+    | "unknown";
+  vertical: "level" | "up" | "down" | "unknown";
+}
+
 export interface Observation extends Envelope {
   type: "Observation";
   observationVersion: number;
   trainingContext: TrainingContext;
+  selfMotion: SelfMotionPercept;
   vitals: {
     health: number;
     food: number;
