@@ -119,11 +119,17 @@ class SurvivalGoalProvider:
     name = "survival"
 
     def propose(
-        self, observation: dict[str, Any], state: dict[str, float], tick: int
+        self,
+        observation: dict[str, Any],
+        state: dict[str, float],
+        tick: int,
+        *,
+        home: str = "unknown",
     ) -> list[Goal]:
+        home_relation = home
         drives = {drive.name: drive for drive in homeostasis(observation, state)}
         environment = observation["environment"]
-        home = observation["home"]
+        home_record = observation["home"]
         night = environment["dayPhase"] in {"dusk", "night"}
         proposals: list[Goal] = []
 
@@ -191,7 +197,9 @@ class SurvivalGoalProvider:
                 ["no_owned_storage"],
             )
 
-        if home["homeDistance"] is not None and home["homeDistance"] > 32 and night:
+        # Person's own belief that it is far from a home it remembers, never
+        # a distance the runtime measured (C8).
+        if home_relation == "far" and night:
             add(
                 "RECOVER_HOME",
                 600,
@@ -199,7 +207,7 @@ class SurvivalGoalProvider:
                 ["far_from_home_at_night"],
             )
 
-        if home["foodReserve"] < 4 and state.get("owned_storage_available", 0) >= 1:
+        if home_record["foodReserve"] < 4 and state.get("owned_storage_available", 0) >= 1:
             add(
                 "MAINTAIN_RESERVES",
                 180,
