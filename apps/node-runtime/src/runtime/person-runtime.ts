@@ -44,7 +44,7 @@ import {
   type EpisodeReport,
 } from "../reporting/episode-report.ts";
 import { StatusWriter, statusPath } from "../reporting/status.ts";
-import { WorldMemory } from "./world-memory.ts";
+import { PlacementLedger } from "./placement-ledger.ts";
 
 export interface PersonRuntimeOptions {
   config: PersonConfig;
@@ -79,7 +79,7 @@ export class PersonRuntime {
   readonly config: PersonConfig;
   readonly identity: SessionIdentity;
   readonly registry: SkillRegistry;
-  readonly memory: WorldMemory;
+  readonly ledger: PlacementLedger;
   readonly permissions: PermissionGate;
   readonly kernel: SafetyKernel;
   readonly validator: InvocationValidator;
@@ -114,7 +114,7 @@ export class PersonRuntime {
     };
     this.#episodeId = options.episodeId ?? `ep_${Date.now().toString(36)}`;
     this.#onDiagnostic = options.onDiagnostic ?? (() => {});
-    this.memory = WorldMemory.load(
+    this.ledger = PlacementLedger.load(
       options.config.runtime.outputDirectory,
       this.identity.worldId,
       this.identity.personId,
@@ -133,7 +133,7 @@ export class PersonRuntime {
       permissions: this.permissions,
       kernel: this.kernel,
       registry: this.registry,
-      memory: this.memory,
+      ledger: this.ledger,
     });
     this.#operatorIntervention = {
       flagged: options.operatorIntervention !== undefined,
@@ -158,9 +158,9 @@ export class PersonRuntime {
         learningMode: options.config.learning.mode,
         operatorIntervention: this.#operatorIntervention,
         home: {
-          position: this.memory.home.position,
+          position: this.ledger.home.position,
           distance: null,
-          shelterState: this.memory.home.shelterState,
+          shelterState: this.ledger.home.shelterState,
         },
       },
     );
@@ -299,7 +299,7 @@ export class PersonRuntime {
         // Cognition is already gone; the report below is the record that matters.
       }
     } finally {
-      this.memory.save();
+      this.ledger.save();
       await this.#channel.stop();
       await this.#embodiment.disconnect();
       this.#status.update({
@@ -312,7 +312,7 @@ export class PersonRuntime {
       });
     }
 
-    builder.setStorageProvenance(this.memory.ownedStorage);
+    builder.setStorageProvenance(this.ledger.ownedStorage);
     const report = builder.finish(
       outcome,
       reason,
@@ -330,7 +330,7 @@ export class PersonRuntime {
     patch: Partial<Parameters<StatusWriter["update"]>[0]> = {},
   ): void {
     const snapshot = this.#embodiment.snapshot();
-    const home = this.memory.home.position;
+    const home = this.ledger.home.position;
     this.#status.update({
       tick: snapshot.tick,
       dimension: snapshot.dimension,
@@ -341,7 +341,7 @@ export class PersonRuntime {
       home: {
         position: home,
         distance: distance(snapshot.position, home),
-        shelterState: this.memory.home.shelterState,
+        shelterState: this.ledger.home.shelterState,
       },
       safety: {
         threat: this.kernel.threatState(snapshot),
@@ -397,7 +397,7 @@ export class PersonRuntime {
       snapshot,
       permissions: this.permissions,
       kernel: this.kernel,
-      memory: this.memory,
+      ledger: this.ledger,
       trainingContext: this.config.runtime.trainingContext,
       cognition: this.#cognitionState,
       previousOutcome: this.#previousOutcome,
@@ -475,7 +475,7 @@ export class PersonRuntime {
         interruptReason: outcome.interruptReason,
       };
       this.#cognitionState = { ...this.#cognitionState, activeSkill: null };
-      this.memory.save();
+      this.ledger.save();
     }
     this.#record(
       builder,

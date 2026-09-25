@@ -59,10 +59,11 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | ---------------------------------------------------------- | ------------------------------------------------- | ---------------------------------- | ---------- |
 | [0001](0001-baritone-motor-backend.md)                     | Baritone as the planned primary motor backend     | Accepted (direction) / Deferred    | 2026-09-22 |
 | [0002](0002-perception-firewall.md)                        | The perception firewall                           | Accepted (rule) / Deferred (model) | 2026-09-22 |
-| [0003](0003-memory-firewall.md)                            | The memory firewall                               | Accepted (rule) / Deferred (model) | 2026-09-22 |
+| [0003](0003-memory-firewall.md)                            | The memory firewall                               | Accepted (rule) / model: ADR 0007  | 2026-09-22 |
 | [0004](0004-external-awareness-and-research-boundary.md)   | External awareness and the research boundary      | Accepted (rule) / Deferred         | 2026-09-22 |
 | [0005](0005-cognitive-autonomy-vs-capability-authority.md) | Cognitive autonomy is not environmental authority | Accepted                           | 2026-09-22 |
 | [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                           | Accepted (rule) / Deferred         | 2026-09-22 |
+| [0007](0007-episodic-memory-and-bounded-recall.md)         | Episodic memory and bounded recall                | Proposed                           | 2026-09-24 |
 
 All six were written during the Phase 0 canonical architecture reconciliation
 (`docs/PERSON_SPEC.md`, frozen 2026-09-22). None of them changed production

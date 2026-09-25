@@ -486,8 +486,8 @@
               },
               "source": {
                 "type": "string",
-                "const": "remembered",
-                "description": "Read from Person's own placement ledger rather than seen."
+                "const": "placement_ledger",
+                "description": "Read from the runtime's placement ledger of what Person built, rather than seen. Not a recollection."
               }
             }
           }

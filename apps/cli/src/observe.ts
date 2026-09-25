@@ -9,7 +9,7 @@ import {
   ProtectedAreas,
   SafetyKernel,
   StatusWriter,
-  WorldMemory,
+  PlacementLedger,
   buildObservation,
   statusPath,
   type Embodiment,
@@ -73,7 +73,7 @@ export async function captureObservation(
   const areas = new ProtectedAreas(config);
   const permissions = new PermissionGate(config, areas);
   const kernel = new SafetyKernel(permissions);
-  const memory = WorldMemory.load(
+  const ledger = PlacementLedger.load(
     config.runtime.outputDirectory,
     config.worldId,
     config.personId,
@@ -103,7 +103,7 @@ export async function captureObservation(
       snapshot: embodiment.snapshot(),
       permissions,
       kernel,
-      memory,
+      ledger,
       trainingContext: config.runtime.trainingContext,
       cognition: {
         activeGoal: null,
@@ -124,9 +124,9 @@ export async function captureObservation(
       food: snapshot.food,
       lastSafePosition: snapshot.lastSafePosition,
       home: {
-        position: memory.home.position,
-        distance: distance(snapshot.position, memory.home.position),
-        shelterState: memory.home.shelterState,
+        position: ledger.home.position,
+        distance: distance(snapshot.position, ledger.home.position),
+        shelterState: ledger.home.shelterState,
       },
       safety: {
         threat: kernel.threatState(snapshot),

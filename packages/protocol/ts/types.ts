@@ -131,9 +131,11 @@ export interface WorkstationRecord extends RelativeLocation {
    * Where this came from. Workstations are read out of Person's own placement
    * ledger rather than seen, so they are reported even when Person is facing
    * the other way, and they are the one channel in `nearby` that is not
-   * current perception. Marked so it cannot be mistaken for one.
+   * current perception. Marked so it cannot be mistaken for one, and named
+   * for the runtime record it is, so it cannot be mistaken for something
+   * Person recalled either.
    */
-  source: "remembered";
+  source: "placement_ledger";
 }
 
 export interface HazardRecord extends RelativeLocation {

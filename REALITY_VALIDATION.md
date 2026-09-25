@@ -254,6 +254,34 @@ needs more than exists: `person skill-test` runs a skill with its default
 parameters, which for `look` is `forward`, so a directed `look` can only be
 observed live inside a `person run` episode today.
 
+## Memory (fixture only)
+
+Added 2026-09-24 (ADR 0007). **TESTED IN FIXTURE. Not live-validated.** No
+new body behaviour is involved: memory lives entirely in cognition and is fed
+by messages the runtime already sends. The peripheral-ownership repair
+(PR #7), which gates what memory can be formed from, is also fixture-only.
+
+What the fixture establishes (`apps/cognition/tests/test_memory.py`,
+`tests/integration/memory.test.ts`):
+
+- wood behind a wall or beyond the range of vision never becomes a memory of
+  wood; what Person remembers instead is a search that concluded
+  `not_found_in_bounded_search`;
+- every encoded detail is from a fixed whitelist, and no coordinate, entity
+  handle, UUID, yaw or pitch appears in any memory;
+- memories survive a restart with their provenance, a restarted Person starts
+  with nothing in mind, and each recall returns at most three memories, and
+  only when a cue asks;
+- with tree A in view and a nearer tree B behind Person, the motor fells B
+  (C4), and memory records "saw wood" and "cut wood" with no link between them.
+
+Recall changes no decision yet. The smallest live checkpoint needs no new
+tooling: run two short `person run` episodes against the same evidence
+directory in a disposable 1.16.1 LAN world, then read the journal and confirm
+that `memory_encoded` records carry only whitelisted details and that the
+second session's `memory_recalled` records name memories from the first. That
+has not been done.
+
 ## Safety validation
 
 Proven in the fixture and against the double:

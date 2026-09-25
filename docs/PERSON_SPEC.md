@@ -1560,14 +1560,20 @@ Memory retrieval should eventually be cue, salience and context dependent.
 Person may deliberately try to remember something, and recall is not
 guaranteed to be perfect.
 
-**CURRENTLY IMPLEMENTED:** the engineering half only. The append-only evidence
-journal (section 23), the snapshots and the provenance records are the full
-event store, and they are read by the statistics reducer, not by anything that
-could be called recollection. `WorldMemory`
-(`apps/node-runtime/src/runtime/world-memory.ts`) is a runtime-owned ownership
-and placement ledger, not Person's memory, and the naming is misleading enough
-to be worth saying twice. Nothing in this section 24 is implemented; see
-`docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6.
+**CURRENTLY IMPLEMENTED (ADR 0007, fixture only):** the engineering half, and
+the first cognitive layer. The append-only evidence journal (section 23), the
+snapshots and the provenance records are the full event store. Episodic memory
+(24.2) and a small working memory (24.1) now exist in
+`apps/cognition/python/person_cognition/memory/`: episodes are encoded through
+a whitelist from what cognition was given or did, the journal records each
+encoding, and the memory store is rebuilt from those records alone. Retrieval
+(section 25) is by typed cue, at most three memories at a time, ranked by cue
+relevance times an accessibility that decays with experienced time and more
+slowly with salience. Semantic, spatial, social and autobiographical memory,
+consolidation and interference measurement are not implemented.
+`PlacementLedger` (`apps/node-runtime/src/runtime/placement-ledger.ts`,
+formerly `WorldMemory`) is a runtime-owned ownership and placement ledger, not
+Person's memory. See `docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6.
 
 ## 24.1 Working Memory
 

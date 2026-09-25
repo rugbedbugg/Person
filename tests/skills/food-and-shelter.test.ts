@@ -90,8 +90,8 @@ test("cooking requires an owned furnace and fuel, then produces cooked food", as
   const built = await world.run("craft_furnace");
   assert.equal(built.status, "SUCCESS", JSON.stringify(built.reasonCodes));
   assert.ok(
-    world.memory.furnacePosition,
-    "the furnace position must be remembered",
+    world.ledger.furnacePosition,
+    "the furnace position must be recorded",
   );
 
   const cooked = await world.run("cook_food", { target_amount: 2 });
@@ -111,7 +111,7 @@ test("shelter is built, verified, reopened and repaired", async () => {
   const built = await world.run("build_basic_shelter");
   assert.equal(built.status, "SUCCESS", JSON.stringify(built.reasonCodes));
   assert.ok(built.evidenceKinds.includes("shelter_verified"));
-  assert.equal(world.memory.home.shelterState, "complete");
+  assert.equal(world.ledger.home.shelterState, "complete");
 
   // Knock a block out and repair it.
   world.world.setBlock({ x: 1, y: 64, z: 1 }, "air");

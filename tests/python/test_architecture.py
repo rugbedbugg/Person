@@ -130,8 +130,8 @@ def test_learning_is_off_by_default_everywhere() -> None:
 def test_future_providers_refuse_to_pretend_they_work() -> None:
     from person_cognition.future_providers import FUTURE_PROVIDERS, NotYetImplemented
 
+    # Memory left this list when it was built (ADR 0007); the rest remain.
     assert set(FUTURE_PROVIDERS) == {
-        "MemoryProvider",
         "WorldModelProvider",
         "AffectProvider",
         "LanguageProvider",
@@ -177,3 +177,30 @@ def test_no_required_scope_placeholders_remain_in_cognition() -> None:
         source = path.read_text(encoding="utf-8")
         match = marker.search(source)
         assert match is None, f"{path.relative_to(REPOSITORY)} contains {match.group(0)}"
+
+
+def test_memory_cannot_read_the_journal_for_itself() -> None:
+    # The memory store is fed events by the evidence store's replay, and reads
+    # only the ones Person encoded. If the memory package could open the
+    # journal it could recall anything in it (ADR 0003 rule 1, ADR 0007).
+    forbidden = {"EvidenceJournal", "EvidenceStore", "SnapshotStore", "open", "read_text"}
+    package = REPOSITORY / "apps/cognition/python/person_cognition/memory"
+    for path in package.rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            name = (
+                node.id
+                if isinstance(node, ast.Name)
+                else node.attr
+                if isinstance(node, ast.Attribute)
+                else node.name
+                if isinstance(node, ast.alias)
+                else None
+            )
+            assert name not in forbidden, f"{path.relative_to(REPOSITORY)} uses {name}"
+
+
+def test_no_arbitrary_query_interface_to_memory_exists() -> None:
+    for path in python_sources():
+        source = path.read_text(encoding="utf-8")
+        assert "def retrieve(" not in source, f"{path.relative_to(REPOSITORY)} defines retrieve"

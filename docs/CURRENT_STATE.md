@@ -1,13 +1,13 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/information-seeking`, based on `aa9dccf` (tip of `feat/lan-validation` after PR #5)
+**Last verified against:** branch `feat/memory-foundation`, based on `0f354df` (tip of `feat/lan-validation` after PR #7)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
-**Date:** 2026-09-23
+**Date:** 2026-09-24
 
 This file is strictly factual. It describes what exists in the source tree and
 what has been run. **`docs/PERSON_SPEC.md` specifies a great deal that is not
-here**, including the perception firewall's sense model, the memory firewall's
-retrieval layer, belief, affect, language, social cognition, projects, web
+here**, including the perception firewall's sense model, semantic, spatial,
+social and autobiographical memory, consolidation, belief, affect, language, social cognition, projects, web
 research, external chat, the Baritone motor backend and the 1.16.5 target.
 That specification's architecture was reconciled on 2026-09-22 and **changed
 no code**. None of it appears below, because none of it exists.
@@ -89,6 +89,7 @@ Two implementations, same skill code:
 - **Routines:** Content-derived stable identifiers, nesting supported
 - **Policy:** DeterministicFallback + EvidencePolicy (Beta posterior, risk-dominant scoring, safe envelope)
 - **Learning modes:** off / shadow / supervised (never auto-enabled)
+- **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
 
 ### Evidence & Persistence (`packages/persistence/`)
 
@@ -97,8 +98,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation)
-- **Schema versions:** new records are `person-evidence-v3`; v1 and v2 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone)
+- **Schema versions:** new records are `person-evidence-v4`; v1 to v3 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -195,28 +196,32 @@ gitignored).
 
 ## 6. Cognition / Planning / Learning Status
 
-| Component                                 | Status                                                     |
-| ----------------------------------------- | ---------------------------------------------------------- |
-| Decision context (7 dimensions)           | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Homeostatic survival goals                | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Goal stack (suspend/resume)               | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Symbolic planner (preconditions/effects)  | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Routine model (nesting, stable IDs)       | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Deterministic fallback policy             | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Evidence policy (Beta posterior)          | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Safe exploration envelope                 | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Learning modes (off/shadow/supervised)    | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Evidence journal (append-only, chained)   | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Atomic snapshots + restore                | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Restart reuse (evidence survives restart) | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
-| Prediction error logging                  | IMPLEMENTED + TESTED IN FIXTURE (inert, changes no policy) |
-| Tick budget instrumentation               | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Recognition gates evidence facts          | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Missing-evidence counterfactual           | IMPLEMENTED + TESTED IN FIXTURE                            |
-| Bounded information seeking (gaze only)   | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Component                                  | Status                                                     |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| Decision context (7 dimensions)            | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Homeostatic survival goals                 | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Goal stack (suspend/resume)                | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Symbolic planner (preconditions/effects)   | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Routine model (nesting, stable IDs)        | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Deterministic fallback policy              | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Evidence policy (Beta posterior)           | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Safe exploration envelope                  | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Learning modes (off/shadow/supervised)     | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Evidence journal (append-only, chained)    | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Atomic snapshots + restore                 | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Restart reuse (evidence survives restart)  | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Prediction error logging                   | IMPLEMENTED + TESTED IN FIXTURE (inert, changes no policy) |
+| Tick budget instrumentation                | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Recognition gates evidence facts           | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Missing-evidence counterfactual            | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Bounded information seeking (gaze only)    | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Episodic memory, legitimate inputs only    | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Bounded cued recall (typed `Cue`, max 3)   | IMPLEMENTED + TESTED IN FIXTURE                            |
+| Memory survives restart; mind starts empty | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Forgetting as inaccessibility (no erasure) | IMPLEMENTED + TESTED IN FIXTURE                            |
 
 **Future providers (placeholder, raise not implemented):**
-MemoryProvider, WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
+WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
 
 ---
 
@@ -330,15 +335,15 @@ implementation. This is the canonical, full-detail record; nothing shorter
 exists elsewhere, and `docs/PERSON_SPEC.md` points here rather than repeating
 it.
 
-| ID  | Deviation                                                            | Introduced | Decision needed before            |
-| --- | -------------------------------------------------------------------- | ---------- | --------------------------------- |
-| C1  | The `Observation` carried exact coordinates (resolved)               | `6b99830`  | resolved 2026-09-22, see below    |
-| C2  | Protected-area entry is an L0 "hard safety" trigger                  | `6b99830`  | any change to the kernel's levels |
-| C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | the memory system, or a rename    |
-| C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing |
-| C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)     |
-| C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person  |
-| C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below    |
+| ID  | Deviation                                                            | Introduced | Decision needed before                  |
+| --- | -------------------------------------------------------------------- | ---------- | --------------------------------------- |
+| C1  | The `Observation` carried exact coordinates (resolved)               | `6b99830`  | resolved 2026-09-22, see below          |
+| C2  | Protected-area entry is an L0 "hard safety" trigger                  | `6b99830`  | any change to the kernel's levels       |
+| C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | **Resolved**: renamed `PlacementLedger` |
+| C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing       |
+| C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)           |
+| C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person        |
+| C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below          |
 
 ### C1. The observation carried exact coordinates
 
@@ -385,10 +390,11 @@ aggregation and a human-like sense model, and a cone that recognised everything
 equally out to 100 degrees would be neither. Sub-block shapes are ignored, so a fence occludes as a full cube
 does. Resources, hazards, entities and found containers are filtered through
 it. Workstations and owned storage are not: they come from Person's own
-placement ledger, so they are remembered rather than seen. Every workstation
-record carries `source: "remembered"` so the channel cannot be mistaken for
-current perception, and `home.ownedStorage` sits in the `home` block for the
-same reason. That is the channel to revisit when memory exists (C6).
+placement ledger, so they are recorded rather than seen. Every workstation
+record carries `source: "placement_ledger"` so the channel cannot be mistaken
+for current perception or for a recollection, and `home.ownedStorage` sits in
+the `home` block for the same reason. Person's own memory reaches cognition by
+a separate, bounded path (ADR 0007).
 
 **Proprioception.** Health, food, saturation, air, armour, status effects,
 whether Person is alive, and the inventory are reported as body state rather
@@ -502,8 +508,10 @@ What information seeking does **not** establish:
   Tests prove the _planner's_ decisions ignore unperceived wood; they do not
   prove the _body_ does.
 - Searches do not share results. Each goal that needs the same unseen evidence
-  runs its own bounded search, and a restarted process remembers no earlier
-  search. Total looking is bounded by goals times budget, not by one budget.
+  runs its own bounded search. Total looking is bounded by goals times budget,
+  not by one budget. Since Phase B a restarted Person can _recall_ an earlier
+  fruitless search (C6), and still searches again, because without a sense of
+  place it cannot know it is where it looked before.
 - Search is gaze only. Person does not walk anywhere to look; that needs a
   spatial model and is not attempted.
 - ~~Peripheral animal records still carry the `named` and `tamed` booleans.~~
@@ -545,16 +553,22 @@ still stop Person. What is wrong is only the claim about why.
 from L0, or whether the distinction stays documentary. No production change has
 been made.
 
-### C3. `WorldMemory` is not memory
+### C3. `WorldMemory` is not memory — RESOLVED
 
-`apps/node-runtime/src/runtime/world-memory.ts` is a runtime-owned ownership
+`apps/node-runtime/src/runtime/world-memory.ts` was a runtime-owned ownership
 and placement ledger: home record, placed blocks, storage provenance, furnace
 and crafting-table positions. It is privileged engineering state that the
 observation builder reads to derive semantic facts. It is not, and must never
 become, Person's recollection (`docs/PERSON_SPEC.md` section 24).
 
-**Decision required:** rename at the next milestone that touches it, or accept
-the name and document it. Both are defensible; leaving it ambiguous is not.
+**Decided (operator, 2026-09-24): rename.** It is now `PlacementLedger` in
+`runtime/placement-ledger.ts`, and every variable that held it is `ledger`.
+Workstations read from it reach cognition marked
+`source: "placement_ledger"` (they were marked `"remembered"`), and
+`observationVersion` is 4, so nothing the runtime supplies can be mistaken
+for a recollection. The persisted file keeps its name
+(`world-<world>-<person>.json`) so existing ledgers still load. "Memory" in
+this repository now means Person's cognitive memory only (ADR 0007).
 
 ### C4. Skills choose their own targets
 
@@ -583,21 +597,36 @@ and would want to supply far more geometry than the port asks for.
 **Decision required before the Baritone spike**, and only about the shape of
 `snapshot()`: see ADR 0001.
 
-### C6. No belief, memory or knowledge representation exists
+### C6. No belief, memory or knowledge representation exists — PARTLY ADDRESSED
 
 `docs/PERSON_SPEC.md` sections 24, 25 and 26 specify episodic, semantic,
 spatial, social and autobiographical memory, consolidation, forgetting and a
-predictive-causal world model. None of it exists. The symbolic state is
-recomputed from the latest observation every tick, so Person currently has no
-way to be wrong about the world in the sense section 26 requires: it has no
-belief that could disagree with an observation.
+predictive-causal world model.
+
+**Now implemented (ADR 0007, Phase B):** episodic memory and a small working
+memory. Episodes are encoded through a whitelist from what cognition was given
+or did: things newly recognised, skill outcomes as reported, emergencies,
+health lost between observations, and concluded searches. They carry salience
+and provenance. The journal records each encoding, and the memory store is
+rebuilt from those records alone. Recall takes a typed cue, returns at most
+three memories labelled as memory, and never feeds the planner's symbolic
+state. Old, weak memories become inaccessible without being erased.
+Everything is TESTED IN FIXTURE only.
+
+**Still absent:** semantic, spatial, social and autobiographical memory,
+consolidation, belief and the world model. The symbolic state is still
+recomputed from the latest observation, so Person still has no belief that
+could disagree with an observation. It can now remember having seen something
+that is no longer there, and nothing yet concludes anything from that.
 
 Prediction error is recorded, which is the input such a model needs, and
 nothing consumes it.
 
-**Not a contradiction, a gap.** Recorded here because the difference between
-"specified" and "implemented" is the thing this reconciliation exists to keep
-visible.
+**Memory uses so far.** Recall is cued at the start of each information
+search, and recalling an earlier fruitless search adds the
+`recalls_unfound_search` reason code. It does not change where or how long
+Person looks: without a sense of place, "I searched before" cannot mean "I
+searched here". That use waits for the spatial model (Phase C).
 
 ### C7. The Mineflayer route veto did not cover every movement family
 
@@ -700,9 +729,11 @@ diagonals in open ground are unaffected and are covered by a test.
 | Tick budgets invented in fixture (4 ticks/step, 12/dig)                            | REALITY_VALIDATION.md      |
 | Prediction error recorded but inert (no world model consumes it)                   | REALITY_VALIDATION.md      |
 | Single-skill live validation: stages 1 and 2 done, 3 to 8 not started              | REALITY_VALIDATION.md      |
-| No belief, memory, affect, language, social or project system exists               | Known Deviations C6, above |
+| No belief, semantic/spatial memory, affect, language, social or project system     | Known Deviations C6, above |
+| Memory changes no decision yet: recall is reported, not acted on                   | ADR 0007                   |
+| Actions are remembered without their referent until C4 is resolved                 | ADR 0007, C4               |
 | No attention model: perception is capped deterministically, nearest first          | Known Deviations C1, above |
-| Information seeking is gaze only, per goal, and forgets across restarts            | Known Deviations C1, above |
+| Information seeking is gaze only and per goal; a restart recalls, not reuses, it   | Known Deviations C1, C6    |
 
 ---
 
@@ -710,9 +741,9 @@ diagonals in open ground are unaffected and are covered by a test.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 243     | 243     |
-| Python (all) | 151     | 151     |
-| **Total**    | **394** | **394** |
+| Node (all)   | 248     | 248     |
+| Python (all) | 176     | 176     |
+| **Total**    | **424** | **424** |
 
 **Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
 not recounted since:**
@@ -732,9 +763,9 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `fix/peripheral-semantic-leak` on 2026-09-24: Node 243 pass / 0
-fail, Python 151 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
-242 / 148 after PR #6.
+Verified on `feat/memory-foundation` on 2026-09-24: Node 248 pass / 0 fail,
+Python 176 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+242 / 148 after PR #6; 243 / 151 after PR #7.
 
 ---
 

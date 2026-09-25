@@ -17,7 +17,7 @@ export * from "./embodiment/gaze.ts";
 export * from "./skills/survey.ts";
 export * from "./observation/vision.ts";
 export * from "./observation/relative.ts";
-export * from "./runtime/world-memory.ts";
+export * from "./runtime/placement-ledger.ts";
 export * from "./runtime/person-runtime.ts";
 export * from "./ipc/cognition-channel.ts";
 export * from "./reporting/episode-report.ts";
