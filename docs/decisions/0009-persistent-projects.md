@@ -1,11 +1,19 @@
 # ADR 0009: Projects as persistent cognitive commitments
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-25)
 **Date:** 2026-09-25
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 
 ---
+
+> **Operator decision, 2026-09-25: accepted.** The accepted architecture is a
+> project as a persistent, interruptible, resumable, restart-persistent,
+> bounded cognitive commitment anchored in Person's own cognitive state. The
+> current policy is not canonical: the project kinds, the fixed ordering,
+> priority 300, the open-project limit, the blocked-twice rule, the one-day
+> retry delay and the calm thresholds are implementation parameters to be
+> calibrated.
 
 ## Context
 
@@ -45,7 +53,7 @@ sessions. Adding a new kind of state that survives a restart needs an ADR
    it is pursued: closed if already done, held if Person cannot place its
    home, otherwise resumed. Re-examination may use bounded, cued recall of
    how that kind of work went (ADR 0007), and never reads the journal.
-6. **Two kinds to start.** `improve_home` (shelter, then storage, anchored to
+6. **Two kinds to start (a parameter, not a boundary).** `improve_home` (shelter, then storage, anchored to
    home) and `secure_food_supply` (cooked food in hand). More kinds are added
    when the capabilities they need exist, not to fill a list.
 
