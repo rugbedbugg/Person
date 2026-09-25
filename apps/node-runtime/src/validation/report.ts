@@ -96,8 +96,9 @@ export interface SkillValidationReport {
     homePosition: Position | null;
     startPosition: Position | null;
     endPosition: Position | null;
-    homeDistanceBefore: number | null;
-    homeDistanceAfter: number | null;
+    /** Exact physical distance from the configured home. Operator-only (C8). */
+    physicalHomeDistanceBefore: number | null;
+    physicalHomeDistanceAfter: number | null;
     routeStatusBefore: string | null;
     routeStatusAfter: string | null;
     stuckStateBefore: string | null;
@@ -193,8 +194,8 @@ export function summariseSkillValidation(
   );
   lines.push(
     `  ${pad("home")}${distanceText(
-      report.navigation.homeDistanceBefore,
-    )} before, ${distanceText(report.navigation.homeDistanceAfter)} after`,
+      report.navigation.physicalHomeDistanceBefore,
+    )} before, ${distanceText(report.navigation.physicalHomeDistanceAfter)} after`,
   );
   lines.push(
     `  ${pad("learning")}${report.learning.changed ? "CHANGED" : "unchanged"} (mode=${report.learning.mode}, policyRevision ${report.learning.policyRevisionBefore} to ${report.learning.policyRevisionAfter})`,
