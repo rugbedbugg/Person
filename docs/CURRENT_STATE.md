@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/autonomous-projects`, based on `14b8613` (tip of `feat/lan-validation` after PR #10)
+**Last verified against:** branch `feat/affect-foundation`, based on `77d62b5` (tip of `feat/lan-validation` after PR #11)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-25
 
@@ -89,6 +89,7 @@ Two implementations, same skill code:
 - **Routines:** Content-derived stable identifiers, nesting supported
 - **Policy:** DeterministicFallback + EvidencePolicy (Beta posterior, risk-dominant scoring, safe envelope)
 - **Learning modes:** off / shadow / supervised (never auto-enabled)
+- **Affect (ADR 0010):** a continuous, bounded, decaying state (`valence`, `unease`, `control`) appraised by deterministic rules from percepts, the body, reported outcomes and Person's own goal, project and search outcomes; it adjusts non-urgent goal priorities within ±25 (base and adjustment journalled separately) and scales the policy's exploration tolerance; it never runs a skill, touches memory salience, or reaches the runtime (`person_cognition/affect.py`)
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
@@ -100,8 +101,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone)
-- **Schema versions:** new records are `person-evidence-v6`; v1 to v5 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after)
+- **Schema versions:** new records are `person-evidence-v7`; v1 to v6 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -226,6 +227,7 @@ gitignored).
 | Cognitive places, routes, recognition                  | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
 | Place-keyed search memory (shorter search)             | IMPLEMENTED + TESTED IN FIXTURE                            |
 | Persistent projects: start, interrupt, resume, abandon | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
+| Affect: appraisal, decay, bounded bias                 | IMPLEMENTED + TESTED IN FIXTURE (integration test)         |
 
 **Future providers (placeholder, raise not implemented):**
 WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
@@ -771,28 +773,30 @@ runtime would allow a direct route home), not a distance.
 
 ## 12. Known Limitations / Backlog
 
-| Limitation                                                                            | Source                     |
-| ------------------------------------------------------------------------------------- | -------------------------- |
-| Mineflayer adapter exercised live for observation and 2 skills only                   | REALITY_VALIDATION.md      |
-| No dig-down skill (mine_stone/coal need exposed stone)                                | IMPLEMENTATION_REPORT.md   |
-| Fixture is simulation, not Minecraft                                                  | IMPLEMENTATION_REPORT.md   |
-| Planner bounded (depth/branch/node caps) — may return no plan                         | IMPLEMENTATION_REPORT.md   |
-| Goals: survival only (projects/social/self-generated future)                          | IMPLEMENTATION_REPORT.md   |
-| Death ends episode — no respawn/recovery loop                                         | IMPLEMENTATION_REPORT.md   |
-| Evidence written by cognition — last outcome missing if cognition dies mid-episode    | IMPLEMENTATION_REPORT.md   |
-| Inventory reconciliation on resume not reimplemented                                  | IMPLEMENTATION_REPORT.md   |
-| `loot_permitted_container` withdraws all types up to amount                           | IMPLEMENTATION_REPORT.md   |
-| One Person per runtime (multi-Person not supported)                                   | IMPLEMENTATION_REPORT.md   |
-| Tick budgets invented in fixture (4 ticks/step, 12/dig)                               | REALITY_VALIDATION.md      |
-| Prediction error recorded but inert (no world model consumes it)                      | REALITY_VALIDATION.md      |
-| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                 | REALITY_VALIDATION.md      |
-| No belief, semantic/spatial memory, affect, language, social or project system        | Known Deviations C6, above |
-| Memory changes one decision: how long a search at a recognised place lasts            | ADR 0007, ADR 0008         |
-| Place recognition is by drifting estimate and coarse scene only; no landmark identity | ADR 0008, C4               |
-| A small teleport inside the locomotion bound is felt as ordinary motion               | ADR 0008                   |
-| Actions are remembered without their referent until C4 is resolved                    | ADR 0007, C4               |
-| No attention model: perception is capped deterministically, nearest first             | Known Deviations C1, above |
-| Information seeking is gaze only and per goal                                         | Known Deviations C1        |
+| Limitation                                                                                         | Source                        |
+| -------------------------------------------------------------------------------------------------- | ----------------------------- |
+| Mineflayer adapter exercised live for observation and 2 skills only                                | REALITY_VALIDATION.md         |
+| No dig-down skill (mine_stone/coal need exposed stone)                                             | IMPLEMENTATION_REPORT.md      |
+| Fixture is simulation, not Minecraft                                                               | IMPLEMENTATION_REPORT.md      |
+| Planner bounded (depth/branch/node caps) — may return no plan                                      | IMPLEMENTATION_REPORT.md      |
+| Goals: survival and two project kinds; no social, exploration or invented projects                 | ADR 0009                      |
+| Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal              | ADR 0010                      |
+| `navigation.pathRisk` is derived from the kernel threat state, which includes unperceived hostiles | found in Phase E; fix follows |
+| Death ends episode — no respawn/recovery loop                                                      | IMPLEMENTATION_REPORT.md      |
+| Evidence written by cognition — last outcome missing if cognition dies mid-episode                 | IMPLEMENTATION_REPORT.md      |
+| Inventory reconciliation on resume not reimplemented                                               | IMPLEMENTATION_REPORT.md      |
+| `loot_permitted_container` withdraws all types up to amount                                        | IMPLEMENTATION_REPORT.md      |
+| One Person per runtime (multi-Person not supported)                                                | IMPLEMENTATION_REPORT.md      |
+| Tick budgets invented in fixture (4 ticks/step, 12/dig)                                            | REALITY_VALIDATION.md         |
+| Prediction error recorded but inert (no world model consumes it)                                   | REALITY_VALIDATION.md         |
+| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                              | REALITY_VALIDATION.md         |
+| No belief, semantic/spatial memory, affect, language, social or project system                     | Known Deviations C6, above    |
+| Memory changes one decision: how long a search at a recognised place lasts                         | ADR 0007, ADR 0008            |
+| Place recognition is by drifting estimate and coarse scene only; no landmark identity              | ADR 0008, C4                  |
+| A small teleport inside the locomotion bound is felt as ordinary motion                            | ADR 0008                      |
+| Actions are remembered without their referent until C4 is resolved                                 | ADR 0007, C4                  |
+| No attention model: perception is capped deterministically, nearest first                          | Known Deviations C1, above    |
+| Information seeking is gaze only and per goal                                                      | Known Deviations C1           |
 
 ---
 
@@ -800,9 +804,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 265     | 265     |
-| Python (all) | 223     | 223     |
-| **Total**    | **488** | **488** |
+| Node (all)   | 267     | 267     |
+| Python (all) | 240     | 240     |
+| **Total**    | **507** | **507** |
 
 **Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
 not recounted since:**
@@ -822,10 +826,10 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `feat/autonomous-projects` on 2026-09-25: Node 265 pass / 0
-fail, Python 223 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+Verified on `feat/affect-foundation` on 2026-09-25: Node 267 pass / 0 fail,
+Python 240 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
-261 / 197 after PR #9; 264 / 211 after PR #10.
+261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11.
 
 ---
 
