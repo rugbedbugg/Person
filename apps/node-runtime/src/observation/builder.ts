@@ -25,8 +25,9 @@ import type { PlacementLedger } from "../runtime/placement-ledger.ts";
  * 5: `selfMotion`, a coarse relative sense of Person's own movement.
  * 6: `home.homeDistance` removed. A drift-free distance to home at any range
  * is not a sense; Person's relation to home is its own belief (C8).
+ * 7: `navigation.pathRisk` judged from perceived hostiles only.
  */
-export const OBSERVATION_VERSION = 6;
+export const OBSERVATION_VERSION = 7;
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -247,7 +248,27 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     );
   }, 0);
 
-  const threat = inputs.kernel.threatState(snapshot);
+  // What Person perceives of hostiles, and the path risk it can judge from
+  // them. The kernel keeps its own threat state from the unshaped snapshot
+  // and acts on it; cognition is told only what it could have seen.
+  const hostiles = sighted(
+    shapeEntities(
+      snapshot.entities.filter((entity) => entity.hostile),
+      { limit: PERCEPTION.entities.hostileTotal },
+    ),
+    (entity) => entity.position,
+    PERCEPTION.entities.hostileTotal,
+  ).map(entityRecord);
+  const thresholds = inputs.kernel.thresholds;
+  const threat = hostiles.some(
+    (hostile) => hostile.distance <= thresholds.immediateThreatDistance,
+  )
+    ? "immediate"
+    : hostiles.some(
+          (hostile) => hostile.distance <= thresholds.nearbyThreatDistance,
+        )
+      ? "nearby"
+      : "none";
 
   return {
     ...envelope(inputs.identity, "Observation", snapshot.tick),
@@ -299,14 +320,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
           harvestPermitted: permissions.mayHarvest(block.position).allowed,
         };
       }),
-      hostiles: sighted(
-        shapeEntities(
-          snapshot.entities.filter((entity) => entity.hostile),
-          { limit: PERCEPTION.entities.hostileTotal },
-        ),
-        (entity) => entity.position,
-        PERCEPTION.entities.hostileTotal,
-      ).map(entityRecord),
+      hostiles,
       // Passive animals are shaped to the region Person may actually walk
       // into. The unshaped list stays in the snapshot the safety kernel and
       // the permission gate read, so this changes what cognition is told and
