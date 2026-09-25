@@ -265,6 +265,17 @@ claim without reading the whole tree.
 | Containment enforces on the body, independent of belief | `SafetyKernel.assess`                               | `tests/safety/containment-and-belief.test.ts`                                                                |
 | Exact home distance is operator-only                    | `physicalHomeDistanceBefore/After`                  | `tests/validation/skill-test.test.ts`, `tests/integration/skill-validation.test.ts`                          |
 
+## Projects (ADR 0009)
+
+| Requirement                                            | Implementation                             | Tests                                                                                |
+| ------------------------------------------------------ | ------------------------------------------ | ------------------------------------------------------------------------------------ |
+| A project starts only when calm and with a home        | `ProjectManager.consider`                  | `test_a_calm_person_...`, `test_no_project_is_taken_up_under_pressure_...`           |
+| An urgent need interrupts; the project resumes after   | goal stack, `ProjectManager.track`         | `test_hunger_interrupts_a_project_which_resumes_...`                                 |
+| Projects survive restart and are re-examined first     | `ProjectBook`, `reexamine`, bounded recall | `test_an_unfinished_project_survives_restart_...`                                    |
+| Obsolete projects close; impossible ones are abandoned | `reexamine`, `BLOCKS_TO_ABANDON`           | `test_a_project_the_world_already_satisfied_...`, `test_a_project_blocked_again_...` |
+| No coordinate or runtime target in project state       | cognitive anchors only; architecture rule  | `test_project_state_holds_no_coordinate_...`, architecture                           |
+| Same evidence, same projects, wherever the world is    | frame-free inputs                          | `tests/integration/projects.test.ts`                                                 |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

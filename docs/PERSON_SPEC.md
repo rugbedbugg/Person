@@ -1242,6 +1242,12 @@ Project
     completionCriteria
 ```
 
+**CURRENTLY IMPLEMENTED (ADR 0009, fixture only):** two project kinds,
+`improve_home` and `secure_food_supply`, with purpose, milestones, status,
+reasons, interruptions and a home anchor from Person's own map. They persist
+across restarts and are re-examined before they are resumed. Dependencies,
+required resources and invented projects are not implemented.
+
 Projects may span:
 
 * minutes,
