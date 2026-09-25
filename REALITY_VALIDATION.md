@@ -309,6 +309,23 @@ world, run a short `person run` in which `gather_wood` walks the bot, and
 compare the journal's `place_formed` estimates with where the bot visibly
 went. That has not been done.
 
+## Projects (fixture only)
+
+Added 2026-09-25 (ADR 0009). **TESTED IN FIXTURE. Not live-validated.**
+Projects live entirely in cognition and add no body behaviour.
+
+What the fixture establishes (`apps/cognition/tests/test_projects.py`,
+`tests/integration/projects.test.ts`): a calm Person with a home it built
+takes up improving it; hunger interrupts the project, which resumes when the
+hunger passes; an unfinished project survives a restart and is re-examined
+before it is pursued; one the world already satisfied is closed; one blocked
+repeatedly is abandoned; and the same life placed 1000 blocks along X yields
+identical project records and decisions.
+
+The smallest live checkpoint: a short `person run` in a disposable 1.16.1 LAN
+world after Person has built its shelter, then read the journal for
+`project_started` and `project_changed`. That has not been done.
+
 ## Safety validation
 
 Proven in the fixture and against the double:
