@@ -73,6 +73,7 @@ class PolicyProvider(Protocol):
         context_id: str,
         *,
         home: str = "unknown",
+        tolerance: float = 1.0,
     ) -> PolicyChoice: ...
 
 
@@ -107,6 +108,7 @@ class DeterministicPolicyProvider:
         context_id: str,
         *,
         home: str = "unknown",
+        tolerance: float = 1.0,
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
@@ -179,7 +181,15 @@ class EvidencePolicyProvider:
         counts: OutcomeCounts,
         *,
         envelope_open: bool,
+        tolerance: float = 1.0,
     ) -> tuple[float, tuple[str, ...]]:
+        """Score one candidate.
+
+        `tolerance` is Person's willingness to explore (ADR 0010), a factor on
+        the exploration bonus and, below 1, extra weight on risk. It reorders
+        preferences among routines the runtime would accept, and nothing
+        else: the envelope and every runtime check are unchanged by it.
+        """
         weights = self.weights
         reasons: list[str] = []
         estimate = counts.posterior_lower()
@@ -187,7 +197,7 @@ class EvidencePolicyProvider:
         reasons.append("beta_posterior_lower_bound")
 
         score -= weights.health * min(1.0, counts.mean_health_cost / 20.0)
-        score -= weights.risk * candidate.risk
+        score -= weights.risk * candidate.risk * (1.0 + max(0.0, 1.0 - tolerance))
         score -= weights.resource * min(1.0, counts.mean_resource_cost / 32.0)
         score -= weights.time * min(1.0, candidate.ticks / 20000.0)
         score += weights.recovery * (counts.recovery_probability - 0.5)
@@ -196,7 +206,7 @@ class EvidencePolicyProvider:
             reasons.append("preconditions_not_currently_met")
 
         if envelope_open and counts.decisive < self.minimum_support:
-            score += self.exploration_bonus
+            score += self.exploration_bonus * tolerance
             reasons.append("exploration_bonus")
         elif counts.decisive < self.minimum_support:
             reasons.append("exploration_suppressed_outside_envelope")
@@ -210,6 +220,7 @@ class EvidencePolicyProvider:
         context_id: str,
         *,
         home: str = "unknown",
+        tolerance: float = 1.0,
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
@@ -219,7 +230,9 @@ class EvidencePolicyProvider:
             counts = self.statistics.routine(
                 self.training_context, context_id, candidate.routine_id
             )
-            value, reasons = self.score(candidate, counts, envelope_open=bool(envelope))
+            value, reasons = self.score(
+                candidate, counts, envelope_open=bool(envelope), tolerance=tolerance
+            )
             scored.append(ScoredCandidate(candidate, value, counts, reasons))
         scored.sort(
             key=lambda entry: (
