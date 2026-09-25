@@ -114,6 +114,15 @@ class Spatial:
     def label_of(self, place_id: str) -> str | None:
         return self._map.labels.get(place_id)
 
+    def home_place(self) -> str | None:
+        """The place Person labelled home in its current frame, if any."""
+        homes = [
+            place.place_id
+            for place in self._map.places()
+            if self._map.labels.get(place.place_id) == "home" and place.frame == self.estimate.frame
+        ]
+        return homes[-1] if homes else None
+
     def home_relation(self) -> tuple[str, float]:
         """Where Person believes it is relative to home, and how firmly (C8).
 

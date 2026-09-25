@@ -37,11 +37,12 @@ from person_protocol import (
 from person_skills import SkillRegistry, skill_registry
 
 from .context import decision_context
-from .goals import Goal, GoalStack, SurvivalGoalProvider
+from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
 from .memory.episodes import EpisodeDraft
 from .prediction import PendingPrediction, build_payload
+from .projects import BY_KIND, ProjectBook, ProjectManager
 from .reducers import CognitiveReducers
 from .reporting import LearningSummary
 from .routines import (
@@ -109,7 +110,12 @@ class CognitionLoop:
         #: Person's places and its last estimate of where it is, rebuilt from
         #: its own records. Reached through `self.spatial` only.
         self.spatial_map = SpatialMap()
-        self.reducers = CognitiveReducers(self.statistics, self.memory_store, self.spatial_map)
+        #: Projects Person has taken up, rebuilt from its own records.
+        self.project_book = ProjectBook()
+        self.projects = ProjectManager(self.project_book)
+        self.reducers = CognitiveReducers(
+            self.statistics, self.memory_store, self.spatial_map, self.project_book
+        )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
         #: Person's belief about where it is relative to home (C8).
@@ -249,6 +255,9 @@ class CognitionLoop:
         # Waking where it last knew it was, less sure of it: nothing about the
         # body's actual location is available, or used.
         self.spatial = Spatial(self.spatial_map)
+        # Projects persist; which of them still apply is checked when Person
+        # next observes the world, not assumed.
+        self.projects = ProjectManager(self.project_book)
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
@@ -317,8 +326,13 @@ class CognitionLoop:
         self._remember(self.memory.experience(message), tick)
 
         self._reopen_unfound(state, tick)
+        self._deliberate_projects(message, state, tick)
         proposals = self.goal_provider.propose(message, state, tick, home=self.home)
+        project_goal = self.projects.goal(state, tick)
+        if project_goal is not None:
+            proposals.append(project_goal)
         goal = self.goals.update(proposals, state, tick)
+        self._record_changes(self.projects.track(self.goals, state, self.memory.now), tick)
         if goal is None:
             goal = self._idle_goal(tick)
             self.goals.update([goal], state, tick)
@@ -886,6 +900,42 @@ class CognitionLoop:
 
         active.failure_modes.append(status.lower())
         self._finish_routine("INTERRUPTED", message["tick"], reason="skill_interrupted")
+
+    # -------------------------------------------------------------- projects
+
+    def _deliberate_projects(
+        self, observation: dict[str, Any], state: dict[str, float], tick: int
+    ) -> None:
+        """Check restored projects still apply, then perhaps take up a new one."""
+        home_place = self.spatial.home_place()
+        waiting = self.projects.unexamined()
+        if waiting:
+            subjects = sorted({s for project in waiting for s in BY_KIND[project.kind].subjects})
+            # How has this kind of work gone before? Bounded, cued recall.
+            recalled = self._recall(
+                Cue.about(*subjects, purpose="goal", kinds=("acted",)),
+                tick,
+            )
+            failures = sum(item.episode.detail("status") != "SUCCESS" for item in recalled)
+            self._record_changes(
+                self.projects.reexamine(state=state, home_place=home_place, failures=failures),
+                tick,
+            )
+        night = observation["environment"]["dayPhase"] in {"dusk", "night"}
+        self._record_changes(
+            self.projects.consider(
+                state=state,
+                drives=homeostasis(observation, state),
+                home_place=home_place,
+                night=night,
+                now=self.memory.now,
+            ),
+            tick,
+        )
+
+    def _record_changes(self, changes: list[tuple[str, dict[str, Any]]], tick: int) -> None:
+        for kind, payload in changes:
+            self._record(kind, tick, payload)
 
     # ---------------------------------------------------------------- memory
 
