@@ -192,9 +192,11 @@ test(
           cognitionCommand: COGNITION,
           evidenceDirectory,
           outputDirectory,
-          // Room for one bounded search as well as routine work: a restarted
-          // Person does not remember having looked, so it may look again.
-          maxDecisions: 16,
+          // Room for bounded searches as well as routine work. A restarted
+          // Person recalls where it looked and searches there more briefly,
+          // but the fixture's zombie makes it flee somewhere it has not
+          // searched, and "not found" was only ever about the other place.
+          maxDecisions: 28,
           learningMode: "supervised",
           episodeId: "ep_second",
         });
