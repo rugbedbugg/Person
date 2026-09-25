@@ -1,12 +1,18 @@
 # ADR 0008: Self-motion and cognitive places
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-25), including rule 19
 **Date:** 2026-09-25
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Operator decision:** Option 1, bounded proprioceptive self-motion (2026-09-25)
 
 ---
+
+> **Operator decision, 2026-09-25: accepted, rule 19 included.**
+> `not_found_in_bounded_search` at believed place P is evidence only about that
+> search at P: not that the resource is absent at P, nearby, or anywhere.
+> Changing the believed place therefore changes whether the earlier result
+> applies. The numbers in this ADR are current implementation parameters.
 
 ## Context
 
@@ -105,7 +111,9 @@ foundation of the spatial model.
     no global map.
 15. **Home is where Person built its shelter.** The place in which Person
     experienced completing `build_basic_shelter` is labelled home in its own
-    model. `homeDistance` is not used for this.
+    model, and so is the place it is at after successfully going home with
+    `return_home`: a belief from its own action's outcome, which labels a
+    place and moves no estimate. `homeDistance` is not used for this.
 16. **Persistence through Person's own records.** Places and routes are
     journalled as `place_formed` and `place_visited` events, and the estimate
     at the end of an episode travels in `episode_ended`, exactly as memory
@@ -146,8 +154,8 @@ retuned without a new ADR.
 
 - The estimate drifts, so Person will fail to recognise places it has
   returned to and will sometimes "recognise" places it has not.
-- `homeDistance` remains a drift-free homing channel beside the new model, a
-  new known deviation (C8).
+- `homeDistance` remained a drift-free homing channel beside the new model
+  (C8). Resolved 2026-09-25: see the decision below.
 
 ### Neutral
 
@@ -171,8 +179,13 @@ retuned without a new ADR.
 - **The coordinate instrument is built.** It becomes a separate provenance for
   a fix, never passive telemetry.
 - **C4 is resolved.** Landmarks can then carry object identity.
-- **Decision on `homeDistance` (C8).** Either keep it as a learned homing
-  sense with its own ADR, or replace its consumers with the spatial model.
+- **`homeDistance` (C8): decided 2026-09-25.** Exact physical distance from
+  home may exist in trusted containment and operator tooling. It is not a
+  Person sense and never crosses into the observation, cognition, memory or
+  the spatial model. Person's relation to home (`at_home`, `near`, `far`,
+  `unknown`) is derived from its own places and doubt, and feeds the
+  planner's `at_home`, the night return-home goal, the decision context and
+  the cognition-side exploration envelope.
 
 ## Relevant Commits / Documents
 

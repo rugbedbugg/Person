@@ -50,7 +50,7 @@ const SETUP_BANNER = (info: OperatorSetupInfo): string =>
     `  skill      ${info.skillId}`,
     `  standing   ${info.position.x},${info.position.y},${info.position.z}`,
     `  home       ${info.home.x},${info.home.y},${info.home.z}`,
-    `  distance   ${info.homeDistance.toFixed(1)} blocks from home`,
+    `  distance   ${info.physicalHomeDistance.toFixed(1)} blocks from home (physical)`,
     "",
     "Position Person yourself now, using your own Minecraft controls.",
     "Person is inert: it will not move, act, or decide anything until you",

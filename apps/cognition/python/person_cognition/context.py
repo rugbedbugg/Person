@@ -93,18 +93,6 @@ def _threat(observation: dict[str, Any]) -> str:
     return "none"
 
 
-def _home_state(observation: dict[str, Any]) -> str:
-    home = observation["home"]
-    if home["activeHome"] is None or home["homeDistance"] is None:
-        return "unknown"
-    distance = home["homeDistance"]
-    if distance <= NEAR_HOME_DISTANCE:
-        return "at_home"
-    if distance <= FAR_HOME_DISTANCE:
-        return "near"
-    return "far"
-
-
 def _tool_tier(observation: dict[str, Any]) -> str:
     tier = 0
     for item in observation["inventory"]["items"]:
@@ -136,17 +124,18 @@ def _food_state(observation: dict[str, Any]) -> str:
     return "none"
 
 
-def decision_context(observation: dict[str, Any]) -> DecisionContext:
+def decision_context(observation: dict[str, Any], home: str = "unknown") -> DecisionContext:
+    """The context a decision is made in. `home` is Person's belief (C8)."""
     return DecisionContext(
         health_band=_health_band(observation["vitals"]["health"]),
         food_band=_food_band(observation["vitals"]["food"]),
         day_phase=observation["environment"]["dayPhase"],
         threat=_threat(observation),
-        home_state=_home_state(observation),
+        home_state=home if home in HOME_STATES else "unknown",
         tool_tier=_tool_tier(observation),
         food_state=_food_state(observation),
     )
 
 
-def context_id(observation: dict[str, Any]) -> str:
-    return decision_context(observation).identifier()
+def context_id(observation: dict[str, Any], home: str = "unknown") -> str:
+    return decision_context(observation, home).identifier()

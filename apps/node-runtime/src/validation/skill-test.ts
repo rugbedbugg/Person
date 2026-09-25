@@ -53,7 +53,8 @@ export interface OperatorSetupInfo {
   skillId: string;
   position: { x: number; y: number; z: number };
   home: { x: number; y: number; z: number };
-  homeDistance: number;
+  /** Exact, for the operator. Not anything Person senses (C8). */
+  physicalHomeDistance: number;
 }
 
 /** Aborts the run before the measured skill begins. */
@@ -168,8 +169,8 @@ export async function runSkillValidation(
       homePosition: null,
       startPosition: null,
       endPosition: null,
-      homeDistanceBefore: null,
-      homeDistanceAfter: null,
+      physicalHomeDistanceBefore: null,
+      physicalHomeDistanceAfter: null,
       routeStatusBefore: null,
       routeStatusAfter: null,
       stuckStateBefore: null,
@@ -414,7 +415,7 @@ export async function runSkillValidation(
         skillId: options.skillId,
         position: here.position,
         home: ledger.home.position,
-        homeDistance: distance(here.position, ledger.home.position),
+        physicalHomeDistance: distance(here.position, ledger.home.position),
       });
       report.timeline.setupCompletedAt = new Date().toISOString();
     }
@@ -457,7 +458,12 @@ export async function runSkillValidation(
     report.preObservation = pre;
     report.preObservationValid = preResult.valid;
     report.navigation.startPosition = options.embodiment.snapshot().position;
-    report.navigation.homeDistanceBefore = pre.home.homeDistance;
+    // Operator evidence from the privileged pose, not from the observation:
+    // cognition has no home distance to report (C8).
+    report.navigation.physicalHomeDistanceBefore = distance(
+      options.embodiment.snapshot().position,
+      ledger.home.position,
+    );
     report.navigation.routeStatusBefore = pre.navigation.routeStatus;
     report.navigation.stuckStateBefore = pre.navigation.stuckState;
     if (!preResult.valid)
@@ -593,7 +599,10 @@ export async function runSkillValidation(
           ? null
           : postResult.diagnostics.join("; ").slice(0, 200);
         report.navigation.endPosition = options.embodiment.snapshot().position;
-        report.navigation.homeDistanceAfter = post.home.homeDistance;
+        report.navigation.physicalHomeDistanceAfter = distance(
+          options.embodiment.snapshot().position,
+          ledger.home.position,
+        );
         report.navigation.routeStatusAfter = post.navigation.routeStatus;
         report.navigation.stuckStateAfter = post.navigation.stuckState;
       } catch (error) {

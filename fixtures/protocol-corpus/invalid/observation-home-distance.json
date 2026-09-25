@@ -4,11 +4,21 @@
   "personId": "ada",
   "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
   "worldId": "fixture-world-01",
-  "tick": -1,
+  "tick": 1200,
   "timestamp": "2026-09-15T08:30:00.000Z",
   "type": "Observation",
   "observationVersion": 2,
   "trainingContext": "fixture",
+  "selfMotion": {
+    "continuity": "continuous",
+    "translation": {
+      "direction": "none",
+      "band": "none",
+      "distance": 0
+    },
+    "rotation": "none",
+    "vertical": "level"
+  },
   "vitals": {
     "health": 14.0,
     "food": 7.0,
@@ -104,7 +114,8 @@
     "ownedStorage": [],
     "bedKnown": false,
     "foodReserve": 0,
-    "fuelReserve": 0
+    "fuelReserve": 0,
+    "homeDistance": 3.5
   },
   "navigation": {
     "routeStatus": "idle",

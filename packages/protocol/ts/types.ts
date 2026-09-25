@@ -259,7 +259,6 @@ export interface Observation extends Envelope {
   };
   home: {
     activeHome: { homeId: string } | null;
-    homeDistance: number | null;
     shelterState: "none" | "partial" | "complete" | "breached" | "unknown";
     ownedStorage: OwnedStorageView[];
     bedKnown: boolean;

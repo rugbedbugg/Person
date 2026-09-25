@@ -18,6 +18,13 @@ from person_persistence import EvidenceEvent
 from .integration import Estimate, integrate, resumed
 from .places import REASONS, Place, Whereabouts, recognise
 
+#: Beyond this many blocks of believed distance, home is far. A parameter,
+#: and a believed distance, never a measured one.
+NEAR_HOME = 32.0
+
+#: Person's relation to home, in the decision context's own words.
+HOME_RELATIONS: frozenset[str] = frozenset({"at_home", "near", "far", "unknown"})
+
 #: Coarse scene subjects that may make up a place's signature. Kinds, never
 #: particular objects.
 SIGNATURE_SUBJECTS: frozenset[str] = frozenset(
@@ -106,6 +113,34 @@ class Spatial:
 
     def label_of(self, place_id: str) -> str | None:
         return self._map.labels.get(place_id)
+
+    def home_relation(self) -> tuple[str, float]:
+        """Where Person believes it is relative to home, and how firmly (C8).
+
+        `at_home` when Person recognises a place it labelled home. `near` or
+        `far` only when that holds whichever way the drift since forming home
+        has gone; otherwise `unknown`, as it is when Person has no home place
+        or is lost in a frame its home is not in. Derived only from Person's
+        own estimate and uncertainty.
+        """
+        homes = [
+            place
+            for place in self._map.places()
+            if self._map.labels.get(place.place_id) == "home" and place.frame == self.estimate.frame
+        ]
+        if not homes:
+            return "unknown", 0.0
+        here = self.here()
+        if here is not None and self._map.labels.get(here.place_id) == "home":
+            return "at_home", here.confidence
+        nearest = min(homes, key=lambda place: self.estimate.distance_to(place.forward, place.left))
+        believed = self.estimate.distance_to(nearest.forward, nearest.left)
+        drift = max(0.0, self.estimate.uncertainty - nearest.uncertainty)
+        if believed + drift <= NEAR_HOME:
+            return "near", 1.0 - drift / NEAR_HOME
+        if believed - drift > NEAR_HOME:
+            return "far", min(1.0, (believed - drift) / believed)
+        return "unknown", 0.0
 
     def settle(
         self, reason: str, experienced: int, label: str | None = None

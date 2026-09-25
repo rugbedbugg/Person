@@ -30,19 +30,19 @@ def observation() -> dict[str, Any]:
 
 def test_an_effect_the_world_confirms_is_a_match(observation: dict[str, Any]) -> None:
     before = deepcopy(observation)
-    before["home"]["homeDistance"] = 40.0
+    before["home"]["shelterState"] = "partial"
     after = deepcopy(observation)
-    after["home"]["homeDistance"] = 0.0
+    after["home"]["shelterState"] = "complete"
 
     result = effects.compare_observations(
-        [{"fact": "at_home", "op": "=", "value": 1}], before, after
+        [{"fact": "shelter_complete", "op": "=", "value": 1}], before, after
     )
 
     assert result["available"] is True
     assert result["matched"] == 1
     assert result["mismatched"] == 0
     fact = result["facts"][0]
-    assert fact["fact"] == "at_home"
+    assert fact["fact"] == "shelter_complete"
     assert fact["before"] == 0.0
     assert fact["observed"] == 1.0
     assert fact["verdict"] == "match"
@@ -50,17 +50,28 @@ def test_an_effect_the_world_confirms_is_a_match(observation: dict[str, Any]) ->
 
 def test_an_effect_the_world_denies_is_a_mismatch(observation: dict[str, Any]) -> None:
     before = deepcopy(observation)
-    before["home"]["homeDistance"] = 40.0
+    before["home"]["shelterState"] = "partial"
     after = deepcopy(observation)
-    after["home"]["homeDistance"] = 38.0
+    after["home"]["shelterState"] = "breached"
 
     result = effects.compare_observations(
-        [{"fact": "at_home", "op": "=", "value": 1}], before, after
+        [{"fact": "shelter_complete", "op": "=", "value": 1}], before, after
     )
 
     assert result["mismatched"] == 1
     assert result["facts"][0]["verdict"] == "mismatch"
     assert result["facts"][0]["severity"] == "inverted"
+
+
+def test_being_home_is_a_belief_an_observation_cannot_settle(
+    observation: dict[str, Any],
+) -> None:
+    # C8: the observation carries no distance to home, so whether Person got
+    # home is Person's own belief, not something a before/after pair proves.
+    result = effects.compare_observations(
+        [{"fact": "at_home", "op": "=", "value": 1}], observation, deepcopy(observation)
+    )
+    assert result["facts"][0]["verdict"] == "not_observable"
 
 
 def test_facts_an_observation_cannot_carry_are_not_failures(

@@ -12,7 +12,7 @@ import type { SafetyKernel } from "../safety/safety-kernel.ts";
 import { categories } from "../skills/materials.ts";
 import { PERCEPTION, resourceCategory, shapeEntities } from "./perception.ts";
 import { eyePose, visible, VISION } from "./vision.ts";
-import { estimateDistance, relativeTo } from "./relative.ts";
+import { relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
 import { poseOf, selfMotion, type SelfMotion } from "./self-motion.ts";
 import type { PlacementLedger } from "../runtime/placement-ledger.ts";
@@ -23,8 +23,10 @@ import type { PlacementLedger } from "../runtime/placement-ledger.ts";
  * coordinates. 3: a peripheral entity no longer says whose it is. 4: ledger
  * workstations say they come from the placement ledger, not from memory.
  * 5: `selfMotion`, a coarse relative sense of Person's own movement.
+ * 6: `home.homeDistance` removed. A drift-free distance to home at any range
+ * is not a sense; Person's relation to home is its own belief (C8).
  */
-export const OBSERVATION_VERSION = 5;
+export const OBSERVATION_VERSION = 6;
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -128,7 +130,6 @@ function affordances(inputs: ObservationInputs): Observation["affordances"] {
 export function buildObservation(inputs: ObservationInputs): Observation {
   const { snapshot, permissions, ledger } = inputs;
   const home = ledger.home.position;
-  const homeDistance = estimateDistance(distance(snapshot.position, home));
   // Where Person is looking, and what that lets it see. Privileged: the pose
   // is used here and never reported.
   const pose = eyePose(snapshot);
@@ -348,7 +349,6 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     },
     home: {
       activeHome: { homeId: ledger.home.homeId },
-      homeDistance,
       shelterState: shelterState(inputs),
       ownedStorage: ledger.ownedStorage.map((record) => ({
         storageId: record.storageId,

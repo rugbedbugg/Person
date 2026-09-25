@@ -217,11 +217,6 @@ const SUSPICIOUS: {
     note: "no safe position has been recorded yet",
   },
   {
-    path: "/home/homeDistance",
-    when: (value) => value === null,
-    note: "home distance is unknown, so every home-relative decision is blind",
-  },
-  {
     path: "/nearby/resources",
     when: (value) => Array.isArray(value) && value.length === 0,
     note: "no resources in range at all: check the search radius and block classification",
@@ -463,7 +458,7 @@ export function renderObservation(observation: Observation): string {
   lines.push(
     `  home      ${
       home.activeHome ? home.activeHome.homeId : "none"
-    } distance=${home.homeDistance ?? "unknown"} shelter=${home.shelterState} storage=${home.ownedStorage.length} foodReserve=${home.foodReserve} fuelReserve=${home.fuelReserve} bed=${home.bedKnown}`,
+    } shelter=${home.shelterState} storage=${home.ownedStorage.length} foodReserve=${home.foodReserve} fuelReserve=${home.fuelReserve} bed=${home.bedKnown}`,
   );
   const navigation = observation.navigation;
   lines.push(

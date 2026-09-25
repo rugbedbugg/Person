@@ -71,6 +71,8 @@ class PolicyProvider(Protocol):
         goal: Any,
         candidates: Sequence[RoutineCandidate],
         context_id: str,
+        *,
+        home: str = "unknown",
     ) -> PolicyChoice: ...
 
 
@@ -103,6 +105,8 @@ class DeterministicPolicyProvider:
         goal: Any,
         candidates: Sequence[RoutineCandidate],
         context_id: str,
+        *,
+        home: str = "unknown",
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
@@ -204,10 +208,12 @@ class EvidencePolicyProvider:
         goal: Any,
         candidates: Sequence[RoutineCandidate],
         context_id: str,
+        *,
+        home: str = "unknown",
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
-        envelope = safe_envelope(observation, self.thresholds)
+        envelope = safe_envelope(observation, self.thresholds, home=home)
         scored: list[ScoredCandidate] = []
         for candidate in candidates:
             counts = self.statistics.routine(
@@ -222,7 +228,7 @@ class EvidencePolicyProvider:
             )
         )
         best = scored[0]
-        fallback = self.fallback.propose(observation, goal, candidates, context_id)
+        fallback = self.fallback.propose(observation, goal, candidates, context_id, home=home)
 
         supported = best.counts.decisive >= self.minimum_support
         reason_codes: list[str] = [*best.reasons]
