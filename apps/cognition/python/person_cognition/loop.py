@@ -51,7 +51,8 @@ from .routines import (
     candidate_from_routine,
     routine_from_plan,
 )
-from .search import NOT_FOUND, SEARCH_ROUTINE_ID, InformationSearch
+from .search import NOT_FOUND, SEARCH_ROUTINE_ID, InformationSearch, revisit_budget
+from .spatial import Spatial, SpatialMap
 
 COGNITION_VERSION = "0.1.0"
 MAX_CANDIDATES = 6
@@ -105,8 +106,12 @@ class CognitionLoop:
         #: Every episode Person has encoded, rebuilt from the journal. The loop
         #: reaches it only through `self.memory`, never directly.
         self.memory_store = MemoryStore()
-        self.reducers = CognitiveReducers(self.statistics, self.memory_store)
+        #: Person's places and its last estimate of where it is, rebuilt from
+        #: its own records. Reached through `self.spatial` only.
+        self.spatial_map = SpatialMap()
+        self.reducers = CognitiveReducers(self.statistics, self.memory_store, self.spatial_map)
         self.memory = Memory(self.memory_store, training_context="fixture")
+        self.spatial = Spatial(self.spatial_map)
         self.goal_provider = SurvivalGoalProvider()
         self.goals = GoalStack()
         self.library = RoutineLibrary()
@@ -133,10 +138,11 @@ class CognitionLoop:
         self._last_state: dict[str, float] = {}
         #: The one search in progress, if any. Ephemeral: never persisted.
         self.search: InformationSearch | None = None
-        #: Goals blocked by a search that found nothing, and the evidence that
-        #: would reopen them. Not a record of absence: the moment any of it is
-        #: seen, the goal is live again.
-        self.unfound: dict[str, tuple[str, ...]] = {}
+        #: Goals blocked by a search that found nothing, the evidence that
+        #: would reopen them, and the cognitive place the search was made from.
+        #: Not a record of absence: the moment any of it is seen, or Person
+        #: believes it is somewhere else, the goal is live again.
+        self.unfound: dict[str, tuple[tuple[str, ...], str | None]] = {}
 
     # ------------------------------------------------------------------ utils
 
@@ -238,6 +244,9 @@ class CognitionLoop:
         report = self.store.restore(self.reducers)
         # Working memory starts empty: the past comes back only when cued.
         self.memory = Memory(self.memory_store, training_context=self.training_context)
+        # Waking where it last knew it was, less sure of it: nothing about the
+        # body's actual location is available, or used.
+        self.spatial = Spatial(self.spatial_map)
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
@@ -267,6 +276,7 @@ class CognitionLoop:
                 "training_context": message["trainingContext"],
                 "learning_mode": self.learning_mode,
                 "experienced_ticks": self.memory.now,
+                "self_estimate": self.spatial.estimate.to_json(),
             },
         )
         if message["phase"] == "ended":
@@ -298,6 +308,8 @@ class CognitionLoop:
         # the last skill claimed it would do.
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
+        # Where Person is comes first, so what it notices is remembered there.
+        self.spatial.feel(message["selfMotion"], frozenset(remembering.noticed(message)))
         self._remember(self.memory.experience(message), tick)
 
         self._reopen_unfound(state, tick)
@@ -587,22 +599,48 @@ class CognitionLoop:
                 self.goals.block(goal.goal_id, "no_feasible_plan", tick)
                 self._emit_idle(observation, goal, context_id, tick)
                 return False
-            search = InformationSearch(goal_id=goal.goal_id, purpose=purpose)
-            # Trying to remember is part of looking. What comes back is
-            # reported, and changes nothing about where Person looks: with no
-            # sense of place, "I searched before" cannot mean "I searched here".
+            # A search happens somewhere. Person settles where it believes it
+            # is, and tries to remember searching for the same things here.
+            where = self._settle("search", tick)
+            sought = remembering.evidence_subjects(purpose)
             recalled = self._recall(
                 Cue.about(
-                    *remembering.evidence_subjects(purpose),
+                    *sought,
                     purpose="search",
                     kinds=("searched", "perceived"),
+                    place=where["place_id"],
                 ),
                 tick,
             )
-            search.recalled = tuple(item.episode.memory_id for item in recalled)
-            search.recalls_unfound = any(
-                item.episode.kind == "searched" and item.episode.detail("conclusion") == NOT_FOUND
+            unfound = [
+                item
                 for item in recalled
+                if item.episode.kind == "searched"
+                and item.episode.detail("conclusion") == NOT_FOUND
+            ]
+            # An earlier search that sought all of this, at what Person
+            # believes is this same place, and found none of it, is evidence
+            # that another full sweep from here will find nothing new. It is
+            # not evidence that nothing is here: the search is shorter, never
+            # skipped, and still concludes only "not found".
+            here_before = [
+                item
+                for item in unfound
+                if item.episode.place_id == where["place_id"]
+                and sought <= set(item.episode.detail("sought") or ())
+            ]
+            revisit = max(
+                (min(where["confidence"], item.episode.place_confidence) for item in here_before),
+                default=0.0,
+            )
+            search = InformationSearch(
+                goal_id=goal.goal_id,
+                purpose=purpose,
+                budget=revisit_budget(revisit),
+                recalled=tuple(item.episode.memory_id for item in recalled),
+                recalls_unfound=bool(unfound),
+                place=where,
+                revisit=round(revisit, 3),
             )
             self.search = search
             self._record("information_search", tick, search.payload("started"))
@@ -610,7 +648,10 @@ class CognitionLoop:
         if search.remaining <= 0:
             self._conclude_search("exhausted", tick, conclusion=NOT_FOUND)
             self.goals.block(goal.goal_id, NOT_FOUND, tick)
-            self.unfound[goal.goal_id] = search.purpose
+            self.unfound[goal.goal_id] = (
+                search.purpose,
+                search.place["place_id"] if search.place else None,
+            )
             self._emit_idle(observation, goal, context_id, tick)
             return False
 
@@ -659,6 +700,7 @@ class CognitionLoop:
                 *(f"wants_{fact}" for fact in search.purpose),
                 f"looks_remaining_{search.remaining}",
                 *(("recalls_unfound_search",) if search.recalls_unfound else ()),
+                *(("searched_here_before",) if search.revisit > 0 else ()),
             ),
         )
         self._emit_decision(observation, goal, context_id, step, spec, tick)
@@ -672,12 +714,21 @@ class CognitionLoop:
         if phase in {"exhausted", "satisfied"}:
             conclusion = NOT_FOUND if phase == "exhausted" else "found"
             self._remember(
-                [remembering.searched(search.purpose, conclusion, len(search.looks), None)], tick
+                [remembering.searched(search.purpose, conclusion, len(search.looks), None)],
+                tick,
+                place=search.place,
             )
 
     def _reopen_unfound(self, state: dict[str, float], tick: int) -> None:
-        for goal_id, purpose in list(self.unfound.items()):
-            if any(state.get(fact, 0.0) >= 1 for fact in purpose):
+        # "Not found" was a fact about one search from one place. Seeing what
+        # was sought reopens the goal; so does no longer believing Person is
+        # at the place it searched from, because somewhere else was not
+        # searched. Returning to that place reopens nothing by itself.
+        here = self.spatial.here()
+        for goal_id, (purpose, searched_from) in list(self.unfound.items()):
+            seen = any(state.get(fact, 0.0) >= 1 for fact in purpose)
+            elsewhere = here is None or here.place_id != searched_from
+            if seen or elsewhere:
                 del self.unfound[goal_id]
                 self.goals.reopen(goal_id, tick)
 
@@ -767,7 +818,15 @@ class CognitionLoop:
         self.summary.note_outcome(message)
         experience = remembering.acted(message, self.registry, event.event_id if event else None)
         if experience is not None:
-            self._remember([experience], message["tick"], message["decisionId"])
+            built_home = (
+                message["executedSkill"] == "build_basic_shelter" and message["status"] == "SUCCESS"
+            )
+            where = self._settle(
+                "shelter" if built_home else "action",
+                message["tick"],
+                label="home" if built_home else None,
+            )
+            self._remember([experience], message["tick"], message["decisionId"], place=where)
 
         pending = self.pending_prediction
         if pending is not None and pending.decision_id == message["decisionId"]:
@@ -822,13 +881,32 @@ class CognitionLoop:
     # ---------------------------------------------------------------- memory
 
     def _remember(
-        self, drafts: list[EpisodeDraft], tick: int, decision_id: str | None = None
+        self,
+        drafts: list[EpisodeDraft],
+        tick: int,
+        decision_id: str | None = None,
+        *,
+        place: dict[str, Any] | None = None,
     ) -> None:
-        """Encode experience. The journal records it; the store is rebuilt from that."""
+        """Encode experience. The journal records it; the store is rebuilt from that.
+
+        Each episode is placed where Person believes it happened: the place it
+        settled at for this experience, or else whichever it recognises.
+        """
+        if drafts and place is None:
+            here = self.spatial.here()
+            place = here.to_json() if here is not None else None
         for draft in drafts:
-            event = self._record("memory_encoded", tick, self.memory.payload(draft), decision_id)
+            payload = self.memory.payload(draft, place)
+            event = self._record("memory_encoded", tick, payload, decision_id)
             if event is not None:
                 self.memory.encoded(event.event_id)
+
+    def _settle(self, reason: str, tick: int, label: str | None = None) -> dict[str, Any]:
+        """Be somewhere that mattered: revisit a recognised place or form one."""
+        kind, payload = self.spatial.settle(reason, self.memory.now, label)
+        self._record(kind, tick, payload)
+        return {"place_id": payload["place_id"], "confidence": payload["confidence"]}
 
     def _recall(self, cue: Cue, tick: int) -> tuple[Recalled, ...]:
         recalled = self.memory.recall(cue)

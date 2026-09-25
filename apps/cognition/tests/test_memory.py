@@ -177,7 +177,15 @@ def test_recall_takes_a_typed_cue_and_nothing_else() -> None:
 
     parameters = list(inspect.signature(Memory.recall).parameters)
     assert parameters == ["self", "cue"], "no limit, no filter, no query string"
-    assert {field.name for field in dataclasses.fields(Cue)} == {"subjects", "purpose", "kinds"}
+    # `place` is one of Person's own place identifiers (ADR 0008), never text.
+    assert {field.name for field in dataclasses.fields(Cue)} == {
+        "subjects",
+        "purpose",
+        "kinds",
+        "place",
+    }
+    with pytest.raises(MemoryRecordError):
+        Cue.about("wood", purpose="search", place="12,64,-3")
 
     with pytest.raises(MemoryRecordError):
         Cue.about("diamonds", purpose="search")
