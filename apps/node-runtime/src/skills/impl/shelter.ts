@@ -56,7 +56,7 @@ async function placeShelterBlocks(
         "Ran out of shelter material",
       );
     await context.embodiment.place(position, material);
-    context.memory.recordPlacement(position);
+    context.ledger.recordPlacement(position);
     placed += 1;
   }
   return placed;
@@ -93,7 +93,7 @@ export const buildBasicShelter: SkillImplementation = async (context) => {
       "FAILED",
       "Shelter enclosure verification failed",
     );
-  context.memory.home = { ...context.memory.home, shelterState: "complete" };
+  context.ledger.home = { ...context.ledger.home, shelterState: "complete" };
   context.effect("shelter_complete");
   context.note("placed_blocks", { placed });
   context.note("shelter_verified", {
@@ -107,7 +107,7 @@ export const repairShelter: SkillImplementation = async (context) => {
   const home = context.home();
   const missing = missingBlocks(context, home);
   if (missing.length === 0) {
-    context.memory.home = { ...context.memory.home, shelterState: "complete" };
+    context.ledger.home = { ...context.ledger.home, shelterState: "complete" };
     context.effect("shelter_intact");
     context.note("shelter_verified", { sealed: true, repaired: 0 });
     return;
@@ -131,7 +131,7 @@ export const repairShelter: SkillImplementation = async (context) => {
       "FAILED",
       "Shelter is still not sealed after repair",
     );
-  context.memory.home = { ...context.memory.home, shelterState: "complete" };
+  context.ledger.home = { ...context.ledger.home, shelterState: "complete" };
   context.effect("shelter_complete");
   context.note("placed_blocks", { placed });
   context.note("shelter_verified", { sealed: true, repaired: placed });

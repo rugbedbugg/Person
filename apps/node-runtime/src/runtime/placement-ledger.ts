@@ -42,8 +42,14 @@ interface PersistedState {
  * Durable, runtime-owned world facts: where home is, what Person built, and
  * which containers it owns. Written atomically so a crash mid-write cannot
  * leave a half-parsed provenance file behind.
+ *
+ * This is trusted runtime bookkeeping, used by the permission gate and the
+ * skills, and it holds exact positions. It is not Person's memory (ADR 0003
+ * rule 5, ADR 0007): nothing here reaches cognition except through the
+ * observation builder, and it is never a source of recollection. It was called
+ * `WorldMemory` until the memory system arrived and made that name wrong.
  */
-export class WorldMemory {
+export class PlacementLedger {
   readonly worldId: string;
   readonly personId: string;
   home: HomeRecord;
@@ -69,30 +75,30 @@ export class WorldMemory {
     worldId: string,
     personId: string,
     home: Position,
-  ): WorldMemory {
-    const memory = new WorldMemory(worldId, personId, home);
-    memory.#file = path.join(directory, `world-${worldId}-${personId}.json`);
+  ): PlacementLedger {
+    const ledger = new PlacementLedger(worldId, personId, home);
+    ledger.#file = path.join(directory, `world-${worldId}-${personId}.json`);
     try {
       const saved: PersistedState = JSON.parse(
-        readFileSync(memory.#file, "utf8"),
+        readFileSync(ledger.#file, "utf8"),
       );
       if (
         saved.version !== 1 ||
         saved.worldId !== worldId ||
         saved.personId !== personId
       )
-        return memory;
-      memory.home = saved.home;
-      memory.furnacePosition = saved.furnacePosition;
-      memory.craftingTablePosition = saved.craftingTablePosition;
+        return ledger;
+      ledger.home = saved.home;
+      ledger.furnacePosition = saved.furnacePosition;
+      ledger.craftingTablePosition = saved.craftingTablePosition;
       for (const record of saved.storage)
-        memory.storage.set(record.storageId, record);
-      for (const key of saved.placedBlocks) memory.placedBlocks.add(key);
+        ledger.storage.set(record.storageId, record);
+      for (const key of saved.placedBlocks) ledger.placedBlocks.add(key);
     } catch {
-      // A missing or unreadable file is simply an unremembered world. The
+      // A missing or unreadable file is simply an unrecorded world. The
       // evidence journal, not this cache, is the authoritative history.
     }
-    return memory;
+    return ledger;
   }
 
   save(): void {

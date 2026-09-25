@@ -33,8 +33,8 @@ test("placing an owned chest records provenance and enables deposit", async () =
   const world = await harness({ world: STORAGE_WORLD });
   const placed = await world.run("place_owned_chest");
   assert.equal(placed.status, "SUCCESS", JSON.stringify(placed.reasonCodes));
-  assert.equal(world.memory.ownedStorage.length, 1);
-  const record = world.memory.ownedStorage[0];
+  assert.equal(world.ledger.ownedStorage.length, 1);
+  const record = world.ledger.ownedStorage[0];
   assert.ok(record);
   assert.equal(record.createdByPerson, "ada");
   assert.equal(record.worldId, "test-world");

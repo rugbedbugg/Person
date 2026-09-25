@@ -27,7 +27,7 @@ function observe(bench: Harness): Observation {
     snapshot: bench.world.snapshot(),
     permissions: bench.permissions,
     kernel: bench.kernel,
-    memory: bench.memory,
+    ledger: bench.ledger,
     trainingContext: "fixture",
     cognition: {
       activeGoal: null,

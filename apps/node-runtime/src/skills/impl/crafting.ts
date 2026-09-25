@@ -46,14 +46,14 @@ function placementSite(
 
 /** Ensures an owned crafting table exists and returns its position. */
 async function ensureCraftingTable(context: SkillContext): Promise<Position> {
-  const remembered = context.memory.craftingTablePosition;
-  if (remembered) {
-    const block = context.embodiment.blockAt(remembered);
+  const recorded = context.ledger.craftingTablePosition;
+  if (recorded) {
+    const block = context.embodiment.blockAt(recorded);
     if (block?.kind === "crafting_table" && block.ownedByPerson) {
-      await approach(context, remembered);
-      return remembered;
+      await approach(context, recorded);
+      return recorded;
     }
-    context.memory.craftingTablePosition = null;
+    context.ledger.craftingTablePosition = null;
   }
   if (itemCount(context.snapshot().inventory, "crafting_table") === 0) {
     const steps = planCraft("crafting_table", 1, context.snapshot().inventory);
@@ -76,8 +76,8 @@ async function ensureCraftingTable(context: SkillContext): Promise<Position> {
       "No permitted crafting table site",
     );
   await context.embodiment.place(site, "crafting_table");
-  context.memory.recordPlacement(site);
-  context.memory.craftingTablePosition = site;
+  context.ledger.recordPlacement(site);
+  context.ledger.craftingTablePosition = site;
   context.note("placed_blocks", {
     crafting_table: `${site.x},${site.y},${site.z}`,
   });
@@ -171,8 +171,8 @@ export const craftFurnace: SkillImplementation = async (context) => {
       `Furnace placement denied: ${verdict.reason}`,
     );
   await context.embodiment.place(site, "furnace");
-  context.memory.recordPlacement(site);
-  context.memory.furnacePosition = site;
+  context.ledger.recordPlacement(site);
+  context.ledger.furnacePosition = site;
   context.effect("furnace_placed");
   context.note("placed_blocks", { furnace: `${site.x},${site.y},${site.z}` });
 };

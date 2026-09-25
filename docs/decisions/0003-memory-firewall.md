@@ -1,6 +1,6 @@
 # ADR 0003: The memory firewall
 
-**Status:** Accepted (rule), Deferred (retrieval model)
+**Status:** Accepted (rule), retrieval model proposed in ADR 0007
 **Date:** 2026-09-22
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -25,6 +25,8 @@ has one will never need the rest.
 
 The same confusion already exists in miniature in a name:
 `apps/node-runtime/src/runtime/world-memory.ts` is called memory and is not.
+(Renamed `PlacementLedger`, in `runtime/placement-ledger.ts`, when the memory
+system was built; see ADR 0007.)
 
 ## Decision
 
@@ -43,12 +45,13 @@ second only.
 4. **Researchers, operators and tests read everything.** The journal exists to
    be inspected from outside. `person inspect evidence` is an operator tool and
    stays one.
-5. **`WorldMemory` is not memory.** It is a runtime-owned ownership and
+5. **`WorldMemory` (now `PlacementLedger`) is not memory.** It is a runtime-owned ownership and
    placement ledger: home record, placed blocks, storage provenance, workstation
    positions. It is privileged engineering state read by the observation
    builder, and it must not become a recollection path.
 
-Rules 1, 3, 4 and 5 are in force now. Rule 2 is deferred with the memory system.
+Rules 1, 3, 4 and 5 are in force now. Rule 2 was deferred with the memory
+system; ADR 0007 proposes the retrieval model that implements it.
 
 ## Consequences
 
@@ -92,4 +95,4 @@ Rules 1, 3, 4 and 5 are in force now. Rule 2 is deferred with the memory system.
 | `docs/PERSON_SPEC.md` sections 24, 25                  | The firewall and the memory model           |
 | `docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6 | `WorldMemory`, and the absent memory system |
 | `packages/persistence/`                                | The event store                             |
-| `apps/node-runtime/src/runtime/world-memory.ts`        | The ledger that is not memory               |
+| `apps/node-runtime/src/runtime/placement-ledger.ts`    | The ledger that is not memory               |
