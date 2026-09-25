@@ -276,6 +276,22 @@ claim without reading the whole tree.
 | No coordinate or runtime target in project state       | cognitive anchors only; architecture rule  | `test_project_state_holds_no_coordinate_...`, architecture                           |
 | Same evidence, same projects, wherever the world is    | frame-free inputs                          | `tests/integration/projects.test.ts`                                                 |
 
+## Affect (ADR 0010)
+
+| Requirement                                                   | Implementation                                     | Tests                                                                       |
+| ------------------------------------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------- |
+| A perceived threat raises unease; an unperceived one does not | `appraise_threat` over the observation             | `test_a_perceived_threat_raises_unease`, `tests/integration/affect.test.ts` |
+| Harm, success and failure are appraised                       | `appraise_harm`, `appraise_outcome`                | `test_harm_...`, `test_success_and_repeated_failure_...`                    |
+| Every change records its cause                                | `Affect.feel`, `affect_appraised`                  | `test_every_change_is_recorded_with_its_cause`                              |
+| Decay in experienced time; restart resumes                    | `decay`, `AffectRecord`                            | `test_affect_decays_...`, `test_a_restart_resumes_affect_...`               |
+| Bounded, recorded priority bias; no urgent goal adjusted      | `Affect.bias`, `CognitionLoop._biased`             | `test_the_bias_is_bounded_...`, `test_projects.py`                          |
+| Different histories, different near choices                   | generic protective/outgoing sensitivity            | `test_different_experience_makes_a_different_near_choice_...`               |
+| Affect creates no goal and cannot outrank hunger              | bias applies to proposals only                     | `test_affect_cannot_create_a_goal_or_outrank_an_urgent_one`                 |
+| Exploration tolerance, never authority                        | `Affect.tolerance`, `EvidencePolicyProvider.score` | `test_calm_explores_and_unease_prefers_the_familiar_...`, protocol scan     |
+| No threshold-to-action; no privileged input                   | affect state read only in `affect.py`              | `test_affect_code_reads_nothing_privileged_and_runs_no_skill`               |
+| Memory salience untouched                                     | ADR 0007 constants                                 | `test_memory_salience_and_recall_are_untouched_by_affect`                   |
+| Same evidence, same affect, wherever the world is             | frame-free inputs                                  | `tests/integration/affect.test.ts`                                          |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

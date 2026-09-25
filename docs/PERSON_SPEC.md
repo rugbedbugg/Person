@@ -2068,6 +2068,14 @@ if anger > X -> attack
 
 Affect biases cognition; it does not select behaviour.
 
+**CURRENTLY IMPLEMENTED (ADR 0010, fixture only):** a rule-based foundation.
+Three continuous dimensions (`valence`, `unease`, `control`), appraised
+deterministically from percepts, the body and Person's own outcomes, decaying
+in experienced time and persisting across restarts. They bias non-urgent goal
+priority within a small bound and scale exploration tolerance. Memory
+coupling, relationship consequences, emotion labels and the fly-inspired
+provider are not implemented.
+
 ## 30.1 Sleep and Cognitive Fatigue
 
 Do not invent a second physical stamina mechanic. Minecraft already has hunger,
