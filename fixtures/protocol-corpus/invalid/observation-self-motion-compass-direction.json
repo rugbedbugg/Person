@@ -12,9 +12,9 @@
   "selfMotion": {
     "continuity": "continuous",
     "translation": {
-      "direction": "none",
-      "band": "none",
-      "distance": 0
+      "direction": "north",
+      "band": "short",
+      "distance": 5
     },
     "rotation": "none",
     "vertical": "level"

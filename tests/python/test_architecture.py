@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import ast
 import importlib.metadata
+import io
 import json
 import re
+import tokenize
 import tomllib
 from pathlib import Path
 
@@ -204,3 +206,44 @@ def test_no_arbitrary_query_interface_to_memory_exists() -> None:
     for path in python_sources():
         source = path.read_text(encoding="utf-8")
         assert "def retrieve(" not in source, f"{path.relative_to(REPOSITORY)} defines retrieve"
+
+
+def test_the_spatial_model_reads_no_absolute_or_ledger_state() -> None:
+    # Person's sense of place is integrated from felt motion (ADR 0008). The
+    # package must not be able to see a coordinate, a heading, the runtime's
+    # home distance, or the journal, whatever the observation happens to hold.
+    package = REPOSITORY / "apps/cognition/python/person_cognition/spatial"
+    forbidden = {
+        "homeDistance",
+        "yaw",
+        "pitch",
+        "position",
+        "WorldSnapshot",
+        "EvidenceJournal",
+        "EvidenceStore",
+        "SnapshotStore",
+        "open",
+        "read_text",
+    }
+    for path in package.rglob("*.py"):
+        source = path.read_text(encoding="utf-8")
+        # Identifiers and string literals, which is where a field would be
+        # read; prose in comments and docstrings may name what is excluded.
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+        for token in tokens:
+            if token.type == tokenize.NAME:
+                words = {token.string}
+            elif token.type == tokenize.STRING and len(token.string) < 40:
+                words = set(re.findall(r"\w+", token.string))
+            else:
+                continue
+            leaked = words & forbidden
+            assert not leaked, f"{path.relative_to(REPOSITORY)} uses {sorted(leaked)}"
+
+
+def test_the_loop_reaches_places_only_through_its_spatial_sense() -> None:
+    source = (REPOSITORY / "apps/cognition/python/person_cognition/loop.py").read_text(
+        encoding="utf-8"
+    )
+    for forbidden in ("spatial_map.places(", "spatial_map._places", ".estimate = "):
+        assert forbidden not in source, f"the loop must not edit the map: {forbidden}"

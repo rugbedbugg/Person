@@ -239,6 +239,21 @@ claim without reading the whole tree.
 | A fruitless search is remembered as not found, not absent | `encoding.searched`, `NOT_FOUND`                   | `test_a_search_that_found_nothing_is_remembered_as_exactly_that` |
 | Fixture and live memories never mix                       | `MemoryStore.episodes_in`                          | `test_fixture_memories_never_surface_in_a_live_world`            |
 
+## Self-motion and places (ADR 0008)
+
+| Requirement                                               | Implementation                                   | Tests                                                               |
+| --------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------- |
+| Self-motion is relative, quantized, and carries no frame  | `observation/self-motion.ts`, observation schema | `tests/observation/self-motion.test.ts`, protocol corpus            |
+| The frame is the facing at the previous observation       | `selfMotion()`                                   | same                                                                |
+| Integration drifts; doubt never shrinks                   | `spatial/integration.py`                         | `test_a_square_walk_comes_back_near_the_start_and_less_sure`        |
+| Being lost starts a new frame                             | `integrate`, `continuity: "discontinuous"`       | `test_being_lost_starts_a_new_frame_rather_than_guessing`           |
+| Places are cognitive and recognised with confidence       | `spatial/places.py`, `Spatial.settle`            | `test_recognition_is_a_confidence_and_falls_with_doubt`             |
+| The map changes only through felt motion                  | `Spatial.feel`; architecture rule                | `test_the_map_changes_only_through_felt_motion`, architecture       |
+| A restart resumes with more doubt and reveals nothing     | `resumed`, `SpatialMap`                          | `test_places_persist_and_a_restart_resumes_...`                     |
+| Shifting the whole world changes nothing in Person's mind | frame-free sense and model                       | `tests/integration/spatial.test.ts`                                 |
+| Home is where Person built its shelter                    | `settle("shelter", label="home")`                | `test_home_is_where_person_built_its_shelter`                       |
+| Search memory is keyed by place: shorter, never absence   | `revisit_budget`, `_seek`, `_reopen_unfound`     | `test_returning_to_a_searched_place_...`, `test_the_same_place_...` |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

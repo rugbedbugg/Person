@@ -9,6 +9,16 @@
   "type": "Observation",
   "observationVersion": 2,
   "trainingContext": "fixture",
+  "selfMotion": {
+    "continuity": "continuous",
+    "translation": {
+      "direction": "none",
+      "band": "none",
+      "distance": 0
+    },
+    "rotation": "none",
+    "vertical": "level"
+  },
   "vitals": {
     "health": 14.0,
     "food": 7.0,

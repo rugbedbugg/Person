@@ -1,6 +1,6 @@
 # ADR 0003: The memory firewall
 
-**Status:** Accepted (rule), retrieval model proposed in ADR 0007
+**Status:** Accepted (rule), retrieval model accepted in ADR 0007
 **Date:** 2026-09-22
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -51,7 +51,7 @@ second only.
    builder, and it must not become a recollection path.
 
 Rules 1, 3, 4 and 5 are in force now. Rule 2 was deferred with the memory
-system; ADR 0007 proposes the retrieval model that implements it.
+system; ADR 0007 (accepted) is the retrieval model that implements it.
 
 ## Consequences
 
