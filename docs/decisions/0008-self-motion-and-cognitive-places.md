@@ -90,10 +90,12 @@ foundation of the spatial model.
     It holds the estimated position and uncertainty at formation, and a
     coarse scene signature: which subjects were perceived there.
 12. **Recognition is uncertain.** Person is "probably at place P" when its
-    current estimate lies within P's radius once both uncertainties are
-    allowed for, with a confidence that falls as they grow. A matching scene
-    signature raises the confidence. Recognition never means the runtime
-    confirmed anything.
+    current estimate lies within P's radius once the doubt it has accumulated
+    since forming P is allowed for, with a confidence that falls as that doubt
+    grows. Within one frame error accumulates along a single path, so the
+    doubt Person already had when it formed P does not separate it from P. A
+    matching scene signature raises the confidence, which never reaches
+    certainty. Recognition never means the runtime confirmed anything.
 13. **Landmarks are coarse.** A signature is a set of subjects (wood, stone,
     container, ...), never the identity of a particular object. C4 remains
     unresolved and nothing here assumes that a tree seen now is the tree seen
@@ -121,6 +123,10 @@ foundation of the spatial model.
     same place, and never shorter than a minimum. The conclusion is still
     `not_found_in_bounded_search`. It never becomes "there is no wood here",
     and the goal still reopens the moment wood is seen.
+19. **"Not found" is about a place.** A goal blocked by a fruitless search
+    reopens when what it sought is seen, and also when Person no longer
+    believes it is at the place it searched from, because somewhere else was
+    not searched. Returning to the searched place reopens nothing by itself.
 
 Numbers such as sector widths, band edges, uncertainty rates, radii,
 confidence rules and budgets are current implementation parameters and can be
