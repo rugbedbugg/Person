@@ -282,6 +282,33 @@ that `memory_encoded` records carry only whitelisted details and that the
 second session's `memory_recalled` records name memories from the first. That
 has not been done.
 
+## Self-motion and places (fixture only)
+
+Added 2026-09-25 (ADR 0008). **TESTED IN FIXTURE. Not live-validated. Not
+conformance-tested:** the Mineflayer double does not move a body the way a
+server does.
+
+What the fixture establishes (`tests/observation/self-motion.test.ts`,
+`apps/cognition/tests/test_spatial.py`, `tests/integration/spatial.test.ts`):
+
+- standing still, walking ahead, sideways and diagonal steps, turning on the
+  spot, a push, a fall and a jump no walking explains each produce the
+  expected coarse `selfMotion`, with nothing absolute in it;
+- integrated motion drifts: a square walk returns near the start with more
+  doubt than it began with, and nothing narrows the doubt;
+- the same scenario placed 1000 blocks along X produces identical decisions,
+  places, estimates, searches and memories (normalised for identifiers);
+  injecting an X-dependent term into the sense makes that test fail;
+- a search at a place Person believes it has returned to is shorter and still
+  concludes only `not_found_in_bounded_search`.
+
+What rests on reading code rather than a test: that the live adapter's `yaw`
+follows the same convention as the fixture's, so that "left" is felt as left.
+The smallest live checkpoint needs no new tooling: in a disposable 1.16.1 LAN
+world, run a short `person run` in which `gather_wood` walks the bot, and
+compare the journal's `place_formed` estimates with where the bot visibly
+went. That has not been done.
+
 ## Safety validation
 
 Proven in the fixture and against the double:
