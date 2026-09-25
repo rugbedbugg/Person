@@ -270,3 +270,21 @@ test("percepts cannot be assembled back into a coordinate", async () => {
       `${anchor} would be an anchor for reconstruction`,
     );
 });
+
+test("the path risk Person is told of comes from threats it perceives", async () => {
+  // The kernel still sees every hostile the body knows about and acts on it.
+  // What cognition is told must be built from what Person perceives, or an
+  // unseen zombie behind Person leaks through a summary field.
+  const bench = await harness();
+  bench.world.spawn("zombie", { x: 0, y: 64, z: 5 });
+  bench.world.face({ x: 0, y: 64, z: -6 });
+  const unseen = observe(bench);
+  assert.equal(unseen.nearby.hostiles.length, 0, "the zombie is behind Person");
+  assert.notEqual(bench.kernel.threatState(bench.world.snapshot()), "none");
+  assert.equal(unseen.navigation.pathRisk, "low");
+
+  bench.world.face({ x: 0, y: 64, z: 5 });
+  const seen = observe(bench);
+  assert.equal(seen.nearby.hostiles.length, 1);
+  assert.equal(seen.navigation.pathRisk, "high");
+});

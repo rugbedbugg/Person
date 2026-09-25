@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/affect-foundation`, based on `77d62b5` (tip of `feat/lan-validation` after PR #11)
+**Last verified against:** branch `fix/perceived-path-risk`, based on `a549d6f` (tip of `feat/lan-validation` after PR #12)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-25
 
@@ -525,6 +525,12 @@ What information seeking does **not** establish:
   reopens when Person believes it is somewhere else.
 - Search is gaze only. Person does not walk anywhere _in order to_ look;
   choosing where to go to search is not attempted.
+- ~~`navigation.pathRisk` was derived from the kernel's threat state, which
+  counts every hostile the body knows about, including ones Person cannot
+  see.~~ Found during Phase E, fixed in `fix/perceived-path-risk`: it is now
+  judged from the perceived hostiles, with the kernel's own distance
+  thresholds (`observationVersion` 7). The kernel still reads the unshaped
+  snapshot and acts on unseen threats, so safety is unchanged.
 - ~~Peripheral animal records still carry the `named` and `tamed` booleans.~~
   Fixed in `fix/peripheral-semantic-leak`: a peripheral entity now carries
   only its location fields. `named`, `tamed` and `protectedTarget` (the
@@ -773,30 +779,29 @@ runtime would allow a direct route home), not a distance.
 
 ## 12. Known Limitations / Backlog
 
-| Limitation                                                                                         | Source                        |
-| -------------------------------------------------------------------------------------------------- | ----------------------------- |
-| Mineflayer adapter exercised live for observation and 2 skills only                                | REALITY_VALIDATION.md         |
-| No dig-down skill (mine_stone/coal need exposed stone)                                             | IMPLEMENTATION_REPORT.md      |
-| Fixture is simulation, not Minecraft                                                               | IMPLEMENTATION_REPORT.md      |
-| Planner bounded (depth/branch/node caps) — may return no plan                                      | IMPLEMENTATION_REPORT.md      |
-| Goals: survival and two project kinds; no social, exploration or invented projects                 | ADR 0009                      |
-| Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal              | ADR 0010                      |
-| `navigation.pathRisk` is derived from the kernel threat state, which includes unperceived hostiles | found in Phase E; fix follows |
-| Death ends episode — no respawn/recovery loop                                                      | IMPLEMENTATION_REPORT.md      |
-| Evidence written by cognition — last outcome missing if cognition dies mid-episode                 | IMPLEMENTATION_REPORT.md      |
-| Inventory reconciliation on resume not reimplemented                                               | IMPLEMENTATION_REPORT.md      |
-| `loot_permitted_container` withdraws all types up to amount                                        | IMPLEMENTATION_REPORT.md      |
-| One Person per runtime (multi-Person not supported)                                                | IMPLEMENTATION_REPORT.md      |
-| Tick budgets invented in fixture (4 ticks/step, 12/dig)                                            | REALITY_VALIDATION.md         |
-| Prediction error recorded but inert (no world model consumes it)                                   | REALITY_VALIDATION.md         |
-| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                              | REALITY_VALIDATION.md         |
-| No belief, semantic/spatial memory, affect, language, social or project system                     | Known Deviations C6, above    |
-| Memory changes one decision: how long a search at a recognised place lasts                         | ADR 0007, ADR 0008            |
-| Place recognition is by drifting estimate and coarse scene only; no landmark identity              | ADR 0008, C4                  |
-| A small teleport inside the locomotion bound is felt as ordinary motion                            | ADR 0008                      |
-| Actions are remembered without their referent until C4 is resolved                                 | ADR 0007, C4                  |
-| No attention model: perception is capped deterministically, nearest first                          | Known Deviations C1, above    |
-| Information seeking is gaze only and per goal                                                      | Known Deviations C1           |
+| Limitation                                                                            | Source                     |
+| ------------------------------------------------------------------------------------- | -------------------------- |
+| Mineflayer adapter exercised live for observation and 2 skills only                   | REALITY_VALIDATION.md      |
+| No dig-down skill (mine_stone/coal need exposed stone)                                | IMPLEMENTATION_REPORT.md   |
+| Fixture is simulation, not Minecraft                                                  | IMPLEMENTATION_REPORT.md   |
+| Planner bounded (depth/branch/node caps) — may return no plan                         | IMPLEMENTATION_REPORT.md   |
+| Goals: survival and two project kinds; no social, exploration or invented projects    | ADR 0009                   |
+| Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal | ADR 0010                   |
+| Death ends episode — no respawn/recovery loop                                         | IMPLEMENTATION_REPORT.md   |
+| Evidence written by cognition — last outcome missing if cognition dies mid-episode    | IMPLEMENTATION_REPORT.md   |
+| Inventory reconciliation on resume not reimplemented                                  | IMPLEMENTATION_REPORT.md   |
+| `loot_permitted_container` withdraws all types up to amount                           | IMPLEMENTATION_REPORT.md   |
+| One Person per runtime (multi-Person not supported)                                   | IMPLEMENTATION_REPORT.md   |
+| Tick budgets invented in fixture (4 ticks/step, 12/dig)                               | REALITY_VALIDATION.md      |
+| Prediction error recorded but inert (no world model consumes it)                      | REALITY_VALIDATION.md      |
+| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                 | REALITY_VALIDATION.md      |
+| No belief, semantic/spatial memory, affect, language, social or project system        | Known Deviations C6, above |
+| Memory changes one decision: how long a search at a recognised place lasts            | ADR 0007, ADR 0008         |
+| Place recognition is by drifting estimate and coarse scene only; no landmark identity | ADR 0008, C4               |
+| A small teleport inside the locomotion bound is felt as ordinary motion               | ADR 0008                   |
+| Actions are remembered without their referent until C4 is resolved                    | ADR 0007, C4               |
+| No attention model: perception is capped deterministically, nearest first             | Known Deviations C1, above |
+| Information seeking is gaze only and per goal                                         | Known Deviations C1        |
 
 ---
 
@@ -804,9 +809,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 267     | 267     |
+| Node (all)   | 268     | 268     |
 | Python (all) | 240     | 240     |
-| **Total**    | **507** | **507** |
+| **Total**    | **508** | **508** |
 
 **Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
 not recounted since:**
@@ -826,10 +831,11 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `feat/affect-foundation` on 2026-09-25: Node 267 pass / 0 fail,
-Python 240 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+Verified on `fix/perceived-path-risk` on 2026-09-25: Node 268 pass / 0
+fail, Python 240 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
-261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11.
+261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
+267 / 240 after PR #12.
 
 ---
 
