@@ -21,7 +21,11 @@ const withComparison = (config: PersonConfig): PersonConfig => ({
   cognition: { ...config.cognition, command: COGNITION },
 });
 
-test("return_home's declared effect is checked against the world, and matches", async () => {
+test("return_home arrives, which the operator can check and Person cannot observe", async () => {
+  // C8: the observation no longer carries a distance to home, so whether
+  // Person is at home is its own belief, and an observation comparison has to
+  // say `not_observable`. Arrival is still checked against the world, through
+  // the operator report's exact physical distance, which cognition never sees.
   const config = withComparison(baseConfig({ home: { x: 0, y: 64, z: 0 } }));
   const world = new FixtureWorld({ spawn: { x: 10, y: 64, z: 0 } });
 
@@ -33,6 +37,11 @@ test("return_home's declared effect is checked against the world, and matches", 
   });
 
   assert.equal(run.report.terminalStatus, "SUCCESS");
+  assert.equal(run.report.navigation.physicalHomeDistanceBefore, 10);
+  assert.ok(
+    (run.report.navigation.physicalHomeDistanceAfter ?? 99) <= 2.5,
+    "the body really is home",
+  );
   const comparison = run.report.effectComparison;
   assert.ok(comparison, "a comparison must be attempted");
   assert.equal(
@@ -40,13 +49,10 @@ test("return_home's declared effect is checked against the world, and matches", 
     true,
     `the comparison did not run: ${comparison.reason}`,
   );
-  assert.equal(comparison.matched, 1);
   assert.equal(comparison.mismatched, 0);
   const atHome = comparison.facts.find((fact) => fact.fact === "at_home");
   assert.ok(atHome);
-  assert.equal(atHome.verdict, "match");
-  assert.equal(atHome.before, 0);
-  assert.equal(atHome.observed, 1);
+  assert.equal(atHome.verdict, "not_observable");
 });
 
 test("an effect an observation cannot carry is not counted as a failure", async () => {

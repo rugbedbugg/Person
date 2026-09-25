@@ -450,7 +450,7 @@ test("operator setup keeps Person inert until it is explicitly confirmed", async
   );
   assert.ok(info, "the operator is told where Person is standing");
   assert.equal((info as unknown as OperatorSetupInfo).skillId, "wait_safely");
-  assert.equal((info as unknown as OperatorSetupInfo).homeDistance, 10);
+  assert.equal((info as unknown as OperatorSetupInfo).physicalHomeDistance, 10);
   for (const method of PHYSICAL)
     assert.ok(
       !callsAtConfirmation.includes(method),
@@ -540,9 +540,9 @@ test("return_home travels to the configured home and says how far it got", async
   assert.equal(run.report.safety.decision, "ACCEPT");
   assert.equal(run.report.actualSkill, "return_home");
   assert.equal(run.report.terminalStatus, "SUCCESS");
-  assert.equal(run.report.navigation.homeDistanceBefore, 10);
+  assert.equal(run.report.navigation.physicalHomeDistanceBefore, 10);
   assert.ok(
-    (run.report.navigation.homeDistanceAfter ?? 99) <= 2.5,
+    (run.report.navigation.physicalHomeDistanceAfter ?? 99) <= 2.5,
     "the spec's own completion criterion is what decides this",
   );
   assert.deepEqual(run.report.navigation.homePosition, config.world.home);
