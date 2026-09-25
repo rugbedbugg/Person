@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v6"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v7"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -27,6 +27,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v4",
     "person-evidence-v5",
     "person-evidence-v6",
+    "person-evidence-v7",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -62,6 +63,10 @@ EVENT_TYPES: tuple[str, ...] = (
     "project_started",
     #: A project progressed, was interrupted, resumed, completed or abandoned.
     "project_changed",
+    #: One appraisal and the affect change it made: trigger, components,
+    #: state before, delta, state after (ADR 0010). The affect record is
+    #: rebuilt from these alone. Never scored.
+    "affect_appraised",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -74,6 +79,8 @@ V4_EVENT_TYPES: frozenset[str] = frozenset({"memory_encoded", "memory_recalled"}
 V5_EVENT_TYPES: frozenset[str] = frozenset({"place_formed", "place_visited"})
 #: Event types introduced with the sixth.
 V6_EVENT_TYPES: frozenset[str] = frozenset({"project_started", "project_changed"})
+#: Event types introduced with the seventh.
+V7_EVENT_TYPES: frozenset[str] = frozenset({"affect_appraised"})
 
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
@@ -83,6 +90,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V4_EVENT_TYPES, "person-evidence-v4"),
     **dict.fromkeys(V5_EVENT_TYPES, "person-evidence-v5"),
     **dict.fromkeys(V6_EVENT_TYPES, "person-evidence-v6"),
+    **dict.fromkeys(V7_EVENT_TYPES, "person-evidence-v7"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
