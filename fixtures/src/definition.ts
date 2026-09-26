@@ -39,6 +39,21 @@ export interface FixtureEvent {
   weather?: "clear" | "rain" | "thunder";
 }
 
+/**
+ * A rule of this world that nothing in Person is told.
+ *
+ * Hidden mechanics exist so discovery can be tested honestly: a relation
+ * Person could only learn by experiencing its consequences, and one no
+ * language model could already know, because it is not Minecraft's.
+ * `barren_while_weather`: while the weather is `weather`, the listed blocks
+ * break when dug but drop nothing.
+ */
+export interface FixtureHiddenRule {
+  kind: "barren_while_weather";
+  weather: "clear" | "rain" | "thunder";
+  blocks: string[];
+}
+
 export interface FixtureWorldDefinition {
   name: string;
   seed: number;
@@ -68,6 +83,7 @@ export interface FixtureWorldDefinition {
   entities: FixtureEntity[];
   containers: FixtureContainer[];
   events: FixtureEvent[];
+  hiddenRules?: FixtureHiddenRule[];
 }
 
 export const DEFAULT_DEFINITION: FixtureWorldDefinition = {

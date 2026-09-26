@@ -190,7 +190,7 @@ When documenting any capability, use only these terms:
 ---
 
 _Last updated: 2026-09-22_
-_Baseline for this update: `d0e9398` (feat/lan-validation)_
+_Baseline for this update: `48728e8` (feat/lan-validation)_
 _Tag: `v0.1.0-foundation` (`6b99830`)_
 
 HEAD moves. Do not trust the line above as a current-branch reference; run

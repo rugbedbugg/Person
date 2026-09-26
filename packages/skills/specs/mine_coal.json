@@ -57,6 +57,7 @@
     "unreachable_resource",
     "missing_tool",
     "inventory_full",
+    "no_yield",
     "timed_out"
   ],
   "requiredPermissions": ["mine_resource"],

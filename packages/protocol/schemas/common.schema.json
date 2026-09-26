@@ -19,6 +19,11 @@
       "type": "string",
       "pattern": "^[A-Za-z0-9_.:-]{1,64}$"
     },
+    "contextId": {
+      "type": "string",
+      "description": "A decision context: one band per dimension, joined with dots. Longer than a slug, because every dimension is spelled out.",
+      "pattern": "^[A-Za-z0-9_.:-]{1,128}$"
+    },
     "identifier": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9_]{0,63}$"

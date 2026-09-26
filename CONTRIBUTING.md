@@ -2,7 +2,7 @@
 
 **For:** Human contributors to Person (Partha, Upayan, future collaborators)
 **Date:** 2026-09-19
-**HEAD:** `7501194` (feat/lan-validation)
+**HEAD:** `5b9a395` (feat/lan-validation)
 **Canonical checks:** `mise run check`
 
 ---

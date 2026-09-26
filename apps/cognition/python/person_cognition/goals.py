@@ -27,6 +27,8 @@ GOAL_TYPES = (
     "ESTABLISH_STORAGE",
     "RECOVER_HOME",
     "MAINTAIN_RESERVES",
+    #: One trial of an experiment (ADR 0012).
+    "INVESTIGATE",
 )
 
 
@@ -317,6 +319,21 @@ class GoalStack:
             return
         self.entries[goal_id] = replace(goal, status="BLOCKED", suspension_reason=reason)
         self._note(tick, goal_id, "blocked")
+        if self.active_id == goal_id:
+            self.active_id = None
+
+    def conclude(self, goal_id: str, tick: int, reason: str) -> None:
+        """A goal that was only ever about one attempt is over, however it went.
+
+        An experiment's trial is for observing, not for getting its outcome:
+        once observed, it is done. Recorded as `concluded`: neither achieved
+        nor blocked.
+        """
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
+            return
+        self.entries[goal_id] = replace(goal, status="COMPLETE", suspension_reason=reason)
+        self._note(tick, goal_id, "concluded")
         if self.active_id == goal_id:
             self.active_id = None
 

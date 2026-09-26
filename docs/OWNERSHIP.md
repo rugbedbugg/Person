@@ -2,7 +2,7 @@
 
 **Status:** Conservative baseline — exact subsystem ownership may evolve as collaboration settles.
 **Date:** 2026-09-22
-**Baseline:** `d0e9398`
+**Baseline:** `48728e8`
 
 ---
 

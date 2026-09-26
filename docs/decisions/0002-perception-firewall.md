@@ -116,7 +116,7 @@ Rule 6 is deferred. Rules 1 to 5 are in force now.
 | `docs/CURRENT_STATE.md`, "Known Deviations", C1   | Coordinates currently cross the firewall            |
 | `apps/node-runtime/src/observation/perception.ts` | The firewall's current implementation               |
 | `REALITY_VALIDATION.md`, first contact, finding 3 | Why shaping exists                                  |
-| `2d7f9d2`                                         | Perception balance commit                           |
+| `f0b3ff8`                                         | Perception balance commit                           |
 
 ## Implementation Notes
 
