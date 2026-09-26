@@ -1,0 +1,46 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb",
+  "personId": "ada",
+  "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
+  "worldId": "fixture-world-01",
+  "tick": 1200,
+  "timestamp": "2026-09-15T08:30:00.000Z",
+  "type": "GoalDecision",
+  "decisionId": "33333333-3333-4333-8333-333333333333",
+  "goal": {
+    "goalId": "goal_investigation_1_t1",
+    "goalType": "INVESTIGATE",
+    "priority": 240.0,
+    "source": "self_generated",
+    "createdAtTick": 1200,
+    "status": "ACTIVE",
+    "completionCondition": [
+      {
+        "fact": "plant_food",
+        "op": ">=",
+        "value": 7
+      }
+    ],
+    "suspensionReason": null
+  },
+  "reasonCodes": ["investigate_hyp_1", "vary_weather", "attempt_1"],
+  "stack": [
+    {
+      "goalId": "goal_investigation_1_t1",
+      "goalType": "INVESTIGATE",
+      "priority": 240.0,
+      "source": "self_generated",
+      "createdAtTick": 1200,
+      "status": "ACTIVE",
+      "completionCondition": [
+        {
+          "fact": "plant_food",
+          "op": ">=",
+          "value": 7
+        }
+      ],
+      "suspensionReason": null
+    }
+  ]
+}

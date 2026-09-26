@@ -58,7 +58,8 @@
             "ESTABLISH_TOOLS",
             "ESTABLISH_STORAGE",
             "RECOVER_HOME",
-            "MAINTAIN_RESERVES"
+            "MAINTAIN_RESERVES",
+            "INVESTIGATE"
           ]
         },
         "priority": {
