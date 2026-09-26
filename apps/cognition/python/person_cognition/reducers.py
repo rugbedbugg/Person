@@ -1,11 +1,12 @@
 """Everything cognition rebuilds from the journal after a restart.
 
-Six reducers read the same journal for different things: the routine
+Seven reducers read the same journal for different things: the routine
 statistics read outcomes, the memory store reads encoded episodes, the
-spatial map reads the places Person formed and revisited, and the project
-book reads the projects Person took up, the affect record reads
-appraisals, and the effect beliefs read classified prediction evidence. None
-sees the other's state, and each ignores the events it has no case for.
+spatial map reads the places Person formed and revisited, the project book
+reads the projects Person took up, the affect record reads appraisals, the
+effect beliefs read classified prediction evidence, and the hypothesis book
+reads causal trials, hypotheses, their evidence and investigations. None sees
+the other's state, and each ignores the events it has no case for.
 """
 
 from __future__ import annotations
@@ -18,6 +19,7 @@ from person_policy import RoutineStatistics
 
 from .affect import AffectRecord
 from .effect_learning import EffectBeliefs
+from .hypotheses import HypothesisBook
 from .memory import MemoryStore
 from .projects import ProjectBook
 from .spatial import SpatialMap
@@ -32,6 +34,7 @@ class CognitiveReducers:
         projects: ProjectBook,
         affect: AffectRecord,
         effects: EffectBeliefs,
+        hypotheses: HypothesisBook,
     ) -> None:
         self.statistics = statistics
         self.memory = memory
@@ -39,6 +42,7 @@ class CognitiveReducers:
         self.projects = projects
         self.affect = affect
         self.effects = effects
+        self.hypotheses = hypotheses
 
     def reset(self) -> None:
         self.statistics.reset()
@@ -47,6 +51,7 @@ class CognitiveReducers:
         self.projects.reset()
         self.affect.reset()
         self.effects.reset()
+        self.hypotheses.reset()
 
     def apply(self, event: EvidenceEvent) -> None:
         self.statistics.apply(event)
@@ -55,6 +60,7 @@ class CognitiveReducers:
         self.projects.apply(event)
         self.affect.apply(event)
         self.effects.apply(event)
+        self.hypotheses.apply(event)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -64,6 +70,7 @@ class CognitiveReducers:
             "projects": self.projects.to_json(),
             "affect": self.affect.to_json(),
             "effects": self.effects.to_json(),
+            "hypotheses": self.hypotheses.to_json(),
         }
 
     def load_json(self, body: Mapping[str, Any]) -> None:
@@ -75,3 +82,4 @@ class CognitiveReducers:
         self.projects.load_json(body["projects"])
         self.affect.load_json(body["affect"])
         self.effects.load_json(body["effects"])
+        self.hypotheses.load_json(body["hypotheses"])

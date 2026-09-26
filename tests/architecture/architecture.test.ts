@@ -336,3 +336,21 @@ test("status telemetry is one-way and reaches no decision", () => {
         );
     }
 });
+
+test("trusted safety knows nothing of curiosity", () => {
+  // Curiosity grants no authority (ADR 0012): an experiment's trial reaches
+  // the runtime as an ordinary proposal, and nothing that judges proposals
+  // can tell it apart, let alone relax for it.
+  const roots = [
+    "apps/node-runtime/src/safety",
+    "apps/node-runtime/src/skills",
+  ];
+  for (const root of roots)
+    for (const file of sourceFiles(root, ".ts")) {
+      const source = readFileSync(file, "utf8");
+      assert.ok(
+        !/INVESTIGATE|hypothes|curios|experiment/i.test(source),
+        `${file} must not treat experiments specially`,
+      );
+    }
+});

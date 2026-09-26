@@ -47,6 +47,9 @@ class ScoredCandidate:
     #: The learned effect-reliability term included in `score` (ADR 0011),
     #: kept separately so it can be inspected. Zero unless one was supplied.
     learned_effect: float = 0.0
+    #: The supported-hypothesis term included in `score` (ADR 0012), kept
+    #: separately for the same reason. Zero unless one was supplied.
+    hypothesis_effect: float = 0.0
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +116,7 @@ class DeterministicPolicyProvider:
         home: str = "unknown",
         tolerance: float = 1.0,
         reliability: Callable[[tuple[str, ...]], float] | None = None,
+        hypotheses: Callable[[tuple[str, ...]], float] | None = None,
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
@@ -226,10 +230,12 @@ class EvidencePolicyProvider:
         home: str = "unknown",
         tolerance: float = 1.0,
         reliability: Callable[[tuple[str, ...]], float] | None = None,
+        hypotheses: Callable[[tuple[str, ...]], float] | None = None,
     ) -> PolicyChoice:
         """Choose a routine. `reliability` scores a routine's steps from learned
-        effect beliefs; the loop supplies it only when the learning mode lets
-        learned beliefs act (ADR 0011)."""
+        effect beliefs, and `hypotheses` from supported causal hypotheses whose
+        condition holds now; the loop supplies each only when the learning
+        mode lets learned beliefs act (ADR 0011, ADR 0012)."""
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
         envelope = safe_envelope(observation, self.thresholds, home=home)
@@ -244,8 +250,18 @@ class EvidencePolicyProvider:
             learned = reliability(candidate.steps) if reliability is not None else 0.0
             if learned:
                 reasons = (*reasons, "learned_effect_reliability")
+            causal = hypotheses(candidate.steps) if hypotheses is not None else 0.0
+            if causal:
+                reasons = (*reasons, "supported_hypothesis")
             scored.append(
-                ScoredCandidate(candidate, value + learned, counts, reasons, learned_effect=learned)
+                ScoredCandidate(
+                    candidate,
+                    value + learned + causal,
+                    counts,
+                    reasons,
+                    learned_effect=learned,
+                    hypothesis_effect=causal,
+                )
             )
         scored.sort(
             key=lambda entry: (

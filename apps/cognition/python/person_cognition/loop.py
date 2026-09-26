@@ -48,8 +48,26 @@ from .affect import (
     appraise_threat,
 )
 from .context import decision_context
-from .effect_learning import EffectBeliefs, admitted_to, classify, reliability_term
+from .effect_learning import EffectBeliefs, Trial, admitted_to, classify, reliability_term
 from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
+from .hypotheses import (
+    CausalHypothesis,
+    ContrastProposer,
+    HypothesisBook,
+    InvestigationManager,
+    Perceived,
+    Proposer,
+    ReasoningContext,
+    admit,
+    calm,
+    design,
+    evaluable_effects,
+    hypothesis_term,
+    perceived,
+    vocabulary,
+)
+from .hypotheses.experiments import GOAL_TYPE as INVESTIGATE
+from .hypotheses.generation import CONTEXT_TRIALS
 from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
 from .memory.episodes import EpisodeDraft
@@ -69,6 +87,8 @@ from .spatial import Spatial, SpatialMap
 
 COGNITION_VERSION = "0.1.0"
 MAX_CANDIDATES = 6
+#: Unresolved hypotheses held at once about one skill's effect.
+MAX_LIVE_HYPOTHESES = 3
 
 #: Routines that are not strategies, so they are never scored as one.
 UNSCORED_ROUTINES = frozenset({"r_idle_wait", SEARCH_ROUTINE_ID})
@@ -132,6 +152,16 @@ class CognitionLoop:
         self._goal_events_seen = 0
         #: Learned reliability of skill effects, active and shadow (ADR 0011).
         self.effect_beliefs = EffectBeliefs()
+        #: Causal hypotheses, their evidence and investigations (ADR 0012).
+        self.hypothesis_book = HypothesisBook()
+        self.investigations = InvestigationManager(self.hypothesis_book.investigations)
+        #: Who reasons about anomalies. Deterministic unless one is supplied;
+        #: whatever it is, it only proposes, through the grounding gate.
+        self.proposer: Proposer = ContrastProposer()
+        #: The skills the runtime offered this session.
+        self.offered: tuple[str, ...] = ()
+        #: What Person perceives now: weather, day phase, and the place it is sure of.
+        self._now: Perceived | None = None
         self.reducers = CognitiveReducers(
             self.statistics,
             self.memory_store,
@@ -139,6 +169,7 @@ class CognitionLoop:
             self.project_book,
             self.affect_record,
             self.effect_beliefs,
+            self.hypothesis_book,
         )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -284,6 +315,9 @@ class CognitionLoop:
         self.projects = ProjectManager(self.project_book)
         # Affect persists too, and settles only as experienced time passes.
         self.affect = Affect(self.affect_record)
+        # So do hypotheses and investigations; an open investigation resumes.
+        self.investigations = InvestigationManager(self.hypothesis_book.investigations)
+        self.offered = tuple(str(skill) for skill in message["skillIds"])
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
@@ -342,6 +376,7 @@ class CognitionLoop:
         # believes it is home, and what it notices is remembered there.
         self.spatial.feel(message["selfMotion"], frozenset(remembering.noticed(message)))
         self.home, _ = self.spatial.home_relation()
+        self._now = perceived(message, self.spatial.here())
         state = symbolic_state(message, home=self.home)
         context = decision_context(message, self.home)
         context_id = context.identifier()
@@ -354,10 +389,15 @@ class CognitionLoop:
 
         self._reopen_unfound(state, tick)
         self._deliberate_projects(message, state, tick)
+        self._deliberate_investigations(message, state, tick)
         proposals = self.goal_provider.propose(message, state, tick, home=self.home)
         project_goal = self.projects.goal(state, tick)
         if project_goal is not None:
             proposals.append(project_goal)
+        trial_goal = self._trial_goal(state, tick)
+        if trial_goal is not None:
+            proposals.append(trial_goal)
+        self._retire_stale_trials(trial_goal, tick)
         # Affect adjusts the candidates that already exist, within a tight
         # bound, and records how much; it adds none and removes none.
         proposals = [self._biased(proposal) for proposal in proposals]
@@ -365,6 +405,7 @@ class CognitionLoop:
         changes = self.projects.track(self.goals, state, self.memory.now)
         self._record_changes(changes, tick)
         self._appraise_progress(changes, tick)
+        self._record_changes(self.investigations.track(self.goals, trial_goal), tick)
         if goal is None:
             goal = self._idle_goal(tick)
             self.goals.update([goal], state, tick)
@@ -433,8 +474,15 @@ class CognitionLoop:
         goal: Goal,
         tick: int,
     ) -> bool:
+        # An experiment's trial may be pursued only by the intervention it
+        # tests; anything else would not be the experiment.
+        method = self.investigations.method(goal.goal_id)
         plans = plan_for(
-            state, goal.completion_condition, registry=self.registry, limit=MAX_CANDIDATES
+            state,
+            goal.completion_condition,
+            registry=self.registry,
+            limit=MAX_CANDIDATES,
+            allowed_skills=(method,) if method else None,
         )
         plans = [plan for plan in plans if plan.steps]
         if not plans:
@@ -457,6 +505,7 @@ class CognitionLoop:
                 home=self.home,
                 tolerance=self.affect.tolerance(),
                 reliability=self._reliability(),
+                hypotheses=self._hypotheses(),
             )
         except NoCandidatesError:
             self.goals.block(goal.goal_id, "no_candidate_routine", tick)
@@ -493,6 +542,7 @@ class CognitionLoop:
                         "routine_id": scored.candidate.routine_id,
                         "score": round(scored.score, 6),
                         "learned_effect": scored.learned_effect,
+                        "hypothesis_effect": scored.hypothesis_effect,
                         "attempts": scored.counts.attempts,
                         "successes": scored.counts.successes,
                     }
@@ -582,6 +632,7 @@ class CognitionLoop:
         )
         # The state a prediction is measured against is the one the planner
         # reasoned over, captured before anything physical happens.
+        experiment = self.investigations.hypothesis_for(goal.goal_id)
         self.pending_prediction = PendingPrediction(
             decision_id=decision_id,
             context_id=context_id,
@@ -590,6 +641,10 @@ class CognitionLoop:
             requested_skill=step.skill_id,
             state_before=dict(self._last_state),
             tick=tick,
+            perceived=self._now.to_json() if self._now is not None else None,
+            experiment=experiment
+            if step.skill_id == self.investigations.method(goal.goal_id)
+            else None,
         )
         self._send(
             {
@@ -956,7 +1011,7 @@ class CognitionLoop:
         state: dict[str, float] | None,
         prediction_event: str | None,
         tick: int,
-    ) -> None:
+    ) -> list[tuple[Trial, str | None]]:
         """Classify a settled prediction per declared effect, and journal it.
 
         Every trial is recorded, informative or not, with its reason. What the
@@ -976,8 +1031,9 @@ class CognitionLoop:
             state_after=state,
         )
         destination = admitted_to(self.learning_mode)
+        judged: list[tuple[Trial, str | None]] = []
         for trial in trials:
-            self._record(
+            event = self._record(
                 "effect_evidence",
                 tick,
                 {
@@ -987,12 +1043,250 @@ class CognitionLoop:
                 },
                 pending.decision_id,
             )
+            judged.append((trial, event.event_id if event else None))
+        return judged
 
     def _reliability(self) -> Any:
         """The learned term for routine scoring, only when beliefs may act."""
         if self.learning_mode != "supervised":
             return None
         return reliability_term(self.effect_beliefs, self.registry, self.training_context)
+
+    # ---------------------------------------------------- causal hypotheses
+
+    def _hypotheses(self) -> Any:
+        """The supported-hypothesis term for routine scoring, only when beliefs may act."""
+        if self.learning_mode != "supervised" or self._now is None:
+            return None
+        return hypothesis_term(self.hypothesis_book.hypotheses["active"], self._now)
+
+    def _learn_causes(
+        self,
+        pending: PendingPrediction,
+        judged: list[tuple[Trial, str | None]],
+        tick: int,
+    ) -> None:
+        """Count one settled prediction for or against each hypothesis it bears on.
+
+        A trial falls on one side of a hypothesis's contrast by the condition
+        Person perceived when it decided. It is interventional evidence only
+        for the hypothesis it was run to test; for any other it is
+        observational. It is inconclusive if the condition changed while it
+        ran, or Person could not tell which side it was on.
+        """
+        table = {"shadow": "shadow", "active": "active"}.get(admitted_to(self.learning_mode))
+        before = Perceived.from_json(pending.perceived) if pending.perceived else None
+        after = self._now
+        tested = pending.experiment
+        tested_arm: str | None = None
+        tested_reason: str | None = None
+        puzzle: tuple[str, str] | None = None
+        for trial, ref in judged:
+            if table is None or before is None:
+                break
+            if trial.verdict == "inconclusive":
+                tested_reason = tested_reason or trial.reason
+                continue
+            self._record(
+                "causal_trial",
+                tick,
+                {
+                    **trial.to_json(),
+                    "conditions": before.to_json(),
+                    "experiment": tested,
+                    "effect_evidence_id": ref,
+                    "admitted_to": table,
+                },
+                pending.decision_id,
+            )
+            for hypothesis in list(self.hypothesis_book.hypotheses[table].values()):
+                if hypothesis.intervention != trial.skill or hypothesis.outcome.fact != trial.fact:
+                    continue
+                variable = hypothesis.condition.variable
+                reason = None
+                if before.value(variable) is None:
+                    reason = "condition_not_known"
+                elif after is None or after.value(variable) != before.value(variable):
+                    reason = "condition_changed_during_trial"
+                arm = "held" if before.value(variable) == hypothesis.condition.value else "absent"
+                verdict = trial.verdict if reason is None else "inconclusive"
+                self._record(
+                    "hypothesis_evidence",
+                    tick,
+                    {
+                        "hypothesis_id": hypothesis.hypothesis_id,
+                        "arm": arm,
+                        "kind": "interventional"
+                        if hypothesis.hypothesis_id == tested
+                        else "observational",
+                        "verdict": verdict,
+                        "reason": reason or trial.reason,
+                        "trial_ref": ref,
+                        "admitted_to": table if verdict != "inconclusive" else "none",
+                    },
+                    pending.decision_id,
+                )
+                if hypothesis.hypothesis_id == tested:
+                    if verdict == "inconclusive":
+                        tested_reason = tested_reason or reason
+                    else:
+                        tested_arm = arm
+            if puzzle is None:
+                # One settled prediction, one question at most: about its
+                # first declared effect Person could judge. Whether there is
+                # anything to explain depends on the history, not on this
+                # outcome alone: a success after failures is variation too.
+                puzzle = (trial.skill, trial.fact)
+        if puzzle is not None and table is not None:
+            self._wonder(table, *puzzle, tick)
+
+        if tested is not None and table == "active":
+            if tested_arm is None:
+                # A refusal, a takeover or a missing observation says nothing
+                # about the world, and is recorded as saying nothing.
+                self._record(
+                    "hypothesis_evidence",
+                    tick,
+                    {
+                        "hypothesis_id": tested,
+                        "arm": None,
+                        "kind": "interventional",
+                        "verdict": "inconclusive",
+                        "reason": tested_reason or "not_evaluated",
+                        "trial_ref": None,
+                        "admitted_to": "none",
+                    },
+                    pending.decision_id,
+                )
+            resumable = (tested_reason or "") in {
+                "overridden_by_runtime",
+                "not_attempted_interrupted",
+                "not_attempted_preempted",
+            }
+            changes, done = self.investigations.trial(
+                pending.goal_id,
+                arm=tested_arm,
+                conclusive=tested_arm is not None,
+                resumable=resumable,
+                experienced=self.memory.now,
+                hypothesis=self.hypothesis_book.hypotheses["active"].get(tested),
+            )
+            self._record_changes(changes, tick)
+            if done:
+                self.goals.conclude(pending.goal_id, tick, "trial_observed")
+
+    def _wonder(self, table: str, skill: str, fact: str, tick: int) -> None:
+        """Is there something here to explain: variation, or repeated failure? A guess?"""
+        recent = self.hypothesis_book.trials[table].get((skill, fact), [])
+        failed = sum(trial.verdict == "contradicts" for trial in recent)
+        worked = sum(trial.verdict == "supports" for trial in recent)
+        question = "variation" if failed and worked else "repeated_error" if failed >= 2 else None
+        if question is None:
+            return
+        held = self.hypothesis_book.hypotheses[table]
+        live = [
+            h
+            for h in held.values()
+            if h.intervention == skill
+            and h.outcome.fact == fact
+            and h.standing == "unresolved"
+            and h.lifecycle != "retired"
+        ]
+        if len(live) >= MAX_LIVE_HYPOTHESES:
+            return
+        belief = self.effect_beliefs.belief(table, self.training_context, skill, fact)
+        context = ReasoningContext(
+            skill=skill,
+            fact=fact,
+            question=question,
+            trials=tuple(recent[-CONTEXT_TRIALS:]),
+            vocabulary=vocabulary(self.spatial.known_places()),
+            interventions=evaluable_effects(self.registry, self.offered),
+            belief=None
+            if belief is None
+            else {
+                "estimate": None if belief.estimate is None else round(belief.estimate, 4),
+                "strength": round(belief.strength, 4),
+            },
+        )
+        known = frozenset(h.signature for h in held.values())
+        for proposal in self.proposer.propose(context):
+            outcome = admit(
+                proposal,
+                context,
+                hypothesis_id=f"hyp_{self.hypothesis_book.all_ids() + 1}",
+                proposer=self.proposer.kind,
+                now=self.memory.now,
+                known=known,
+            )
+            if isinstance(outcome, CausalHypothesis):
+                testable = design(outcome, self.registry) is not None
+                hypothesis = replace(outcome, lifecycle="testable" if testable else "proposed")
+                known = known | {hypothesis.signature}
+                self._record(
+                    "hypothesis_proposed",
+                    tick,
+                    {
+                        "hypothesis": hypothesis.to_json(),
+                        "question": question,
+                        "admitted_to": table,
+                    },
+                )
+            elif outcome.reasons != ("duplicate",):
+                self._record(
+                    "hypothesis_rejected",
+                    tick,
+                    {
+                        **outcome.to_json(),
+                        "proposer": self.proposer.kind,
+                        "question": question,
+                        "admitted_to": table,
+                    },
+                )
+
+    def _deliberate_investigations(
+        self, observation: dict[str, Any], state: dict[str, float], tick: int
+    ) -> None:
+        """Perhaps start finding something out. Experiments change behaviour,
+        so they run only when learned beliefs may act."""
+        if self.learning_mode != "supervised":
+            return
+        trials = [
+            trial for records in self.hypothesis_book.trials["active"].values() for trial in records
+        ]
+        attempts: dict[str, int] = {}
+        seen: dict[str, set[str]] = {}
+        for trial in trials:
+            attempts[trial.skill] = attempts.get(trial.skill, 0) + 1
+            for variable, value in trial.conditions.items():
+                if value is not None:
+                    seen.setdefault(variable, set()).add(str(value))
+        night = observation["environment"]["dayPhase"] in {"dusk", "night"}
+        self._record_changes(
+            self.investigations.consider(
+                hypotheses=self.hypothesis_book.hypotheses["active"],
+                registry=self.registry,
+                experience={"attempts": attempts, "seen": seen},
+                tolerance=self.affect.tolerance(),
+                open_projects=len(self.projects.unfinished()),
+                is_calm=calm(homeostasis(observation, state), night),
+                now=self.memory.now,
+            ),
+            tick,
+        )
+
+    def _trial_goal(self, state: dict[str, float], tick: int) -> Goal | None:
+        if self.learning_mode != "supervised" or self._now is None:
+            return None
+        self._record_changes(self.investigations.review(self.memory.now), tick)
+        return self.investigations.goal(self._now, state, self.memory.now, tick)
+
+    def _retire_stale_trials(self, trial: Goal | None, tick: int) -> None:
+        """A trial goal lives only while its investigation proposes it."""
+        for goal_id, goal in list(self.goals.entries.items()):
+            stale = trial is None or goal_id != trial.goal_id
+            if goal.goal_type == INVESTIGATE and stale:
+                self.goals.conclude(goal_id, tick, "no_longer_proposed")
 
     # ---------------------------------------------------------------- affect
 
@@ -1024,6 +1318,10 @@ class CognitionLoop:
             self._feel(appraise_project(payload["change"], project["kind"]), tick)
 
     def _biased(self, goal: Goal) -> Goal:
+        if goal.goal_type == INVESTIGATE:
+            # Affect reaches experiments only through the tolerance factor on
+            # risk, as it reaches exploration (ADR 0012): no priority bias.
+            return replace(goal, base_priority=goal.priority, affect_bias=0.0)
         facts = frozenset(condition.fact for condition in goal.completion_condition)
         bias = self.affect.bias(facts, goal.source)
         return replace(
@@ -1127,7 +1425,8 @@ class CognitionLoop:
         self.prediction_errors.append(payload)
         self.summary.note_prediction(payload)
         record = self._record("prediction_error", tick, payload, pending.decision_id)
-        self._learn_effects(pending, state, record.event_id if record else None, tick)
+        judged = self._learn_effects(pending, state, record.event_id if record else None, tick)
+        self._learn_causes(pending, judged, tick)
 
     def _finish_routine(self, status: str, tick: int, *, reason: str) -> None:
         active = self.active

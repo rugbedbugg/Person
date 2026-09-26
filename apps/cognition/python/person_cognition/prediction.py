@@ -110,6 +110,11 @@ class PendingPrediction:
     health_cost: float = 0.0
     settled: bool = False
     evidence_refs: list[str] = field(default_factory=list)
+    #: The conditions Person perceived when it decided, for judging which
+    #: side of a hypothesis's contrast the trial fell on (ADR 0012).
+    perceived: dict[str, str | None] | None = None
+    #: The hypothesis this decision was an experimental trial of, if any.
+    experiment: str | None = None
 
 
 def apply_effect(before: float, op: str, value: float) -> float:

@@ -114,6 +114,10 @@ class Spatial:
     def label_of(self, place_id: str) -> str | None:
         return self._map.labels.get(place_id)
 
+    def known_places(self) -> tuple[str, ...]:
+        """The places Person has formed: the only places it can name."""
+        return tuple(place.place_id for place in self._map.places())
+
     def home_place(self) -> str | None:
         """The place Person labelled home in its current frame, if any."""
         homes = [

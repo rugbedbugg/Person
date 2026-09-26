@@ -221,6 +221,14 @@ def test_the_spatial_model_reads_no_absolute_or_ledger_state() -> None:
         cognition / "affect.py",
         # Learned effect beliefs come from felt outcomes only (ADR 0011).
         cognition / "effect_learning.py",
+        # Hypotheses and experiments speak only Person's vocabulary (ADR
+        # 0012). The quarantine module is the one place that names what is
+        # privileged, so that the gate can recognise it.
+        *(
+            path
+            for path in (cognition / "hypotheses").rglob("*.py")
+            if path.name != "quarantine.py"
+        ),
     ]
     forbidden = {
         "homeDistance",
@@ -268,3 +276,78 @@ def test_no_cognition_code_reads_a_home_distance() -> None:
             short = token.type == tokenize.STRING and len(token.string) < 40
             if short and "homeDistance" in token.string:
                 raise AssertionError(f"{path.relative_to(REPOSITORY)} reads homeDistance")
+
+
+HYPOTHESES = REPOSITORY / "apps/cognition/python/person_cognition/hypotheses"
+
+
+def _code(path: Path) -> str:
+    """Source without comments and docstrings: prose may name what is excluded."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        body = getattr(node, "body", None)
+        if (
+            isinstance(body, list)
+            and body
+            and isinstance(body[0], ast.Expr)
+            and isinstance(body[0].value, ast.Constant)
+            and isinstance(body[0].value.value, str)
+        ):
+            body[0] = ast.Pass()
+    return ast.unparse(tree)
+
+
+def test_experiments_act_only_through_the_ordinary_goal_boundary() -> None:
+    # An experiment is a goal. Nothing in the package can emit a message,
+    # touch a body or reach the runtime; the loop sends what the planner and
+    # policy chose, as for any goal.
+    for path in HYPOTHESES.rglob("*.py"):
+        code = _code(path)
+        for forbidden in (
+            "_send",
+            "encode_frame",
+            "SkillInvocation",
+            "embodiment",
+            "Embodiment",
+            "mineflayer",
+            "subprocess",
+            "socket",
+        ):
+            assert forbidden not in code, f"{path.name} uses {forbidden}"
+
+
+def test_a_hypothesis_holds_no_executable_predicate() -> None:
+    tree = ast.parse((HYPOTHESES / "hypothesis.py").read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        assert not isinstance(node, ast.Lambda), "no predicate hides in a hypothesis"
+        if isinstance(node, ast.AnnAssign):
+            assert "Callable" not in ast.unparse(node.annotation)
+
+
+def test_a_proposer_sees_only_the_bounded_reasoning_context() -> None:
+    generation = _code(HYPOTHESES / "generation.py")
+    # The language model's whole input is the context, serialised.
+    calls = re.findall(r"self\._complete\((.*)\)", generation)
+    assert calls == ["json.dumps(context.to_json(), sort_keys=True)"], calls
+    assert re.search(r"def propose\(self, context: ReasoningContext\)", generation)
+
+
+def test_proposal_text_cannot_move_a_belief() -> None:
+    # The gate builds a hypothesis with empty evidence; only journalled
+    # trials, through the book, ever update one.
+    generation = _code(HYPOTHESES / "generation.py")
+    for forbidden in (".updated(", "Cell(", "cells=", "followed", "lifecycle="):
+        assert forbidden not in generation, forbidden
+    book = _code(HYPOTHESES / "book.py")
+    assert book.count(".updated(") == 1
+
+
+def test_no_hypothesis_is_ever_declared_knowledge() -> None:
+    pattern = re.compile(r"\bknowledge\w*\s*=|\bknown\s*=\s*True|standing\s*=\s*['\"]true")
+    sources = [
+        *HYPOTHESES.rglob("*.py"),
+        REPOSITORY / "apps/cognition/python/person_cognition/loop.py",
+    ]
+    for path in sources:
+        match = pattern.search(_code(path))
+        assert match is None, f"{path.name}: {match.group(0) if match else ''}"
