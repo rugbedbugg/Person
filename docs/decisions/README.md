@@ -68,6 +68,7 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0009](0009-persistent-projects.md)                        | Projects as persistent cognitive commitments      | Accepted                           | 2026-09-25 |
 | [0010](0010-affect-foundation.md)                          | Affect as a bounded bias on cognition             | Accepted                           | 2026-09-25 |
 | [0011](0011-learned-effect-reliability.md)                 | Learned reliability of skill effects              | Accepted                           | 2026-09-26 |
+| [0012](0012-causal-hypotheses-and-experiments.md)          | Causal hypotheses and controlled experiments      | Proposed                           | 2026-09-26 |
 
 All six were written during the Phase 0 canonical architecture reconciliation
 (`docs/PERSON_SPEC.md`, frozen 2026-09-22). None of them changed production
