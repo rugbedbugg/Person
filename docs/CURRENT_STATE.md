@@ -103,7 +103,7 @@ Two implementations, same skill code:
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
 - **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to)
-- **Schema versions:** new records are `person-evidence-v8`; v1 to v7 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Schema versions:** new records are `person-evidence-v9`; v1 to v8 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 

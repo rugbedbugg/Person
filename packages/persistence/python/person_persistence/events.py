@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v8"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v9"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -29,6 +29,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v6",
     "person-evidence-v7",
     "person-evidence-v8",
+    "person-evidence-v9",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -73,6 +74,21 @@ EVENT_TYPES: tuple[str, ...] = (
     #: learning mode then admitted it to (ADR 0011). The effect-belief tables
     #: are rebuilt from these alone.
     "effect_evidence",
+    #: One conclusive trial of a skill's declared effect with the conditions
+    #: Person perceived when it decided (ADR 0012): its own record of what
+    #: happened when, which hypothesis generation reasons over.
+    "causal_trial",
+    #: A proposal passed the grounding gate and became a hypothesis, with no
+    #: evidence yet: its provenance, premises and the table it went to.
+    "hypothesis_proposed",
+    #: A proposal was quarantined, with the reasons. Never a hypothesis.
+    "hypothesis_rejected",
+    #: One trial counted for or against one hypothesis: its arm, whether it
+    #: was interventional or observational, and its verdict.
+    "hypothesis_evidence",
+    #: An investigation started, ran a trial, was interrupted, resumed,
+    #: concluded or retired. Investigations are rebuilt from these alone.
+    "investigation_changed",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -89,6 +105,16 @@ V6_EVENT_TYPES: frozenset[str] = frozenset({"project_started", "project_changed"
 V7_EVENT_TYPES: frozenset[str] = frozenset({"affect_appraised"})
 #: Event types introduced with the eighth.
 V8_EVENT_TYPES: frozenset[str] = frozenset({"effect_evidence"})
+#: Event types introduced with the ninth.
+V9_EVENT_TYPES: frozenset[str] = frozenset(
+    {
+        "causal_trial",
+        "hypothesis_proposed",
+        "hypothesis_rejected",
+        "hypothesis_evidence",
+        "investigation_changed",
+    }
+)
 
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
@@ -100,6 +126,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V6_EVENT_TYPES, "person-evidence-v6"),
     **dict.fromkeys(V7_EVENT_TYPES, "person-evidence-v7"),
     **dict.fromkeys(V8_EVENT_TYPES, "person-evidence-v8"),
+    **dict.fromkeys(V9_EVENT_TYPES, "person-evidence-v9"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
