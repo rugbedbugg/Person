@@ -1,6 +1,6 @@
 # ADR 0011: Learned reliability of skill effects
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-26)
 **Date:** 2026-09-26
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -9,6 +9,14 @@ reliability learned from prediction error, gated by learning mode
 (2026-09-26)
 
 ---
+
+> **Operator decision, 2026-09-26: accepted.** The architecture is accepted:
+> the skill contract, the empirical effect-reliability belief and routine
+> statistics are three different things, and a belief is not a memory. The
+> Beta(1, 1) prior, the learned-term bound (0.1), the evidence-strength
+> formula (n / (n + 4)), the current evaluable fact set and the current
+> persistence representation are implementation parameters, not
+> architectural laws.
 
 ## Context
 
