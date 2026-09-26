@@ -1,8 +1,8 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/effect-learning`, based on `f981e68` (tip of `feat/lan-validation` after PR #13)
+**Last verified against:** branch `feat/causal-learning`, based on `8a6d264` (tip of `feat/lan-validation` after PR #14)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
-**Date:** 2026-09-25
+**Date:** 2026-09-26
 
 This file is strictly factual. It describes what exists in the source tree and
 what has been run. **`docs/PERSON_SPEC.md` specifies a great deal that is not
@@ -90,6 +90,7 @@ Two implementations, same skill code:
 - **Policy:** DeterministicFallback + EvidencePolicy (Beta posterior, risk-dominant scoring, safe envelope)
 - **Learning modes:** off / shadow / supervised (never auto-enabled)
 - **Learned effect reliability (ADR 0011):** uncertain beliefs about how reliably each skill's declared effects follow, learned from audited prediction error, gated by learning mode, and under `supervised` adding a term of at most ±0.1 to routine scores, recorded separately as `learned_effect` (`person_cognition/effect_learning.py`)
+- **Causal hypotheses and experiments (ADR 0012):** typed, falsifiable single-condition hypotheses ("when it rains, gathering berries is less likely to yield berries") in a closed vocabulary of perceived weather, day phase and Person's own places; proposed from unexplained variation or repeated prediction error by a deterministic contrast proposer (a language-model proposer can be plugged in through the same bounded context and grounding gate, none is wired); admitted with no evidence; tested by bounded experiments whose trials are ordinary `INVESTIGATE` goals using only the intervention; interventional evidence weighs twice observational, and no standing is claimed without intervention on both sides; under `supervised` a supported hypothesis whose condition holds adds at most ±0.1 to routine scores, recorded as `hypothesis_effect` (`person_cognition/hypotheses/`)
 - **Affect (ADR 0010):** a continuous, bounded, decaying state (`valence`, `unease`, `control`) appraised by deterministic rules from percepts, the body, reported outcomes and Person's own goal, project and search outcomes; it adjusts non-urgent goal priorities within ±25 (base and adjustment journalled separately) and scales the policy's exploration tolerance; it never runs a skill, touches memory salience, or reaches the runtime (`person_cognition/affect.py`)
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
@@ -102,7 +103,7 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to)
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone)
 - **Schema versions:** new records are `person-evidence-v9`; v1 to v8 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
@@ -230,6 +231,7 @@ gitignored).
 | Place-keyed search memory (shorter search)             | IMPLEMENTED + TESTED IN FIXTURE                                           |
 | Persistent projects: start, interrupt, resume, abandon | IMPLEMENTED + TESTED IN FIXTURE (integration test)                        |
 | Affect: appraisal, decay, bounded bias                 | IMPLEMENTED + TESTED IN FIXTURE (integration test)                        |
+| Causal hypotheses, grounding gate, experiments         | IMPLEMENTED + TESTED IN FIXTURE (integration test)                        |
 
 **Future providers (placeholder, raise not implemented):**
 WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
@@ -662,8 +664,23 @@ contradicting evidence, has no estimate without evidence, and a strength
 separate from its estimate. The learning mode decides where evidence goes:
 nowhere (`off`), an isolated shadow table (`shadow`), or the active table
 (`supervised`), which adds a small, separately recorded term to routine
-scores. Person still has no general belief or knowledge architecture, no
-causal hypotheses and no consolidation.
+scores.
+
+**Now implemented (ADR 0012, Phase F2):** causal hypotheses under test.
+A hypothesis is typed and falsifiable, names one perceived condition, one
+skill Person was offered and one declared effect it can judge, and starts
+with no evidence: the trials that motivated it are premises, not evidence,
+and a proposer's claimed confidence is refused. Evidence is split by arm
+(condition held or not) and kind (Person's own experiment, or ordinary life);
+standing (`supported`, `weakened`, `contradicted`) needs enough evidence and
+intervention on both sides, is recomputed from evidence, and reverses.
+Experiments are bounded (one open, four trials per arm, twelve attempts,
+eight trials a day, retirement after a day without progress), run only under
+`supervised`, and go through the ordinary goal, planner, policy, validator
+and safety path. Hypotheses are not memories. Memory, belief and knowledge
+are defined as separate (ADR 0012); no consolidation and no knowledge store
+exist, so nothing is ever promoted to knowledge. C6 is therefore still
+**not** resolved.
 
 **Memory uses so far.** Recall is cued at the start of each information
 search, with the place Person believes it is at. Recalling an earlier search
@@ -807,6 +824,9 @@ runtime would allow a direct route home), not a distance.
 | One Person per runtime (multi-Person not supported)                                                                               | IMPLEMENTATION_REPORT.md   |
 | Tick budgets invented in fixture (4 ticks/step, 12/dig)                                                                           | REALITY_VALIDATION.md      |
 | Effect beliefs cover inventory, body and threat facts only; ledger-derived effects (building, storage, furnace) teach nothing yet | ADR 0011                   |
+| Hypotheses name one perceived condition and one declared effect; no multi-factor, delayed or undeclared-effect hypotheses         | ADR 0012                   |
+| No language-model proposer is wired; the deterministic contrast proposer is the only reasoner                                     | ADR 0012                   |
+| No consolidation and no knowledge store; nothing is promoted to knowledge                                                         | ADR 0012, C6               |
 | Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                                                             | REALITY_VALIDATION.md      |
 | No belief, semantic/spatial memory, affect, language, social or project system                                                    | Known Deviations C6, above |
 | Memory changes one decision: how long a search at a recognised place lasts                                                        | ADR 0007, ADR 0008         |
@@ -844,11 +864,11 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `feat/effect-learning` on 2026-09-26: Node 269 pass / 0 fail,
-Python 265 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `feat/causal-learning` on 2026-09-26: Node 276 pass / 0 fail,
+Python 318 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
-267 / 240 after PR #12; 268 / 240 after PR #13.
+267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14.
 
 ---
 

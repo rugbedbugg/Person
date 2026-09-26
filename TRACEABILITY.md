@@ -307,6 +307,24 @@ claim without reading the whole tree.
 | Statistics, memory and affect untouched         | reducers ignore `effect_evidence`                    | `test_routine_statistics_memory_and_affect_ignore_effect_evidence`                           |
 | Same felt evidence, same learning               | frame-free inputs                                    | `tests/integration/effect-learning.test.ts`                                                  |
 
+## Causal hypotheses and experiments (ADR 0012)
+
+| Requirement                                         | Implementation                                         | Tests                                                                                   |
+| --------------------------------------------------- | ------------------------------------------------------ | --------------------------------------------------------------------------------------- |
+| Typed, falsifiable, closed-vocabulary hypotheses    | `CausalHypothesis`, `vocabulary`, `evaluable_effects`  | `test_a_hypothesis_has_no_executable_...`, `test_every_concept_a_hypothesis_names_...`  |
+| Reasoning is not evidence; quarantine               | `admit`, `quarantine.refusal`, `ModelProposer`         | `test_a_language_model_reasons_for_person_...`, `test_malformed_privileged_...`         |
+| Premises motivate, never confirm                    | evidence counts only after proposal                    | `test_the_motivating_trials_are_premises_not_evidence`                                  |
+| Strength apart from confidence; reversible          | `relation`, `confidence`, `standing`                   | `test_one_supporting_trial_...`, `test_later_evidence_reverses_the_conclusion`          |
+| Intervention outweighs correlation                  | `KIND_WEIGHT`, `controlled`                            | `test_correlation_counts_for_less_than_intervention_...`                                |
+| Experiments are ordinary, bounded goals             | `InvestigationManager`, `design`, `INVESTIGATE`        | `test_experiment_trials_pass_the_ordinary_...`, `test_the_experiment_budget_terminates` |
+| Denial and mid-trial change teach nothing           | `_learn_causes`                                        | `test_a_refused_trial_...`, `test_a_condition_that_changes_mid_trial_...`               |
+| Interrupted and resumed                             | `InvestigationManager.track`                           | `test_urgent_needs_interrupt_an_experiment_and_it_resumes`                              |
+| Learning modes gate learning and action             | book tables, supervised-only investigations            | `test_off_learns_nothing_...`, `test_shadow_hypotheses_change_no_decision`              |
+| Bounded, recorded policy term                       | `hypothesis_term`, `ScoredCandidate.hypothesis_effect` | `test_a_supported_hypothesis_can_change_a_close_choice_...`                             |
+| Memory, belief and knowledge distinct               | separate reducer; no knowledge status                  | `test_episodic_memory_and_causal_belief_...`, `test_nothing_becomes_knowledge_...`      |
+| Hidden rule discovered; frame- and hazard-invariant | the whole loop                                         | `tests/integration/causal-learning.test.ts`                                             |
+| Curiosity grants no authority                       | no experiment case in safety or skills                 | `trusted safety knows nothing of curiosity`                                             |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

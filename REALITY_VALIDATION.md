@@ -369,6 +369,38 @@ disposable 1.16.1 LAN world in which Person gathers wood, then read the
 journal's `effect_evidence` records against what visibly happened. That has
 not been done.
 
+## Causal hypotheses and experiments (fixture only)
+
+Added 2026-09-26 (ADR 0012). **TESTED IN FIXTURE. Not live-validated.**
+
+What the fixture establishes (`apps/cognition/tests/test_causal_learning.py`,
+`tests/integration/causal-learning.test.ts`): in a fixture world with a rule
+Person is never told (berry bushes give nothing while it rains), Person,
+gathering berries in the rain and then in clear weather, proposes the typed
+hypothesis that rain makes gathering less likely to yield berries, runs an
+experiment whose trials are ordinary `INVESTIGATE` goals in both weathers,
+and ends with the hypothesis `supported` and controlled; a +1000 X shift and
+hidden lava behind a wall leave every causal record identical; a world
+without the rule decides identically until the first outcome differs; with
+learning `off` nothing is hypothesised or investigated. In the cognition
+suite: privileged, invented, ungrounded, unfalsifiable and self-certifying
+proposals, including a language model's, are quarantined; a model's proposal
+starts with no evidence; premises are not evidence; one trial is not
+certainty; correlation alone never settles a hypothesis and weighs less than
+intervention; later evidence reverses a conclusion; refusals, takeovers and a
+condition that changes mid-trial teach nothing; experiments are bounded,
+interrupted by urgent needs and resumed; `shadow` changes no decision; a
+supported hypothesis can change a close routine choice when its condition
+holds, and only then. Mutations (a model's confidence seeding evidence,
+observation weighted like intervention, correlation settling standing, a
+refusal counted as failure, ungrounded proposals admitted, a mid-trial
+condition change ignored) each make a test fail.
+
+The smallest live checkpoint would need a hidden or custom mechanic on a live
+server, which vanilla 1.16.1 does not offer; a supervised run in which Person
+gathers in changing weather could only check that the records are honest,
+not that a real rule is discovered. That has not been done.
+
 ## Safety validation
 
 Proven in the fixture and against the double:

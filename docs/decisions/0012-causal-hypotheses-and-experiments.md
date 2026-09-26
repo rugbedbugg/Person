@@ -188,6 +188,35 @@ The evidence weights, arm sizes, standing thresholds, budgets, priority, risk
 limit, score weights, context size and the condition vocabulary are
 implementation parameters.
 
+### Settled while implementing
+
+Within the decisions above, and recorded so the code can be checked against
+them:
+
+- **When Person wonders.** A question is raised after any conclusive trial
+  whose history shows variation (the effect sometimes followed and sometimes
+  did not) or repeated failure; a success after failures is variation too. One
+  settled prediction raises at most one question, about the first declared
+  effect Person could judge, and at most three unresolved hypotheses are held
+  about one effect. Repeated failure alone makes every condition the failures
+  shared a guess.
+- **Discrimination.** An experiment on a condition Person has never lived
+  through on both sides is worth nothing yet, so it is not started.
+- **Patience.** An investigation that makes no progress for a day of
+  experienced time is retired (`condition_not_encountered`), so waiting for a
+  condition cannot hold the one open slot for ever.
+- **What an inconclusive trial also covers.** A condition that changed between
+  the decision and the observation that judged it, and a place condition when
+  Person was not sure where it was.
+- **Affect.** Trial goals receive no affect priority bias; affect reaches an
+  experiment only through the tolerance factor on its risk, and through the
+  ordinary appraisal of any action's outcome.
+- **Two defects found on the way, fixed separately.** Harvests that yielded
+  nothing were reported as `inventory_full` (now `no_yield`, after two
+  fruitless tries), and a decision context id could exceed the protocol's
+  64-character limit, which dropped the decision (the `contextId` field now
+  allows 128).
+
 ## Consequences
 
 ### Positive

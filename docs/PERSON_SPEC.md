@@ -1399,6 +1399,10 @@ Person exploits known safe behavior.
 
 ## 22.1 Active Experimentation
 
+**CURRENTLY IMPLEMENTED (ADR 0012, fixture only):** uncertainty-driven,
+bounded, single-factor experiments on typed hypotheses, run as ordinary
+goals under `supervised` learning.
+
 Exploration should eventually be **epistemic**, not merely random novelty-seeking.
 
 When Person has competing plausible beliefs and is inside the safe envelope, it may choose a bounded action partly for expected information gain.
@@ -1772,8 +1776,10 @@ so that catastrophic forgetting is detected instead of hidden by continuously ch
 
 **CURRENTLY IMPLEMENTED (ADR 0011, fixture only):** one narrow learned belief,
 the reliability of each skill's declared effects, learned from audited
-prediction error with explicit uncertainty and gated by learning mode. No
-general world model, causal hypotheses or experiments exist.
+prediction error with explicit uncertainty and gated by learning mode.
+**And (ADR 0012, fixture only):** typed single-condition causal hypotheses,
+tested by bounded experiments through the ordinary goal path. No general
+world model, consolidation or knowledge store exists.
 
 The architecture must never collapse six concepts that this section, and every
 section that touches belief or memory, depends on being kept distinct:
