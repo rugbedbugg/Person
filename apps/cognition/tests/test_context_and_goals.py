@@ -184,3 +184,42 @@ def test_a_blocked_goal_stops_being_selected(observation: dict[str, Any]) -> Non
     assert stack.entries[active.goal_id].status == "BLOCKED"
     following = stack.update(provider.propose(observation, state, 2), state, 2)
     assert following is None or following.goal_id != active.goal_id
+
+
+def test_every_context_identifier_fits_the_protocol() -> None:
+    # The runtime receives the context id in every PolicyDecision; one the
+    # protocol refuses means the decision is never sent.
+    import re
+
+    from person_cognition.context import (
+        DAY_PHASES,
+        FOOD_BANDS,
+        FOOD_STATES,
+        HEALTH_BANDS,
+        HOME_STATES,
+        THREAT_LEVELS,
+        TOOL_TIERS,
+        DecisionContext,
+    )
+
+    schema = json.loads(
+        (
+            Path(__file__).resolve().parents[3] / "packages/protocol/schemas/common.schema.json"
+        ).read_text(encoding="utf-8")
+    )
+    pattern = re.compile(schema["$defs"]["contextId"]["pattern"])
+    longest = DecisionContext(
+        *(
+            max(values, key=len)
+            for values in (
+                HEALTH_BANDS,
+                FOOD_BANDS,
+                DAY_PHASES,
+                THREAT_LEVELS,
+                HOME_STATES,
+                TOOL_TIERS,
+                FOOD_STATES,
+            )
+        )
+    )
+    assert pattern.fullmatch(longest.identifier()), longest.identifier()

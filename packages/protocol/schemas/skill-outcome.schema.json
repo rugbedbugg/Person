@@ -51,7 +51,7 @@
       "$ref": "common.schema.json#/$defs/slug"
     },
     "contextId": {
-      "$ref": "common.schema.json#/$defs/slug"
+      "$ref": "common.schema.json#/$defs/contextId"
     },
     "requestedSkill": {
       "$ref": "common.schema.json#/$defs/identifier"
