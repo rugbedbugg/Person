@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/effect-learning`, based on `fd52a26` (tip of `feat/lan-validation` after PR #13)
+**Last verified against:** branch `feat/effect-learning`, based on `f981e68` (tip of `feat/lan-validation` after PR #13)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-25
 
@@ -826,7 +826,7 @@ runtime would allow a direct route home), not a distance.
 | Python (all) | 265     | 265     |
 | **Total**    | **534** | **534** |
 
-**Coverage by area, as last broken down at `d0e9398` (188 Node / 129 Python);
+**Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
 
 - Protocol: 47 (Node + Python)
@@ -845,7 +845,7 @@ not recounted since:**
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
 Verified on `feat/effect-learning` on 2026-09-26: Node 269 pass / 0 fail,
-Python 265 pass. History: 188 / 129 at `d0e9398`; 234 / 129 after PR #5;
+Python 265 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13.

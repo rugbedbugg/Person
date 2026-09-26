@@ -114,8 +114,8 @@ Otherwise, document the ADR process and use it going forward. The commit history
 | Training-context separation (fixture/live evidence never merges) | `packages/persistence/`, `docs/LEARNING.md`                       | `6b99830`           |
 | Legacy Shroud V1 discarded (Q-table, 7 actions, epsilon-greedy)  | `IMPLEMENTATION_REPORT.md` "Rewritten or discarded"               | `6b99830`           |
 | No SQLite — JSONL journal + snapshots instead                    | `IMPLEMENTATION_REPORT.md` "Architectural deviations"             | `6b99830`           |
-| Adapter audit against installed libraries (no live server)       | `REALITY_VALIDATION.md`, `IMPLEMENTATION_REPORT.md` Milestone 1   | `7e97e54`–`554ae64` |
-| LAN port as runtime override (never written to config)           | `packages/config/ts/override.ts`, `docs/LAN_TESTING.md`           | `5e51c8c`           |
-| Single-skill validation harness (shared dispatch path)           | `apps/node-runtime/src/skills/dispatch.ts`, `docs/LAN_TESTING.md` | `1c07bc5`           |
+| Adapter audit against installed libraries (no live server)       | `REALITY_VALIDATION.md`, `IMPLEMENTATION_REPORT.md` Milestone 1   | `d557275`–`2d2b48f` |
+| LAN port as runtime override (never written to config)           | `packages/config/ts/override.ts`, `docs/LAN_TESTING.md`           | `062f7fe`           |
+| Single-skill validation harness (shared dispatch path)           | `apps/node-runtime/src/skills/dispatch.ts`, `docs/LAN_TESTING.md` | `b692153`           |
 
 These are **recorded for reference**, not as formal ADRs. Future decisions use the ADR process.

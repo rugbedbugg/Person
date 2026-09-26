@@ -1,6 +1,6 @@
 # Baritone 1.16.5 navigation feasibility
 
-Phase 1 spike. Branch `feat/baritone-feasibility`, parent `45d3c9c` (the merge of
+Phase 1 spike. Branch `feat/baritone-feasibility`, parent `fcad12c` (the merge of
 PR #1 into `feat/lan-validation`). Dated 2026-09-22.
 
 This document answers one question with evidence: can Person drive a

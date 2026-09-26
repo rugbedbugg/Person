@@ -1,8 +1,8 @@
 # PROJECT_HISTORY.md — Evidence-Based Development History
 
-**Derived from:** Git commit history (11 commits, `6b99830` → `d0e9398`)
+**Derived from:** Git commit history (11 commits, `6b99830` → `48728e8`)
 **Date:** 2026-09-22
-**Baseline for this update:** `d0e9398` (tip of `feat/lan-validation`)
+**Baseline for this update:** `48728e8` (tip of `feat/lan-validation`)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 
 This file records what happened, in the order it happened. **It is not
@@ -17,19 +17,19 @@ decisions recorded above them were made without them.
 
 ```
 6b99830 2026-09-15 [Person]: Survival vertical slice & evidence substrate established  ← TAG v0.1.0-foundation
-7e97e54 2026-09-15 [Adapter]: Mineflayer entity, container & world-readiness handling corrected
-c219e27 2026-09-15 [Instrumentation]: Prediction error, tick timing & observation comparison added
-554ae64 2026-09-15 [Validation]: Protected-area routing tested, planner cost fixed & reality report written
-2fd7963 2026-09-15 [Docs]: Milestone 1 test totals corrected
-5e51c8c 2026-09-15 [LAN]: Port override, status telemetry & connection diagnostics added
-2d7f9d2 2026-09-15 [Observation]: Live biome, player identity, perception balance & exit hang fixed
-9caf114 2026-09-15 [Docs]: First contact results, 4 corrections & test world recorded
-1c07bc5 2026-09-16 [Validation]: Single-skill harness, shared dispatch path & operator setup added
-7501194 2026-09-16 [Docs]: Second contact results, skill validation stage & traceability recorded
-d0e9398 2026-09-20 [Docs]: Establish canonical documentation system and GitHub collaboration files  ← baseline
+d557275 2026-09-15 [Adapter]: Mineflayer entity, container & world-readiness handling corrected
+0f6cc1a 2026-09-15 [Instrumentation]: Prediction error, tick timing & observation comparison added
+2d2b48f 2026-09-15 [Validation]: Protected-area routing tested, planner cost fixed & reality report written
+3313622 2026-09-15 [Docs]: Milestone 1 test totals corrected
+062f7fe 2026-09-15 [LAN]: Port override, status telemetry & connection diagnostics added
+f0b3ff8 2026-09-15 [Observation]: Live biome, player identity, perception balance & exit hang fixed
+9ff7778 2026-09-15 [Docs]: First contact results, 4 corrections & test world recorded
+b692153 2026-09-16 [Validation]: Single-skill harness, shared dispatch path & operator setup added
+5b9a395 2026-09-16 [Docs]: Second contact results, skill validation stage & traceability recorded
+48728e8 2026-09-20 [Docs]: Establish canonical documentation system and GitHub collaboration files  ← baseline
 ```
 
-One event in the timeline is not a commit. On **2026-09-16**, after `7501194`,
+One event in the timeline is not a commit. On **2026-09-16**, after `5b9a395`,
 the operator ran three live `person skill-test` validations against the LAN
 world. They produced local report artifacts under `runs/`, which is gitignored,
 so they left no trace in the history above. They were located and read during
@@ -85,7 +85,7 @@ Establish the complete survival vertical slice: Node runtime + Python cognition,
 
 ## Phase 2: Adapter Audit & Correction — Mineflayer Reality Hardening
 
-**Commits:** `7e97e54` → `554ae64` (4 commits, same day)
+**Commits:** `d557275` → `2d2b48f` (4 commits, same day)
 **Constraint:** **No Minecraft server reachable** — all work done against installed libraries and data tables
 
 ### Objective
@@ -96,10 +96,10 @@ Audit Mineflayer adapter against `mineflayer` 4.39.0, `mineflayer-pathfinder` 2.
 
 | Commit    | Focus                                | Key Changes                                                      |
 | --------- | ------------------------------------ | ---------------------------------------------------------------- |
-| `7e97e54` | Entity, container, world-readiness   | Entity metadata handling, container caching, spawn readiness     |
-| `c219e27` | Instrumentation                      | Prediction error, tick timing, observation comparison            |
-| `554ae64` | Protected-area routing, planner cost | Route detour tests, planner parameter-aware cost, reality report |
-| `2fd7963` | Docs                                 | Test totals correction                                           |
+| `d557275` | Entity, container, world-readiness   | Entity metadata handling, container caching, spawn readiness     |
+| `0f6cc1a` | Instrumentation                      | Prediction error, tick timing, observation comparison            |
+| `2d2b48f` | Protected-area routing, planner cost | Route detour tests, planner parameter-aware cost, reality report |
+| `3313622` | Docs                                 | Test totals correction                                           |
 
 ### Six Critical Defects Found (Adapter Audit)
 
@@ -137,7 +137,7 @@ Audit Mineflayer adapter against `mineflayer` 4.39.0, `mineflayer-pathfinder` 2.
 
 ## Phase 3: Pre-LAN Readiness — Connection Instrumentation
 
-**Commit:** `5e51c8c`
+**Commit:** `062f7fe`
 **Date:** 2026-09-15
 
 ### Objective
@@ -161,7 +161,7 @@ Prepare for first live LAN connection. LAN port changes every world open — mus
 
 ## Phase 4: First Live Contact — Observation Validation
 
-**Commits:** `2d7f9d2` → `9caf114`
+**Commits:** `f0b3ff8` → `9ff7778`
 **Date:** 2026-09-15 (hours after pre-LAN patch)
 
 ### Event
@@ -202,7 +202,7 @@ First successful `person observe` against Minecraft Java 1.16.1 LAN (Peaceful, d
 
 ## Phase 5: Single-Skill Validation Harness
 
-**Commit:** `1c07bc5`
+**Commit:** `b692153`
 **Date:** 2026-09-16
 
 ### Objective
@@ -236,7 +236,7 @@ Build `person skill-test` — validates one skill at a time through the **same s
 
 ## Phase 6: Second Contact & Traceability
 
-**Commit:** `7501194` (HEAD)
+**Commit:** `5b9a395` (HEAD)
 **Date:** 2026-09-16
 
 ### Event
@@ -268,7 +268,7 @@ Second live `person observe` against same LAN world — verified all four first-
 
 ## Phase 6: Canonical Documentation System
 
-**Commit:** `d0e9398`
+**Commit:** `48728e8`
 **Date:** 2026-09-20
 
 ### Objective
@@ -315,7 +315,7 @@ and audit only.
 - `docs/SAFETY.md` reframed so self-preservation, experimental containment and
   shared-world property policy are distinct concerns. **The kernel was not
   touched.**
-- `docs/CURRENT_STATE.md` corrected to `d0e9398`, with a Known Deviations
+- `docs/CURRENT_STATE.md` corrected to `48728e8`, with a Known Deviations
   section listing C1–C6.
 - `REALITY_VALIDATION.md` records the three live skill validations of
   2026-09-16 with their provenance, including the fact that the artifacts are
@@ -377,13 +377,13 @@ check` passes unchanged.
 | Phase                          | Commit Range          | Key SHA                                |
 | ------------------------------ | --------------------- | -------------------------------------- |
 | Foundation (vertical slice)    | `6b99830`             | `6b99830` (tagged `v0.1.0-foundation`) |
-| Adapter audit & 6 defects      | `7e97e54` → `554ae64` | `7e97e54`, `c219e27`, `554ae64`        |
-| Pre-LAN readiness              | `5e51c8c`             | `5e51c8c`                              |
-| First contact (4 defects)      | `2d7f9d2`, `9caf114`  | `2d7f9d2`, `9caf114`                   |
-| Single-skill harness           | `1c07bc5`             | `1c07bc5`                              |
-| Second contact + traceability  | `7501194`             | `7501194`                              |
-| Canonical documentation        | `d0e9398`             | `d0e9398`                              |
-| Person v1 reconciliation       | `ab2ecae`             | documentation only                     |
+| Adapter audit & 6 defects      | `d557275` → `2d2b48f` | `d557275`, `0f6cc1a`, `2d2b48f`        |
+| Pre-LAN readiness              | `062f7fe`             | `062f7fe`                              |
+| First contact (4 defects)      | `f0b3ff8`, `9ff7778`  | `f0b3ff8`, `9ff7778`                   |
+| Single-skill harness           | `b692153`             | `b692153`                              |
+| Second contact + traceability  | `5b9a395`             | `5b9a395`                              |
+| Canonical documentation        | `48728e8`             | `48728e8`                              |
+| Person v1 reconciliation       | `af304a3`             | documentation only                     |
 | Canonicalization, evidence, CI | this commit           | documentation + evidence + CI config   |
 
 ---
