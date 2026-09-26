@@ -756,7 +756,13 @@ export class FixtureWorld implements Embodiment {
     this.#setBlock(position, "air");
     this.#owned.delete(positionKey(position));
     this.#containers.delete(positionKey(position));
-    const drops = definition.drops.map((drop) => ({ ...drop }));
+    const barren = (this.definition.hiddenRules ?? []).some(
+      (rule) =>
+        rule.kind === "barren_while_weather" &&
+        rule.weather === this.#weather &&
+        rule.blocks.includes(name),
+    );
+    const drops = barren ? [] : definition.drops.map((drop) => ({ ...drop }));
     for (const drop of drops) this.#give(drop.name, drop.count);
     this.#advance(12);
     return drops;

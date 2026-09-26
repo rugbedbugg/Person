@@ -97,11 +97,9 @@ export const huntSafePassiveAnimals: SkillImplementation = async (context) => {
   const gained = rawHeld() - before;
   if (gained <= 0) {
     if (kills > 0)
-      throw new SkillFailure(
-        "inventory_full",
-        "FAILED",
-        "Kills produced no food",
-      );
+      throw context.snapshot().freeSlots === 0
+        ? new SkillFailure("inventory_full", "FAILED", "Kills produced no food")
+        : new SkillFailure("no_yield", "FAILED", "Kills yielded no food");
     throw new SkillFailure(
       "no_permitted_target",
       "UNREACHABLE",

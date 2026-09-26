@@ -116,3 +116,63 @@ test("death during a skill is reported as DEATH", async () => {
   const result = await running;
   assert.equal(result.status, "DEATH");
 });
+
+// A rule of this fixture world that nothing in Person is told: while it
+// rains, berry bushes break but give nothing. Harvesting has to report that
+// honestly, as a genuine attempt that yielded nothing, and stop trying.
+const barrenInRain = {
+  ...base,
+  inventory: [],
+  hiddenRules: [
+    {
+      kind: "barren_while_weather" as const,
+      weather: "rain" as const,
+      blocks: ["sweet_berry_bush"],
+    },
+  ],
+  clusters: [
+    {
+      name: "sweet_berry_bush",
+      center: { x: 5, y: 64, z: 0 },
+      count: 12,
+      spread: 2,
+    },
+  ],
+};
+
+const bushesLeft = (world: Awaited<ReturnType<typeof harness>>): number =>
+  world.world.findBlocks({ kinds: ["plant_food"], maxDistance: 64, limit: 64 })
+    .length;
+
+test("a harvest that yields nothing is a genuine failure, not a full inventory", async () => {
+  const world = await harness({
+    world: {
+      ...barrenInRain,
+      events: [
+        { atTick: 0, type: "weather" as const, weather: "rain" as const },
+      ],
+    },
+  });
+  const before = bushesLeft(world);
+  const result = await world.run("gather_plant_food", {
+    target_amount: 6,
+    max_distance: 32,
+  });
+  assert.equal(result.status, "FAILED", JSON.stringify(result.reasonCodes));
+  assert.ok(result.reasonCodes.includes("no_yield"), result.reasonCodes.join());
+  assert.ok(!result.reasonCodes.includes("inventory_full"));
+  assert.equal(
+    before - bushesLeft(world),
+    2,
+    "it stops after two fruitless tries",
+  );
+});
+
+test("the same harvest in clear weather yields as usual", async () => {
+  const world = await harness({ world: barrenInRain });
+  const result = await world.run("gather_plant_food", {
+    target_amount: 6,
+    max_distance: 32,
+  });
+  assert.equal(result.status, "SUCCESS", JSON.stringify(result.reasonCodes));
+});

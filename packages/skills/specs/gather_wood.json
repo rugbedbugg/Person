@@ -58,6 +58,7 @@
     "unreachable_resource",
     "inventory_full",
     "interrupted_by_threat",
+    "no_yield",
     "timed_out"
   ],
   "requiredPermissions": ["harvest_resource"],
