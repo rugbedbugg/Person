@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `docs/status-sync`, based on `12f2acc` (tip of `feat/lan-validation` after PR #15)
+**Last verified against:** branch `feat/affect-experiments`, based on `36897e6` (tip of `feat/lan-validation` after PR #16)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-29
 
@@ -20,8 +20,11 @@ Development since the freeze followed an operator roadmap, merged into
 #6), B episodic memory (#8), C self-motion and places (#9, with the C8 fix in
 #10), D persistent projects (#11), E affect (#12, with the perceived-path-risk
 fix in #13), F learned effect reliability (#14), F2 causal hypotheses and
-experiments (#15). The next research track is affect experiment infrastructure;
-nothing of it exists yet.
+experiments (#15). After a documentation synchronisation (#16), the research
+track began with R1 (ADR 0013): an affect mode and a seeded experiment
+harness, with a first P0/P1/P2 matrix in `docs/evidence/experiments/`. A live
+checkpoint against the current head was due first and could not run; the
+blocker is recorded in `REALITY_VALIDATION.md`.
 
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
@@ -102,7 +105,7 @@ Two implementations, same skill code:
 - **Learning modes:** off / shadow / supervised (never auto-enabled)
 - **Learned effect reliability (ADR 0011):** uncertain beliefs about how reliably each skill's declared effects follow, learned from audited prediction error, gated by learning mode, and under `supervised` adding a term of at most ±0.1 to routine scores, recorded separately as `learned_effect` (`person_cognition/effect_learning.py`)
 - **Causal hypotheses and experiments (ADR 0012):** typed, falsifiable single-condition hypotheses ("when it rains, gathering berries is less likely to yield berries") in a closed vocabulary of perceived weather, day phase and Person's own places; proposed from unexplained variation or repeated prediction error by a deterministic contrast proposer (a language-model proposer can be plugged in through the same bounded context and grounding gate, none is wired); admitted with no evidence; tested by bounded experiments whose trials are ordinary `INVESTIGATE` goals using only the intervention; interventional evidence weighs twice observational, and no standing is claimed without intervention on both sides; under `supervised` a supported hypothesis whose condition holds adds at most ±0.1 to routine scores, recorded as `hypothesis_effect` (`person_cognition/hypotheses/`)
-- **Affect (ADR 0010):** a continuous, bounded, decaying state (`valence`, `unease`, `control`) appraised by deterministic rules from percepts, the body, reported outcomes and Person's own goal, project and search outcomes; it adjusts non-urgent goal priorities within ±25 (base and adjustment journalled separately) and scales the policy's exploration tolerance; it never runs a skill, touches memory salience, or reaches the runtime (`person_cognition/affect.py`)
+- **Affect (ADR 0010):** a continuous, bounded, decaying state (`valence`, `unease`, `control`) appraised by deterministic rules from percepts, the body, reported outcomes and Person's own goal, project and search outcomes; it adjusts non-urgent goal priorities within ±25 (base and adjustment journalled separately) and scales the policy's exploration tolerance; it never runs a skill, touches memory salience, or reaches the runtime (`person_cognition/affect.py`). An affect mode (ADR 0013), set in Person's configuration and read by cognition only, switches it: `off` (nothing evolves, nothing is consumed), `record_only` (appraised and journalled exactly as `active`, reaching no decision) and `active` (the default); the mode is written on `episode_started`
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
@@ -285,6 +288,7 @@ stay until their own systems are designed.
 | `person compare <ref> <actual>`                        | Diff observations, flag suspicious defaults                   | ✅ no connection                               |
 | `person status`                                        | Read runtime telemetry (never connects)                       | ✅ read-only                                   |
 | `person skill-test --skill X`                          | Single-skill validation through shared dispatch               | ⚠️ changes world, marks operator contamination |
+| `person experiment --plan <file>`                      | Seeded fixture runs per condition, metrics and comparisons    | ✅ fixture only, never connects                |
 
 **Aliases:** `shroud` = `person`, `shroud-train` = `person learn`
 
@@ -841,6 +845,8 @@ runtime would allow a direct route home), not a distance.
 | Planner bounded (depth/branch/node caps) — may return no plan                                                                     | IMPLEMENTATION_REPORT.md   |
 | Goals: survival and two project kinds; no social, exploration or invented projects                                                | ADR 0009                   |
 | Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal                                             | ADR 0010                   |
+| In the R1 runs affect drifted negative, often saturated, and changed decisions on 1 seed of 10                                    | ADR 0013, experiment notes |
+| The experiment harness measures from per-decision deltas; the body is not sampled continuously                                    | ADR 0013                   |
 | Death ends episode — no respawn/recovery loop                                                                                     | IMPLEMENTATION_REPORT.md   |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                | IMPLEMENTATION_REPORT.md   |
 | Inventory reconciliation on resume not reimplemented                                                                              | IMPLEMENTATION_REPORT.md   |
@@ -866,9 +872,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 276     | 276     |
-| Python (all) | 319     | 319     |
-| **Total**    | **595** | **595** |
+| Node (all)   | 283     | 283     |
+| Python (all) | 332     | 332     |
+| **Total**    | **615** | **615** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -888,12 +894,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `docs/status-sync` on 2026-09-29: Node 276 pass / 0 fail,
-Python 319 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `feat/affect-experiments` on 2026-09-29: Node 283 pass / 0 fail,
+Python 332 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15.
+276 / 318 after PR #15; 276 / 319 after PR #16.
 
 ---
 
