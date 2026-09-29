@@ -1,0 +1,574 @@
+{
+  "schemaVersion": 1,
+  "testId": "st_muml8mn2_12e4875a",
+  "startedAt": "2026-09-29T11:23:30.590Z",
+  "finishedAt": "2026-09-29T11:23:34.282Z",
+  "personId": "ada",
+  "worldId": "person-dedicated-1",
+  "sessionId": "fea027e5-7209-4f58-8bdc-8dff4691da3d",
+  "embodiment": "minecraft",
+  "minecraftVersion": "1.16.1",
+  "trainingContext": "minecraft_normal",
+  "protocolVersion": "shroud-learning-v2",
+  "skillLibraryRevision": "501983c9be777a91",
+  "requestedSkill": "look_around",
+  "requestedParameters": {},
+  "requestedLimits": {
+    "maxTicks": 200,
+    "maxDistance": 0,
+    "minHealth": 0
+  },
+  "invocation": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "6b0d4b83-0b4c-4dbf-a4c5-494593d7c146",
+    "personId": "ada",
+    "sessionId": "fea027e5-7209-4f58-8bdc-8dff4691da3d",
+    "worldId": "person-dedicated-1",
+    "tick": 3559,
+    "timestamp": "2026-09-29T11:23:31.624Z",
+    "type": "SkillInvocation",
+    "decisionId": "1bda20fe-1aff-424a-9e90-bc17dd40790f",
+    "goalId": "validation",
+    "routineId": "skill_test",
+    "routineStepIndex": 0,
+    "skillId": "look_around",
+    "skillVersion": 1,
+    "parameters": {},
+    "limits": {
+      "maxTicks": 200,
+      "maxDistance": 0,
+      "minHealth": 0
+    }
+  },
+  "safety": {
+    "decision": "ACCEPT",
+    "level": "L2",
+    "reasonCodes": [],
+    "executedSkill": "look_around",
+    "executedParameters": {},
+    "executedLimits": {
+      "maxTicks": 200,
+      "maxDistance": 0,
+      "minHealth": 0
+    },
+    "emergency": null
+  },
+  "actualSkill": "look_around",
+  "operatorSetup": false,
+  "operatorIntervention": {
+    "flagged": true,
+    "reason": "world prepared from the server console (gamerules; probe zombies removed)"
+  },
+  "timeline": {
+    "connectedAt": "2026-09-29T11:23:31.120Z",
+    "setupStartedAt": null,
+    "setupCompletedAt": null,
+    "skillStartedAt": "2026-09-29T11:23:31.624Z",
+    "skillFinishedAt": "2026-09-29T11:23:33.878Z",
+    "disconnectedAt": "2026-09-29T11:23:34.070Z",
+    "elapsedMs": 3692
+  },
+  "preObservation": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "8990e277-e70b-49c5-9634-8ad227b5b695",
+    "personId": "ada",
+    "sessionId": "fea027e5-7209-4f58-8bdc-8dff4691da3d",
+    "worldId": "person-dedicated-1",
+    "tick": 3559,
+    "timestamp": "2026-09-29T11:23:31.323Z",
+    "type": "Observation",
+    "observationVersion": 7,
+    "trainingContext": "minecraft_normal",
+    "selfMotion": {
+      "continuity": "start",
+      "translation": {
+        "direction": "unknown",
+        "band": "unknown",
+        "distance": null
+      },
+      "rotation": "unknown",
+      "vertical": "unknown"
+    },
+    "vitals": {
+      "health": 20,
+      "food": 20,
+      "saturation": 5,
+      "air": 300,
+      "armor": 0,
+      "statusEffects": [],
+      "alive": true
+    },
+    "environment": {
+      "dimension": "overworld",
+      "dayPhase": "day",
+      "timeOfDay": 3774,
+      "weather": "clear",
+      "lightLevel": 15,
+      "biome": "forest"
+    },
+    "inventory": {
+      "items": [],
+      "categories": {
+        "food": 0,
+        "raw_food": 0,
+        "cooked_food": 0,
+        "fuel": 0,
+        "wood": 0,
+        "stone": 0,
+        "coal": 0,
+        "tools": 0,
+        "weapons": 0,
+        "armor": 0,
+        "building_materials": 0
+      },
+      "freeSlots": 36
+    },
+    "permissions": {
+      "harvest": true,
+      "mine": true,
+      "build": true,
+      "huntPassive": true,
+      "depositOwned": true,
+      "withdrawOwned": true,
+      "withdrawExisting": true,
+      "craft": true,
+      "consume": true
+    },
+    "affordances": {
+      "diggableGround": false,
+      "shelterSite": true,
+      "storageSite": true
+    },
+    "nearby": {
+      "resources": [
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "level",
+          "rangeBand": "reach",
+          "distance": 4,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "level",
+          "rangeBand": "reach",
+          "distance": 4.5,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "below",
+          "rangeBand": "reach",
+          "distance": 4,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "below",
+          "rangeBand": "reach",
+          "distance": 4.5,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "bearing": "left",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 6,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "bearing": "left",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 6.5,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "bearing": "left",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 6,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        }
+      ],
+      "hostiles": [],
+      "passiveAnimals": [],
+      "players": [],
+      "containers": [],
+      "workstations": [],
+      "hazards": []
+    },
+    "home": {
+      "activeHome": {
+        "homeId": "home_primary"
+      },
+      "shelterState": "none",
+      "ownedStorage": [],
+      "bedKnown": false,
+      "foodReserve": 0,
+      "fuelReserve": 0
+    },
+    "navigation": {
+      "routeStatus": "idle",
+      "pathRisk": "low",
+      "stuckState": "free",
+      "returnPathKnown": true
+    },
+    "cognition": {
+      "activeGoal": null,
+      "activeRoutine": null,
+      "activeSkill": null,
+      "suspendedGoals": []
+    },
+    "previousOutcome": null
+  },
+  "preObservationValid": true,
+  "postObservation": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "ce6bdd47-f547-4160-b1b2-8ef5a0bb997a",
+    "personId": "ada",
+    "sessionId": "fea027e5-7209-4f58-8bdc-8dff4691da3d",
+    "worldId": "person-dedicated-1",
+    "tick": 3599,
+    "timestamp": "2026-09-29T11:23:33.988Z",
+    "type": "Observation",
+    "observationVersion": 7,
+    "trainingContext": "minecraft_normal",
+    "selfMotion": {
+      "continuity": "start",
+      "translation": {
+        "direction": "unknown",
+        "band": "unknown",
+        "distance": null
+      },
+      "rotation": "unknown",
+      "vertical": "unknown"
+    },
+    "vitals": {
+      "health": 20,
+      "food": 20,
+      "saturation": 5,
+      "air": 300,
+      "armor": 0,
+      "statusEffects": [],
+      "alive": true
+    },
+    "environment": {
+      "dimension": "overworld",
+      "dayPhase": "day",
+      "timeOfDay": 3814,
+      "weather": "clear",
+      "lightLevel": 15,
+      "biome": "forest"
+    },
+    "inventory": {
+      "items": [],
+      "categories": {
+        "food": 0,
+        "raw_food": 0,
+        "cooked_food": 0,
+        "fuel": 0,
+        "wood": 0,
+        "stone": 0,
+        "coal": 0,
+        "tools": 0,
+        "weapons": 0,
+        "armor": 0,
+        "building_materials": 0
+      },
+      "freeSlots": 36
+    },
+    "permissions": {
+      "harvest": true,
+      "mine": true,
+      "build": true,
+      "huntPassive": true,
+      "depositOwned": true,
+      "withdrawOwned": true,
+      "withdrawExisting": true,
+      "craft": true,
+      "consume": true
+    },
+    "affordances": {
+      "diggableGround": false,
+      "shelterSite": true,
+      "storageSite": true
+    },
+    "nearby": {
+      "resources": [
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "level",
+          "rangeBand": "reach",
+          "distance": 4,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "level",
+          "rangeBand": "reach",
+          "distance": 4.5,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "below",
+          "rangeBand": "reach",
+          "distance": 4,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "bearing": "right",
+          "elevation": "below",
+          "rangeBand": "reach",
+          "distance": 4.5,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "bearing": "left",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 6,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "bearing": "left",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 6.5,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "bearing": "left",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 6,
+          "detail": "peripheral",
+          "harvestPermitted": true
+        }
+      ],
+      "hostiles": [],
+      "passiveAnimals": [],
+      "players": [],
+      "containers": [],
+      "workstations": [],
+      "hazards": []
+    },
+    "home": {
+      "activeHome": {
+        "homeId": "home_primary"
+      },
+      "shelterState": "none",
+      "ownedStorage": [],
+      "bedKnown": false,
+      "foodReserve": 0,
+      "fuelReserve": 0
+    },
+    "navigation": {
+      "routeStatus": "idle",
+      "pathRisk": "low",
+      "stuckState": "free",
+      "returnPathKnown": true
+    },
+    "cognition": {
+      "activeGoal": null,
+      "activeRoutine": null,
+      "activeSkill": null,
+      "suspendedGoals": []
+    },
+    "previousOutcome": {
+      "requestedSkill": "look_around",
+      "executedSkill": "look_around",
+      "status": "SUCCESS",
+      "effects": [
+        "surveyed"
+      ],
+      "healthCost": 0,
+      "resourceCost": [],
+      "elapsedTicks": 40,
+      "interruptReason": null
+    }
+  },
+  "postObservationValid": true,
+  "postObservationReason": null,
+  "outcome": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "eb2e56d2-1b92-49ce-9ae8-54271f15f837",
+    "personId": "ada",
+    "sessionId": "fea027e5-7209-4f58-8bdc-8dff4691da3d",
+    "worldId": "person-dedicated-1",
+    "tick": 3599,
+    "timestamp": "2026-09-29T11:23:33.878Z",
+    "type": "SkillOutcome",
+    "decisionId": "1bda20fe-1aff-424a-9e90-bc17dd40790f",
+    "goalId": "validation",
+    "routineId": "skill_test",
+    "contextId": "validation",
+    "requestedSkill": "look_around",
+    "requestedParameters": {},
+    "requestedSkillStatus": "SUCCESS",
+    "executedSkill": "look_around",
+    "executedParameters": {},
+    "status": "SUCCESS",
+    "emergency": false,
+    "reasonCodes": [],
+    "effects": [
+      "surveyed"
+    ],
+    "expectedEffects": [
+      {
+        "fact": "surveyed",
+        "op": "=",
+        "value": 1
+      }
+    ],
+    "healthBefore": 20,
+    "healthAfter": 20,
+    "foodBefore": 20,
+    "foodAfter": 20,
+    "healthCost": 0,
+    "resourceCost": [],
+    "inventoryDelta": [],
+    "elapsedTicks": 40,
+    "interruptReason": null,
+    "completionEvidence": {
+      "kinds": [
+        "elapsed_ticks"
+      ],
+      "details": {
+        "elapsed_ticks_orientations_sampled": 5,
+        "elapsed_ticks_gaze_steps": 9,
+        "timing_navigation_ticks": 0,
+        "timing_interaction_ticks": 0,
+        "timing_waiting_ticks": 0,
+        "timing_budget_ticks": 200,
+        "timing_budget_pressure": 0.2
+      }
+    }
+  },
+  "terminalStatus": "SUCCESS",
+  "requestedSkillStatus": "SUCCESS",
+  "elapsedTicks": 40,
+  "completionEvidence": {
+    "kinds": [
+      "elapsed_ticks"
+    ],
+    "details": {
+      "elapsed_ticks_orientations_sampled": 5,
+      "elapsed_ticks_gaze_steps": 9,
+      "timing_navigation_ticks": 0,
+      "timing_interaction_ticks": 0,
+      "timing_waiting_ticks": 0,
+      "timing_budget_ticks": 200,
+      "timing_budget_pressure": 0.2
+    }
+  },
+  "expectedEffects": [
+    {
+      "fact": "surveyed",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "observedEffects": [
+    "surveyed"
+  ],
+  "effectComparison": {
+    "available": true,
+    "reason": null,
+    "facts": [
+      {
+        "fact": "surveyed",
+        "op": "=",
+        "predictedValue": 1,
+        "before": 0,
+        "predicted": 1,
+        "observed": 0,
+        "severity": "inverted",
+        "verdict": "mismatch"
+      }
+    ],
+    "unexplained": [],
+    "worstSeverity": "inverted",
+    "matched": 0,
+    "mismatched": 1,
+    "notObservable": 0,
+    "inconclusive": 0
+  },
+  "navigation": {
+    "homePosition": {
+      "x": -185,
+      "y": 71,
+      "z": 176
+    },
+    "startPosition": {
+      "x": -185,
+      "y": 71,
+      "z": 175
+    },
+    "endPosition": {
+      "x": -185,
+      "y": 71,
+      "z": 175
+    },
+    "physicalHomeDistanceBefore": 1,
+    "physicalHomeDistanceAfter": 1,
+    "routeStatusBefore": "idle",
+    "routeStatusAfter": "idle",
+    "stuckStateBefore": "free",
+    "stuckStateAfter": "free"
+  },
+  "learning": {
+    "mode": "off",
+    "policyRevisionBefore": 0,
+    "policyRevisionAfter": 0,
+    "evidenceBefore": {
+      "directory": "<repo>/runs/servers/person-1161/person-evidence",
+      "exists": false,
+      "files": [],
+      "policyRevision": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb924"
+    },
+    "evidenceAfter": {
+      "directory": "<repo>/runs/servers/person-1161/person-evidence",
+      "exists": false,
+      "files": [],
+      "policyRevision": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb924"
+    },
+    "changed": false
+  },
+  "disconnect": {
+    "status": "clean",
+    "detail": null
+  },
+  "result": "completed",
+  "failure": null
+}

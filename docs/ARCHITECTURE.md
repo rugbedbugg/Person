@@ -177,7 +177,9 @@ rather than stranding a body in a hostile world.
 
 ## What exists above the boundary
 
-All of it is TESTED IN FIXTURE only, and none of it reaches the runtime: no
+All of it is TESTED IN FIXTURE (the dedicated-server checkpoint of 2026-09-29
+exercised restart reconstruction of memory, places and affect live once), and
+none of it reaches the runtime: no
 protocol message carries a memory, a place, an affect value, a belief or a
 hypothesis.
 

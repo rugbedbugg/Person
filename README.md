@@ -162,17 +162,17 @@ node apps/cli/src/bin/person.ts status  --config my-world.toml
 Person joins as an ordinary non-operator survival player. The world host keeps
 cheats; Person never gets them, and has no way to send a command at all.
 
-**Person has acted in Minecraft twice, and that is all.** Two live
-observations (2026-09-15, 2026-09-16) and three live single-skill validations
-(`wait_safely` once, `return_home` twice, 2026-09-16) have been run against a
-disposable LAN world. The other twenty-one of the twenty-three skills have
-never run live, no autonomous episode has ever run live, and every safety
-mechanism has been proven only in the fixture and against a conformance double.
-Those runs predate the perception firewall: nothing added since (observation
-versions 2 to 7, gaze, memory, places, projects, affect, learning) has run
-against Minecraft. `REALITY_VALIDATION.md` is
-explicit about what that leaves open, and about where the evidence for those
-runs lives.
+**Person has acted in Minecraft only briefly.** On a disposable LAN world:
+two observations (2026-09-15, 2026-09-16) and three single-skill validations
+(`wait_safely` once, `return_home` twice, 2026-09-16), all before the
+perception firewall. On a local dedicated server (2026-09-29): a six-check
+checkpoint of the current body contract (observation v7, gaze, the perception
+firewall, the kernel's threat detection, restart reconstruction), one
+`look_around` validation, and the first two autonomous episodes, of eight
+decisions each. Twenty of the twenty-three skills have never been validated
+live, and most safety mechanisms have been proven only in the fixture and
+against a conformance double. `REALITY_VALIDATION.md` is explicit about what
+that leaves open, and about where the evidence for those runs lives.
 
 ## Development and testing
 

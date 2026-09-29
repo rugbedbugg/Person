@@ -231,6 +231,7 @@ export class PersonRuntime {
 
     let outcome: EpisodeReport["outcome"] = "completed";
     let reason: string | null = null;
+    let endTick = 0;
 
     try {
       this.#status.update({
@@ -302,6 +303,13 @@ export class PersonRuntime {
         // Cognition is already gone; the report below is the record that matters.
       }
     } finally {
+      // Read the clock while the body is still connected: a disconnected
+      // Minecraft body no longer knows the world's time.
+      try {
+        endTick = this.#embodiment.snapshot().tick;
+      } catch {
+        endTick = builder.report.startTick;
+      }
       this.ledger.save();
       await this.#channel.stop();
       await this.#embodiment.disconnect();
@@ -316,11 +324,7 @@ export class PersonRuntime {
     }
 
     builder.setStorageProvenance(this.ledger.ownedStorage);
-    const report = builder.finish(
-      outcome,
-      reason,
-      this.#embodiment.snapshot().tick,
-    );
+    const report = builder.finish(outcome, reason, endTick);
     writeEpisodeReport(
       path.join(this.config.runtime.outputDirectory, "reports"),
       report,
