@@ -117,6 +117,33 @@ Weights, band thresholds, caps, tonic coefficients and recovery constants are
 implementation parameters, chosen on development worlds only and frozen before
 any held-out evaluation.
 
+## Settled while implementing (2026-09-29)
+
+- **Tonic pressure is an offset held until the next observation**, toward
+  which each dimension relaxes exactly (`settle`). Under interoception the
+  affect state is not rounded between steps; rounding once per observation
+  would itself depend on cadence. R1.5 keeps its rounding, which the reference
+  runs require.
+- **R1.5 harm touched control; R2 harm does not** (decision 3).
+- **Eating is two events**: the action's outcome, with its consequences, and
+  the body's recovery from hunger. The operator allowed "recovered after
+  eating" as its own phasic appraisal.
+- **Parameters frozen for held-out evaluation**, chosen on the development
+  worlds only (`experiments/r2/development/`) and unchanged by them:
+
+  | Parameter                           | Value                                                                                         |
+  | ----------------------------------- | --------------------------------------------------------------------------------------------- |
+  | Hunger begins / starving            | food below 18 / at or below 6                                                                 |
+  | Badly hurt                          | health below 12                                                                               |
+  | Breath bands (bubbles)              | full above 7; short 4 to 7; critical 3 or fewer                                               |
+  | Tonic weights (valence, unease)     | hunger -0.35, +0.15; vulnerability -0.35, +0.35; breathlessness -0.3, +0.5; threat -0.1, +0.4 |
+  | Tonic caps                          | valence -0.6 to 0; unease 0 to 0.7; control never                                             |
+  | Threat onset / escalation           | unease +0.3 x intensity; escalation step 0.25 intensity                                       |
+  | Harm                                | unease +0.08, valence -0.05 per health point                                                  |
+  | Hunger onset / starving / relieved  | valence -0.03 / -0.08 and unease +0.05 / +0.05                                                |
+  | Breath short / critical / recovered | unease +0.1 / +0.2 and valence -0.05 / valence +0.03                                          |
+  | Consequence combination             | own appraisal + strongest good + strongest bad                                                |
+
 ## Consequences
 
 ### Positive
