@@ -244,6 +244,8 @@ class GoalStack:
     #: Every event ever noted, so a reader can find the new ones although
     #: `history` is trimmed.
     noted: int = 0
+    #: The candidates the last update ranked, best first (research record).
+    ranked: tuple[Goal, ...] = ()
 
     def _note(self, tick: int, goal_id: str, event: str) -> None:
         self.noted += 1
@@ -302,8 +304,11 @@ class GoalStack:
         ]
         if not candidates:
             self.active_id = None
+            self.ranked = ()
             return None
         candidates.sort(key=lambda goal: (-goal.priority, goal.goal_type))
+        # What this choice was made from, for the engineering record.
+        self.ranked = tuple(candidates)
         best = candidates[0]
 
         if self.active_id and self.active_id != best.goal_id:

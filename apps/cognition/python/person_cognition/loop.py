@@ -37,6 +37,7 @@ from person_protocol import (
 from person_skills import SkillRegistry, skill_registry
 
 from .affect import (
+    TOLERANCE_RANGE,
     Affect,
     AffectRecord,
     Appraisal,
@@ -117,6 +118,14 @@ class ActiveRoutine:
 
     def current(self) -> SkillStep | None:
         return self.steps[self.index] if not self.finished else None
+
+
+def _span(scores: tuple[float, float, float] | None) -> dict[str, float] | None:
+    """A routine's score at the low, neutral and high tolerance, for the record."""
+    if scores is None:
+        return None
+    low, neutral, high = scores
+    return {"low": round(low, 6), "neutral": round(neutral, 6), "high": round(high, 6)}
 
 
 class CognitionLoop:
@@ -511,6 +520,7 @@ class CognitionLoop:
                 tolerance=self.affect.tolerance(),
                 reliability=self._reliability(),
                 hypotheses=self._hypotheses(),
+                tolerance_bounds=TOLERANCE_RANGE,
             )
         except NoCandidatesError:
             self.goals.block(goal.goal_id, "no_candidate_routine", tick)
@@ -542,6 +552,11 @@ class CognitionLoop:
                 "confidence": choice.confidence,
                 "reason_codes": list(choice.reason_codes),
                 "shadow_routine_id": choice.shadow_routine_id,
+                # For research (ADR 0013): the tolerance affect supplied,
+                # whether the ranking decided, and each score across the
+                # tolerance range. Nothing reads them back.
+                "tolerance": self.affect.tolerance(),
+                "scored_choice": choice.scored_choice,
                 "candidates": [
                     {
                         "routine_id": scored.candidate.routine_id,
@@ -550,6 +565,7 @@ class CognitionLoop:
                         "hypothesis_effect": scored.hypothesis_effect,
                         "attempts": scored.counts.attempts,
                         "successes": scored.counts.successes,
+                        "score_at_tolerance": _span(scored.tolerance_scores),
                     }
                     for scored in choice.candidates
                 ],
@@ -589,6 +605,9 @@ class CognitionLoop:
                 if goal.base_priority is not None
                 else goal.priority,
                 "affect_bias": goal.affect_bias,
+                # Every legitimate candidate this choice was made from, for
+                # research (ADR 0013). Nothing reads it back.
+                "candidates": [self._basis(entry) for entry in self.goals.ranked],
                 "context_id": context_id,
                 "reason_codes": list(goal.reason_codes),
                 "stack": [entry["goalId"] for entry in self.goals.as_messages()],
@@ -1323,6 +1342,23 @@ class CognitionLoop:
         for _kind, payload in changes:
             project = payload["project"]
             self._feel(appraise_project(payload["change"], project["kind"]), tick)
+
+    @staticmethod
+    def _basis(goal: Goal) -> dict[str, Any]:
+        """One goal candidate as the engineering record describes it."""
+        fixed = goal.goal_type == INVESTIGATE or goal.source == "emergency"
+        facts = frozenset(condition.fact for condition in goal.completion_condition)
+        return {
+            "goal_id": goal.goal_id,
+            "goal_type": goal.goal_type,
+            "source": goal.source,
+            "character": "fixed" if fixed else Affect.character(facts),
+            "base_priority": goal.base_priority
+            if goal.base_priority is not None
+            else goal.priority,
+            "affect_bias": goal.affect_bias,
+            "priority": goal.priority,
+        }
 
     def _biased(self, goal: Goal) -> Goal:
         if goal.goal_type == INVESTIGATE:
