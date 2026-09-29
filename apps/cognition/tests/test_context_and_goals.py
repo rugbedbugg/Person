@@ -186,6 +186,28 @@ def test_a_blocked_goal_stops_being_selected(observation: dict[str, Any]) -> Non
     assert following is None or following.goal_id != active.goal_id
 
 
+def test_blocking_a_goal_that_is_already_blocked_is_not_a_new_event(
+    observation: dict[str, Any],
+) -> None:
+    # A goal stays blocked until something reopens it. Blocking it again
+    # changes nothing, so it must not be recorded, or appraised, as a fresh
+    # thwarting: one blockage would otherwise count once per observation.
+    provider = SurvivalGoalProvider()
+    stack = GoalStack()
+    state = symbolic_state(observation)
+    active = stack.update(provider.propose(observation, state, 0), state, 0)
+    assert active is not None
+    for tick in (1, 2, 3):
+        stack.block(active.goal_id, "no_feasible_plan", tick)
+    blocked = [event for event in stack.history if event[2] == "blocked"]
+    assert blocked == [(1, active.goal_id, "blocked")]
+    assert stack.entries[active.goal_id].status == "BLOCKED"
+
+    stack.reopen(active.goal_id, 4)
+    stack.block(active.goal_id, "no_feasible_plan", 5)
+    assert [e for e in stack.history if e[2] == "blocked"][-1] == (5, active.goal_id, "blocked")
+
+
 def test_every_context_identifier_fits_the_protocol() -> None:
     # The runtime receives the context id in every PolicyDecision; one the
     # protocol refuses means the decision is never sent.

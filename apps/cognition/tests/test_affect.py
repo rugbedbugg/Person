@@ -246,6 +246,18 @@ def test_the_recorded_bias_always_accounts_for_the_priority(
         ), record
 
 
+def test_a_blockage_that_persists_is_appraised_once(tmp_path: Path, view: dict[str, Any]) -> None:
+    harness = Harness(tmp_path)
+    harness.hello()
+    goal, _, _ = harness.observe(at(view, 100))
+    goal_id = goal["goal"]["goalId"]
+    for tick in (110, 120, 130):
+        harness.loop.goals.block(goal_id, "no_feasible_plan", tick)
+    harness.observe(at(view, 140))
+    blocked = [r for r in appraisals(tmp_path) if r["trigger"].startswith("goal_blocked_")]
+    assert len(blocked) == 1, blocked
+
+
 def ranked(harness: Harness, view: dict[str, Any], state: AffectState | None) -> str:
     if state is not None:
         harness.loop.affect.state = state

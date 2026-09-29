@@ -330,8 +330,13 @@ class GoalStack:
         goal = self.entries.get(goal_id)
         if goal is None:
             return
+        already = goal.status == "BLOCKED"
         self.entries[goal_id] = replace(goal, status="BLOCKED", suspension_reason=reason)
-        self._note(tick, goal_id, "blocked")
+        # A goal stays blocked until something reopens it. Blocking it again
+        # is not a new event, and recording it as one would let a single
+        # blockage be counted, and appraised, once per observation.
+        if not already:
+            self._note(tick, goal_id, "blocked")
         if self.active_id == goal_id:
             self.active_id = None
 
