@@ -140,7 +140,7 @@ any held-out evaluation.
   | Tonic caps                          | valence -0.6 to 0; unease 0 to 0.7; control never                                             |
   | Threat onset / escalation           | unease +0.3 x intensity; escalation step 0.25 intensity                                       |
   | Harm                                | unease +0.08, valence -0.05 per health point                                                  |
-  | Hunger onset / starving / relieved  | valence -0.03 / -0.08 and unease +0.05 / +0.05                                                |
+  | Hunger onset / starving / relieved  | valence -0.03 / valence -0.08 and unease +0.05 / valence +0.05                                |
   | Breath short / critical / recovered | unease +0.1 / +0.2 and valence -0.05 / valence +0.03                                          |
   | Consequence combination             | own appraisal + strongest good + strongest bad                                                |
 
