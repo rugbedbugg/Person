@@ -328,7 +328,8 @@ class GoalStack:
 
     def block(self, goal_id: str, reason: str, tick: int) -> None:
         goal = self.entries.get(goal_id)
-        if goal is None:
+        # A finished or abandoned goal is not revived by being blocked.
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
             return
         already = goal.status == "BLOCKED"
         self.entries[goal_id] = replace(goal, status="BLOCKED", suspension_reason=reason)
@@ -352,6 +353,16 @@ class GoalStack:
             return
         self.entries[goal_id] = replace(goal, status="COMPLETE", suspension_reason=reason)
         self._note(tick, goal_id, "concluded")
+        if self.active_id == goal_id:
+            self.active_id = None
+
+    def abandon(self, goal_id: str, tick: int, reason: str) -> None:
+        """A goal Person has given up on. It is never a candidate again."""
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
+            return
+        self.entries[goal_id] = replace(goal, status="ABANDONED", suspension_reason=reason)
+        self._note(tick, goal_id, "abandoned")
         if self.active_id == goal_id:
             self.active_id = None
 
