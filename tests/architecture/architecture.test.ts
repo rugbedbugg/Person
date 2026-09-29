@@ -380,3 +380,22 @@ test("instrumentation stays outside Person and the runtime", () => {
     );
   }
 });
+
+test("trusted safety knows nothing of interoceptive affect", () => {
+  // ADR 0014 changes what affect is formed from, not what the runtime
+  // permits: nothing that judges or executes an action may see tonic
+  // pressure, bodily appraisal or the interoception switch.
+  for (const root of [
+    "apps/node-runtime/src/safety",
+    "apps/node-runtime/src/skills",
+    "apps/node-runtime/src/runtime",
+    "adapters/minecraft/src",
+  ])
+    for (const file of sourceFiles(root, ".ts")) {
+      const source = readFileSync(file, "utf8");
+      assert.ok(
+        !/interocept|tonic|affect_tonic|appraise/i.test(source),
+        `${file} must not depend on interoceptive affect`,
+      );
+    }
+});

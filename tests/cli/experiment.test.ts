@@ -313,3 +313,33 @@ test(
     assert.ok(serial.affectBounds.swings["protective"]!["outgoing"]! > 0);
   },
 );
+
+test(
+  "R1.5 and R2 appraisal can be compared inside one revision",
+  { timeout: 300000 },
+  async () => {
+    const results = await runExperiment({
+      planFile: planFile({
+        seeds: [1],
+        conditions: [
+          { id: "A15", affectMode: "active", interoception: "off" },
+          { id: "A2", affectMode: "active", interoception: "on" },
+        ],
+      }),
+      outputDirectory: temporaryDirectory("person-experiment-"),
+      repository: REPOSITORY,
+    });
+    const byId = (id: string) =>
+      results.runs.find((run) => run.metadata.condition === id)!;
+    assert.equal(byId("A15").metadata.interoception, "off");
+    assert.equal(byId("A2").metadata.interoception, "on");
+    assert.equal(byId("A15").metrics["affect_tonic_updates"], 0);
+    assert.ok(
+      results.comparisons.some(
+        (c) =>
+          c.between.join() === "A15,A2" &&
+          c.purpose.startsWith("the interoceptive contribution"),
+      ),
+    );
+  },
+);

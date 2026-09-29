@@ -42,6 +42,8 @@ export type AffectMode = "off" | "record_only" | "active";
 export interface ExperimentCondition {
   id: string;
   affectMode: AffectMode;
+  /** ADR 0014. Unstated means on; off reproduces R1.5 appraisal. */
+  interoception?: "on" | "off";
 }
 
 /** How long a run lasts: whichever bound is reached first ends it. */
@@ -84,6 +86,7 @@ export interface RunMetadata {
   planSha256: string;
   condition: string;
   affectMode: AffectMode;
+  interoception: "on" | "off";
   seed: number;
   horizon: string;
   maxExperiencedTicks: number | null;
@@ -180,11 +183,19 @@ export function loadPlan(file: string): ExperimentPlan {
     const ids = plan.conditions.map((condition) => condition.id);
     if (new Set(ids).size !== ids.length)
       problems.push("condition ids must be distinct");
-    for (const condition of plan.conditions)
+    for (const condition of plan.conditions) {
       if (!["off", "record_only", "active"].includes(condition.affectMode))
         problems.push(
           `condition ${condition.id} has an unknown affectMode ${condition.affectMode}`,
         );
+      if (
+        condition.interoception !== undefined &&
+        !["on", "off"].includes(condition.interoception)
+      )
+        problems.push(
+          `condition ${condition.id} has an unknown interoception ${condition.interoception}`,
+        );
+    }
   }
   if (
     !Number.isInteger(plan.maxDecisions) ||
@@ -530,7 +541,10 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
       mode: plan.learningMode ?? base.learning.mode,
       evidenceDirectory,
     },
-    affect: { mode: condition.affectMode },
+    affect: {
+      mode: condition.affectMode,
+      interoception: condition.interoception ?? "on",
+    },
     cognition: { ...base.cognition, command: cognitionCommand },
   };
   delete config.runtime.fixtureWorld;
@@ -568,6 +582,7 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
       planSha256: sha256(readFileSync(options.planFile, "utf8")),
       condition: condition.id,
       affectMode: condition.affectMode,
+      interoception: condition.interoception ?? "on",
       seed,
       horizon: horizon.id,
       maxExperiencedTicks: horizon.maxExperiencedTicks ?? null,
@@ -595,24 +610,50 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
   return result;
 }
 
+type Cell = { mode: AffectMode; interoception?: "on" | "off" };
+
 const COMPARISONS: {
-  modes: [AffectMode, AffectMode];
+  pair: [Cell, Cell];
   purpose: string;
 }[] = [
+  ...(["on", "off"] as const).flatMap((interoception) => [
+    {
+      pair: [
+        { mode: "off" as const },
+        { mode: "record_only" as const, interoception },
+      ] as [Cell, Cell],
+      purpose:
+        "negative control: affect that reaches no decision must change no decision",
+    },
+    {
+      pair: [
+        { mode: "record_only" as const, interoception },
+        { mode: "active" as const, interoception },
+      ] as [Cell, Cell],
+      purpose: "the causal effect of letting the same affect reach decisions",
+    },
+    {
+      pair: [
+        { mode: "off" as const },
+        { mode: "active" as const, interoception },
+      ] as [Cell, Cell],
+      purpose: "the whole affect system",
+    },
+  ]),
   {
-    modes: ["off", "record_only"],
+    pair: [
+      { mode: "active", interoception: "off" },
+      { mode: "active", interoception: "on" },
+    ],
     purpose:
-      "negative control: affect that reaches no decision must change no decision",
-  },
-  {
-    modes: ["record_only", "active"],
-    purpose: "the causal effect of letting the same affect reach decisions",
-  },
-  {
-    modes: ["off", "active"],
-    purpose: "the whole affect system",
+      "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
   },
 ];
+
+const matches = (condition: ExperimentCondition, cell: Cell): boolean =>
+  condition.affectMode === cell.mode &&
+  (cell.interoception === undefined ||
+    (condition.interoception ?? "on") === cell.interoception);
 
 export interface ExperimentOptions {
   planFile: string;
@@ -679,10 +720,19 @@ export async function runExperiment(
 
   const comparisons: Comparison[] = [];
   for (const horizon of horizons)
-    for (const { modes, purpose } of COMPARISONS) {
-      const first = plan.conditions.find((c) => c.affectMode === modes[0]);
-      const second = plan.conditions.find((c) => c.affectMode === modes[1]);
-      if (!first || !second) continue;
+    for (const { pair, purpose } of COMPARISONS) {
+      const first = plan.conditions.find((c) => matches(c, pair[0]));
+      const second = plan.conditions.find((c) => matches(c, pair[1]));
+      if (!first || !second || first === second) continue;
+      if (
+        comparisons.some(
+          (c) =>
+            c.horizon === horizon.id &&
+            c.between[0] === first.id &&
+            c.between[1] === second.id,
+        )
+      )
+        continue;
       const divergences = plan.seeds.map((seed) => {
         const trace = (id: string) =>
           runs.find(

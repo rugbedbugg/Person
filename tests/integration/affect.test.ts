@@ -37,7 +37,10 @@ function affect(evidenceDirectory: string): string[] {
     )
     .filter((line) => line.trim())
     .map((line) => JSON.parse(line) as JournalEvent)
-    .filter((event) => event.type === "affect_appraised")
+    .filter(
+      (event) =>
+        event.type === "affect_appraised" || event.type === "affect_tonic",
+    )
     .map((event) => JSON.stringify(event.payload).replace(UUID, "<id>"));
 }
 
@@ -90,11 +93,15 @@ test(
     const absent = await life(0, { lava: false, wall: true });
 
     assert.ok(
-      seen.some((record) => record.includes('"perceived_threat"')),
+      seen.some((record) => record.includes('"threat_onset"')),
       "lava in view is unsettling",
     );
     assert.deepEqual(hidden, absent, "unperceived lava is no lava to Person");
-    assert.ok(!hidden.some((record) => record.includes('"perceived_threat"')));
+    assert.ok(
+      seen.some((record) => record.includes('"threat":')),
+      "lava in view is also a lasting pressure while it stays in view",
+    );
+    assert.ok(!hidden.some((record) => record.includes('"threat_onset"')));
   },
 );
 
