@@ -1,0 +1,130 @@
+{
+  "name": "bench-c-exploration",
+  "seed": 1,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "forest",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "spawnYaw": 0.0,
+  "vitals": {
+    "health": 20,
+    "air": 300,
+    "armor": 0,
+    "food": 8,
+    "saturation": 0
+  },
+  "inventory": [
+    {
+      "name": "stone_pickaxe",
+      "count": 1
+    },
+    {
+      "name": "oak_planks",
+      "count": 32
+    },
+    {
+      "name": "furnace",
+      "count": 1
+    },
+    {
+      "name": "coal",
+      "count": 16
+    }
+  ],
+  "blocks": [],
+  "clusters": [
+    {
+      "name": "sweet_berry_bush",
+      "center": {
+        "x": -3,
+        "y": 64,
+        "z": -6
+      },
+      "count": 16,
+      "spread": 2
+    },
+    {
+      "name": "oak_log",
+      "center": {
+        "x": 10,
+        "y": 64,
+        "z": 8
+      },
+      "count": 30,
+      "spread": 3
+    }
+  ],
+  "entities": [
+    {
+      "name": "cow",
+      "position": {
+        "x": 3,
+        "y": 64,
+        "z": -6
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 4,
+        "y": 64,
+        "z": -7
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 2,
+        "y": 64,
+        "z": -8
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 5,
+        "y": 64,
+        "z": -6
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 3,
+        "y": 64,
+        "z": -9
+      }
+    },
+    {
+      "name": "cow",
+      "position": {
+        "x": 4,
+        "y": 64,
+        "z": -5
+      }
+    }
+  ],
+  "containers": [
+    {
+      "position": {
+        "x": 3,
+        "y": 64,
+        "z": 3
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "bread",
+          "count": 12
+        }
+      ],
+      "ownedByPerson": true
+    }
+  ],
+  "events": []
+}

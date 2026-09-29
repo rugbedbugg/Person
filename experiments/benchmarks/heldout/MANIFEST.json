@@ -1,0 +1,14 @@
+{
+  "frozen": "2026-09-29",
+  "purpose": "R1.5 held-out evaluation set. Do not change these files, and do not run or inspect their results while designing a model; a finished model is evaluated on them once. Changing any requires an explicit operator decision and a new manifest.",
+  "files": {
+    "experiments/benchmarks/heldout/a-wide-margin.json": "130d5f12f003258abbe3cae4d05648aaef11a14c840cf6d899cef9b0a751ad0c",
+    "experiments/benchmarks/heldout/b-near-tie.json": "5b07fe72d17250ab52f0a820f52304f79e961fe2e74b2424390f62381a8176db",
+    "experiments/benchmarks/heldout/c-exploration.json": "db09804db36b4c0f4e1651c835d8a49c37c2754c035da54f4c6a357184a2407e",
+    "experiments/benchmarks/heldout/d-setback.json": "007d338982f2975e6186ab2fcf0e7e7304aed05e95ce0bd3ea9cad7c68b96364",
+    "fixtures/worlds/benchmarks/heldout/a-wide-margin.json": "1f364c1977d2eec29af4c806fc587c063e8c08708031f14ec0191c6a6917eac3",
+    "fixtures/worlds/benchmarks/heldout/b-near-tie.json": "245ec6e8b6c39aed2b2025b07b146beacd91f41f97dfd8aa7ce2ddd12820339f",
+    "fixtures/worlds/benchmarks/heldout/c-exploration.json": "59017b63e4a6007cbc918f38338ce28c9dd36542e4f5c4d18fd48ac4d6244793",
+    "fixtures/worlds/benchmarks/heldout/d-setback.json": "84f444468998e2377cb4ab0f6afe9e05eef5ad6ddc3a9ec57a8c1eaa11869429"
+  }
+}

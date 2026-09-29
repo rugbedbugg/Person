@@ -1,0 +1,42 @@
+{
+  "name": "bench-b-near-tie",
+  "description": "R1.5 class B, near-tied choice: the home project's storage milestone and the tools goal sit within affect's reach of each other. Horizons are experiment settings chosen against the affect half-lives (unease 1200, valence 6000, control 12000 ticks): short about one valence half-life, medium two control half-lives, long six. Development: may be inspected freely; never used to evaluate a model finally.",
+  "split": "development",
+  "benchmarkClass": "B",
+  "world": "../../../fixtures/worlds/benchmarks/development/b-near-tie.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [1, 2, 3, 4, 5],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "P1",
+      "affectMode": "record_only"
+    },
+    {
+      "id": "P2",
+      "affectMode": "active"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}

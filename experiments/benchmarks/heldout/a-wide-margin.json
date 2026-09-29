@@ -1,0 +1,42 @@
+{
+  "name": "bench-a-wide-margin-heldout",
+  "description": "R1.5 class A, wide-margin control: one legitimate goal leads by more than the largest swing affect can produce, so off, record-only and active should usually agree. Horizons are experiment settings chosen against the affect half-lives (unease 1200, valence 6000, control 12000 ticks): short about one valence half-life, medium two control half-lives, long six. HELD OUT: not to be run while a model is being designed; evaluate a finished model once.",
+  "split": "heldout",
+  "benchmarkClass": "A",
+  "world": "../../../fixtures/worlds/benchmarks/heldout/a-wide-margin.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [101, 102, 103, 104, 105],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "P1",
+      "affectMode": "record_only"
+    },
+    {
+      "id": "P2",
+      "affectMode": "active"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}
