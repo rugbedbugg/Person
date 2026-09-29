@@ -926,6 +926,12 @@ complete and correct.
 
 ## Live checkpoint, 2026-09-29: not run
 
+> **Update, later the same day.** The operator authorized local test
+> infrastructure and accepted the Minecraft EULA for a local research server,
+> and the six checks were run against a dedicated server: see
+> [Dedicated-server validation](#dedicated-server-validation-2026-09-29). The
+> text below is kept as it was written.
+
 After the documentation synchronisation (PR #16), the smallest modern live
 check was due against the current head: observation version 7 through
 Mineflayer, gaze turning the real body, a visible versus an occluded threat,
@@ -946,6 +952,73 @@ The exact blocker, as found on the development machine at 2026-09-29 12:00
 So the newest live evidence is still the three skill-test runs of 2026-09-16,
 at `observationVersion` 1. The checkpoint's six checks remain the next live
 step; `docs/LAN_TESTING.md` has the procedure, starting with `person observe`.
+
+## Dedicated-server validation, 2026-09-29
+
+**This is dedicated-server validation, recorded apart from the LAN runs of
+2026-09-15 and 2026-09-16.** It ran against a local Minecraft Java 1.16.1
+dedicated server, not a single-player world opened to LAN.
+
+### Environment
+
+|                      |                                                                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server               | official Mojang 1.16.1 `server.jar`, SHA-1 `a412fd69db1f81db3f511c1463fd304675244077`, 37,968,964 bytes, SHA-256 `2782d547724bc3ffc0ef6e97b2790e75c1df89241f9d4645b58c706f5e6c935b`                              |
+| Log4j mitigation     | Mojang `log4j2_112-116.xml`, SHA-1 `02937d122c86ce73319ef9975b58896fc1b491d1`, SHA-256 `29534615b561487bccd3f2ec859b172bc642096cef4f8606754ead7eca5050dd`, passed as `-Dlog4j.configurationFile` on every launch |
+| Java                 | Temurin 1.8.0_504                                                                                                                                                                                                |
+| EULA                 | accepted by the operator on 2026-09-29                                                                                                                                                                           |
+| Binding              | `server-ip=127.0.0.1`, port 25565; no port forwarding, no firewall change                                                                                                                                        |
+| Accounts             | `online-mode=false`; whitelist of one, `PersonAda`; `max-players=1`                                                                                                                                              |
+| Game                 | survival (forced), difficulty easy, no operators, command blocks off                                                                                                                                             |
+| World                | `person-dedicated-1`, seed 20260929, generated fresh under `runs/servers/`                                                                                                                                       |
+| Operator world setup | from the server console: weather cycle off, clear weather, mob spawning off, patrol and trader spawning off, insomnia off. The daylight cycle stayed on: the runtime refuses a frozen one.                       |
+| Training context     | `minecraft_normal`                                                                                                                                                                                               |
+
+Server state lives only under `runs/servers/`, apart from `~/.minecraft`.
+The tooling is `scripts/dedicated-server/` and `scripts/dedicated-checkpoint.ts`;
+the evidence, with hashes, is `docs/evidence/dedicated-server/2026-09-29/`.
+Every command that connected was marked operator-contaminated, because the
+world was prepared from the console. Nothing from the console or the server
+reached cognition except through the ordinary `Observation`.
+
+### The six checks
+
+| #   | Check                                      | Result | How                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --- | ------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Observation v7 through Mineflayer          | PASS   | `person observe`: schema-valid, `observationVersion` 7                                                                                                                                                                                                                                                                                                                                                           |
+| 2   | Gaze physically turns the real body        | PASS   | probe: two `look left` steps moved the server's own reading of PersonAda's yaw from 0 to -90 degrees, two `look right` steps back to 0; `person skill-test --skill look_around` ran through the validator, kernel and dispatch: ACCEPT, SUCCESS, requested and executed identical                                                                                                                                |
+| 3   | Visible versus occluded or behind threat   | PASS   | probe, a summoned zombie with no AI: 5 blocks ahead, perceived (central, `ahead`); 5 blocks behind, not perceived; inside a closed stone box 6 blocks ahead, not perceived                                                                                                                                                                                                                                       |
+| 4   | The kernel is independent of cognition     | PASS   | in all three placements the kernel, reading the privileged snapshot, rated the threat `immediate`; after cleanup, `none`                                                                                                                                                                                                                                                                                         |
+| 5   | No coordinates, yaw or entity handles leak | PASS   | every observation (the `observe` capture and the four probe observations) scanned for `position`, `x`, `y`, `z`, `yaw`, `pitch`, `heading`, `entityId`, `uuid`, `username`, `homeDistance`, `lastSafePosition`: none                                                                                                                                                                                             |
+| 6   | Memory and affect survive a restart        | PASS   | two autonomous episodes of 8 decisions, one evidence directory: `episode_ended` at 4080 experienced ticks, the second episode starting at 4080; no break in the evidence chain; the second episode's first appraisal began at valence 0.1903, the first episode's 0.1907 after 20 experienced ticks of decay; it recalled two memories the first episode encoded and recognised a place the first episode formed |
+
+### First live autonomous episodes
+
+Check 6 made the first autonomous episodes Person has run against Minecraft:
+two, of eight decisions each, learning off. All 16 proposals were accepted by
+the kernel; no emergency, no health lost. Person looked for and gathered wood
+(one `gather_wood` timed out at 108% of its 2400-tick budget), crafted a
+crafting table, a wooden axe and a wooden pickaxe, and failed to build and
+then to repair a shelter. One rotten flesh in its inventory came from a probe
+zombie killed during cleanup: an operator artifact, not an outcome of Person's.
+
+### Defects this checkpoint exposed
+
+- **Live episode reports record 0 elapsed ticks.** The runtime read the end
+  tick after disconnecting, and a disconnected Mineflayer body falls back to
+  its start tick. Fixed in `6f7e567`, with a test.
+- **`skill-test` counts `surveyed` as a mismatch.** `look_around` declares
+  `surveyed`, which no observation can carry, so the comparison should report
+  it as not observable. Report-only; recorded, not yet fixed.
+- **The `observe` summary prints `undefined` for peripheral percepts.** They
+  correctly carry no name; the terminal renderer does not allow for that.
+  Display-only; recorded, not yet fixed.
+
+### What this does not establish
+
+Everything in the matrix above was run once, in one world, by day, on easy,
+with natural spawning off. It says nothing about night, natural mobs, other
+terrain or long episodes, and it is not LAN validation.
 
 ## Affect experiments (fixture only)
 

@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `research/affect-benchmarks`, based on `ea46c47` (tip of `feat/lan-validation` after PR #17)
+**Last verified against:** branch `validation/dedicated-checkpoint`, based on `6183dff` (tip of `feat/lan-validation` after PR #18)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-29
 
@@ -13,7 +13,9 @@ relationships, web research, external chat, the Baritone motor backend and the
 firewall, bounded gaze and information seeking, episodic memory, a spatial
 model and cognitive home, persistent projects, affect, learned effect
 reliability and causal hypotheses have been built, each described below. All of
-them are TESTED IN FIXTURE only; none has run against Minecraft.
+them are TESTED IN FIXTURE; the dedicated-server checkpoint of 2026-09-29
+exercised the perception firewall, gaze and restart reconstruction live once,
+and nothing more of them has run against Minecraft.
 
 Development since the freeze followed an operator roadmap, merged into
 `feat/lan-validation` one pull request at a time: A information seeking (PR
@@ -165,37 +167,38 @@ Parameters: scalars only. No command, script, chat, or coordinate fields possibl
 
 ## 4. Skill Library Status
 
-| Skill                     | Fixture | Adapter (Conformance)           | Live                      | Notes                               |
-| ------------------------- | ------- | ------------------------------- | ------------------------- | ----------------------------------- |
-| flee                      | ✅ pass | ✅ partial                      | ❌ not run                | neutral mobs, threat set unified    |
-| dig_in                    | ✅ pass | ✅ dig/place                    | ❌ not run                | diggable ground check added         |
-| wait_safely               | ✅ pass | ✅ waitTicks                    | ✅ **1 run, 2026-09-16**  | SUCCESS; no operator setup          |
-| return_home               | ✅ pass | ✅ moveTo/dig/place             | ✅ **2 runs, 2026-09-16** | SUCCESS; both operator-positioned   |
-| gather_plant_food         | ✅ pass | ✅ findBlocks/moveTo/dig        | ❌ not run                | drop collection unverified          |
-| hunt_safe_passive_animals | ✅ pass | ✅ entity classification/attack | ❌ not run                | metadata crash + named animal fixed |
-| cook_food                 | ✅ pass | ✅ smelt                        | ❌ not run                | partial output + empty smelt fixed  |
-| eat_to_target             | ✅ pass | ✅ consume                      | ❌ not run                | contract corrected (3 items, not 1) |
-| gather_wood               | ✅ pass | ✅ full path                    | ❌ not run                | tool durability unmodelled          |
-| mine_stone                | ✅ pass | ✅ full path                    | ❌ not run                | needs exposed stone                 |
-| mine_coal                 | ✅ pass | ✅ full path                    | ❌ not run                | needs exposed ore                   |
-| craft_basic_tools         | ✅ pass | ✅ craft/place                  | ❌ not run                | server-authoritative recipes        |
-| craft_stone_tools         | ✅ pass | ✅ craft                        | ❌ not run                | table placement unverified          |
-| craft_furnace             | ✅ pass | ✅ craft/place                  | ❌ not run                | table placement unverified          |
-| craft_chest               | ✅ pass | ✅ craft                        | ❌ not run                | table placement unverified          |
-| build_basic_shelter       | ✅ pass | ✅ place/blockAt                | ❌ not run                | irregular terrain unverified        |
-| repair_shelter            | ✅ pass | ✅ place/blockAt                | ❌ not run                | same                                |
-| place_owned_chest         | ✅ pass | ✅ place/provenance             | ❌ not run                | container entity unverified         |
-| deposit_owned_storage     | ✅ pass | ✅ deposit refusal              | ❌ not run                | slot handling unverified            |
-| withdraw_owned_storage    | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                | first-withdrawal bug fixed          |
-| loot_permitted_container  | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                | takes up to amount of every type    |
-| look_around               | ✅ pass | ❌ `bot.look` not in the double | ❌ not run                | returns to start; informs nothing   |
-| look                      | ✅ pass | ❌ `bot.look` not in the double | ❌ not run                | one gaze step; Person stays facing  |
+| Skill                     | Fixture | Adapter (Conformance)           | Live                                       | Notes                               |
+| ------------------------- | ------- | ------------------------------- | ------------------------------------------ | ----------------------------------- |
+| flee                      | ✅ pass | ✅ partial                      | ❌ not run                                 | neutral mobs, threat set unified    |
+| dig_in                    | ✅ pass | ✅ dig/place                    | ❌ not run                                 | diggable ground check added         |
+| wait_safely               | ✅ pass | ✅ waitTicks                    | ✅ **1 run, 2026-09-16**                   | SUCCESS; no operator setup          |
+| return_home               | ✅ pass | ✅ moveTo/dig/place             | ✅ **2 runs, 2026-09-16**                  | SUCCESS; both operator-positioned   |
+| gather_plant_food         | ✅ pass | ✅ findBlocks/moveTo/dig        | ❌ not run                                 | drop collection unverified          |
+| hunt_safe_passive_animals | ✅ pass | ✅ entity classification/attack | ❌ not run                                 | metadata crash + named animal fixed |
+| cook_food                 | ✅ pass | ✅ smelt                        | ❌ not run                                 | partial output + empty smelt fixed  |
+| eat_to_target             | ✅ pass | ✅ consume                      | ❌ not run                                 | contract corrected (3 items, not 1) |
+| gather_wood               | ✅ pass | ✅ full path                    | ❌ not run                                 | tool durability unmodelled          |
+| mine_stone                | ✅ pass | ✅ full path                    | ❌ not run                                 | needs exposed stone                 |
+| mine_coal                 | ✅ pass | ✅ full path                    | ❌ not run                                 | needs exposed ore                   |
+| craft_basic_tools         | ✅ pass | ✅ craft/place                  | ❌ not run                                 | server-authoritative recipes        |
+| craft_stone_tools         | ✅ pass | ✅ craft                        | ❌ not run                                 | table placement unverified          |
+| craft_furnace             | ✅ pass | ✅ craft/place                  | ❌ not run                                 | table placement unverified          |
+| craft_chest               | ✅ pass | ✅ craft                        | ❌ not run                                 | table placement unverified          |
+| build_basic_shelter       | ✅ pass | ✅ place/blockAt                | ❌ not run                                 | irregular terrain unverified        |
+| repair_shelter            | ✅ pass | ✅ place/blockAt                | ❌ not run                                 | same                                |
+| place_owned_chest         | ✅ pass | ✅ place/provenance             | ❌ not run                                 | container entity unverified         |
+| deposit_owned_storage     | ✅ pass | ✅ deposit refusal              | ❌ not run                                 | slot handling unverified            |
+| withdraw_owned_storage    | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                                 | first-withdrawal bug fixed          |
+| loot_permitted_container  | ✅ pass | ✅ inspectContainer/withdraw    | ❌ not run                                 | takes up to amount of every type    |
+| look_around               | ✅ pass | ❌ `bot.look` not in the double | ✅ **1 run, 2026-09-29, dedicated server** | SUCCESS; returns to start           |
+| look                      | ✅ pass | ❌ `bot.look` not in the double | ❌ not run                                 | one gaze step; Person stays facing  |
 
-**Status vocabulary used strictly:** Fixture / Adapter / Live. Two skills are
-marked Live; the other twenty-one are not. Live evidence is the three
-`person skill-test` reports described in `REALITY_VALIDATION.md`, which are
-local operator artifacts under `runs/` and are **not committed** (`runs/` is
-gitignored).
+**Status vocabulary used strictly:** Fixture / Adapter / Live. Three skills
+are marked Live: `wait_safely` and `return_home` on a LAN world (2026-09-16),
+`look_around` on the local dedicated server (2026-09-29); the other twenty are
+not. The evidence is the four `person skill-test` reports described in
+`REALITY_VALIDATION.md`, preserved with provenance in
+`docs/evidence/skill-tests/` and `docs/evidence/dedicated-server/2026-09-29/`.
 
 ---
 
@@ -326,9 +329,22 @@ stay until their own systems are designed.
 skill identical in every run, effect comparison matched `at_home` on both
 navigation runs, learning fingerprint unchanged, all disconnects clean. Details
 and provenance in `REALITY_VALIDATION.md`.
+**Dedicated-server checkpoint (2026-09-29):** against a local 1.16.1
+dedicated server (not a LAN world), all six checks passed: observation v7
+through Mineflayer, gaze turning the real body, a threat perceived in view and
+not behind or boxed in while the kernel saw all three, no privileged field in
+any observation, and memory, affect, places, experienced time and the evidence
+chain surviving a restart. The restart check ran the first two autonomous
+episodes against Minecraft, eight decisions each. `look_around` was also
+validated through `person skill-test`. Recorded separately from the LAN runs in
+`REALITY_VALIDATION.md`, "Dedicated-server validation".
 
-**Twenty-one of twenty-three skills have never been run live.** The next stage in
-the intended order is basic gathering, and it has not been started.
+**Twenty of twenty-three skills have never been validated live** through
+`person skill-test`. In the two short autonomous episodes `look`,
+`gather_wood` and `craft_basic_tools` also ran and succeeded (one `gather_wood`
+timed out), and `build_basic_shelter` and `repair_shelter` ran and failed; one
+run each is not validation. The next stage in the intended order is basic
+gathering.
 
 ---
 
@@ -360,12 +376,14 @@ appraised, as blocked again every cycle, which pinned valence and control at
 and was pursued again (`005148b`). The first also means journals written
 before it lack `episode_ended`.
 
-**The live evidence is older than the current body contract.** Every live run
-used `observationVersion` 1. Versions 2 to 7 (relative percepts and the
-vision cone, recognition gating, the ledger label, self-motion, the retired
-`homeDistance`, perceived path risk), the `look` and `look_around` skills, the
-C7 route-veto repair and everything in cognition since 2026-09-16 have never
-run against Minecraft.
+**Live evidence of the current body contract is recent and narrow.** The LAN
+runs of 2026-09-15 and 16 used `observationVersion` 1. The dedicated-server
+checkpoint of 2026-09-29 exercised version 7, gaze, the perception firewall,
+the kernel's threat detection and restart reconstruction, once each, in one
+world, by day, with natural spawning off. The C7 route-veto repair,
+self-motion and places in motion, projects, learning and affect's influence
+on decisions have not been exercised against Minecraft in any way a result
+could rest on.
 
 **Remaining blockers for live validation (from REALITY_VALIDATION.md):**
 
@@ -851,7 +869,7 @@ runtime would allow a direct route home), not a distance.
 
 | Limitation                                                                                                                         | Source                     |
 | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| Mineflayer adapter exercised live for observation and 2 skills only                                                                | REALITY_VALIDATION.md      |
+| Mineflayer adapter validated live for observation, 3 skills by skill-test and two 8-decision autonomous episodes                   | REALITY_VALIDATION.md      |
 | No dig-down skill (mine_stone/coal need exposed stone)                                                                             | IMPLEMENTATION_REPORT.md   |
 | Fixture is simulation, not Minecraft                                                                                               | IMPLEMENTATION_REPORT.md   |
 | Planner bounded (depth/branch/node caps) — may return no plan                                                                      | IMPLEMENTATION_REPORT.md   |
@@ -886,9 +904,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 298     | 298     |
+| Node (all)   | 299     | 299     |
 | Python (all) | 345     | 345     |
-| **Total**    | **643** | **643** |
+| **Total**    | **644** | **644** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -908,12 +926,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `research/affect-benchmarks` on 2026-09-29: Node 298 pass / 0 fail,
+Verified on `validation/dedicated-checkpoint` on 2026-09-29: Node 299 pass / 0 fail,
 Python 345 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18.
 
 ---
 
