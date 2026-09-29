@@ -73,6 +73,10 @@
         "mode": {
           "enum": ["off", "record_only", "active"],
           "description": "off: affect does not evolve and reaches no decision. record_only: appraised and journalled exactly as active, reaching no decision. active: the ADR 0010 behaviour. Unset means active."
+        },
+        "interoception": {
+          "enum": ["on", "off"],
+          "description": "ADR 0014: on (the default) feels the body, phasic and tonic; off reproduces R1.5 appraisal exactly, as a research baseline."
         }
       }
     },

@@ -69,6 +69,7 @@ from .hypotheses import (
 )
 from .hypotheses.experiments import GOAL_TYPE as INVESTIGATE
 from .hypotheses.generation import CONTEXT_TRIALS
+from .interoception import Interoception, combined
 from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
 from .memory.episodes import EpisodeDraft
@@ -139,6 +140,7 @@ class CognitionLoop:
         evidence_directory: Path | None = None,
         validator: ProtocolValidator | None = None,
         affect_mode: str = "active",
+        interoception: bool = True,
     ) -> None:
         self.settings = settings
         #: How far affect is switched on (ADR 0013); from Person's own
@@ -160,8 +162,16 @@ class CognitionLoop:
         self.projects = ProjectManager(self.project_book)
         #: Person's affect, rebuilt from its own appraisals (ADR 0010).
         self.affect_record = AffectRecord()
-        self.affect = Affect(self.affect_record, mode=affect_mode)
+        #: ADR 0014: the body as affect feels it, phasic and tonic. Off is a
+        #: frozen R1.5 baseline for research, never Person's ordinary life.
+        self.interoception_on = interoception
+        self.affect = Affect(self.affect_record, mode=affect_mode, precise=interoception)
         self._felt_health: float | None = None
+        self.interoception = Interoception()
+        #: One observation step's causal events, appraised once at its end.
+        self._pending_actions: list[tuple[str, Appraisal | None]] = []
+        self._step_searches: list[tuple[str, str, Appraisal]] = []
+        self._step_changes: list[tuple[str, dict[str, Any]]] = []
         self._goal_events_seen = 0
         #: Learned reliability of skill effects, active and shadow (ADR 0011).
         self.effect_beliefs = EffectBeliefs()
@@ -327,7 +337,9 @@ class CognitionLoop:
         # next observes the world, not assumed.
         self.projects = ProjectManager(self.project_book)
         # Affect persists too, and settles only as experienced time passes.
-        self.affect = Affect(self.affect_record, mode=self.affect_mode)
+        self.affect = Affect(
+            self.affect_record, mode=self.affect_mode, precise=self.interoception_on
+        )
         # So do hypotheses and investigations; an open investigation resumes.
         self.investigations = InvestigationManager(self.hypothesis_book.investigations)
         self.offered = tuple(str(skill) for skill in message["skillIds"])
@@ -360,6 +372,7 @@ class CognitionLoop:
                 "training_context": message["trainingContext"],
                 "learning_mode": self.learning_mode,
                 "affect_mode": self.affect_mode,
+                "interoception": "on" if self.interoception_on else "off",
                 "experienced_ticks": self.memory.now,
                 "self_estimate": self.spatial.estimate.to_json(),
             },
@@ -368,6 +381,8 @@ class CognitionLoop:
             self._settle_prediction(None, message["tick"])
             self._conclude_search("abandoned", message["tick"], reason="episode_ended")
             self._finish_routine("INTERRUPTED", message["tick"], reason="episode_ended")
+            if self.interoception_on:
+                self._appraise_step(message["tick"])
             if self.store is not None:
                 self.store.write_snapshot(self.reducers)
                 self.summary.write(
@@ -385,6 +400,13 @@ class CognitionLoop:
     # ------------------------------------------------------------ observation
 
     def on_observation(self, message: dict[str, Any]) -> None:
+        self._observe(message)
+        if self.interoception_on:
+            # Everything this observation brought about, appraised once per
+            # causal event (ADR 0014).
+            self._appraise_step(message["tick"])
+
+    def _observe(self, message: dict[str, Any]) -> None:
         tick = message["tick"]
         # Where Person is comes first: its sense of place decides whether it
         # believes it is home, and what it notices is remembered there.
@@ -399,7 +421,10 @@ class CognitionLoop:
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
         self._remember(self.memory.experience(message), tick)
-        self._appraise_body(message, tick)
+        if self.interoception_on:
+            self._sense_body(message, tick)
+        else:
+            self._appraise_body(message, tick)
 
         self._reopen_unfound(state, tick)
         self._deliberate_projects(message, state, tick)
@@ -418,7 +443,10 @@ class CognitionLoop:
         goal = self.goals.update(proposals, state, tick)
         changes = self.projects.track(self.goals, state, self.memory.now)
         self._record_changes(changes, tick)
-        self._appraise_progress(changes, tick)
+        if self.interoception_on:
+            self._step_changes.extend(changes)
+        else:
+            self._appraise_progress(changes, tick)
         self._record_changes(self.investigations.track(self.goals, trial_goal), tick)
         if goal is None:
             goal = self._idle_goal(tick)
@@ -855,7 +883,11 @@ class CognitionLoop:
         self._record("information_search", tick, search.payload(phase, **extra))
         if phase in {"exhausted", "satisfied"}:
             conclusion = NOT_FOUND if phase == "exhausted" else "found"
-            self._feel(appraise_search(conclusion), tick)
+            if self.interoception_on:
+                cause = f"search:{search.goal_id}@{self.memory.now}"
+                self._step_searches.append((cause, search.goal_id, appraise_search(conclusion)))
+            else:
+                self._feel(appraise_search(conclusion), tick)
             self._remember(
                 [remembering.searched(search.purpose, conclusion, len(search.looks), None)],
                 tick,
@@ -959,7 +991,11 @@ class CognitionLoop:
         }
         event = self._record(event_type, message["tick"], payload, message["decisionId"])
         self.summary.note_outcome(message)
-        self._feel(appraise_outcome(message), message["tick"])
+        if self.interoception_on:
+            # Appraised with what it brought about, once Person has seen that.
+            self._pending_actions.append((message["decisionId"], appraise_outcome(message)))
+        else:
+            self._feel(appraise_outcome(message), message["tick"])
         experience = remembering.acted(message, self.registry, event.event_id if event else None)
         if experience is not None:
             succeeded = message["status"] == "SUCCESS"
@@ -1314,13 +1350,93 @@ class CognitionLoop:
 
     # ---------------------------------------------------------------- affect
 
-    def _feel(self, appraisal: Appraisal | None, tick: int) -> None:
+    def _feel(
+        self, appraisal: Appraisal | None, tick: int, extra: dict[str, Any] | None = None
+    ) -> None:
         """Apply one appraisal and journal its full causal record."""
         if appraisal is None:
             return
-        record = self.affect.feel(appraisal, self.memory.now)
+        record = self.affect.feel(appraisal, self.memory.now, extra)
         if record is not None:
             self._record("affect_appraised", tick, record)
+
+    def _sense_body(self, observation: dict[str, Any], tick: int) -> None:
+        """The body's conditions press on, and its events are felt once (ADR 0014)."""
+        sensed = self.interoception.sense(observation)
+        record = self.affect.apply_tonic(sensed.pressures, self.memory.now)
+        if record is not None:
+            self._record("affect_tonic", tick, record)
+        for appraisal in sensed.events:
+            self._feel(appraisal, tick, {"cause": f"{appraisal.trigger}@{self.memory.now}"})
+
+    def _appraise_step(self, tick: int) -> None:
+        """One appraisal per causal event of this step, with its consequences.
+
+        The causal events are an action whose outcome was reported, a search
+        that concluded, and, for consequences with neither behind them, the
+        observation itself. Goals and projects an event brought about are
+        listed with it and weigh once. The idle placeholder is not a goal of
+        Person's and is never appraised.
+        """
+        new = min(self.goals.noted - self._goal_events_seen, len(self.goals.history))
+        self._goal_events_seen = self.goals.noted
+        goal_events = self.goals.history[len(self.goals.history) - new :] if new else []
+        actions, self._pending_actions = self._pending_actions, []
+        searches, self._step_searches = self._step_searches, []
+        changes, self._step_changes = self._step_changes, []
+
+        now = self.memory.now
+        events: dict[str, tuple[Appraisal | None, list[tuple[dict[str, Any], Appraisal]]]] = {}
+        # Earlier outcomes with no observation of their own stand alone.
+        for decision_id, appraisal in actions[:-1]:
+            events[f"action:{decision_id}"] = (appraisal, [])
+        action = f"action:{actions[-1][0]}" if actions else None
+        if actions:
+            events[action] = (actions[-1][1], [])  # type: ignore[index]
+        for cause, _goal_id, appraisal in searches:
+            events[cause] = (appraisal, [])
+        observed = f"observation@{now}"
+
+        def attach(cause: str, consequence: dict[str, Any], appraisal: Appraisal) -> None:
+            base, listed = events.get(cause, (None, []))
+            listed.append((consequence, appraisal))
+            events[cause] = (base, listed)
+
+        for _when, goal_id, event in goal_events:
+            goal = self.goals.entries.get(goal_id)
+            if goal is None or goal.source == "maintenance":
+                continue
+            appraisal = appraise_goal(event, goal.goal_type)
+            if appraisal is None:
+                continue
+            consequence = {"kind": f"goal_{event}", "goal_id": goal_id, "goal_type": goal.goal_type}
+            by_search = next(
+                (cause for cause, searched, _ in searches if searched == goal_id), None
+            )
+            if event == "blocked" and goal.suspension_reason == NOT_FOUND and by_search:
+                attach(by_search, consequence, appraisal)
+            else:
+                attach(action or observed, consequence, appraisal)
+        for _kind, payload in changes:
+            project = payload["project"]
+            appraisal = appraise_project(payload["change"], project["kind"])
+            if appraisal is None:
+                continue
+            consequence = {
+                "kind": f"project_{payload['change']}",
+                "project_id": project["project_id"],
+                "project_kind": project["kind"],
+            }
+            attach(action or observed, consequence, appraisal)
+
+        for cause, (base, consequences) in events.items():
+            if base is None and not consequences:
+                continue
+            self._feel(
+                combined(base, consequences),
+                tick,
+                {"cause": cause, "consequences": [item for item, _ in consequences]},
+            )
 
     def _appraise_body(self, observation: dict[str, Any], tick: int) -> None:
         """What the world and the body feel like now: threat perceived, harm felt."""
