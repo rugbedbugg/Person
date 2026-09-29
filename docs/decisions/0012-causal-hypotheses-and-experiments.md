@@ -1,6 +1,6 @@
 # ADR 0012: Causal hypotheses and controlled experiments
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-29)
 **Date:** 2026-09-26
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -10,6 +10,10 @@ through the ordinary goal machinery; memory, belief and knowledge kept
 distinct, with knowledge promotion deferred (2026-09-26)
 
 ---
+
+> **Operator decision, 2026-09-29: accepted.** The exact hypothesis-confidence
+> constants, experiment budgets, scoring weights and the current typed
+> vocabularies are implementation parameters, not immutable architecture.
 
 ## Context
 

@@ -64,7 +64,7 @@ The following categories of changes **must receive explicit review** from both P
 ### 3.5 Persistent State Model
 
 - Snapshot format, checksum, restore logic
-- What persists across restart (identity, home, storage, goals, routines, evidence, relationships, affect)
+- What persists across restart (identity; the placement ledger's home, storage and workstations; evidence and routine statistics; episodic memory; places and the self-motion estimate; open projects; affect; effect beliefs; hypotheses and investigations). Goals are re-derived, not restored. Relationships are not implemented, so nothing about them persists
 - What resets (active path, executor state, observation cache)
 - Demonstration manifest schema & review process
 

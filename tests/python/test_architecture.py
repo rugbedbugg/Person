@@ -132,13 +132,12 @@ def test_learning_is_off_by_default_everywhere() -> None:
 def test_future_providers_refuse_to_pretend_they_work() -> None:
     from person_cognition.future_providers import FUTURE_PROVIDERS, NotYetImplemented
 
-    # Memory left this list when it was built (ADR 0007); the rest remain.
+    # Memory (ADR 0007), projects (ADR 0009) and affect (ADR 0010) left this
+    # list when they were built; the rest remain.
     assert set(FUTURE_PROVIDERS) == {
         "WorldModelProvider",
-        "AffectProvider",
         "LanguageProvider",
         "SocialProvider",
-        "ProjectProvider",
         "ExplorationProvider",
     }
     for _name, factory in FUTURE_PROVIDERS.items():
@@ -150,6 +149,19 @@ def test_future_providers_refuse_to_pretend_they_work() -> None:
         )
         with pytest.raises(NotYetImplemented):
             getattr(provider, method)(*[{}] * _arity(provider, method))
+
+
+def test_no_placeholder_outlives_the_capability_it_reserved() -> None:
+    from person_cognition import future_providers
+
+    for name in ("MemoryProvider", "AffectProvider", "ProjectProvider"):
+        assert not hasattr(future_providers, name), f"{name} is implemented, not future"
+    loop = (REPOSITORY / "apps/cognition/python/person_cognition/loop.py").read_text(
+        encoding="utf-8"
+    )
+    assert "future_providers" not in loop, "the loop runs on implementations only"
+    for module in (".affect", ".projects", ".memory"):
+        assert f"from {module} import" in loop, f"the loop uses {module[1:]} itself"
 
 
 def _arity(provider: object, method: str) -> int:

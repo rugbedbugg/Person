@@ -1,8 +1,8 @@
 # PROJECT_HISTORY.md — Evidence-Based Development History
 
-**Derived from:** Git commit history (11 commits, `6b99830` → `48728e8`)
-**Date:** 2026-09-22
-**Baseline for this update:** `48728e8` (tip of `feat/lan-validation`)
+**Derived from:** Git commit history (`6b99830` → `12f2acc`) and pull requests #1 to #15
+**Date:** 2026-09-29 (phases 1 to 8 written 2026-09-22)
+**Baseline for this update:** `12f2acc` (tip of `feat/lan-validation` after PR #15)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 
 This file records what happened, in the order it happened. **It is not
@@ -372,6 +372,60 @@ check` passes unchanged.
 
 ---
 
+## Phase 9: The Operator Roadmap, Pull Requests #2 to #15
+
+**Dates:** 2026-09-22 to 2026-09-26
+**Branch:** each phase on its own branch, merged into `feat/lan-validation` with
+a merge commit. `main` was not updated and still points at `6b99830`.
+
+From here work followed an operator-authorized loop: a branch per phase, an ADR
+where the phase made an architectural decision, tests, implementation, `mise
+run check`, signed commits, a pull request, CI, merge. The roadmap letters
+(A to H) are the operator's sequence; they are not the numbered phases of
+`PERSON_SPEC` section 72. Every milestone below is TESTED IN FIXTURE only.
+
+| PR  | Merge     | Date       | Milestone                                                            | ADR       |
+| --- | --------- | ---------- | -------------------------------------------------------------------- | --------- |
+| #1  | `fcad12c` | 2026-09-22 | Person v1 architecture frozen, CI (phases 7 and 8 above)             | 0001-0006 |
+| #2  | `3b26948` | 2026-09-22 | Baritone 1.16.5 navigation feasibility study                         | 0001      |
+| #3  | `4bce06c` | 2026-09-22 | Mineflayer protected-region veto covers every movement (C7 resolved) | —         |
+| #4  | `cb1bed3` | 2026-09-22 | Perception firewall: relative percepts, vision cone (C1 resolved)    | 0002      |
+| #5  | `a838dac` | 2026-09-22 | Bounded active gaze (`look_around`)                                  | 0002      |
+| #6  | `2c3c5e3` | 2026-09-23 | A: planner-owned information seeking (`look`)                        | —         |
+| #7  | `2fe8e39` | 2026-09-24 | Fix: a peripheral animal no longer says whose it is                  | —         |
+| #8  | `5f4b024` | 2026-09-25 | B: episodic memory, bounded typed recall (C3 resolved by rename)     | 0007      |
+| #9  | `ea666a2` | 2026-09-25 | C: felt self-motion and cognitive places                             | 0008      |
+| #10 | `df7eb3b` | 2026-09-25 | Fix: `homeDistance` retired, home derived from places (C8 resolved)  | —         |
+| #11 | `4b78d58` | 2026-09-25 | D: persistent projects: take up, interrupt, resume, abandon          | 0009      |
+| #12 | `bb506b5` | 2026-09-25 | E: affect: appraisal, decay, bounded priority and exploration bias   | 0010      |
+| #13 | `f981e68` | 2026-09-25 | Fix: path risk judged from perceived threats only                    | —         |
+| #14 | `8a6d264` | 2026-09-26 | F: learned reliability of skill effects, mode-gated                  | 0011      |
+| #15 | `12f2acc` | 2026-09-26 | F2: typed causal hypotheses and controlled experiments               | 0012      |
+
+Two latent defects were found and fixed on the way to F2: a harvest that
+yielded nothing was reported as `inventory_full` (now `no_yield`), and a
+decision context identifier could exceed the protocol's 64-character limit, so
+the loop silently sent no policy decision (the limit is now 128).
+
+C6 (no belief, memory or knowledge representation) is narrowed but not
+resolved: episodic memory, places, effect beliefs and hypotheses exist;
+semantic memory, consolidation and knowledge do not.
+
+### History rewrite, 2026-09-26
+
+On 2026-09-26, with the operator's explicit authorization, the commits on
+`feat/lan-validation` that carried a `Co-Authored-By` trailer were rewritten
+to remove it and force-pushed. Trees, authors and author and committer dates
+were preserved and every rewritten commit was re-signed; merge commits were
+reworded to the `[Merge]: Integrate <branch> from #N` form. Commit identifiers
+earlier than that date in older notes no longer resolve; the repository's
+documents were repointed to the rewritten history in `508da11`. The tag
+`v0.1.0-foundation` (`6b99830`) was not touched. Pull request descriptions
+were edited to drop the tool footer; merged pull requests themselves cannot be
+changed.
+
+---
+
 ## Summary: Major Historical Phase SHAs
 
 | Phase                          | Commit Range          | Key SHA                                |
@@ -384,23 +438,26 @@ check` passes unchanged.
 | Second contact + traceability  | `5b9a395`             | `5b9a395`                              |
 | Canonical documentation        | `48728e8`             | `48728e8`                              |
 | Person v1 reconciliation       | `af304a3`             | documentation only                     |
-| Canonicalization, evidence, CI | this commit           | documentation + evidence + CI config   |
+| Canonicalization, evidence, CI | PR #1                 | `fcad12c` (merge)                      |
+| Perception firewall and gaze   | PRs #4, #5            | `cb1bed3`, `a838dac`                   |
+| Roadmap A to F2                | PRs #6 to #15         | `2c3c5e3` → `12f2acc`                  |
 
 ---
 
 ## What Intentionally Remained Out of Scope (Through All Phases)
 
-- Language model integration
+Through phase 8, the survival slice excluded affect, projects and memory; phase
+9 built them (above). Still out of scope as of `12f2acc`:
+
+- Language model integration (the hypothesis generator can take one; none is wired)
 - Neural policy / deep RL
-- Affect / emotion systems
 - Social memory / relationships / incidents
-- Projects (beyond goal suspension)
+- Semantic and autobiographical memory, consolidation, a knowledge store
 - Redstone / advanced construction
 - Multi-Person architecture
 - Death/respawn/recovery loop
 - SQLite persistence
-- Live skill execution (only `observe` has run live)
-- Any capability not required for survival vertical slice
+- Live validation beyond `observe` and three single-skill runs of 2026-09-16
 
 ---
 
@@ -408,4 +465,5 @@ check` passes unchanged.
 
 All commits signed with GPG key `8BBCB014DE46077B` (Oxide 1-6 <yes.par781@gmail.com>).
 Tag `v0.1.0-foundation` also signed.
-**History must not be rewritten.**
+**History must not be rewritten without explicit human authorization.** The one
+authorized rewrite, on 2026-09-26, is recorded in phase 9.

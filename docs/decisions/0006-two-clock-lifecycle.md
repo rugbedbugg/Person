@@ -1,6 +1,6 @@
 # ADR 0006: The two-clock lifecycle
 
-**Status:** Accepted (rule), Deferred (implementation)
+**Status:** Accepted, partially implemented (operator, 2026-09-29)
 **Date:** 2026-09-22
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -63,6 +63,43 @@ Rules:
    not resume.
 
 Rules 1 to 3 are in force now. Rules 4 and 5 are deferred.
+
+## Implementation status
+
+> **Operator decision, 2026-09-29: accepted, partially implemented.** Only
+> what the code below proves is claimed. The complete two-clock lifecycle is
+> not implemented.
+
+**Implemented: Person's experienced-time clock.** `Memory.now`
+(`apps/cognition/python/person_cognition/memory/store.py`) counts only world
+ticks that passed between observations Person actually received. A world
+tick that goes backwards adds nothing. The value is journalled as
+`experienced_ticks` on `episode_ended` (and stamped on every memory), and a
+restarted Person reconstructs it from those records, so its clock resumes
+where it stopped and nothing is counted for time the process did not run.
+This is rule 1 made mechanical for the one clock that exists.
+
+Its consumers today:
+
+| Consumer             | What runs on experienced time                                    |
+| -------------------- | ---------------------------------------------------------------- |
+| Memory accessibility | `0.5 ** (age / half_life)`, age in experienced ticks (ADR 0007)  |
+| Affect decay         | each dimension's half-life (ADR 0010)                            |
+| Project cooldowns    | an abandoned kind waits a day of experience (ADR 0009)           |
+| Experiment patience  | an investigation retires after a day without progress (ADR 0012) |
+| Places               | when a place was formed is stamped with it (ADR 0008)            |
+
+Spatial doubt is **not** a consumer: it grows with Person's own felt motion
+and on waking after a restart, not with elapsed experienced time.
+
+**Not implemented.** Anything about external time: no reasoning over
+`timestamp`, no discovery that external hours passed while suspended (rule 2
+is kept only in the sense that nothing claims otherwise). None of the five
+operational states exists as a state: the runtime still knows only connected
+and not connected, so `EMBODIED`, `WORLD_UNAVAILABLE`, `SLEEPING`,
+`SUSPENDED` and `TERMINATED` are not represented (rule 4). Death still ends the episode; the
+two configured death semantics do not exist (rule 5). The two clocks are
+recorded on every event (rule 3), and nothing yet compares them.
 
 ## Consequences
 

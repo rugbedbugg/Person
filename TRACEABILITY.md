@@ -41,7 +41,7 @@ claim without reading the whole tree.
 | Requirement                                  | Implementation                                           | Tests                                                                          |
 | -------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | Typed SkillSpec contract                     | `packages/skills/specs/*.json`, `skill-spec.schema.json` | `packages/skills` registries load and validate at import; `tests/architecture` |
-| All 21 skills implemented for real           | `apps/node-runtime/src/skills/impl/`                     | `tests/skills/`, `tests/integration/survival-routine.test.ts`                  |
+| All 23 skills implemented for real           | `apps/node-runtime/src/skills/impl/`                     | `tests/skills/`, `tests/integration/survival-routine.test.ts`                  |
 | Implementations match the library exactly    | `SKILL_IMPLEMENTATIONS`                                  | `tests/architecture/architecture.test.ts`                                      |
 | No placeholder implementations               | same                                                     | `tests/architecture/architecture.test.ts`                                      |
 | Precondition enforcement                     | `SkillRegistry.resolveParameters`, per-skill guards      | `tests/skills/resources.test.ts`, `tests/skills/food-and-shelter.test.ts`      |
@@ -150,11 +150,12 @@ claim without reading the whole tree.
 
 ## Future interfaces
 
-| Requirement                                                          | Implementation                                               | Tests                                               |
-| -------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------- |
-| WorldModel, Affect, Language, Social, Project, Exploration providers | `apps/cognition/python/person_cognition/future_providers.py` | `test_future_providers_refuse_to_pretend_they_work` |
-| No premature implementation                                          | every placeholder raises                                     | same                                                |
-| No LLM, no neural policy, no heavy dependencies                      | absent by construction                                       | `tests/python/test_architecture.py`                 |
+| Requirement                                                                  | Implementation                                               | Tests                                                     |
+| ---------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------- |
+| WorldModel, Language, Social, Exploration providers                          | `apps/cognition/python/person_cognition/future_providers.py` | `test_future_providers_refuse_to_pretend_they_work`       |
+| A placeholder leaves when its capability is built (memory, projects, affect) | `person_cognition.memory`, `.projects`, `.affect`            | `test_no_placeholder_outlives_the_capability_it_reserved` |
+| No premature implementation                                                  | every placeholder raises                                     | same                                                      |
+| No LLM, no neural policy, no heavy dependencies                              | absent by construction                                       | `tests/python/test_architecture.py`                       |
 
 ## Real embodiment validation (Milestone 1)
 

@@ -12,6 +12,11 @@ Memory used to be reserved here, as `MemoryProvider.retrieve(query, limit)`.
 It is implemented now, in `person_cognition.memory`, and deliberately not with
 that signature: an arbitrary query with a caller-chosen limit is the database
 access ADR 0003 forbids. Recall takes a typed `Cue` (ADR 0007).
+
+Affect and projects left for the same reason: they are implemented, in
+`person_cognition.affect` (ADR 0010) and `person_cognition.projects` (ADR
+0009), and neither took the shape reserved for it. A placeholder that outlives
+its implementation is a false claim that the capability does not exist.
 """
 
 from __future__ import annotations
@@ -45,13 +50,6 @@ class WorldModelProvider(Protocol):
 
 
 @runtime_checkable
-class AffectProvider(Protocol):
-    """Appraisal and persistent computational affect."""
-
-    def update(self, event: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]: ...
-
-
-@runtime_checkable
 class LanguageProvider(Protocol):
     """Advisory language services. Never authoritative over identity or action."""
 
@@ -67,15 +65,6 @@ class SocialProvider(Protocol):
     def observe_interaction(self, event: dict[str, Any]) -> None: ...
 
     def relationship(self, player: str) -> dict[str, Any]: ...
-
-
-@runtime_checkable
-class ProjectProvider(Protocol):
-    """Long-term projects with milestones and suspended state."""
-
-    def active_projects(self) -> list[dict[str, Any]]: ...
-
-    def advance(self, project_id: str, outcome: dict[str, Any]) -> None: ...
 
 
 @runtime_checkable
@@ -101,13 +90,6 @@ class UnimplementedWorldModelProvider:
         raise NotYetImplemented("WorldModelProvider", self.milestone)
 
 
-class UnimplementedAffectProvider:
-    milestone = "Phase 10, affect"
-
-    def update(self, event: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        raise NotYetImplemented("AffectProvider", self.milestone)
-
-
 class UnimplementedLanguageProvider:
     milestone = "Phase 9, language"
 
@@ -128,16 +110,6 @@ class UnimplementedSocialProvider:
         raise NotYetImplemented("SocialProvider", self.milestone)
 
 
-class UnimplementedProjectProvider:
-    milestone = "Phase 11, autonomous projects"
-
-    def active_projects(self) -> list[dict[str, Any]]:
-        raise NotYetImplemented("ProjectProvider", self.milestone)
-
-    def advance(self, project_id: str, outcome: dict[str, Any]) -> None:
-        raise NotYetImplemented("ProjectProvider", self.milestone)
-
-
 class UnimplementedExplorationProvider:
     milestone = "Phase 6, active experimentation"
 
@@ -147,9 +119,7 @@ class UnimplementedExplorationProvider:
 
 FUTURE_PROVIDERS = {
     "WorldModelProvider": UnimplementedWorldModelProvider,
-    "AffectProvider": UnimplementedAffectProvider,
     "LanguageProvider": UnimplementedLanguageProvider,
     "SocialProvider": UnimplementedSocialProvider,
-    "ProjectProvider": UnimplementedProjectProvider,
     "ExplorationProvider": UnimplementedExplorationProvider,
 }

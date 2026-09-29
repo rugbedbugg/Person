@@ -62,18 +62,20 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0003](0003-memory-firewall.md)                            | The memory firewall                               | Accepted (rule) / model: ADR 0007  | 2026-09-22 |
 | [0004](0004-external-awareness-and-research-boundary.md)   | External awareness and the research boundary      | Accepted (rule) / Deferred         | 2026-09-22 |
 | [0005](0005-cognitive-autonomy-vs-capability-authority.md) | Cognitive autonomy is not environmental authority | Accepted                           | 2026-09-22 |
-| [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                           | Accepted (rule) / Deferred         | 2026-09-22 |
+| [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                           | Accepted / partially implemented   | 2026-09-22 |
 | [0007](0007-episodic-memory-and-bounded-recall.md)         | Episodic memory and bounded recall                | Accepted                           | 2026-09-24 |
 | [0008](0008-self-motion-and-cognitive-places.md)           | Self-motion and cognitive places                  | Accepted                           | 2026-09-25 |
 | [0009](0009-persistent-projects.md)                        | Projects as persistent cognitive commitments      | Accepted                           | 2026-09-25 |
 | [0010](0010-affect-foundation.md)                          | Affect as a bounded bias on cognition             | Accepted                           | 2026-09-25 |
 | [0011](0011-learned-effect-reliability.md)                 | Learned reliability of skill effects              | Accepted                           | 2026-09-26 |
-| [0012](0012-causal-hypotheses-and-experiments.md)          | Causal hypotheses and controlled experiments      | Proposed                           | 2026-09-26 |
+| [0012](0012-causal-hypotheses-and-experiments.md)          | Causal hypotheses and controlled experiments      | Accepted                           | 2026-09-26 |
 
-All six were written during the Phase 0 canonical architecture reconciliation
-(`docs/PERSON_SPEC.md`, frozen 2026-09-22). None of them changed production
-code. 0005 records an invariant that has held since `6b99830`; the other five
-constrain work that has not started.
+ADRs 0001 to 0006 were written during the Phase 0 canonical architecture
+reconciliation (`docs/PERSON_SPEC.md`, frozen 2026-09-22) and changed no
+production code when written. Since then 0002's structural firewall and first
+vision model (PRs #4, #5) and 0006's experienced-time clock have been built;
+0001 and 0004 have not started. ADRs 0007 to 0012 were each written with the
+phase that implemented them and accepted by the operator.
 
 ---
 

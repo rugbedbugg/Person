@@ -16,11 +16,17 @@ time. The Node runtime validates every proposal, can replace it outright when
 safety demands, executes it under hard limits, and reports what actually
 happened. Learning is credited to what ran, never to what was asked for.
 
-This milestone implements the survival vertical slice and the evidence
-substrate that later work depends on. It does not implement language, memory,
-belief, affect, social cognition, projects, or redstone; see
-`docs/ARCHITECTURE.md` for where those attach, and `docs/PERSON_SPEC.md` for
-what Person is intended to become.
+On top of the survival vertical slice and its evidence substrate, Person now
+has a perception firewall with bounded gaze, planner-owned information seeking,
+episodic memory recalled by typed cue, a drifting sense of place and home,
+persistent projects, a small decaying affect that biases near choices, learned
+reliability of its skills' effects, and typed causal hypotheses it tests with
+its own bounded experiments. All of that is TESTED IN FIXTURE only. It does not
+implement language, social cognition, relationships, semantic or
+autobiographical memory, consolidation, a knowledge store, or redstone.
+`docs/CURRENT_STATE.md` is the factual snapshot, `docs/ARCHITECTURE.md` shows
+where each part attaches, and `docs/PERSON_SPEC.md` says what Person is
+intended to become.
 
 ## Installation
 
@@ -156,9 +162,12 @@ cheats; Person never gets them, and has no way to send a command at all.
 **Person has acted in Minecraft twice, and that is all.** Two live
 observations (2026-09-15, 2026-09-16) and three live single-skill validations
 (`wait_safely` once, `return_home` twice, 2026-09-16) have been run against a
-disposable LAN world. The other nineteen skills have never run live, no
-autonomous episode has ever run live, and every safety mechanism has been proven
-only in the fixture and against a conformance double. `REALITY_VALIDATION.md` is
+disposable LAN world. The other twenty-one of the twenty-three skills have
+never run live, no autonomous episode has ever run live, and every safety
+mechanism has been proven only in the fixture and against a conformance double.
+Those runs predate the perception firewall: nothing added since (observation
+versions 2 to 7, gaze, memory, places, projects, affect, learning) has run
+against Minecraft. `REALITY_VALIDATION.md` is
 explicit about what that leaves open, and about where the evidence for those
 runs lives.
 
@@ -167,10 +176,10 @@ runs lives.
 ```bash
 npm run typecheck     # tsc --noEmit
 npm run build         # tsc emit to dist/
-npm test              # Node test runner, 188 tests
+npm test              # Node test runner
 npm run format:check  # prettier
 
-uv run pytest         # 129 tests
+uv run pytest         # Python tests
 uv run ruff check .   # lint
 uv run ruff format --check .
 uv run mypy           # strict, on package sources
