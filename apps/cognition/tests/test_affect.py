@@ -225,6 +225,27 @@ def test_the_bias_is_bounded_and_never_touches_urgent_goals() -> None:
         assert affect.bias(frozenset({"safe"}), "emergency") == 0.0
 
 
+def test_the_recorded_bias_always_accounts_for_the_priority(
+    tmp_path: Path, two_goals: dict[str, Any]
+) -> None:
+    # A goal that stays on the stack is re-proposed every observation, with
+    # the bias affect gives it now. The record must carry that bias, not the
+    # one it was first queued with, or the causal record lies.
+    harness = with_home(tmp_path, two_goals)
+    harness.loop.affect.state = experienced([skill_outcome("gather_wood", "SUCCESS")] * 10, 0)
+    harness.observe(at(two_goals, 200))
+    selected = [
+        event.payload
+        for event in EvidenceJournal(tmp_path / "journal").read()
+        if event.type == "goal_selected"
+    ]
+    assert any(record["affect_bias"] != 0.0 for record in selected)
+    for record in selected:
+        assert record["priority"] == pytest.approx(
+            min(1000.0, max(0.0, record["base_priority"] + record["affect_bias"])), abs=1e-3
+        ), record
+
+
 def ranked(harness: Harness, view: dict[str, Any], state: AffectState | None) -> str:
     if state is not None:
         harness.loop.affect.state = state
