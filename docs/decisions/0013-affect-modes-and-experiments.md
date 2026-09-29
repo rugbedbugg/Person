@@ -1,6 +1,6 @@
 # ADR 0013: Affect modes and a reproducible experiment harness
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-29)
 **Date:** 2026-09-29
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -9,6 +9,13 @@
 world, and a first P0/P1/P2 matrix; no new affect psychology (2026-09-29)
 
 ---
+
+> **Operator decision, 2026-09-29: accepted.** The accepted architecture is
+> the three affect modes, one shared appraisal and state-update path for
+> `record_only` and `active` with only the explicit consumption points
+> differing, deterministic seeded runs, reproducibility metadata, and metrics
+> reported individually rather than as one score. World sets, seeds, run
+> lengths, the metric list and any thresholds are experiment parameters.
 
 ## Context
 
