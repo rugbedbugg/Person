@@ -237,7 +237,7 @@ test("repeated experience is told apart from one experience counted twice", () =
     { ...BOUNDS, half_lives: { valence: 6000 } },
     20,
   );
-  assert.equal(metrics["affect_exact_duplicate_appraisals"], 1);
+  assert.equal(metrics["affect_identical_appraisal_records"], 1);
   assert.equal(metrics["affect_moments_with_several_appraisals"], 1);
   assert.equal(metrics["affect_min_ticks_between_threat_appraisals"], 2);
   assert.deepEqual(distributions["appraisals_at_one_moment"], {

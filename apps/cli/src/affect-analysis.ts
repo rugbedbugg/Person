@@ -331,8 +331,12 @@ export function saturation(
     distributions[`${dimension}_input_by_trigger`] = sortKeys(byTrigger);
   }
 
-  // Is any experience counted more than once? Exact repeats are a bug; several
-  // appraisals at one moment are layers of one event, and are shown apart.
+  // Is any experience counted more than once? Two records identical in time,
+  // trigger, components and prior state are either one appraisal recorded
+  // twice or two appraisals of the same kind that found the state at a bound
+  // (a clamped change leaves `before` unchanged); the journal must be read to
+  // tell which. Several appraisals at one moment are shown apart: they may be
+  // layers of one event, such as several goals that one action completes.
   const seen = new Set<string>();
   let duplicates = 0;
   const moments = new Map<number, string[]>();
@@ -359,7 +363,7 @@ export function saturation(
   const gaps = threat
     .slice(1)
     .map((record, index) => record.at - threat[index]!.at);
-  metrics["affect_exact_duplicate_appraisals"] = duplicates;
+  metrics["affect_identical_appraisal_records"] = duplicates;
   metrics["affect_moments_with_several_appraisals"] = shared;
   metrics["affect_threat_appraisals"] = threat.length;
   metrics["affect_min_ticks_between_threat_appraisals"] = gaps.length

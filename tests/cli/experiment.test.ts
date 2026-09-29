@@ -308,7 +308,7 @@ test(
         assert.equal(run.metrics["priority_changed"], 0);
         assert.equal(run.metrics["exploration_changed"], 0);
       }
-      assert.equal(run.metrics["affect_exact_duplicate_appraisals"], 0);
+      assert.equal(run.metrics["affect_identical_appraisal_records"], 0);
     }
     assert.ok(serial.affectBounds.swings["protective"]!["outgoing"]! > 0);
   },
