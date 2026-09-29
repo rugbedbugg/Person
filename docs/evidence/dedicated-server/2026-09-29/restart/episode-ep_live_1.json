@@ -1,0 +1,756 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "ep_live_1",
+  "personId": "ada",
+  "worldId": "person-dedicated-1",
+  "sessionId": "a49850e8-087e-4d47-bcff-0ae51e8b8d91",
+  "trainingContext": "minecraft_normal",
+  "learningMode": "off",
+  "rngSeed": 20260915,
+  "policyRevision": 0,
+  "skillLibraryRevision": "501983c9be777a91",
+  "protocolVersion": "shroud-learning-v2",
+  "startedAt": "2026-09-29T11:24:01.372Z",
+  "startTick": 4179,
+  "finishedAt": "2026-09-29T11:27:27.510Z",
+  "outcome": "completed",
+  "reason": "decision_budget_reached",
+  "endTick": 4179,
+  "elapsedTicks": 0,
+  "decisions": [
+    {
+      "decisionId": "5740cf14-9990-5e5e-8757-ff77e384d852",
+      "tick": 4179,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_7"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "180f2845-aa57-492c-8b58-7865db14c9ac"
+    },
+    {
+      "decisionId": "63e31452-ca83-5101-a83b-4e9b06bd46ae",
+      "tick": 4199,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_6"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "fca426bb-299a-4cd6-b57f-e5748fe1c41f"
+    },
+    {
+      "decisionId": "f4175e73-eb90-516e-878d-2989cee33cf7",
+      "tick": 4199,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "fuel",
+          "op": "+=",
+          "value": 32
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 1360,
+      "budgetTicks": 2400,
+      "budgetPressure": 0.5667,
+      "navigationTicks": 480,
+      "interactionTicks": 880,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "birch_log",
+          "delta": 4
+        },
+        {
+          "name": "rotten_flesh",
+          "delta": 1
+        }
+      ],
+      "outcomeMessageId": "202c50f4-b3b0-4410-9175-00aad7cbca97"
+    },
+    {
+      "decisionId": "cf618bf0-edfc-5360-8f8a-a764d221b69e",
+      "tick": 5579,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "fuel",
+          "op": "+=",
+          "value": 32
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "gather_wood",
+      "status": "TIMED_OUT",
+      "requestedSkillStatus": "TIMED_OUT",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 2580,
+      "budgetTicks": 2400,
+      "budgetPressure": 1.075,
+      "navigationTicks": 1160,
+      "interactionTicks": 1420,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "birch_log",
+          "delta": 15
+        }
+      ],
+      "outcomeMessageId": "a9dfee52-dcd6-4fcd-9d7e-96f06aa30151"
+    },
+    {
+      "decisionId": "dc7810e2-e2e0-5667-ba25-61518d7d3915",
+      "tick": 8179,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_e902660ed4a7198f",
+      "routineName": "secure_shelter__craft_basic_tools_craft_basic_tools",
+      "routineSteps": [
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "craft_basic_tools",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "wood",
+          "op": ">=",
+          "value": 3
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "-=",
+          "value": 3
+        },
+        {
+          "fact": "planks",
+          "op": "+=",
+          "value": 4
+        },
+        {
+          "fact": "crafting_table",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_pickaxe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_axe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "tool_tier",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "craft_basic_tools",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 60,
+      "budgetTicks": 1200,
+      "budgetPressure": 0.05,
+      "navigationTicks": 0,
+      "interactionTicks": 60,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "birch_log",
+          "delta": -4
+        },
+        {
+          "name": "crafting_table",
+          "delta": 1
+        },
+        {
+          "name": "wooden_axe",
+          "delta": 1
+        },
+        {
+          "name": "wooden_pickaxe",
+          "delta": 1
+        }
+      ],
+      "outcomeMessageId": "e00eaf80-138d-486a-9011-98ab1b2325df"
+    },
+    {
+      "decisionId": "c2cddb1d-baa8-5ea2-af83-462b4589c265",
+      "tick": 8239,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_e902660ed4a7198f",
+      "routineName": "secure_shelter__craft_basic_tools_craft_basic_tools",
+      "routineSteps": [
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "craft_basic_tools",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "wood",
+          "op": ">=",
+          "value": 3
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "-=",
+          "value": 3
+        },
+        {
+          "fact": "planks",
+          "op": "+=",
+          "value": 4
+        },
+        {
+          "fact": "crafting_table",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_pickaxe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_axe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "tool_tier",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "craft_basic_tools",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 1200,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "84eb4d81-0b70-4706-97fe-ea84578a8188"
+    },
+    {
+      "decisionId": "6a59b44a-cd22-50a2-aa2e-5ebf71a193a1",
+      "tick": 8239,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_e902660ed4a7198f",
+      "routineName": "secure_shelter__craft_basic_tools_craft_basic_tools",
+      "routineSteps": [
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "craft_basic_tools",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "wood",
+          "op": ">=",
+          "value": 3
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "-=",
+          "value": 3
+        },
+        {
+          "fact": "planks",
+          "op": "+=",
+          "value": 4
+        },
+        {
+          "fact": "crafting_table",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_pickaxe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_axe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "tool_tier",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "craft_basic_tools",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 1200,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "628d901b-f33f-4fe0-872f-1500640a9ef5"
+    },
+    {
+      "decisionId": "f300fa46-18ef-5214-8a02-34da0b113ce2",
+      "tick": 8259,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_e902660ed4a7198f",
+      "routineName": "secure_shelter__craft_basic_tools_craft_basic_tools",
+      "routineSteps": [
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "craft_basic_tools",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "craft_basic_tools",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "wood",
+          "op": ">=",
+          "value": 3
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "-=",
+          "value": 3
+        },
+        {
+          "fact": "planks",
+          "op": "+=",
+          "value": 4
+        },
+        {
+          "fact": "crafting_table",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_pickaxe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "wooden_axe",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "tool_tier",
+          "op": "max",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "craft_basic_tools",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 1200,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "fcc1a0fe-a1d9-4da8-8b16-16d9e91ca8d2"
+    }
+  ],
+  "safetyOverrides": [],
+  "storageProvenance": [],
+  "tickBudgets": [
+    {
+      "skill": "gather_wood",
+      "runs": 2,
+      "budgetTicks": 2400,
+      "meanElapsedTicks": 1970,
+      "maxElapsedTicks": 2580,
+      "worstPressure": 1.075,
+      "meanNavigationTicks": 820,
+      "meanInteractionTicks": 1150,
+      "timeouts": 1
+    },
+    {
+      "skill": "look",
+      "runs": 2,
+      "budgetTicks": 40,
+      "meanElapsedTicks": 10,
+      "maxElapsedTicks": 20,
+      "worstPressure": 0.5,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "craft_basic_tools",
+      "runs": 4,
+      "budgetTicks": 1200,
+      "meanElapsedTicks": 15,
+      "maxElapsedTicks": 60,
+      "worstPressure": 0.05,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 15,
+      "timeouts": 0
+    }
+  ],
+  "totals": {
+    "decisions": 8,
+    "accepted": 8,
+    "replaced": 0,
+    "rejected": 0,
+    "learnedDecisions": 0,
+    "fallbackDecisions": 8,
+    "successes": 7,
+    "failures": 1,
+    "emergencies": 0,
+    "healthLost": 0,
+    "resourceDelta": [
+      {
+        "name": "birch_log",
+        "delta": 15
+      },
+      {
+        "name": "crafting_table",
+        "delta": 1
+      },
+      {
+        "name": "rotten_flesh",
+        "delta": 1
+      },
+      {
+        "name": "wooden_axe",
+        "delta": 1
+      },
+      {
+        "name": "wooden_pickaxe",
+        "delta": 1
+      }
+    ]
+  }
+}
