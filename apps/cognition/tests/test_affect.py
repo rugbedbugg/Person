@@ -431,3 +431,171 @@ def test_affect_is_not_belief(view: dict[str, Any]) -> None:
 
     assert "unease" not in symbolic_state(view)
     assert dataclasses.fields(AffectState)
+
+
+# -------------------------------------------------------------- affect modes
+#
+# ADR 0013. `record_only` and `active` must differ only where affect is
+# consumed; `off` must not let affect evolve at all. The negative control for
+# every affect experiment rests on these.
+
+MODES = ("off", "record_only", "active")
+
+
+def moded(tmp_path: Path, mode: str) -> Harness:
+    harness = Harness(tmp_path, affect_mode=mode)
+    harness.hello()
+    return harness
+
+
+def eventful(harness: Harness, view: dict[str, Any]) -> list[dict[str, Any]]:
+    """A short stretch of life with a threat, harm and a failure in it."""
+    decided: list[dict[str, Any]] = []
+    threatened = at(view, 100)
+    threatened["nearby"]["hostiles"] = [zombie(5.0)]
+    decided.extend(harness.observe(threatened))
+    hurt = at(view, 140)
+    hurt["vitals"]["health"] = 13.0
+    goal, policy, invocation = harness.observe(hurt)
+    decided.extend((goal, policy, invocation))
+    harness.complete(invocation, policy, status="FAILED")
+    decided.extend(harness.observe(at(hurt, 200)))
+    return decided
+
+
+def comparable(messages: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """What was decided, without identifiers minted fresh in every run."""
+    volatile = {"messageId", "timestamp", "decisionId", "sessionId"}
+    return [{key: value for key, value in m.items() if key not in volatile} for m in messages]
+
+
+def test_off_appraises_nothing_and_the_state_never_moves(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    harness = moded(tmp_path, "off")
+    eventful(harness, view)
+    assert appraisals(tmp_path) == [], "no appraisal is applied"
+    assert harness.loop.affect.state == AffectState(), "nothing evolves"
+
+    raised = Affect(AffectRecord(), mode="off")
+    raised.state = AffectState(unease=0.8)
+    raised.advance(int(HALF_LIVES["unease"]) * 4)
+    assert raised.state == AffectState(unease=0.8), "not even decay"
+    harm = appraise_harm(8.0)
+    assert harm is not None
+    assert raised.feel(harm, 10) is None
+
+
+def test_record_only_journals_exactly_what_active_journals(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    active = moded(tmp_path / "active", "active")
+    recorded = moded(tmp_path / "recorded", "record_only")
+    eventful(active, view)
+    eventful(recorded, view)
+    assert appraisals(tmp_path / "recorded"), "the appraisals happen"
+    assert appraisals(tmp_path / "recorded") == appraisals(tmp_path / "active")
+    assert recorded.loop.affect.state == active.loop.affect.state
+
+
+def test_only_active_affect_reaches_a_decision(tmp_path: Path, two_goals: dict[str, Any]) -> None:
+    confident = experienced([skill_outcome("gather_wood", "SUCCESS")] * 10, harm=0)
+    chosen = {}
+    for mode in MODES:
+        harness = Harness(tmp_path / mode, affect_mode=mode)
+        harness.hello()
+        _, policy, invocation = harness.observe(at(two_goals, 100))
+        harness.loop.handle(outcome(invocation, policy, "build_basic_shelter"))
+        harness.loop.affect.state = confident
+        goal, _, _ = harness.observe(at(two_goals, 200))
+        chosen[mode] = goal["goal"]["goalType"]
+        selected = [
+            event.payload
+            for event in EvidenceJournal(tmp_path / mode / "journal").read()
+            if event.type == "goal_selected"
+        ][-1]
+        if mode != "active":
+            assert selected["affect_bias"] == 0.0, f"{mode}: affect adjusted a priority"
+            assert selected["priority"] == selected["base_priority"]
+        else:
+            assert selected["affect_bias"] != 0.0
+    assert chosen == {
+        "off": "ESTABLISH_STORAGE",
+        "record_only": "ESTABLISH_STORAGE",
+        "active": "ESTABLISH_TOOLS",
+    }
+
+
+def test_neither_consumption_point_answers_unless_active() -> None:
+    extreme = AffectState(valence=1.0, unease=1.0, control=-1.0)
+    for mode in MODES:
+        affect = Affect(AffectRecord(), mode=mode)
+        affect.state = extreme
+        bias = affect.bias(frozenset({"owned_storage_available"}), "homeostasis")
+        if mode == "active":
+            assert bias != 0.0 and affect.tolerance() != 1.0
+        else:
+            assert bias == 0.0 and affect.tolerance() == 1.0, mode
+
+
+def test_off_and_record_only_make_the_same_decisions(tmp_path: Path, view: dict[str, Any]) -> None:
+    off = eventful(moded(tmp_path / "off", "off"), view)
+    recorded = eventful(moded(tmp_path / "recorded", "record_only"), view)
+    assert comparable(off) == comparable(recorded)
+
+
+def test_the_mode_is_recorded_on_episode_started(tmp_path: Path) -> None:
+    for mode in MODES:
+        harness = moded(tmp_path / mode, mode)
+        harness.loop.handle(
+            {
+                **envelope("EpisodeEvent", 1),
+                "episodeId": "ep_1",
+                "phase": "started",
+                "reasonCodes": [],
+                "rngSeed": 7,
+                "trainingContext": "fixture",
+            }
+        )
+        started = [
+            event.payload
+            for event in EvidenceJournal(tmp_path / mode / "journal").read()
+            if event.type == "episode_started"
+        ]
+        assert started[-1]["affect_mode"] == mode
+
+
+def test_an_unknown_mode_is_refused() -> None:
+    with pytest.raises(ValueError):
+        Affect(AffectRecord(), mode="muted")
+
+
+def test_the_mode_is_consulted_only_at_the_consumption_boundary() -> None:
+    import ast
+
+    tree = ast.parse((COGNITION / "affect.py").read_text(encoding="utf-8"))
+    consulting = {
+        function.name
+        for function in ast.walk(tree)
+        if isinstance(function, ast.FunctionDef)
+        and any(
+            isinstance(node, ast.Attribute)
+            and node.attr == "mode"
+            and isinstance(node.value, ast.Name)
+            and node.value.id == "self"
+            for node in ast.walk(function)
+        )
+    }
+    # Evolution (advance, feel) stops only when off; consumption (bias,
+    # tolerance) answers only when active. Appraisal itself never asks.
+    assert consulting == {"__init__", "advance", "feel", "bias", "tolerance"}
+    for name in ("appraise_threat", "appraise_harm", "appraise_outcome", "decay"):
+        source = ast.get_source_segment(
+            (COGNITION / "affect.py").read_text(encoding="utf-8"),
+            next(
+                node
+                for node in ast.walk(tree)
+                if isinstance(node, ast.FunctionDef) and node.name == name
+            ),
+        )
+        assert source is not None and "mode" not in source, name

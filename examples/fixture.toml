@@ -22,6 +22,11 @@ snapshotEveryEvents = 25
 explorationBonus = 0.15
 minimumSupport = 3
 
+[affect]
+# ADR 0013: off | record_only | active. Research runs switch it; everything
+# else keeps active, the ADR 0010 behaviour.
+mode = "active"
+
 [cognition]
 command = ["uv", "run", "person-cognition", "--config", "examples/fixture.toml"]
 startTimeoutMs = 20000

@@ -82,6 +82,7 @@ def main(argv: list[str] | None = None) -> int:
 
     loop = CognitionLoop(
         settings=settings,
+        affect_mode=settings.affect_mode if settings is not None else "active",
         evidence_directory=Path(arguments.evidence_directory)
         if arguments.evidence_directory
         else None,

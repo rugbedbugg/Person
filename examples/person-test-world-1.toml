@@ -46,6 +46,11 @@ naturalDaylightCycle = true
 # First validation world is Peaceful.
 normalDifficulty = false
 
+[affect]
+# ADR 0013: off | record_only | active. Research runs switch it; everything
+# else keeps active, the ADR 0010 behaviour.
+mode = "active"
+
 [cognition]
 command = ["uv", "run", "person-cognition"]
 startTimeoutMs = 20000
