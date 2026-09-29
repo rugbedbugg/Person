@@ -209,8 +209,8 @@ export interface Observation extends Envelope {
   vitals: {
     health: number;
     food: number;
-    saturation: number;
-    air: number;
+    /** Bubbles, 0 to 10 (ADR 0014). */
+    breath: number;
     armor: number;
     statusEffects: {
       name: string;

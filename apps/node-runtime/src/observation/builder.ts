@@ -27,7 +27,12 @@ import type { PlacementLedger } from "../runtime/placement-ledger.ts";
  * is not a sense; Person's relation to home is its own belief (C8).
  * 7: `navigation.pathRisk` judged from perceived hostiles only.
  */
-export const OBSERVATION_VERSION = 7;
+export const OBSERVATION_VERSION = 8;
+
+/** The bubbles a player sees: ten when full, one per thirty ticks of air. */
+export function breathBubbles(air: number): number {
+  return Math.min(10, Math.max(0, Math.ceil(air / 30)));
+}
 
 export interface CognitionState {
   activeGoal: string | null;
@@ -279,8 +284,9 @@ export function buildObservation(inputs: ObservationInputs): Observation {
     vitals: {
       health: snapshot.health,
       food: snapshot.food,
-      saturation: snapshot.saturation,
-      air: snapshot.air,
+      // A player is shown ten bubbles, not the air counter, and is not shown
+      // saturation at all (ADR 0014): nor is Person.
+      breath: breathBubbles(snapshot.air),
       armor: snapshot.armor,
       statusEffects: snapshot.statusEffects,
       alive: snapshot.alive,

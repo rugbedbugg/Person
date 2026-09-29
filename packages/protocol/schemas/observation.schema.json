@@ -105,8 +105,7 @@
       "required": [
         "health",
         "food",
-        "saturation",
-        "air",
+        "breath",
         "armor",
         "statusEffects",
         "alive"
@@ -122,15 +121,11 @@
           "minimum": 0,
           "maximum": 20
         },
-        "saturation": {
-          "type": "number",
+        "breath": {
+          "type": "integer",
           "minimum": 0,
-          "maximum": 20
-        },
-        "air": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 300
+          "maximum": 10,
+          "description": "Breath as a player sees it: bubbles, 10 when full. Not the server's air counter (ADR 0014)."
         },
         "armor": {
           "type": "number",
