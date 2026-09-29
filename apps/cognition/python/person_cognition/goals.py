@@ -244,6 +244,8 @@ class GoalStack:
     #: Every event ever noted, so a reader can find the new ones although
     #: `history` is trimmed.
     noted: int = 0
+    #: The candidates the last update ranked, best first (research record).
+    ranked: tuple[Goal, ...] = ()
 
     def _note(self, tick: int, goal_id: str, event: str) -> None:
         self.noted += 1
@@ -302,8 +304,11 @@ class GoalStack:
         ]
         if not candidates:
             self.active_id = None
+            self.ranked = ()
             return None
         candidates.sort(key=lambda goal: (-goal.priority, goal.goal_type))
+        # What this choice was made from, for the engineering record.
+        self.ranked = tuple(candidates)
         best = candidates[0]
 
         if self.active_id and self.active_id != best.goal_id:
@@ -323,10 +328,16 @@ class GoalStack:
 
     def block(self, goal_id: str, reason: str, tick: int) -> None:
         goal = self.entries.get(goal_id)
-        if goal is None:
+        # A finished or abandoned goal is not revived by being blocked.
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
             return
+        already = goal.status == "BLOCKED"
         self.entries[goal_id] = replace(goal, status="BLOCKED", suspension_reason=reason)
-        self._note(tick, goal_id, "blocked")
+        # A goal stays blocked until something reopens it. Blocking it again
+        # is not a new event, and recording it as one would let a single
+        # blockage be counted, and appraised, once per observation.
+        if not already:
+            self._note(tick, goal_id, "blocked")
         if self.active_id == goal_id:
             self.active_id = None
 
@@ -342,6 +353,16 @@ class GoalStack:
             return
         self.entries[goal_id] = replace(goal, status="COMPLETE", suspension_reason=reason)
         self._note(tick, goal_id, "concluded")
+        if self.active_id == goal_id:
+            self.active_id = None
+
+    def abandon(self, goal_id: str, tick: int, reason: str) -> None:
+        """A goal Person has given up on. It is never a candidate again."""
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
+            return
+        self.entries[goal_id] = replace(goal, status="ABANDONED", suspension_reason=reason)
+        self._note(tick, goal_id, "abandoned")
         if self.active_id == goal_id:
             self.active_id = None
 

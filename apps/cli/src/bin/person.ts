@@ -31,7 +31,8 @@ Usage:
   person validate <file> [--migrate]
   person inspect  evidence|skills|config|predictions [--config <file>] [--json]
   person compare  <reference-observation.json> <actual-observation.json> [--json]
-  person experiment --plan <plan.json> [--out <directory>] [--json]
+  person experiment --plan <plan.json> [--out <directory>] [--jobs <n>]
+                    [--heldout] [--json]
 
 Every command that connects also accepts:
   --operator-intervention[=reason]   mark this run as contaminated by a human
@@ -58,7 +59,9 @@ Notes:
   "experiment" runs a research plan in the fixture world: every condition on
   every world seed, each run independent, measured afterwards from its report
   and journal (ADR 0013). It never connects to Minecraft. Results go under
-  --out (default runs/experiments).
+  --out (default runs/experiments). --jobs runs that many at once, which
+  changes nothing measured. A held-out plan runs only with --heldout: it
+  evaluates a finished model once and is not for designing one.
 
   Learning is off unless you ask for it. "person run" uses the mode in the
   configuration file, which examples ship as "off"; "person learn" is the only
@@ -87,6 +90,8 @@ export interface ParsedCommand {
   learningMode?: "off" | "shadow" | "supervised";
   skillId?: string;
   planPath?: string;
+  jobs: number;
+  heldout: boolean;
   operatorSetup: boolean;
   json: boolean;
   migrate: boolean;
@@ -107,6 +112,8 @@ export function parseArguments(argv: string[]): ParsedCommand {
     json: false,
     migrate: false,
     operatorSetup: false,
+    jobs: 1,
+    heldout: false,
     connection: {},
     follow: false,
     intervalMs: 1000,
@@ -160,7 +167,13 @@ export function parseArguments(argv: string[]): ParsedCommand {
       if (!value || value.startsWith("--"))
         throw new UsageError("--plan needs an experiment plan file");
       parsed.planPath = value;
-    } else if (argument === "--operator-setup") parsed.operatorSetup = true;
+    } else if (argument === "--jobs") {
+      const value = Number(rest[++index]);
+      if (!Number.isInteger(value) || value < 1 || value > 64)
+        throw new UsageError("--jobs must be a whole number from 1 to 64");
+      parsed.jobs = value;
+    } else if (argument === "--heldout") parsed.heldout = true;
+    else if (argument === "--operator-setup") parsed.operatorSetup = true;
     else if (argument === "--out") {
       const value = rest[++index];
       if (!value || value.startsWith("--"))
@@ -226,8 +239,13 @@ export function parseArguments(argv: string[]): ParsedCommand {
     throw new UsageError("--operator-setup only applies to person skill-test");
   if (parsed.command === "experiment" && !parsed.planPath)
     throw new UsageError("person experiment needs --plan <file>");
-  if (parsed.planPath && parsed.command !== "experiment")
-    throw new UsageError("--plan only applies to person experiment");
+  if (
+    (parsed.planPath || parsed.heldout || parsed.jobs !== 1) &&
+    parsed.command !== "experiment"
+  )
+    throw new UsageError(
+      "--plan, --jobs and --heldout only apply to person experiment",
+    );
   if (parsed.command === "observe" && !parsed.configPath)
     throw new UsageError("person observe needs --config <file>");
   if (parsed.command === "status" && !parsed.configPath)
@@ -293,10 +311,12 @@ export async function main(argv: string[]): Promise<number> {
           parsed.outputFile ?? path.join("runs", "experiments"),
         ),
         repository: process.cwd(),
+        jobs: parsed.jobs,
+        allowHeldout: parsed.heldout,
         onRun: (run) => {
           if (!parsed.json)
             process.stderr.write(
-              `person: ${run.metadata.condition} seed ${run.metadata.seed}: ${run.metrics["decisions"]} decisions\n`,
+              `person: ${run.metadata.condition} ${run.metadata.horizon} seed ${run.metadata.seed}: ${run.metrics["decisions"]} decisions, ${run.metrics["experienced_ticks"]} ticks\n`,
             );
         },
       });
@@ -305,10 +325,12 @@ export async function main(argv: string[]): Promise<number> {
           ? `${JSON.stringify(results, null, 2)}\n`
           : summariseExperiment(results),
       );
-      const control = results.comparisons.find((comparison) =>
-        comparison.purpose.startsWith("negative control"),
+      const leaked = results.comparisons.some(
+        (comparison) =>
+          comparison.purpose.startsWith("negative control") &&
+          comparison.divergentSeeds > 0,
       );
-      return control && control.divergentSeeds > 0 ? 1 : 0;
+      return leaked ? 1 : 0;
     }
     if (parsed.command === "skill-test") {
       const result = await skillTestCommand({

@@ -11,6 +11,13 @@ import path from "node:path";
 import { loadConfig, type PersonConfig } from "#config";
 import { FixtureWorld, type FixtureWorldDefinition } from "#fixture-world";
 import { PersonRuntime, type EpisodeReport } from "#node-runtime";
+import {
+  explorationChannel,
+  priorityChannel,
+  saturation,
+  type AffectBounds,
+  type JournalEvent,
+} from "./affect-analysis.ts";
 
 /**
  * The experiment harness (ADR 0013).
@@ -23,6 +30,11 @@ import { PersonRuntime, type EpisodeReport } from "#node-runtime";
  * the seed only lays out the world.
  *
  * There is no aggregate score. Metrics are reported one by one.
+ *
+ * A plan belongs to the development split or the held-out split. Held-out
+ * plans are for evaluating a finished model once; the harness refuses to run
+ * one unless asked to explicitly, so they cannot drift into use while a model
+ * is being designed.
  */
 
 export type AffectMode = "off" | "record_only" | "active";
@@ -32,9 +44,31 @@ export interface ExperimentCondition {
   affectMode: AffectMode;
 }
 
+/** How long a run lasts: whichever bound is reached first ends it. */
+export interface Horizon {
+  id: string;
+  maxDecisions: number;
+  /**
+   * A bound in Person's time. The runtime cannot read Person's clock, so it
+   * bounds the episode's elapsed world ticks (`runtime.maxTicks`). In a fresh
+   * single-episode run that is Person's experienced time plus the last action,
+   * whose end Person never observed; `experienced_ticks` and
+   * `elapsed_ticks` are both reported.
+   */
+  maxExperiencedTicks?: number;
+}
+
+export type Split = "development" | "heldout";
+
 export interface ExperimentPlan {
   name: string;
   description?: string;
+  /** Which split the plan belongs to. Unstated means development. */
+  split?: Split;
+  /** A label for the decision geometry the world is built to present. */
+  benchmarkClass?: string;
+  /** Several run lengths; each (condition, horizon, seed) is its own run. */
+  horizons?: Horizon[];
   /** The fixture world, relative to the plan file. */
   world: string;
   /** The Person configuration every run starts from, relative to the plan. */
@@ -51,6 +85,9 @@ export interface RunMetadata {
   condition: string;
   affectMode: AffectMode;
   seed: number;
+  horizon: string;
+  maxExperiencedTicks: number | null;
+  split: Split;
   episodeId: string;
   commit: string;
   treeClean: boolean;
@@ -94,6 +131,7 @@ export interface Divergence {
 }
 
 export interface Comparison {
+  horizon: string;
   between: [string, string];
   purpose: string;
   divergences: Divergence[];
@@ -105,8 +143,10 @@ export interface ExperimentResults {
   planSha256: string;
   commit: string;
   treeClean: boolean;
+  affectBounds: AffectBounds;
   runs: RunResult[];
-  /** Per condition, per metric: the value from each seed, in seed order. */
+  /** Per condition (and horizon, when a plan has several), per metric: the
+   *  value from each seed, in seed order. */
   byCondition: Record<string, Record<string, number[]>>;
   comparisons: Comparison[];
 }
@@ -154,6 +194,38 @@ export function loadPlan(file: string): ExperimentPlan {
     problems.push("maxDecisions must be between 1 and 100000");
   if (typeof plan.world !== "string" || typeof plan.config !== "string")
     problems.push("world and config must be paths");
+  if (
+    plan.split !== undefined &&
+    !["development", "heldout"].includes(plan.split)
+  )
+    problems.push("split must be development or heldout");
+  if (plan.horizons !== undefined) {
+    if (!Array.isArray(plan.horizons) || plan.horizons.length === 0)
+      problems.push("horizons, when given, must list at least one horizon");
+    else {
+      const ids = plan.horizons.map((horizon) => horizon.id);
+      if (new Set(ids).size !== ids.length)
+        problems.push("horizon ids must be distinct");
+      for (const horizon of plan.horizons) {
+        if (!/^[a-z0-9_-]{1,32}$/.test(horizon.id ?? ""))
+          problems.push("a horizon id must be a short lowercase identifier");
+        if (
+          !Number.isInteger(horizon.maxDecisions) ||
+          horizon.maxDecisions < 1 ||
+          horizon.maxDecisions > 100000
+        )
+          problems.push(`horizon ${horizon.id}: maxDecisions out of range`);
+        if (
+          horizon.maxExperiencedTicks !== undefined &&
+          (!Number.isInteger(horizon.maxExperiencedTicks) ||
+            horizon.maxExperiencedTicks < 1)
+        )
+          problems.push(
+            `horizon ${horizon.id}: maxExperiencedTicks must be positive`,
+          );
+      }
+    }
+  }
   if (problems.length)
     throw new Error(
       `Invalid experiment plan ${file}:\n  - ${problems.join("\n  - ")}`,
@@ -161,9 +233,19 @@ export function loadPlan(file: string): ExperimentPlan {
   return plan;
 }
 
-interface JournalEvent {
-  type: string;
-  payload: Record<string, unknown>;
+/** The horizons a plan runs; a plan without any has one, unnamed. */
+export function horizonsOf(plan: ExperimentPlan): Horizon[] {
+  return plan.horizons ?? [{ id: "default", maxDecisions: plan.maxDecisions }];
+}
+
+/** What affect could do at most, as the affect code reports it. */
+export function affectBounds(repository: string): AffectBounds {
+  return JSON.parse(
+    execFileSync("uv", ["run", "person-cognition", "--affect-bounds"], {
+      cwd: repository,
+      encoding: "utf8",
+    }),
+  ) as AffectBounds;
 }
 
 function readJournal(evidenceDirectory: string): JournalEvent[] {
@@ -216,8 +298,11 @@ const tally = (values: string[]): Record<string, number> => {
 export function measure(
   report: EpisodeReport,
   events: JournalEvent[],
+  bounds?: AffectBounds,
 ): { metrics: Metrics; distributions: Record<string, Record<string, number>> } {
   const decisions = report.decisions;
+  const ended = events.filter((event) => event.type === "episode_ended").at(-1);
+  const experienced = Number(ended?.payload["experienced_ticks"] ?? 0);
   const of = (type: string) => events.filter((event) => event.type === type);
   const projectChanges = of("project_changed").map((event) =>
     String(event.payload["change"]),
@@ -274,6 +359,7 @@ export function measure(
 
   const metrics: Metrics = {
     completed: report.outcome === "completed" ? 1 : 0,
+    experienced_ticks: experienced,
     died: decisions.some((decision) => decision.status === "DEATH") ? 1 : 0,
     decisions: report.totals.decisions,
     elapsed_ticks: report.elapsedTicks,
@@ -351,16 +437,21 @@ export function measure(
       0,
     ),
   };
-  return {
-    metrics,
-    distributions: {
-      goal_types: tally(decisions.map((decision) => decision.goalType)),
-      executed_skills: tally(
-        decisions.map((decision) => decision.executedSkill ?? "none"),
-      ),
-      terminal_statuses: tally(decisions.map((decision) => decision.status)),
-    },
+  const distributions: Record<string, Record<string, number>> = {
+    goal_types: tally(decisions.map((decision) => decision.goalType)),
+    executed_skills: tally(
+      decisions.map((decision) => decision.executedSkill ?? "none"),
+    ),
+    terminal_statuses: tally(decisions.map((decision) => decision.status)),
   };
+  if (bounds) {
+    Object.assign(metrics, priorityChannel(events, bounds));
+    Object.assign(metrics, explorationChannel(events));
+    const affect = saturation(events, bounds, experienced);
+    Object.assign(metrics, affect.metrics);
+    Object.assign(distributions, affect.distributions);
+  }
+  return { metrics, distributions };
 }
 
 export function compareTraces(
@@ -384,19 +475,25 @@ export interface RunOneOptions {
   planFile: string;
   condition: ExperimentCondition;
   seed: number;
+  horizon?: Horizon;
   outputDirectory: string;
   repository: string;
+  bounds?: AffectBounds;
 }
 
 /** One independent run: fresh evidence, one world seed, one condition. */
 export async function runOne(options: RunOneOptions): Promise<RunResult> {
   const { plan, condition, seed, repository } = options;
+  const horizon = options.horizon ?? horizonsOf(plan)[0]!;
   const planDirectory = path.dirname(path.resolve(options.planFile));
-  const runDirectory = path.join(
-    options.outputDirectory,
-    condition.id,
-    `seed-${seed}`,
-  );
+  const runDirectory = plan.horizons
+    ? path.join(
+        options.outputDirectory,
+        condition.id,
+        horizon.id,
+        `seed-${seed}`,
+      )
+    : path.join(options.outputDirectory, condition.id, `seed-${seed}`);
   // Independence: nothing from an earlier run of the same cell survives.
   // The seed goes to the world only. `runtime.rngSeed`, which cognition is
   // told in SessionHello, stays whatever the base configuration says.
@@ -422,7 +519,10 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
       embodiment: "fixture",
       trainingContext: "fixture",
       outputDirectory: reportDirectory,
-      maxDecisions: plan.maxDecisions,
+      maxDecisions: horizon.maxDecisions,
+      ...(horizon.maxExperiencedTicks
+        ? { maxTicks: horizon.maxExperiencedTicks }
+        : {}),
       decisionIntervalMs: 0,
     },
     learning: {
@@ -445,7 +545,11 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
   const worldText = `${JSON.stringify(definition, null, 2)}\n`;
   writeFileSync(path.join(runDirectory, "world.json"), worldText);
 
-  const episodeId = `${plan.name}-${condition.id}-s${seed}`.toLowerCase();
+  const episodeId = (
+    plan.horizons
+      ? `${plan.name}-${condition.id}-${horizon.id}-s${seed}`
+      : `${plan.name}-${condition.id}-s${seed}`
+  ).toLowerCase();
   const runtime = new PersonRuntime({
     config,
     embodiment: new FixtureWorld(definition),
@@ -456,6 +560,7 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
   const { metrics, distributions } = measure(
     report,
     readJournal(evidenceDirectory),
+    options.bounds,
   );
   const result: RunResult = {
     metadata: {
@@ -464,6 +569,9 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
       condition: condition.id,
       affectMode: condition.affectMode,
       seed,
+      horizon: horizon.id,
+      maxExperiencedTicks: horizon.maxExperiencedTicks ?? null,
+      split: plan.split ?? "development",
       episodeId,
       commit: git(repository, ["rev-parse", "HEAD"]),
       treeClean: git(repository, ["status", "--porcelain"]) === "",
@@ -472,7 +580,7 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
       skillLibraryRevision: report.skillLibraryRevision,
       protocolVersion: report.protocolVersion,
       learningMode: report.learningMode,
-      maxDecisions: plan.maxDecisions,
+      maxDecisions: horizon.maxDecisions,
       cognitionCommand,
       node: process.version,
     },
@@ -510,6 +618,10 @@ export interface ExperimentOptions {
   planFile: string;
   outputDirectory: string;
   repository: string;
+  /** Runs at once. Each run is independent, so this changes nothing measured. */
+  jobs?: number;
+  /** Required to run a held-out plan. */
+  allowHeldout?: boolean;
   onRun?: (result: RunResult) => void;
 }
 
@@ -518,54 +630,84 @@ export async function runExperiment(
   options: ExperimentOptions,
 ): Promise<ExperimentResults> {
   const plan = loadPlan(options.planFile);
+  if (plan.split === "heldout" && !options.allowHeldout)
+    throw new Error(
+      `${plan.name} is a held-out plan: it evaluates a finished model once and is not run while one is designed. Pass --heldout to run it deliberately.`,
+    );
   const outputDirectory = path.join(options.outputDirectory, plan.name);
-  const runs: RunResult[] = [];
-  for (const condition of plan.conditions)
-    for (const seed of plan.seeds) {
+  const bounds = affectBounds(options.repository);
+  const horizons = horizonsOf(plan);
+  const cells = plan.conditions.flatMap((condition) =>
+    horizons.flatMap((horizon) =>
+      plan.seeds.map((seed) => ({ condition, horizon, seed })),
+    ),
+  );
+  const slots: (RunResult | undefined)[] = new Array(cells.length);
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    while (next < cells.length) {
+      const index = next++;
+      const cell = cells[index]!;
       const result = await runOne({
         plan,
         planFile: options.planFile,
-        condition,
-        seed,
+        condition: cell.condition,
+        seed: cell.seed,
+        horizon: cell.horizon,
         outputDirectory,
         repository: options.repository,
+        bounds,
       });
-      runs.push(result);
+      slots[index] = result;
       options.onRun?.(result);
     }
+  };
+  const jobs = Math.max(1, Math.min(options.jobs ?? 1, cells.length));
+  await Promise.all(Array.from({ length: jobs }, worker));
+  const runs = slots as RunResult[];
 
+  const label = (run: RunResult) =>
+    plan.horizons
+      ? `${run.metadata.horizon}/${run.metadata.condition}`
+      : run.metadata.condition;
   const byCondition: ExperimentResults["byCondition"] = {};
   for (const run of runs) {
-    const metrics = (byCondition[run.metadata.condition] ??= {});
+    const metrics = (byCondition[label(run)] ??= {});
     for (const [name, value] of Object.entries(run.metrics))
       (metrics[name] ??= []).push(value);
   }
 
   const comparisons: Comparison[] = [];
-  for (const { modes, purpose } of COMPARISONS) {
-    const first = plan.conditions.find((c) => c.affectMode === modes[0]);
-    const second = plan.conditions.find((c) => c.affectMode === modes[1]);
-    if (!first || !second) continue;
-    const divergences = plan.seeds.map((seed) => {
-      const trace = (id: string) =>
-        runs.find(
-          (run) => run.metadata.condition === id && run.metadata.seed === seed,
-        )?.trace ?? [];
-      return compareTraces(seed, trace(first.id), trace(second.id));
-    });
-    comparisons.push({
-      between: [first.id, second.id],
-      purpose,
-      divergences,
-      divergentSeeds: count(divergences, (d) => d.firstDifference !== -1),
-    });
-  }
+  for (const horizon of horizons)
+    for (const { modes, purpose } of COMPARISONS) {
+      const first = plan.conditions.find((c) => c.affectMode === modes[0]);
+      const second = plan.conditions.find((c) => c.affectMode === modes[1]);
+      if (!first || !second) continue;
+      const divergences = plan.seeds.map((seed) => {
+        const trace = (id: string) =>
+          runs.find(
+            (run) =>
+              run.metadata.condition === id &&
+              run.metadata.seed === seed &&
+              run.metadata.horizon === horizon.id,
+          )?.trace ?? [];
+        return compareTraces(seed, trace(first.id), trace(second.id));
+      });
+      comparisons.push({
+        horizon: horizon.id,
+        between: [first.id, second.id],
+        purpose,
+        divergences,
+        divergentSeeds: count(divergences, (d) => d.firstDifference !== -1),
+      });
+    }
 
   const results: ExperimentResults = {
     plan,
     planSha256: sha256(readFileSync(options.planFile, "utf8")),
     commit: git(options.repository, ["rev-parse", "HEAD"]),
     treeClean: git(options.repository, ["status", "--porcelain"]) === "",
+    affectBounds: bounds,
     runs,
     byCondition,
     comparisons,
@@ -583,11 +725,14 @@ export function metricsCsv(runs: RunResult[]): string {
   const names = [
     ...new Set(runs.flatMap((run) => Object.keys(run.metrics))),
   ].sort();
-  const header = ["condition", "affect_mode", "seed", ...names].join(",");
+  const header = ["condition", "affect_mode", "horizon", "seed", ...names].join(
+    ",",
+  );
   const rows = runs.map((run) =>
     [
       run.metadata.condition,
       run.metadata.affectMode,
+      run.metadata.horizon,
       run.metadata.seed,
       ...names.map((name) => run.metrics[name] ?? ""),
     ].join(","),
@@ -599,11 +744,18 @@ export function metricsCsv(runs: RunResult[]): string {
 export function summariseExperiment(results: ExperimentResults): string {
   const lines: string[] = [
     `Experiment ${results.plan.name} at ${results.commit.slice(0, 12)}${results.treeClean ? "" : " (uncommitted changes)"}`,
-    `  seeds: ${results.plan.seeds.join(", ")}; decisions per run: ${results.plan.maxDecisions}`,
+    `  split: ${results.plan.split ?? "development"}; seeds: ${results.plan.seeds.join(", ")}; horizons: ${horizonsOf(
+      results.plan,
+    )
+      .map(
+        (h) =>
+          `${h.id} (${h.maxDecisions} decisions${h.maxExperiencedTicks ? `, ${h.maxExperiencedTicks} ticks` : ""})`,
+      )
+      .join(", ")}`,
   ];
   for (const comparison of results.comparisons)
     lines.push(
-      `  ${comparison.between.join(" vs ")}: ${comparison.divergentSeeds}/${comparison.divergences.length} seeds diverge (${comparison.purpose})`,
+      `  ${results.plan.horizons ? `${comparison.horizon}: ` : ""}${comparison.between.join(" vs ")}: ${comparison.divergentSeeds}/${comparison.divergences.length} seeds diverge (${comparison.purpose})`,
     );
   const conditions = Object.keys(results.byCondition);
   const names = Object.keys(results.byCondition[conditions[0] ?? ""] ?? {});

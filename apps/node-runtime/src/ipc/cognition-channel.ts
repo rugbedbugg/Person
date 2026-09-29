@@ -12,6 +12,13 @@ import {
   type NodeMessage,
 } from "#protocol";
 
+/**
+ * How long cognition may take to finish what it was sent after its input is
+ * closed. Ending an episode writes a record and a snapshot; a few seconds is
+ * ample, and the runtime stops it regardless once they have passed.
+ */
+const GRACEFUL_EXIT_MS = 5000;
+
 export interface ChannelOptions {
   command: string[];
   cwd: string;
@@ -231,7 +238,22 @@ export class CognitionChannel extends EventEmitter {
     } catch {
       // The pipe may already be closed if cognition exited first.
     }
-    if (child.exitCode === null && child.signalCode === null) {
+    // Closing its input is how cognition learns the session is over: it
+    // handles what it has been sent, the episode's end among it, and exits.
+    // It gets a bounded moment to do so before it is stopped regardless, so a
+    // hung cognition can never hold the runtime.
+    const exited = (): boolean =>
+      child.exitCode !== null || child.signalCode !== null;
+    if (!exited())
+      await new Promise<void>((resolve) => {
+        const timer = setTimeout(resolve, GRACEFUL_EXIT_MS);
+        timer.unref?.();
+        child.once("exit", () => {
+          clearTimeout(timer);
+          resolve();
+        });
+      });
+    if (!exited()) {
       child.kill("SIGTERM");
       await new Promise<void>((resolve) => {
         const timer = setTimeout(() => {

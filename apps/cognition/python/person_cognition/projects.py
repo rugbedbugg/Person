@@ -369,6 +369,9 @@ class ProjectManager:
             project = replace(project, blocks=(*blocks, (name, count)))
             if count >= BLOCKS_TO_ABANDON:
                 given_up = replace(project, status="ABANDONED", note=f"blocked_{name}")
+                # Giving up the commitment gives up its goal: left on the
+                # stack, it would be taken up again as if never abandoned.
+                goals.abandon(project.goal_id, now, f"project_abandoned_blocked_{name}")
                 changes.append(_change("project_changed", given_up, "abandoned"))
             else:
                 # One more chance: queue the milestone again.

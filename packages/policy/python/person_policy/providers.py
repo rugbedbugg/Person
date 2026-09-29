@@ -50,6 +50,10 @@ class ScoredCandidate:
     #: The supported-hypothesis term included in `score` (ADR 0012), kept
     #: separately for the same reason. Zero unless one was supplied.
     hypothesis_effect: float = 0.0
+    #: The score at the low end of the tolerance range, at neutral tolerance
+    #: and at the high end (ADR 0013), when the caller asked for them. For
+    #: the engineering record only: the choice is made from `score`.
+    tolerance_scores: tuple[float, float, float] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -65,6 +69,9 @@ class PolicyChoice:
     candidates: tuple[ScoredCandidate, ...]
     shadow_routine_id: str | None = None
     extras: dict[str, Any] = field(default_factory=dict)
+    #: Whether the scored ranking decided the choice. False whenever the
+    #: deterministic fallback decided, whatever the scores said.
+    scored_choice: bool = False
 
 
 @runtime_checkable
@@ -80,6 +87,7 @@ class PolicyProvider(Protocol):
         *,
         home: str = "unknown",
         tolerance: float = 1.0,
+        tolerance_bounds: tuple[float, float] | None = None,
     ) -> PolicyChoice: ...
 
 
@@ -117,6 +125,7 @@ class DeterministicPolicyProvider:
         tolerance: float = 1.0,
         reliability: Callable[[tuple[str, ...]], float] | None = None,
         hypotheses: Callable[[tuple[str, ...]], float] | None = None,
+        tolerance_bounds: tuple[float, float] | None = None,
     ) -> PolicyChoice:
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
@@ -220,6 +229,15 @@ class EvidencePolicyProvider:
             reasons.append("exploration_suppressed_outside_envelope")
         return score, tuple(reasons)
 
+    def _at(
+        self,
+        candidate: RoutineCandidate,
+        counts: OutcomeCounts,
+        envelope_open: bool,
+        tolerance: float,
+    ) -> float:
+        return self.score(candidate, counts, envelope_open=envelope_open, tolerance=tolerance)[0]
+
     def propose(
         self,
         observation: dict[str, Any],
@@ -231,6 +249,7 @@ class EvidencePolicyProvider:
         tolerance: float = 1.0,
         reliability: Callable[[tuple[str, ...]], float] | None = None,
         hypotheses: Callable[[tuple[str, ...]], float] | None = None,
+        tolerance_bounds: tuple[float, float] | None = None,
     ) -> PolicyChoice:
         """Choose a routine. `reliability` scores a routine's steps from learned
         effect beliefs, and `hypotheses` from supported causal hypotheses whose
@@ -253,6 +272,14 @@ class EvidencePolicyProvider:
             causal = hypotheses(candidate.steps) if hypotheses is not None else 0.0
             if causal:
                 reasons = (*reasons, "supported_hypothesis")
+            span: tuple[float, float, float] | None = None
+            if tolerance_bounds is not None:
+                low, high = tolerance_bounds
+                span = (
+                    self._at(candidate, counts, bool(envelope), low) + learned + causal,
+                    self._at(candidate, counts, bool(envelope), 1.0) + learned + causal,
+                    self._at(candidate, counts, bool(envelope), high) + learned + causal,
+                )
             scored.append(
                 ScoredCandidate(
                     candidate,
@@ -261,6 +288,7 @@ class EvidencePolicyProvider:
                     reasons,
                     learned_effect=learned,
                     hypothesis_effect=causal,
+                    tolerance_scores=span,
                 )
             )
         scored.sort(
@@ -336,4 +364,5 @@ class EvidencePolicyProvider:
             learned_or_fallback="learned" if supported else "fallback",
             candidates=tuple(scored),
             shadow_routine_id=None,
+            scored_choice=True,
         )

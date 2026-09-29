@@ -1,0 +1,4486 @@
+{
+  "plan": {
+    "name": "bench-c-exploration",
+    "description": "R1.5 class C, exploration opportunity: several food routines with different risks in view, the learner supervised so the exploration-tolerance channel is live. Horizons are experiment settings chosen against the affect half-lives (unease 1200, valence 6000, control 12000 ticks): short about one valence half-life, medium two control half-lives, long six. Development: may be inspected freely; never used to evaluate a model finally.",
+    "split": "development",
+    "benchmarkClass": "C",
+    "world": "../../../fixtures/worlds/benchmarks/development/c-exploration.json",
+    "config": "../../../examples/fixture.toml",
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "conditions": [
+      {
+        "id": "P0",
+        "affectMode": "off"
+      },
+      {
+        "id": "P1",
+        "affectMode": "record_only"
+      },
+      {
+        "id": "P2",
+        "affectMode": "active"
+      }
+    ],
+    "maxDecisions": 5000,
+    "learningMode": "supervised",
+    "horizons": [
+      {
+        "id": "short",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 6000
+      },
+      {
+        "id": "medium",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 24000
+      },
+      {
+        "id": "long",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 72000
+      }
+    ]
+  },
+  "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+  "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+  "treeClean": true,
+  "affectBounds": {
+    "bias_limit": 25,
+    "half_lives": {
+      "control": 12000,
+      "unease": 1200,
+      "valence": 6000
+    },
+    "ranges": {
+      "control": [
+        -1,
+        1
+      ],
+      "unease": [
+        0,
+        1
+      ],
+      "valence": [
+        -1,
+        1
+      ]
+    },
+    "swings": {
+      "fixed": {
+        "fixed": 0,
+        "outgoing": 25,
+        "protective": 12.5
+      },
+      "outgoing": {
+        "fixed": 25,
+        "outgoing": 0,
+        "protective": 37.5
+      },
+      "protective": {
+        "fixed": 25,
+        "outgoing": 50,
+        "protective": 0
+      }
+    },
+    "tolerance_range": [
+      0.5,
+      1.25
+    ]
+  },
+  "comparisons": [
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "P1"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            69,
+            69
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            55,
+            55
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            56,
+            56
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            53,
+            53
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            64,
+            64
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "P1",
+        "P2"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            69,
+            69
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            55,
+            55
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            56,
+            56
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            53,
+            53
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            64,
+            64
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "P2"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            69,
+            69
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            55,
+            55
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            56,
+            56
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            53,
+            53
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            64,
+            64
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "P1"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            104,
+            104
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            103,
+            103
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            104,
+            104
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            100,
+            100
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            111,
+            111
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P1",
+        "P2"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            104,
+            104
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            103,
+            103
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            104,
+            104
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            100,
+            100
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            111,
+            111
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "P2"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            104,
+            104
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            103,
+            103
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            104,
+            104
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            100,
+            100
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            111,
+            111
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "P1"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            184,
+            184
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            206,
+            206
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            225,
+            225
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            203,
+            203
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            215,
+            215
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P1",
+        "P2"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            184,
+            184
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            206,
+            206
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            225,
+            225
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            203,
+            203
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            215,
+            215
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "P2"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            184,
+            184
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            206,
+            206
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            225,
+            225
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            203,
+            203
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            215,
+            215
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    }
+  ],
+  "runs": [
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-short-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "aaa57c0af4ba904f13755435da09a9f3278cd7cb67ff85f6e1c6d2a1dcc9b1c5",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 6,
+          "SECURE_FOOD": 29,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 9
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 65
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-short-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "00128ed6d9015fa67b889a889bb17f541a5d3656dd4113e40f1b237f7b5702e4",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 4,
+          "SECURE_FOOD": 19,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 39,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 55
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-short-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "1d87efaf4541024fef5323c461a6b255c47ec3e102d554b0b2bb13073c84f474",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 22,
+          "MAINTAIN_RESERVES": 3,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 40,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 56
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-short-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "b76b2f4ba1f7aad591ee2cfe13bbf92a709577a31041492c3553dd050f13d4f9",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 24,
+          "MAINTAIN_RESERVES": 4,
+          "SECURE_FOOD": 24,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 37,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 53
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-short-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "16f14c4e9438bf2f3e95d42fdf7f652fb3b3fd01ff1033f1dccd9b4acce4ac40",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 2,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 48,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 64
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-medium-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "61a08366fba512046e92fb1b0d436d9a99cdf1cbf398f7c010fb822fadaa7e69",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 36,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 5,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 39,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "SUCCESS": 97
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-medium-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "8d2674e1a5737cb38a424573a05d5b2b8f565dad2275c75ae335dfea52cbdcba",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 40,
+          "MAINTAIN_RESERVES": 32,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 48,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 103
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-medium-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "f8379a552ce7371a0ad35dadb818d6595ff3990057e2a937d3813fa501297b1c",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 31,
+          "SECURE_FOOD": 41,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 49,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 104
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-medium-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "2cf601595176c4dca4e4b5e9a67a0687767dbbe9a587c67f12ab8f81fef0858b",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 32,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 45,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 100
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-medium-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "33f82031ada39742f273093de4964bda3cb77805301ad83f0b2a7234ac914b23",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 40,
+          "MAINTAIN_RESERVES": 29,
+          "SECURE_FOOD": 41,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 57,
+          "wait_safely": 38
+        },
+        "terminal_statuses": {
+          "SUCCESS": 111
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-long-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "707f3e58c0e27ccc659a0f5f922155e80296e25a7004b58407b60cd3185cbdcb",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 116,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 5,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 119,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "SUCCESS": 177
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-long-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "c418fa4cc2ead004a8c0435f326f1324b45fcdf7bac2bc1cf44e40641555a642",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 51,
+          "MAINTAIN_RESERVES": 109,
+          "SECURE_FOOD": 45,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 63,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 202
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-long-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "6b7ed8ea3c2d6492241d91f781a6ee0d963c293ad5a7d5e5e33f67913c99653c",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 55,
+          "MAINTAIN_RESERVES": 104,
+          "SECURE_FOOD": 65,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 3,
+          "craft_chest": 2,
+          "eat_to_target": 14,
+          "gather_plant_food": 5,
+          "gather_wood": 2,
+          "look": 77,
+          "place_owned_chest": 1,
+          "return_home": 1,
+          "wait_safely": 117,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 220,
+          "UNREACHABLE": 1
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-long-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "019a5938be5c6896080663a28413f6065b0ac0d26d84dd512f0c929402f161dd",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 44,
+          "MAINTAIN_RESERVES": 109,
+          "SECURE_FOOD": 49,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 60,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 199
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p0-long-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "762ed864ed5a65a8ead7f8e8ced33a888b42df03765db4198efa9e5b1962f270",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P0/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 51,
+          "MAINTAIN_RESERVES": 107,
+          "SECURE_FOOD": 56,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 72,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 211
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-short-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "aacf3c0c730aa365a556600c439027b6f5a5d043654de2eb9e1ad7969f720fe1",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 6,
+          "SECURE_FOOD": 29,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 9
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 65
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.6,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.9,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.5821,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 12,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 16,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+action_failed+goal_blocked_maintain_reserves": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-short-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "4e112c48c44f1fb8251697844aa9bf1cbef5397a866e677a7268acdec6efe68a",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 4,
+          "SECURE_FOOD": 19,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 39,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 55
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.35,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.7,
+          "goal_complete": 1,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 2,
+          "goal_complete_secure_food": 9,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-short-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "c9e5fc92c5fb8ebe66231e95161a8d210f3c72d9eff3868db07f9a3355a4858e",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 22,
+          "MAINTAIN_RESERVES": 3,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 40,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 56
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.9,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.03,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 17,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 1,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-short-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "9970bf9e2d19c31d7a48a7b08d9cdd8e702cfd20587d49e64e2b4cd60281af04",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 24,
+          "MAINTAIN_RESERVES": 4,
+          "SECURE_FOOD": 24,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 37,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 53
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.35,
+          "goal_complete": 0.75,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.7,
+          "goal_complete": 1.5,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_secure_food": 14,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-short-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "da0d237983ce0e84e18d076ea304f12eec85b3a621c0fc8af8147eea9c38a398",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 2,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 48,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 64
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.45,
+          "goal_complete": 0.9,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.9,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.03,
+          "search_unfound": -0.4
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 17,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 1,
+          "search_unfound": 8
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-medium-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "1372601d67732eecb42dc1108ca169198fe2aa932c9c29755f3b9ee8639cc723",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 36,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 5,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 39,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "SUCCESS": 97
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.7,
+          "goal_blocked": -0.45,
+          "goal_complete": 1.15,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.6821,
+          "goal_blocked": -0.9,
+          "goal_complete": 2.3,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_failed": 7,
+          "action_succeeded": 14,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 5,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 21,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+action_failed+goal_blocked_maintain_reserves": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 3,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-medium-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "b1690d5016fa41dccc6a2db0960abe8b3a8dd9b3a116f37cef16a313974d88ee",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 40,
+          "MAINTAIN_RESERVES": 32,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 48,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 103
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.4,
+          "goal_complete": 1.4,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.8,
+          "goal_complete": 2.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.03,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 2,
+          "goal_complete_secure_food": 27,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 1,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-medium-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "371a8ef156a5d74abc727ae2091dd242031c725193d13e58b9684f47018d85e2",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 31,
+          "SECURE_FOOD": 41,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 49,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 104
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.45,
+          "goal_complete": 1.741,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.9,
+          "goal_complete": 3.4929,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.4
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 35,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 8
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 8,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-medium-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "4c0f10027dc838976f13bbf682f5f2c8c1f99f79ef77c45802cfa335043b4c0d",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 32,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 45,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 100
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.4,
+          "goal_complete": 1.6269,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.8,
+          "goal_complete": 3.2782,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_secure_food": 32,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-medium-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "75ba82179956dfd1967d00d88b99b4703b92b05bbabecbd94f8d083eb722f3d5",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 40,
+          "MAINTAIN_RESERVES": 29,
+          "SECURE_FOOD": 41,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 57,
+          "wait_safely": 38
+        },
+        "terminal_statuses": {
+          "SUCCESS": 111
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.5,
+          "goal_complete": 1.7317,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -1,
+          "goal_complete": 3.4649,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 34,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 9
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 8,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-long-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "782b814eb07547b92f40be4f81dad51bf4e97e1c43ba6e430f56ffce4d06ba89",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 116,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 5,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 119,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "SUCCESS": 177
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.7,
+          "goal_blocked": -0.45,
+          "goal_complete": 1.15,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.6821,
+          "goal_blocked": -0.9,
+          "goal_complete": 2.3,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_failed": 7,
+          "action_succeeded": 14,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 5,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 21,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+action_failed+goal_blocked_maintain_reserves": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 3,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-long-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "0bdd5292c5e51a729aa53883796970cc99dd8f93363008205c4ff7ecca0ed389",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 51,
+          "MAINTAIN_RESERVES": 109,
+          "SECURE_FOOD": 45,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 63,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 202
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9503,
+          "goal_blocked": -0.55,
+          "goal_complete": 1.4352,
+          "project_abandoned": -0.24,
+          "project_completed": 0,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9242,
+          "goal_blocked": -1.1,
+          "goal_complete": 2.8693,
+          "project_abandoned": -0.36,
+          "project_completed": 0,
+          "project_progressed": 0.1,
+          "search_found": 0.06,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 21,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 5,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 35,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 2,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 2,
+          "search_found": 2,
+          "search_unfound": 9
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 2,
+          "goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-long-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "d77f334eb5cd1210d51ddd1bf59c80ad4bf5dad9983ffe80b63c94e207a29d19",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 55,
+          "MAINTAIN_RESERVES": 104,
+          "SECURE_FOOD": 65,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 3,
+          "craft_chest": 2,
+          "eat_to_target": 14,
+          "gather_plant_food": 5,
+          "gather_wood": 2,
+          "look": 77,
+          "place_owned_chest": 1,
+          "return_home": 1,
+          "wait_safely": 117,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 220,
+          "UNREACHABLE": 1
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.4,
+          "action_succeeded": 1.2179,
+          "goal_blocked": -0.8,
+          "goal_complete": 2.4171,
+          "project_abandoned": -0.32,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.4,
+          "action_succeeded": 1.286,
+          "goal_blocked": -1.6,
+          "goal_complete": 5.0632,
+          "project_abandoned": -0.48,
+          "project_progressed": 0.1,
+          "search_found": 0.12,
+          "search_unfound": -0.65
+        },
+        "appraisal_triggers": {
+          "action_failed": 5,
+          "action_succeeded": 26,
+          "goal_blocked_establish_storage": 7,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 8,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 55,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 2,
+          "project_abandoned_secure_food_supply": 2,
+          "project_progressed_improve_home": 2,
+          "search_found": 4,
+          "search_unfound": 13
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_succeeded": 1,
+          "action_failed+goal_complete_establish_storage": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 10,
+          "action_succeeded+goal_complete_secure_food+search_found": 1,
+          "action_succeeded+search_found": 3,
+          "goal_blocked_establish_storage+goal_complete_secure_food+project_abandoned_improve_home": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 2,
+          "goal_complete_secure_food+search_unfound": 5,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-long-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "d02982b5a1792b42c886a156d52aa1453d81998a8547121797ee066bea7de443",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 44,
+          "MAINTAIN_RESERVES": 109,
+          "SECURE_FOOD": 49,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 60,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 199
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.8983,
+          "goal_blocked": -0.55,
+          "goal_complete": 1.6621,
+          "project_abandoned": -0.24,
+          "project_completed": 0,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9074,
+          "goal_blocked": -1.1,
+          "goal_complete": 3.3475,
+          "project_abandoned": -0.36,
+          "project_completed": 0,
+          "project_progressed": 0.1,
+          "search_found": 0.018,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 21,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 6,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 40,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 2,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 2,
+          "search_found": 1,
+          "search_unfound": 9
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p1-long-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "ed4b3bec9fbbc6430345d3657ab854490954726be7473022083ebbe29ef5b0c2",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P1/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 51,
+          "MAINTAIN_RESERVES": 107,
+          "SECURE_FOOD": 56,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 72,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 211
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.8972,
+          "goal_blocked": -0.65,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_completed": 0,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9052,
+          "goal_blocked": -1.3,
+          "goal_complete": 3.6331,
+          "project_abandoned": -0.36,
+          "project_completed": 0,
+          "project_progressed": 0.1,
+          "search_found": 0.078,
+          "search_unfound": -0.55
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 21,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 7,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 43,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 2,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 2,
+          "search_found": 3,
+          "search_unfound": 11
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 8,
+          "action_succeeded+search_found": 3,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 4,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-short-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "587a08d31c73aaeaa6214a5a6db91ff2ce659fdc3523d3ebfaee142db28f9a09",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 6,
+          "SECURE_FOOD": 29,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 9
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 65
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.6,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.9,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.5821,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 12,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 16,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+action_failed+goal_blocked_maintain_reserves": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-short-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "daf56696f812f98ff172f0baf1c3544c5a22e4c8a560f97cd93a8c88780a3f80",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 4,
+          "SECURE_FOOD": 19,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 39,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 55
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.35,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.7,
+          "goal_complete": 1,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 2,
+          "goal_complete_secure_food": 9,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-short-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "71158b8f94c97f020e52193c37dd5efe615580eea6c41ab4532bbea7944e3a37",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 22,
+          "MAINTAIN_RESERVES": 3,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 40,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 56
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.9,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.03,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 17,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 1,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-short-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "a225d6e1cfd9c120cb1983e3246a34b8bfe031c8d34399cf5d232941f3caf155",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 24,
+          "MAINTAIN_RESERVES": 4,
+          "SECURE_FOOD": 24,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 37,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 53
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.35,
+          "goal_complete": 0.75,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.7,
+          "goal_complete": 1.5,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_secure_food": 14,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-short-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "189b3e4dab91237c3611e7b4958428c03ade5e79dcf14c0b275ba94086281974",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 2,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 3,
+          "gather_plant_food": 2,
+          "look": 48,
+          "wait_safely": 10
+        },
+        "terminal_statuses": {
+          "SUCCESS": 64
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.45,
+          "goal_complete": 0.9,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.3,
+          "goal_blocked": -0.9,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.03,
+          "search_unfound": -0.4
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 6,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 17,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 1,
+          "search_unfound": 8
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 1,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-medium-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "547d44b5072ff07f49ae9e676954340342f9b84992e28091576e9daab695bef2",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 36,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 5,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 39,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "SUCCESS": 97
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.7,
+          "goal_blocked": -0.45,
+          "goal_complete": 1.15,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.6821,
+          "goal_blocked": -0.9,
+          "goal_complete": 2.3,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_failed": 7,
+          "action_succeeded": 14,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 5,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 21,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+action_failed+goal_blocked_maintain_reserves": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 3,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-medium-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "29f3403d48ae4568006e2e79830196d34ea4246be5963550829461d4bc57a174",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 40,
+          "MAINTAIN_RESERVES": 32,
+          "SECURE_FOOD": 30,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 48,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 103
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.4,
+          "goal_complete": 1.4,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.8,
+          "goal_complete": 2.8,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.03,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 2,
+          "goal_complete_secure_food": 27,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 1,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-medium-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "11e63682cc81cbcb6d15dad5da6b42f3c43c0c755b3348900fdd3ebc0860f7be",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 31,
+          "MAINTAIN_RESERVES": 31,
+          "SECURE_FOOD": 41,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 49,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 104
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.45,
+          "goal_complete": 1.741,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.9,
+          "goal_complete": 3.4929,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.4
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 35,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 8
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 8,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-medium-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "743d9798ba7e05241edca5b35d530240a27b208e6d317d048687aefdf157d5b8",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 32,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 45,
+          "wait_safely": 39
+        },
+        "terminal_statuses": {
+          "SUCCESS": 100
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.4,
+          "goal_complete": 1.6269,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.8,
+          "goal_complete": 3.2782,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_secure_food": 32,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-medium-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "52e0e98c7bb1647d059c5f933b724cf44a6344621ce6defd88e190dda15a03fa",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 40,
+          "MAINTAIN_RESERVES": 29,
+          "SECURE_FOOD": 41,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "look": 57,
+          "wait_safely": 38
+        },
+        "terminal_statuses": {
+          "SUCCESS": 111
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -0.5,
+          "goal_complete": 1.7317,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.8,
+          "goal_blocked": -1,
+          "goal_complete": 3.4649,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 16,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 4,
+          "goal_complete_secure_food": 34,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 9
+        },
+        "appraisals_at_one_moment": {
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 8,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-long-s1",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "40d2454f9ff63c316eac7be2d5cb15d16fac13408af947bae296bc403a9c8abd",
+        "worldSha256": "0f3196b5c0a09155b481d72d74d8aae4d1be9e72ce4c8afcee5356eb03a77ffb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 33,
+          "MAINTAIN_RESERVES": 116,
+          "SECURE_FOOD": 34,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "deposit_owned_storage": 4,
+          "eat_to_target": 5,
+          "gather_plant_food": 2,
+          "gather_wood": 1,
+          "look": 44,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 119,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "SUCCESS": 177
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.7,
+          "goal_blocked": -0.45,
+          "goal_complete": 1.15,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.56,
+          "action_succeeded": 0.6821,
+          "goal_blocked": -0.9,
+          "goal_complete": 2.3,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_found": 0.06,
+          "search_unfound": -0.35
+        },
+        "appraisal_triggers": {
+          "action_failed": 7,
+          "action_succeeded": 14,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 5,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 21,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_found": 2,
+          "search_unfound": 7
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+action_failed+goal_blocked_maintain_reserves": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 3,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-long-s2",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "22b405beae1c8fd5ea1f96258e7dceeb44954c8d8d992fe5c07fdf5f3531f17b",
+        "worldSha256": "4f2e1a8fe522da783c0dea4f757b6907a77d6d8a0b7520fa1bba07c51fe91624",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 51,
+          "MAINTAIN_RESERVES": 109,
+          "SECURE_FOOD": 45,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 63,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 202
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9503,
+          "goal_blocked": -0.55,
+          "goal_complete": 1.4352,
+          "project_abandoned": -0.24,
+          "project_completed": 0,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9242,
+          "goal_blocked": -1.1,
+          "goal_complete": 2.8693,
+          "project_abandoned": -0.36,
+          "project_completed": 0,
+          "project_progressed": 0.1,
+          "search_found": 0.06,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 21,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 5,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 35,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 2,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 2,
+          "search_found": 2,
+          "search_unfound": 9
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "action_succeeded+search_found": 2,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 2,
+          "goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-long-s3",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "6d4d23fe66822405f67b243774aa3e595fd82418a949ce7932623ed15ed4c2fb",
+        "worldSha256": "22810c1ca2ec3ca0abc8e3f73a27ae4a5e086ea4b665c12866c418c814fc11d3",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 55,
+          "MAINTAIN_RESERVES": 104,
+          "SECURE_FOOD": 65,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 3,
+          "craft_chest": 2,
+          "eat_to_target": 14,
+          "gather_plant_food": 5,
+          "gather_wood": 2,
+          "look": 77,
+          "place_owned_chest": 1,
+          "return_home": 1,
+          "wait_safely": 117,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 220,
+          "UNREACHABLE": 1
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.4,
+          "action_succeeded": 1.2179,
+          "goal_blocked": -0.8,
+          "goal_complete": 2.4171,
+          "project_abandoned": -0.32,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.4,
+          "action_succeeded": 1.286,
+          "goal_blocked": -1.6,
+          "goal_complete": 5.0632,
+          "project_abandoned": -0.48,
+          "project_progressed": 0.1,
+          "search_found": 0.12,
+          "search_unfound": -0.65
+        },
+        "appraisal_triggers": {
+          "action_failed": 5,
+          "action_succeeded": 26,
+          "goal_blocked_establish_storage": 7,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 8,
+          "goal_complete_establish_storage": 1,
+          "goal_complete_secure_food": 55,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 2,
+          "project_abandoned_secure_food_supply": 2,
+          "project_progressed_improve_home": 2,
+          "search_found": 4,
+          "search_unfound": 13
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_succeeded": 1,
+          "action_failed+goal_complete_establish_storage": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_storage": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 10,
+          "action_succeeded+goal_complete_secure_food+search_found": 1,
+          "action_succeeded+search_found": 3,
+          "goal_blocked_establish_storage+goal_complete_secure_food+project_abandoned_improve_home": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 2,
+          "goal_complete_secure_food+search_unfound": 5,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-long-s4",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "21ef33319cf41fd2bb0447fea845d7e1eb68679c74d874415e94facb5bff1fce",
+        "worldSha256": "23fe5d4afa19bc7b861af5f69bc03119b01a3f5e5f3b47492a21658ba56b6678",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 44,
+          "MAINTAIN_RESERVES": 109,
+          "SECURE_FOOD": 49,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 60,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 199
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.8983,
+          "goal_blocked": -0.55,
+          "goal_complete": 1.6621,
+          "project_abandoned": -0.24,
+          "project_completed": 0,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9074,
+          "goal_blocked": -1.1,
+          "goal_complete": 3.3475,
+          "project_abandoned": -0.36,
+          "project_completed": 0,
+          "project_progressed": 0.1,
+          "search_found": 0.018,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 21,
+          "goal_blocked_establish_storage": 4,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 6,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 40,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 2,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 2,
+          "search_found": 1,
+          "search_unfound": 9
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_maintain_reserves+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_succeeded+goal_complete_secure_food": 9,
+          "action_succeeded+search_found": 1,
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 3,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "bench-c-exploration",
+        "planSha256": "a05121c848219c590b8264b972285927313286538558c7e5302a737732c7e811",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "bench-c-exploration-p2-long-s5",
+        "commit": "95fab0bfc135a22986693863dd14a156bd503bff",
+        "treeClean": true,
+        "configSha256": "a8c7cc6ead210b2bc28d905658a0ac57697c087a10a66610a64a74a249b49014",
+        "worldSha256": "f7f525407668eb409e96fde35dd022de038b29691edbb56f764feee59e5b5135",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "supervised",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/bench-c-exploration/P2/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 51,
+          "MAINTAIN_RESERVES": 107,
+          "SECURE_FOOD": 56,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 2,
+          "eat_to_target": 11,
+          "gather_plant_food": 4,
+          "gather_wood": 1,
+          "look": 72,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 118,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "SUCCESS": 211
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.8972,
+          "goal_blocked": -0.65,
+          "goal_complete": 1.8,
+          "project_abandoned": -0.24,
+          "project_completed": 0,
+          "project_progressed": 0.06,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_found": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.32,
+          "action_succeeded": 0.9052,
+          "goal_blocked": -1.3,
+          "goal_complete": 3.6331,
+          "project_abandoned": -0.36,
+          "project_completed": 0,
+          "project_progressed": 0.1,
+          "search_found": 0.078,
+          "search_unfound": -0.55
+        },
+        "appraisal_triggers": {
+          "action_failed": 4,
+          "action_succeeded": 21,
+          "goal_blocked_establish_storage": 5,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 7,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 43,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 2,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 2,
+          "search_found": 3,
+          "search_unfound": 11
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_succeeded+action_succeeded": 1,
+          "action_succeeded+goal_blocked_secure_food": 1,
+          "action_succeeded+goal_complete_secure_food": 8,
+          "action_succeeded+search_found": 3,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_secure_food+goal_complete_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 4,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    }
+  ]
+}

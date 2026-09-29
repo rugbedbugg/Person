@@ -1,6 +1,6 @@
 # ADR 0013: Affect modes and a reproducible experiment harness
 
-**Status:** Proposed
+**Status:** Accepted (operator, 2026-09-29)
 **Date:** 2026-09-29
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -9,6 +9,13 @@
 world, and a first P0/P1/P2 matrix; no new affect psychology (2026-09-29)
 
 ---
+
+> **Operator decision, 2026-09-29: accepted.** The accepted architecture is
+> the three affect modes, one shared appraisal and state-update path for
+> `record_only` and `active` with only the explicit consumption points
+> differing, deterministic seeded runs, reproducibility metadata, and metrics
+> reported individually rather than as one score. World sets, seeds, run
+> lengths, the metric list and any thresholds are experiment parameters.
 
 ## Context
 
@@ -89,6 +96,33 @@ Person.
 15. New research code names affect functionally (`affect_mode`,
     `affective_state`, `apply_appraisal`). Existing names are not renamed in
     this phase.
+
+## Settled while implementing (R1.5, 2026-09-29)
+
+- **What each decision was chosen from is journalled, for research only.**
+  `goal_selected` lists every legitimate goal candidate with its base
+  priority, affect bias and affect character (`protective`, `outgoing`, or
+  `fixed` for urgent survival goals and experimental trials); `routine_selected`
+  adds the tolerance used, whether the scored ranking decided, and each
+  candidate's score at the neutral tolerance and at both ends of the
+  tolerance range. Payload additions, no schema change. Nothing in cognition
+  reads them back.
+- **The largest possible affect swing is exported by the affect code.**
+  `person-cognition --affect-bounds` evaluates `Affect.bias` over the state
+  space, so the harness judges opportunity from the code itself rather than
+  from a restatement of it. Person never consults it.
+- **Opportunity and change are derived by the harness, per channel.** A
+  priority decision is an opportunity when some reachable state would make a
+  different candidate win; an exploration decision is one when some tolerance
+  in range would. Changed means the affect actually present did. Neither is a
+  Person-facing state.
+- **Horizons in Person time are bounded through the runtime's tick bound.**
+  The runtime cannot read Person's clock; in a fresh single-episode run its
+  elapsed ticks are Person's experienced time plus the final, unobserved
+  action. Both are reported.
+- **Held-out plans refuse to run without `--heldout`**, and their files are
+  frozen by a manifest a test checks. Which worlds, seeds and horizons make up
+  either split remains an experiment parameter.
 
 ## Consequences
 

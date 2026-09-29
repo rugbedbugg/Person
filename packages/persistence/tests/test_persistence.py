@@ -208,6 +208,25 @@ def test_restart_replays_from_the_snapshot_and_rebuilds_without_one(tmp_path: Pa
     assert from_journal.seen == reducer.seen
 
 
+def test_the_chain_continues_after_a_snapshot_taken_at_the_journal_tail(
+    tmp_path: Path,
+) -> None:
+    # An episode's end writes a snapshot after its last record, so the next
+    # process restores from a snapshot with nothing after it to replay. It
+    # must still know which record comes last, or the chain breaks there.
+    store = EvidenceStore(tmp_path, snapshot_every=100)
+    reducer = Counter()
+    previous = None
+    for index in range(4):
+        previous = store.append(make_event(index, previous), reducer).event_id
+    store.write_snapshot(reducer)
+
+    restarted = EvidenceStore(tmp_path, snapshot_every=100)
+    report = restarted.restore(Counter())
+    assert report.from_snapshot is True and report.replayed_events == 0
+    assert restarted.last_event_id == previous
+
+
 def test_a_snapshot_that_disagrees_with_the_journal_forces_a_full_rebuild(tmp_path: Path) -> None:
     store = EvidenceStore(tmp_path, snapshot_every=100)
     reducer = Counter()

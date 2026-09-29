@@ -341,6 +341,21 @@ claim without reading the whole tree.
 | The seed changes the world and never reaches Person                     | seed applied to the fixture definition only                  | `the seed changes the world and never reaches Person`                                                |
 | No aggregate score                                                      | `measure` returns named metrics only                         | by construction; `docs/evidence/experiments/README.md`                                               |
 
+## Affect benchmark characterisation (R1.5, ADR 0013)
+
+| Requirement                                                           | Implementation                                                  | Tests                                                                                                                |
+| --------------------------------------------------------------------- | --------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| What each decision was chosen from is journalled, never read back     | `goal_selected.candidates`, `routine_selected` tolerance scores | `apps/cognition/tests/test_decision_basis.py`                                                                        |
+| The largest possible affect swing comes from the affect code itself   | `bias_swings`, `person-cognition --affect-bounds`               | `test_the_largest_possible_swing_between_goal_characters`, `test_the_bounds_are_exported_without_running_cognition`  |
+| Opportunity and change are measured per channel                       | `apps/cli/src/affect-analysis.ts`                               | `tests/cli/affect-analysis.test.ts`                                                                                  |
+| A choice never changes without an opportunity                         | same                                                            | `running cells at once measures exactly what running them in turn does`                                              |
+| Horizons are bounded in Person's time                                 | `Horizon.maxExperiencedTicks` through `runtime.maxTicks`        | `a run ends at whichever bound comes first, in Person's experienced time`                                            |
+| Development and held-out are separated and the held-out set is frozen | `experiments/benchmarks/`, manifest, `--heldout`                | `tests/cli/benchmarks.test.ts`, `a held-out plan does not run unless it is asked for by name`                        |
+| An episode's end reaches Person before it is stopped                  | `CognitionChannel.stop` waits a bounded moment                  | `tests/integration/episode-end.test.ts`                                                                              |
+| The chain continues after a snapshot at the journal tail              | `EvidenceStore.restore`                                         | `test_the_chain_continues_after_a_snapshot_taken_at_the_journal_tail`                                                |
+| A persisting blockage is one event                                    | `GoalStack.block`                                               | `test_blocking_a_goal_that_is_already_blocked_is_not_a_new_event`, `test_a_blockage_that_persists_is_appraised_once` |
+| An abandoned project leaves no goal behind                            | `GoalStack.abandon`, `ProjectManager.track`                     | `test_an_abandoned_project_leaves_no_goal_behind`                                                                    |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

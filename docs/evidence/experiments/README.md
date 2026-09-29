@@ -64,3 +64,11 @@ from its control. With the current appraisal table and bound, affect is
 almost always saturated negative and almost never decisive. Before richer
 appraisal (R2) is judged, the same harness should be run on worlds and lengths
 where near-tied choices are common, so that an effect has room to appear.
+
+## R1.5: affect benchmark characterisation, 2026-09-29
+
+Four development worlds, three horizons, P0/P1/P2 on five seeds, after four
+correctness fixes. The answers to the R1.5 questions, the bugs and their
+evidence are in `r1.5-benchmarks/README.md`. Among them: R1's single divergent
+seed and its saturation both ran on the code before those fixes, so R1's
+numbers describe that code, not the current one.

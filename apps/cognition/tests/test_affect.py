@@ -246,6 +246,18 @@ def test_the_recorded_bias_always_accounts_for_the_priority(
         ), record
 
 
+def test_a_blockage_that_persists_is_appraised_once(tmp_path: Path, view: dict[str, Any]) -> None:
+    harness = Harness(tmp_path)
+    harness.hello()
+    goal, _, _ = harness.observe(at(view, 100))
+    goal_id = goal["goal"]["goalId"]
+    for tick in (110, 120, 130):
+        harness.loop.goals.block(goal_id, "no_feasible_plan", tick)
+    harness.observe(at(view, 140))
+    blocked = [r for r in appraisals(tmp_path) if r["trigger"].startswith("goal_blocked_")]
+    assert len(blocked) == 1, blocked
+
+
 def ranked(harness: Harness, view: dict[str, Any], state: AffectState | None) -> str:
     if state is not None:
         harness.loop.affect.state = state
@@ -599,3 +611,50 @@ def test_the_mode_is_consulted_only_at_the_consumption_boundary() -> None:
             ),
         )
         assert source is not None and "mode" not in source, name
+
+
+# ------------------------------------------------ bounds, for research only
+#
+# R1.5: what affect could do at most, under the current architecture. A
+# static property of the code, derived from `Affect.bias` itself, exported for
+# the experiment harness and never consulted by Person.
+
+
+def test_the_largest_possible_swing_between_goal_characters() -> None:
+    from person_cognition.affect import bias_swings
+
+    swings = bias_swings()
+    # bias_a - bias_b at its largest over every reachable state.
+    assert swings["protective"]["outgoing"] == pytest.approx(2 * BIAS_LIMIT)
+    assert swings["outgoing"]["protective"] == pytest.approx(1.5 * BIAS_LIMIT)
+    assert swings["protective"]["fixed"] == pytest.approx(BIAS_LIMIT)
+    assert swings["fixed"]["protective"] == pytest.approx(0.5 * BIAS_LIMIT)
+    assert swings["outgoing"]["fixed"] == pytest.approx(BIAS_LIMIT)
+    assert swings["fixed"]["outgoing"] == pytest.approx(BIAS_LIMIT)
+    for character in ("protective", "outgoing", "fixed"):
+        assert swings[character][character] == 0.0, "one state biases a character once"
+
+
+def test_the_bounds_are_exported_without_running_cognition() -> None:
+    import subprocess
+    import sys
+
+    completed = subprocess.run(
+        [sys.executable, "-m", "person_cognition", "--affect-bounds"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    bounds = json.loads(completed.stdout)
+    assert bounds["bias_limit"] == BIAS_LIMIT
+    assert bounds["tolerance_range"] == [0.5, 1.25]
+    assert bounds["half_lives"] == dict(HALF_LIVES)
+    assert bounds["ranges"]["unease"] == [0.0, 1.0]
+    assert bounds["swings"]["protective"]["outgoing"] == pytest.approx(50.0)
+
+
+def test_nothing_in_cognition_consults_the_bounds() -> None:
+    for path in COGNITION.rglob("*.py"):
+        if path.name in {"affect.py", "__main__.py"}:
+            continue
+        assert "bias_swings" not in path.read_text(encoding="utf-8"), path.name

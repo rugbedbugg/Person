@@ -268,6 +268,34 @@ def test_a_project_blocked_again_and_again_is_abandoned(
     assert kinds.count("improve_home") == 1
 
 
+def test_an_abandoned_project_leaves_no_goal_behind(tmp_path: Path, view: dict[str, Any]) -> None:
+    # Giving up a commitment means no longer pursuing it: its milestone goal
+    # must not stay on the stack as a candidate, to be taken up again later.
+    harness = with_home(tmp_path, view)
+    _, invocation = step(harness, at(view, 120))
+    project_goal = invocation["goalId"]
+    tick = 140
+    for _ in range(BLOCKS_TO_ABANDON + 1):
+        harness.loop.goals.block(project_goal, "no_feasible_plan", tick)
+        step(harness, at(view, tick))
+        tick += 20
+    assert "abandoned" in changes(tmp_path, first_project(tmp_path))
+    assert harness.loop.goals.entries[project_goal].status == "ABANDONED"
+
+    before = len(records(tmp_path, "goal_selected"))
+    for _ in range(4):
+        harness.loop.goals.reopen(project_goal, tick)
+        step(harness, at(view, tick))
+        tick += 20
+    later = records(tmp_path, "goal_selected")[before:]
+    assert later and all(record["goal_id"] != project_goal for record in later)
+    assert all(
+        candidate["goal_id"] != project_goal
+        for record in later
+        for candidate in record["candidates"]
+    )
+
+
 # ------------------------------------------------------------ boundaries
 
 

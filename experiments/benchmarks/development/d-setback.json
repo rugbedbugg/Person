@@ -1,0 +1,42 @@
+{
+  "name": "bench-d-setback",
+  "description": "R1.5 class D, setback and recovery: a hostile encounter in an otherwise calm life, followed by a long quiet period. Horizons are experiment settings chosen against the affect half-lives (unease 1200, valence 6000, control 12000 ticks): short about one valence half-life, medium two control half-lives, long six. Development: may be inspected freely; never used to evaluate a model finally.",
+  "split": "development",
+  "benchmarkClass": "D",
+  "world": "../../../fixtures/worlds/benchmarks/development/d-setback.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [1, 2, 3, 4, 5],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "P1",
+      "affectMode": "record_only"
+    },
+    {
+      "id": "P2",
+      "affectMode": "active"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}
