@@ -17,6 +17,7 @@ import {
   statusCommand,
   validateCommand,
 } from "../commands.ts";
+import { runExperiment, summariseExperiment } from "../experiment.ts";
 
 const USAGE = `Person: a persistent artificial inhabitant for Minecraft.
 
@@ -30,6 +31,7 @@ Usage:
   person validate <file> [--migrate]
   person inspect  evidence|skills|config|predictions [--config <file>] [--json]
   person compare  <reference-observation.json> <actual-observation.json> [--json]
+  person experiment --plan <plan.json> [--out <directory>] [--json]
 
 Every command that connects also accepts:
   --operator-intervention[=reason]   mark this run as contaminated by a human
@@ -53,6 +55,11 @@ Notes:
   "compare" diffs a captured observation against a reference and flags fields
   that look like defaults nothing ever filled in.
 
+  "experiment" runs a research plan in the fixture world: every condition on
+  every world seed, each run independent, measured afterwards from its report
+  and journal (ADR 0013). It never connects to Minecraft. Results go under
+  --out (default runs/experiments).
+
   Learning is off unless you ask for it. "person run" uses the mode in the
   configuration file, which examples ship as "off"; "person learn" is the only
   way to put a learner in control, and even then the Node safety kernel keeps
@@ -73,11 +80,13 @@ export interface ParsedCommand {
     | "status"
     | "compare"
     | "skill-test"
+    | "experiment"
     | "help";
   configPath?: string;
   target?: string;
   learningMode?: "off" | "shadow" | "supervised";
   skillId?: string;
+  planPath?: string;
   operatorSetup: boolean;
   json: boolean;
   migrate: boolean;
@@ -115,6 +124,7 @@ export function parseArguments(argv: string[]): ParsedCommand {
     "status",
     "compare",
     "skill-test",
+    "experiment",
   ] as const;
   if ((COMMANDS as readonly string[]).includes(command as string))
     parsed.command = command as (typeof COMMANDS)[number];
@@ -145,6 +155,11 @@ export function parseArguments(argv: string[]): ParsedCommand {
         throw new UsageError("--skill needs the name of a registered skill");
       if (parsed.skillId) throw new UsageError("--skill was given twice");
       parsed.skillId = value;
+    } else if (argument === "--plan") {
+      const value = rest[++index];
+      if (!value || value.startsWith("--"))
+        throw new UsageError("--plan needs an experiment plan file");
+      parsed.planPath = value;
     } else if (argument === "--operator-setup") parsed.operatorSetup = true;
     else if (argument === "--out") {
       const value = rest[++index];
@@ -209,6 +224,10 @@ export function parseArguments(argv: string[]): ParsedCommand {
   }
   if (parsed.operatorSetup && parsed.command !== "skill-test")
     throw new UsageError("--operator-setup only applies to person skill-test");
+  if (parsed.command === "experiment" && !parsed.planPath)
+    throw new UsageError("person experiment needs --plan <file>");
+  if (parsed.planPath && parsed.command !== "experiment")
+    throw new UsageError("--plan only applies to person experiment");
   if (parsed.command === "observe" && !parsed.configPath)
     throw new UsageError("person observe needs --config <file>");
   if (parsed.command === "status" && !parsed.configPath)
@@ -266,6 +285,30 @@ export async function main(argv: string[]): Promise<number> {
       });
       process.stdout.write(result.output);
       return result.code;
+    }
+    if (parsed.command === "experiment") {
+      const results = await runExperiment({
+        planFile: path.resolve(parsed.planPath as string),
+        outputDirectory: path.resolve(
+          parsed.outputFile ?? path.join("runs", "experiments"),
+        ),
+        repository: process.cwd(),
+        onRun: (run) => {
+          if (!parsed.json)
+            process.stderr.write(
+              `person: ${run.metadata.condition} seed ${run.metadata.seed}: ${run.metrics["decisions"]} decisions\n`,
+            );
+        },
+      });
+      process.stdout.write(
+        parsed.json
+          ? `${JSON.stringify(results, null, 2)}\n`
+          : summariseExperiment(results),
+      );
+      const control = results.comparisons.find((comparison) =>
+        comparison.purpose.startsWith("negative control"),
+      );
+      return control && control.divergentSeeds > 0 ? 1 : 0;
     }
     if (parsed.command === "skill-test") {
       const result = await skillTestCommand({
