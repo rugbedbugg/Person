@@ -1,0 +1,49 @@
+{
+  "name": "r2-dev-a-wide-margin",
+  "description": "R2 development matrix (ADR 0014) on a development world: affect off (P0), active with R1.5 appraisal (A15), and R2 appraisal record-only (R2rec) and active (R2act). Development only: parameters may be chosen from these runs; the held-out suite is not run until they are frozen.",
+  "split": "development",
+  "benchmarkClass": "A",
+  "world": "../../../fixtures/worlds/benchmarks/development/a-wide-margin.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [1, 2, 3, 4, 5],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "A15",
+      "affectMode": "active",
+      "interoception": "off"
+    },
+    {
+      "id": "R2rec",
+      "affectMode": "record_only",
+      "interoception": "on"
+    },
+    {
+      "id": "R2act",
+      "affectMode": "active",
+      "interoception": "on"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}
