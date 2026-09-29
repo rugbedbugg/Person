@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v9"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v10"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -30,6 +30,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v7",
     "person-evidence-v8",
     "person-evidence-v9",
+    "person-evidence-v10",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -89,6 +90,11 @@ EVENT_TYPES: tuple[str, ...] = (
     #: An investigation started, ran a trial, was interrupted, resumed,
     #: concluded or retired. Investigations are rebuilt from these alone.
     "investigation_changed",
+    #: One tonic update of affect (ADR 0014): the bodily and threat pressures
+    #: in force, the offset they set, the experienced time covered, and the
+    #: state before and after. With `affect_appraised`, the affect record is
+    #: rebuilt from these alone. Never scored.
+    "affect_tonic",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -116,6 +122,9 @@ V9_EVENT_TYPES: frozenset[str] = frozenset(
     }
 )
 
+#: Event types introduced with the tenth.
+V10_EVENT_TYPES: frozenset[str] = frozenset({"affect_tonic"})
+
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
 INTRODUCED_IN: dict[str, str] = {
@@ -127,6 +136,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V7_EVENT_TYPES, "person-evidence-v7"),
     **dict.fromkeys(V8_EVENT_TYPES, "person-evidence-v8"),
     **dict.fromkeys(V9_EVENT_TYPES, "person-evidence-v9"),
+    **dict.fromkeys(V10_EVENT_TYPES, "person-evidence-v10"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
