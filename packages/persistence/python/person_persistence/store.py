@@ -86,6 +86,10 @@ class EvidenceStore:
             try:
                 reducer.load_json(snapshot["body"])
                 after = snapshot["last_event_id"]
+                # A snapshot at the journal's tail has nothing after it to
+                # replay; the chain must still continue from its last record.
+                self.last_event_id = after
+                self._last_tick = int(snapshot["tick"])
                 report.from_snapshot = True
                 report.snapshot_tick = snapshot["tick"]
                 self._snapshot_sequence = int(snapshot["sequence"])
@@ -95,6 +99,8 @@ class EvidenceStore:
                 report.notes.append(f"snapshot body rejected, rebuilding from evidence: {error}")
                 reducer.reset()
                 after = None
+                self.last_event_id = None
+                self._last_tick = 0
                 self.event_count = 0
 
         try:
@@ -107,6 +113,8 @@ class EvidenceStore:
             report.notes.append(f"snapshot and journal disagree, full rebuild: {error}")
             report.from_snapshot = False
             reducer.reset()
+            self.last_event_id = None
+            self._last_tick = 0
             self.event_count = 0
             replayed = self._replay(reducer, None)
 
