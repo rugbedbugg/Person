@@ -226,3 +226,90 @@ test("a malformed plan is refused before anything runs", () => {
       /Invalid experiment plan/,
     );
 });
+
+test(
+  "a run ends at whichever bound comes first, in Person's experienced time",
+  { timeout: 300000 },
+  async () => {
+    const results = await runExperiment({
+      planFile: planFile({
+        seeds: [1],
+        conditions: [{ id: "P2", affectMode: "active" }],
+        horizons: [
+          { id: "ticks", maxDecisions: 500, maxExperiencedTicks: 1500 },
+          { id: "decisions", maxDecisions: 5, maxExperiencedTicks: 100000 },
+        ],
+      }),
+      outputDirectory: temporaryDirectory("person-experiment-"),
+      repository: REPOSITORY,
+      jobs: 2,
+    });
+    const run = (id: string) =>
+      results.runs.find((r) => r.metadata.horizon === id)!;
+    const ticks = run("ticks").metrics;
+    assert.ok(ticks["elapsed_ticks"]! >= 1500, "the bound was what ended it");
+    assert.ok(ticks["decisions"]! < 500);
+    // Person did not observe the end of its last action, so its own clock
+    // stops short of the runtime's by at most that one action.
+    assert.ok(ticks["experienced_ticks"]! <= ticks["elapsed_ticks"]!);
+    assert.ok(
+      ticks["experienced_ticks"]! >= ticks["elapsed_ticks"]! - 12000,
+      "no skill's budget is longer than 12000 ticks",
+    );
+    const decisions = run("decisions").metrics;
+    assert.equal(decisions["decisions"], 5);
+    assert.ok(decisions["experienced_ticks"]! < 100000);
+    assert.equal(run("ticks").metadata.maxExperiencedTicks, 1500);
+    assert.deepEqual(
+      results.comparisons.map((c) => c.horizon),
+      [],
+      "one condition: nothing to compare",
+    );
+  },
+);
+
+test("a held-out plan does not run unless it is asked for by name", async () => {
+  await assert.rejects(
+    runExperiment({
+      planFile: planFile({ split: "heldout" }),
+      outputDirectory: temporaryDirectory("person-experiment-"),
+      repository: REPOSITORY,
+    }),
+    /held-out plan/,
+  );
+});
+
+test(
+  "running cells at once measures exactly what running them in turn does",
+  { timeout: 300000 },
+  async () => {
+    const file = planFile({ seeds: [7, 8] });
+    const serial = await runExperiment({
+      planFile: file,
+      outputDirectory: temporaryDirectory("person-experiment-"),
+      repository: REPOSITORY,
+      jobs: 1,
+    });
+    const parallel = await runExperiment({
+      planFile: file,
+      outputDirectory: temporaryDirectory("person-experiment-"),
+      repository: REPOSITORY,
+      jobs: 4,
+    });
+    assert.deepEqual(
+      parallel.runs.map((run) => [run.metrics, run.trace]),
+      serial.runs.map((run) => [run.metrics, run.trace]),
+    );
+    for (const run of serial.runs) {
+      // Affect can only change a choice where it had the opportunity to.
+      assert.equal(run.metrics["priority_changed_without_opportunity"], 0);
+      assert.equal(run.metrics["exploration_changed_without_opportunity"], 0);
+      if (run.metadata.affectMode !== "active") {
+        assert.equal(run.metrics["priority_changed"], 0);
+        assert.equal(run.metrics["exploration_changed"], 0);
+      }
+      assert.equal(run.metrics["affect_exact_duplicate_appraisals"], 0);
+    }
+    assert.ok(serial.affectBounds.swings["protective"]!["outgoing"]! > 0);
+  },
+);
