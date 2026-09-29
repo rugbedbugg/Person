@@ -923,3 +923,34 @@ rather than publishing intermediate positions, so a live navigation cannot be
 watched from outside while it happens. That is understood and is a future
 telemetry improvement, not a correctness bug: the report written at the end is
 complete and correct.
+
+## Live checkpoint, 2026-09-29: not run
+
+After the documentation synchronisation (PR #16), the smallest modern live
+check was due against the current head: observation version 7 through
+Mineflayer, gaze turning the real body, a visible versus an occluded threat,
+the kernel's independence from cognition, no coordinate, yaw or entity handle
+reaching cognition, and a memory and affect restart. **None of it was run.**
+
+The exact blocker, as found on the development machine at 2026-09-29 12:00
++05:30:
+
+- No Java process was running and nothing was listening for Minecraft. No LAN
+  world was open.
+- A Minecraft 1.16.1 client and the saves `Person Test World #1` and
+  `Person Test World #2` are installed, but a single-player world is opened to
+  LAN from the client's own menu, which needs a person at the game.
+- No dedicated server jar is present. Fetching one means accepting Mojang's
+  EULA, which is the operator's to accept, not an agent's.
+
+So the newest live evidence is still the three skill-test runs of 2026-09-16,
+at `observationVersion` 1. The checkpoint's six checks remain the next live
+step; `docs/LAN_TESTING.md` has the procedure, starting with `person observe`.
+
+## Affect experiments (fixture only)
+
+The first affect experiments (ADR 0013) ran on 2026-09-29 in the fixture
+world: affect off, record-only and active on ten world seeds, with the learner
+off and supervised. Results, and what they do and do not show, are in
+`docs/evidence/experiments/README.md`. They are TESTED IN FIXTURE and are not
+live evidence of anything.

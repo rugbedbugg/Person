@@ -61,3 +61,40 @@ def test_a_legacy_q_learning_checkpoint_is_recognised_and_refused() -> None:
 def test_a_person_configuration_is_not_mistaken_for_a_checkpoint() -> None:
     document = tomllib.loads((REPOSITORY / "examples/fixture.toml").read_text(encoding="utf-8"))
     assert not is_legacy_learning_checkpoint(document)
+
+
+# ------------------------------------------------------------ affect mode
+
+
+def _with_affect(tmp_path: Path, affect: dict[str, object] | None) -> Path:
+    document = tomllib.loads((REPOSITORY / "examples/fixture.toml").read_text(encoding="utf-8"))
+    document.pop("affect", None)
+    if affect is not None:
+        document["affect"] = affect
+    document["runtime"]["outputDirectory"] = str(tmp_path)
+    path = tmp_path / "config.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+    return path
+
+
+def test_the_affect_mode_is_read_from_the_configuration(tmp_path: Path) -> None:
+    for mode in ("off", "record_only", "active"):
+        settings = load_cognition_settings(_with_affect(tmp_path, {"mode": mode}))
+        assert settings.affect_mode == mode
+
+
+def test_an_unstated_affect_mode_keeps_the_behaviour_affect_has_had(tmp_path: Path) -> None:
+    assert load_cognition_settings(_with_affect(tmp_path, None)).affect_mode == "active"
+
+
+def test_an_unknown_affect_mode_is_refused(tmp_path: Path) -> None:
+    with pytest.raises(ConfigError):
+        load_cognition_settings(_with_affect(tmp_path, {"mode": "muted"}))
+    with pytest.raises(ConfigError):
+        load_cognition_settings(_with_affect(tmp_path, {"mode": "off", "gain": 2}))
+
+
+def test_every_shipped_configuration_states_its_affect_mode() -> None:
+    for path in sorted((REPOSITORY / "examples").glob("*.toml")):
+        document = tomllib.loads(path.read_text(encoding="utf-8"))
+        assert document.get("affect", {}).get("mode") == "active", path.name

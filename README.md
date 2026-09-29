@@ -63,6 +63,7 @@ person status   --config <file> [--json] [--follow [--interval <ms>]]
 person validate <file> [--migrate]
 person inspect  evidence|skills|config|predictions [--config <file>] [--json]
 person compare  <reference-observation.json> <actual-observation.json> [--json]
+person experiment --plan <plan.json> [--out <directory>] [--json]
 
 Every connecting command also accepts:
 person ... --operator-intervention[=reason]   mark the run as contaminated
@@ -74,7 +75,9 @@ compatibility with the previous runtime's habits.
 `observe` connects, takes one observation and stops. It is the smallest thing
 that can be done against a live Minecraft world, and the right first one.
 `status` reads what the runtime last wrote and never connects, so watching
-Person cannot change what Person does. `compare` diffs a capture against a
+Person cannot change what Person does. `experiment` runs a research plan in the fixture
+world, every condition on every world seed, and reports each metric per run
+(`experiments/`, ADR 0013). `compare` diffs a capture against a
 reference and flags fields that look like defaults nothing ever filled in.
 
 Minecraft assigns a new LAN port every time a world is opened, so `--port` is

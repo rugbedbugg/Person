@@ -1,0 +1,1928 @@
+{
+  "plan": {
+    "name": "r1-affect-modes",
+    "description": "R1 (ADR 0013): the same fixture world on the same seeds with affect off (P0), record-only (P1) and active (P2). Learning off, so the only thing that differs between conditions is affect.",
+    "world": "../fixtures/worlds/vertical-slice.json",
+    "config": "../examples/fixture.toml",
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "conditions": [
+      {
+        "id": "P0",
+        "affectMode": "off"
+      },
+      {
+        "id": "P1",
+        "affectMode": "record_only"
+      },
+      {
+        "id": "P2",
+        "affectMode": "active"
+      }
+    ],
+    "maxDecisions": 60,
+    "learningMode": "off"
+  },
+  "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+  "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+  "treeClean": true,
+  "comparisons": [
+    {
+      "between": [
+        "P0",
+        "P1"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 6,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 7,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 8,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 9,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 10,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "between": [
+        "P1",
+        "P2"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": 15,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 6,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 7,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 8,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 9,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 10,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        }
+      ],
+      "divergentSeeds": 1
+    },
+    {
+      "between": [
+        "P0",
+        "P2"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": 15,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 6,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 7,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 8,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 9,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        },
+        {
+          "seed": 10,
+          "firstDifference": -1,
+          "lengths": [
+            60,
+            60
+          ]
+        }
+      ],
+      "divergentSeeds": 1
+    }
+  ],
+  "runs": [
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 1,
+        "episodeId": "r1-affect-modes-p0-s1",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "6988d00a5fcef64db6a8ca527f8ff0f42decf313791cc2d3f472f22b48fc2f7e",
+        "worldSha256": "2af2e067d0a69dfd0b8d323fdce16cd14035272b7597853845c5ac4fe3720774",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 7
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 39,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 2,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 51,
+          "UNREACHABLE": 5
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 2,
+        "episodeId": "r1-affect-modes-p0-s2",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "4a78827074aa0ec3d2f9a396f5a8edffc275109b6a18fc545725b8a54e1f2842",
+        "worldSha256": "f31e058f09ac3bb9549d86b760ac56f4745231f65f67e02375db7afc6f46dfa9",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_chest": 2,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 42,
+          "repair_shelter": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 4,
+          "SUCCESS": 50,
+          "UNREACHABLE": 3
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 3,
+        "episodeId": "r1-affect-modes-p0-s3",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "3a8976fa614f84cd252b5e21b48a5dbd57620a41ce5f80fbf4407dc8e4e8b169",
+        "worldSha256": "857c15341bcce268dfa69ee576fa0b2082d672189a6b7a46eab7fe4735112ddb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 50,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 4,
+        "episodeId": "r1-affect-modes-p0-s4",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "50dae1a825bbe7f488d83d16a6ac196130cc679aa8e966e6fc070feed04b30c2",
+        "worldSha256": "0fe55cd3804e85bb389919ebf700bd7002d1631937e26cd9e5bd500c7542c00c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 4,
+          "ESTABLISH_TOOLS": 28,
+          "SECURE_FOOD": 25,
+          "SECURE_SHELTER": 2,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "eat_to_target": 1,
+          "flee": 4,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 6,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "INTERRUPTED": 2,
+          "SUCCESS": 54
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 5,
+        "episodeId": "r1-affect-modes-p0-s5",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "712e749457e5f9c7a2faf0224bd0e2024e58e3199959e20f0aba907170a03f6d",
+        "worldSha256": "cd82bcc6eb705df03fbcb5bb8acb23df8323288f112def636e3c238431a69445",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 5,
+          "ESTABLISH_TOOLS": 38,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 13,
+          "SECURE_SHELTER": 2,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "deposit_owned_storage": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 39,
+          "mine_stone": 1,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 55
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 6,
+        "episodeId": "r1-affect-modes-p0-s6",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "4211f6e86ed5f482f80c60c3f0e501439e2a49af2c7b463966071843a5cecb5a",
+        "worldSha256": "f5a0891d3e5d3baf956d0e133a677c6816f3e44efd2028d2167db3cb3235ac85",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-6/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 3,
+          "ESTABLISH_TOOLS": 48,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 43,
+          "repair_shelter": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 52,
+          "UNREACHABLE": 3
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 7,
+        "episodeId": "r1-affect-modes-p0-s7",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "8603a15e611daac7735f7d494999c41213e752b15aeea5d7c339b34e52158ec3",
+        "worldSha256": "32a3d2869d60ed92cf75f274d353685f9d2333cb988d3aaa52c0a9c9e657b28c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-7/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 5,
+          "ESTABLISH_TOOLS": 29,
+          "MAINTAIN_RESERVES": 15,
+          "SECURE_FOOD": 6,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 4,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 22,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 6,
+          "wait_safely": 17
+        },
+        "terminal_statuses": {
+          "FAILED": 2,
+          "INTERRUPTED": 2,
+          "SUCCESS": 47,
+          "UNREACHABLE": 9
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 8,
+        "episodeId": "r1-affect-modes-p0-s8",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "b2856e18489a84dcee8a0c81cca4c3404d6573d80d1dd603df43e0d510920f03",
+        "worldSha256": "f7bec20d181c9db6a649b379b080d8f5cc9dd5d4879f6e552307d3c83400f98b",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-8/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 50,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 9,
+        "episodeId": "r1-affect-modes-p0-s9",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "8b65cc50f7c406aaa7b119ecfc1b1611a5f50cb979f7fc46db2d58e3c804d4bf",
+        "worldSha256": "03c10337b746a8b6d69292d7f22210cb4d6dbe2c7b1da037778150e260d71750",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-9/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 36,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 49,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P0",
+        "affectMode": "off",
+        "seed": 10,
+        "episodeId": "r1-affect-modes-p0-s10",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "6d84563c15c93e98da0b9a669dec6e5e81b5aa629b7e5b659bbd7b2c4b7070bc",
+        "worldSha256": "5a38d5232d1f924169e5b655ce2dbf9facb48ff13a2cc87eeb0a08f7478246f2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P0/seed-10/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 36,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 49,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 1,
+        "episodeId": "r1-affect-modes-p1-s1",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "5f5e55c0c2b85187f487028e1ebcbef7bd3cdc3f156bf958932085058b6dbb9e",
+        "worldSha256": "2af2e067d0a69dfd0b8d323fdce16cd14035272b7597853845c5ac4fe3720774",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 7
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 39,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 2,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 51,
+          "UNREACHABLE": 5
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 2,
+        "episodeId": "r1-affect-modes-p1-s2",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "d29a2ab62ecfb2341545827fcdf42eee90c066d088cfab5a6fded2a1ba74c2e8",
+        "worldSha256": "f31e058f09ac3bb9549d86b760ac56f4745231f65f67e02375db7afc6f46dfa9",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_chest": 2,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 42,
+          "repair_shelter": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 4,
+          "SUCCESS": 50,
+          "UNREACHABLE": 3
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 3,
+        "episodeId": "r1-affect-modes-p1-s3",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "018cbf5a2dec92c52bdcf2d4c735b7943b3d3fd92a8a2284d74b0809c3c1c82e",
+        "worldSha256": "857c15341bcce268dfa69ee576fa0b2082d672189a6b7a46eab7fe4735112ddb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 50,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 4,
+        "episodeId": "r1-affect-modes-p1-s4",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "1e63b1c37d398fc5186247f825e6882f6d522615fccc08aa7afa6f81ba1cf81a",
+        "worldSha256": "0fe55cd3804e85bb389919ebf700bd7002d1631937e26cd9e5bd500c7542c00c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 4,
+          "ESTABLISH_TOOLS": 28,
+          "SECURE_FOOD": 25,
+          "SECURE_SHELTER": 2,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "eat_to_target": 1,
+          "flee": 4,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 6,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 4,
+          "INTERRUPTED": 2,
+          "SUCCESS": 54
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 5,
+        "episodeId": "r1-affect-modes-p1-s5",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "8719be2aa1ccef9936387dcee944ec1914236461d430c2bacd40a06f5f9bbb84",
+        "worldSha256": "cd82bcc6eb705df03fbcb5bb8acb23df8323288f112def636e3c238431a69445",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 5,
+          "ESTABLISH_TOOLS": 38,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 13,
+          "SECURE_SHELTER": 2,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "deposit_owned_storage": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 39,
+          "mine_stone": 1,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 55
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 6,
+        "episodeId": "r1-affect-modes-p1-s6",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "e65e2725feb08874339ffbd9cebb27f49ec002df4e5f9601769005f608cd45d7",
+        "worldSha256": "f5a0891d3e5d3baf956d0e133a677c6816f3e44efd2028d2167db3cb3235ac85",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-6/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 3,
+          "ESTABLISH_TOOLS": 48,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 43,
+          "repair_shelter": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 52,
+          "UNREACHABLE": 3
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 7,
+        "episodeId": "r1-affect-modes-p1-s7",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "cecde17a157546200a99d3e425082c045181ec791298acee11efb5364837abe6",
+        "worldSha256": "32a3d2869d60ed92cf75f274d353685f9d2333cb988d3aaa52c0a9c9e657b28c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-7/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 5,
+          "ESTABLISH_TOOLS": 29,
+          "MAINTAIN_RESERVES": 15,
+          "SECURE_FOOD": 6,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 4,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 22,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 6,
+          "wait_safely": 17
+        },
+        "terminal_statuses": {
+          "FAILED": 2,
+          "INTERRUPTED": 2,
+          "SUCCESS": 47,
+          "UNREACHABLE": 9
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 8,
+        "episodeId": "r1-affect-modes-p1-s8",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "a56e7e381d5e2c45955cf9f87c2feb4cafe5c4051c0443fcf1e9c9d00f9f677d",
+        "worldSha256": "f7bec20d181c9db6a649b379b080d8f5cc9dd5d4879f6e552307d3c83400f98b",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-8/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 50,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 9,
+        "episodeId": "r1-affect-modes-p1-s9",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "4d43772d991ab822737f68922501e24002b4eef38e97380e1bcca252bf1bb523",
+        "worldSha256": "03c10337b746a8b6d69292d7f22210cb4d6dbe2c7b1da037778150e260d71750",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-9/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 36,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 49,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P1",
+        "affectMode": "record_only",
+        "seed": 10,
+        "episodeId": "r1-affect-modes-p1-s10",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "c9b0f3c9f7042bd941dd9889029a75a81e7a7563515ebde58bffd3cac512cd61",
+        "worldSha256": "5a38d5232d1f924169e5b655ce2dbf9facb48ff13a2cc87eeb0a08f7478246f2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P1/seed-10/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 36,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 49,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 1,
+        "episodeId": "r1-affect-modes-p2-s1",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "4107daf2a44dda97eadc12cfd48e5ae6745ae3ae1b0236906536f9ef484caa63",
+        "worldSha256": "2af2e067d0a69dfd0b8d323fdce16cd14035272b7597853845c5ac4fe3720774",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 7
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 39,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 2,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 51,
+          "UNREACHABLE": 5
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 2,
+        "episodeId": "r1-affect-modes-p2-s2",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "d6271dde06d0ecd0f5e3989b8305ff178d3c89e7dd14e4bd4abc83e2daf1b367",
+        "worldSha256": "f31e058f09ac3bb9549d86b760ac56f4745231f65f67e02375db7afc6f46dfa9",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_chest": 2,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 42,
+          "repair_shelter": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 4,
+          "SUCCESS": 50,
+          "UNREACHABLE": 3
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 3,
+        "episodeId": "r1-affect-modes-p2-s3",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "a65bf1be2a1ee63bc7429299fb303d557f3007ee79e8207f63efdb892f76e86e",
+        "worldSha256": "857c15341bcce268dfa69ee576fa0b2082d672189a6b7a46eab7fe4735112ddb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 50,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 4,
+        "episodeId": "r1-affect-modes-p2-s4",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "202e3c7e548a5466f0619eebc248d78ecd34bf729f70c8d3e8086eac57ef1cb5",
+        "worldSha256": "0fe55cd3804e85bb389919ebf700bd7002d1631937e26cd9e5bd500c7542c00c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 18,
+          "MAINTAIN_RESERVES": 8,
+          "SECURE_FOOD": 24,
+          "SECURE_SHELTER": 2,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 3,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 30,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 11,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 7,
+          "INTERRUPTED": 1,
+          "SUCCESS": 52
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 5,
+        "episodeId": "r1-affect-modes-p2-s5",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "46571b59c25e8fd324e375b0875da3a103fc79524d1a21eb9e3b1a475f353fb2",
+        "worldSha256": "cd82bcc6eb705df03fbcb5bb8acb23df8323288f112def636e3c238431a69445",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 5,
+          "ESTABLISH_TOOLS": 38,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 13,
+          "SECURE_SHELTER": 2,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "deposit_owned_storage": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 39,
+          "mine_stone": 1,
+          "place_owned_chest": 1,
+          "return_home": 2,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 55
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 6,
+        "episodeId": "r1-affect-modes-p2-s6",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "056c34b55650f431dc0a105dd0cebb8f5472e427d684cfcace0ef566dce2acba",
+        "worldSha256": "f5a0891d3e5d3baf956d0e133a677c6816f3e44efd2028d2167db3cb3235ac85",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-6/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 3,
+          "ESTABLISH_TOOLS": 48,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 43,
+          "repair_shelter": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 52,
+          "UNREACHABLE": 3
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 7,
+        "episodeId": "r1-affect-modes-p2-s7",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "10b3da28ad8f40463334eba565a622e35ac89744c99a04d9ab96b103c5726911",
+        "worldSha256": "32a3d2869d60ed92cf75f274d353685f9d2333cb988d3aaa52c0a9c9e657b28c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-7/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 5,
+          "ESTABLISH_TOOLS": 29,
+          "MAINTAIN_RESERVES": 15,
+          "SECURE_FOOD": 6,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 4,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 22,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 6,
+          "wait_safely": 17
+        },
+        "terminal_statuses": {
+          "FAILED": 2,
+          "INTERRUPTED": 2,
+          "SUCCESS": 47,
+          "UNREACHABLE": 9
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 8,
+        "episodeId": "r1-affect-modes-p2-s8",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "e0c9757f4d0d3d74ea89b7cc9a31009df1d7fe96ae8edfdb9739e52af673f8d1",
+        "worldSha256": "f7bec20d181c9db6a649b379b080d8f5cc9dd5d4879f6e552307d3c83400f98b",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-8/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 7,
+          "ESTABLISH_TOOLS": 44,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 6
+        },
+        "executed_skills": {
+          "craft_basic_tools": 1,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 38,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 4
+        },
+        "terminal_statuses": {
+          "FAILED": 1,
+          "INTERRUPTED": 3,
+          "SUCCESS": 50,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 9,
+        "episodeId": "r1-affect-modes-p2-s9",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "789c3d702490cb2e5ee5577b0f448d9197f0754114e81aaa9dfbe7b97b34ff16",
+        "worldSha256": "03c10337b746a8b6d69292d7f22210cb4d6dbe2c7b1da037778150e260d71750",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-9/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 36,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 49,
+          "UNREACHABLE": 6
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r1-affect-modes",
+        "planSha256": "418941ac9205ad6adba4029fa8bd72e0de83cdd43c68b0493543a8c51725f5c7",
+        "condition": "P2",
+        "affectMode": "active",
+        "seed": 10,
+        "episodeId": "r1-affect-modes-p2-s10",
+        "commit": "aaac2bd7af63298d9ee3ea80d8c45bc51296bc40",
+        "treeClean": true,
+        "configSha256": "1e1bb5c9f0aba6cc0ec377144b87cd51c477b0095328276b6e62eb7ca1a1006b",
+        "worldSha256": "5a38d5232d1f924169e5b655ce2dbf9facb48ff13a2cc87eeb0a08f7478246f2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 60,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r1-affect-modes/P2/seed-10/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 6,
+          "ESTABLISH_TOOLS": 45,
+          "MAINTAIN_RESERVES": 1,
+          "SECURE_FOOD": 3,
+          "SECURE_SHELTER": 5
+        },
+        "executed_skills": {
+          "craft_basic_tools": 2,
+          "craft_chest": 1,
+          "craft_stone_tools": 1,
+          "eat_to_target": 1,
+          "flee": 5,
+          "gather_plant_food": 1,
+          "gather_wood": 1,
+          "look": 36,
+          "mine_stone": 1,
+          "repair_shelter": 3,
+          "return_home": 3,
+          "wait_safely": 5
+        },
+        "terminal_statuses": {
+          "FAILED": 3,
+          "INTERRUPTED": 2,
+          "SUCCESS": 49,
+          "UNREACHABLE": 6
+        }
+      }
+    }
+  ]
+}

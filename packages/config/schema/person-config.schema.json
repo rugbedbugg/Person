@@ -64,6 +64,18 @@
         "minimumSupport": { "type": "integer", "minimum": 1, "maximum": 100 }
       }
     },
+    "affect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "description": "How far Person's affect is switched on (ADR 0013). Read by cognition only; the runtime neither reads nor receives it.",
+      "properties": {
+        "mode": {
+          "enum": ["off", "record_only", "active"],
+          "description": "off: affect does not evolve and reaches no decision. record_only: appraised and journalled exactly as active, reaching no decision. active: the ADR 0010 behaviour. Unset means active."
+        }
+      }
+    },
     "cognition": {
       "type": "object",
       "additionalProperties": false,

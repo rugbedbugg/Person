@@ -354,3 +354,29 @@ test("trusted safety knows nothing of curiosity", () => {
       );
     }
 });
+
+test("instrumentation stays outside Person and the runtime", () => {
+  // The experiment harness (ADR 0013) may read privileged engineering data
+  // after a run. Nothing that runs Person may depend on it, and the runtime
+  // never learns the affect mode, which is cognition's own setting.
+  for (const root of [
+    "apps/node-runtime/src",
+    "adapters/minecraft/src",
+    "fixtures/src",
+    "packages/protocol",
+  ])
+    for (const file of sourceFiles(root, ".ts")) {
+      const source = readFileSync(file, "utf8");
+      assert.ok(
+        !/experiment\.ts|runExperiment|affectMode|affect\.mode/.test(source),
+        `${file} must not depend on the experiment harness or the affect mode`,
+      );
+    }
+  for (const file of sourceFiles("apps/cognition/python", ".py")) {
+    const source = readFileSync(file, "utf8");
+    assert.ok(
+      !/experiment_harness|metrics\.csv|results\.json/.test(source),
+      `${file} must not read experiment results`,
+    );
+  }
+});

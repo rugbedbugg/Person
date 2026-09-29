@@ -129,8 +129,12 @@ class CognitionLoop:
         log: Callable[[str], None] | None = None,
         evidence_directory: Path | None = None,
         validator: ProtocolValidator | None = None,
+        affect_mode: str = "active",
     ) -> None:
         self.settings = settings
+        #: How far affect is switched on (ADR 0013); from Person's own
+        #: configuration, never from the runtime.
+        self.affect_mode = affect_mode
         self.registry = registry or skill_registry()
         self.validator = validator or protocol_validator()
         self._write = write or (lambda line: sys.stdout.write(line))
@@ -147,7 +151,7 @@ class CognitionLoop:
         self.projects = ProjectManager(self.project_book)
         #: Person's affect, rebuilt from its own appraisals (ADR 0010).
         self.affect_record = AffectRecord()
-        self.affect = Affect(self.affect_record)
+        self.affect = Affect(self.affect_record, mode=affect_mode)
         self._felt_health: float | None = None
         self._goal_events_seen = 0
         #: Learned reliability of skill effects, active and shadow (ADR 0011).
@@ -314,7 +318,7 @@ class CognitionLoop:
         # next observes the world, not assumed.
         self.projects = ProjectManager(self.project_book)
         # Affect persists too, and settles only as experienced time passes.
-        self.affect = Affect(self.affect_record)
+        self.affect = Affect(self.affect_record, mode=self.affect_mode)
         # So do hypotheses and investigations; an open investigation resumes.
         self.investigations = InvestigationManager(self.hypothesis_book.investigations)
         self.offered = tuple(str(skill) for skill in message["skillIds"])
@@ -346,6 +350,7 @@ class CognitionLoop:
                 "rng_seed": message["rngSeed"],
                 "training_context": message["trainingContext"],
                 "learning_mode": self.learning_mode,
+                "affect_mode": self.affect_mode,
                 "experienced_ticks": self.memory.now,
                 "self_estimate": self.spatial.estimate.to_json(),
             },
@@ -1294,7 +1299,9 @@ class CognitionLoop:
         """Apply one appraisal and journal its full causal record."""
         if appraisal is None:
             return
-        self._record("affect_appraised", tick, self.affect.feel(appraisal, self.memory.now))
+        record = self.affect.feel(appraisal, self.memory.now)
+        if record is not None:
+            self._record("affect_appraised", tick, record)
 
     def _appraise_body(self, observation: dict[str, Any], tick: int) -> None:
         """What the world and the body feel like now: threat perceived, harm felt."""

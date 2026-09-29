@@ -18,7 +18,13 @@ The state has three dimensions, each with a plain meaning:
     control   [-1, 1]  whether Person's own actions seem to work
 
 Every appraisal records what triggered it, its components, and the change it
-made, so an observer can always answer "why did this change?". Activation
+made, so an observer can always answer "why did this change?".
+
+An affect mode (ADR 0013) switches affect for experiments. `active` is the
+behaviour above. `record_only` appraises and records exactly as `active` does,
+and lets nothing reach a decision. `off` lets nothing evolve at all. The mode
+is consulted in two places only: where the state evolves, and where it is
+consumed. Activation
 decays toward a baseline as Person's experienced time passes. A temperament
 supplies the baseline, how strongly Person reacts and how fast it recovers;
 the default is neutral, and nothing here depends on its values.
@@ -33,6 +39,9 @@ from typing import Any
 from person_persistence import EvidenceEvent
 
 DIMENSIONS: tuple[str, ...] = ("valence", "unease", "control")
+
+#: How far affect is switched on (ADR 0013). Unset means `active`.
+AFFECT_MODES: tuple[str, ...] = ("off", "record_only", "active")
 RANGES: Mapping[str, tuple[float, float]] = {
     "valence": (-1.0, 1.0),
     "unease": (0.0, 1.0),
@@ -250,7 +259,15 @@ class AffectRecord:
 class Affect:
     """Person's affect, for the cognition loop: appraise, decay, bias."""
 
-    def __init__(self, record: AffectRecord, temperament: Temperament | None = None) -> None:
+    def __init__(
+        self,
+        record: AffectRecord,
+        temperament: Temperament | None = None,
+        mode: str = "active",
+    ) -> None:
+        if mode not in AFFECT_MODES:
+            raise ValueError(f"unknown affect mode {mode!r}; expected one of {AFFECT_MODES}")
+        self.mode = mode
         self.temperament = temperament or Temperament()
         # A restart resumes the recorded state: affect is part of continuity.
         # It decays from when it was recorded, in experienced time only.
@@ -259,11 +276,18 @@ class Affect:
 
     def advance(self, now: int) -> None:
         """Let experienced time pass: activation settles toward baseline."""
+        if self.mode == "off":
+            return
         self.state = decay(self.state, self.temperament, now - self._at)
         self._at = max(self._at, now)
 
-    def feel(self, appraisal: Appraisal, now: int) -> dict[str, Any]:
-        """Apply one appraisal. Returns the engineering record of the change."""
+    def feel(self, appraisal: Appraisal, now: int) -> dict[str, Any] | None:
+        """Apply one appraisal. Returns the engineering record of the change.
+
+        With affect off nothing is applied and there is nothing to record.
+        """
+        if self.mode == "off":
+            return None
         self.advance(now)
         scaled = {
             dimension: round(delta * self.temperament.reactivity, 4)
@@ -296,7 +320,7 @@ class Affect:
         neighbours among the legitimate, non-urgent candidates, and nothing
         more.
         """
-        if source == "emergency":
+        if self.mode != "active" or source == "emergency":
             return 0.0
         pull = SENSITIVITY[self.character(completion_facts)]
         raw = sum(weight * self.state.get(dimension) for dimension, weight in pull.items())
@@ -310,6 +334,8 @@ class Affect:
         preference inside what the runtime already permits, never a change to
         what it permits.
         """
+        if self.mode != "active":
+            return 1.0
         low, high = TOLERANCE_RANGE
         raw = 1.0 - 0.5 * self.state.unease + 0.25 * self.state.control
         return round(max(low, min(high, raw)), 4)

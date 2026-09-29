@@ -326,6 +326,21 @@ claim without reading the whole tree.
 | Hidden rule discovered; frame- and hazard-invariant | the whole loop                                         | `tests/integration/causal-learning.test.ts`                                             |
 | Curiosity grants no authority                       | no experiment case in safety or skills                 | `trusted safety knows nothing of curiosity`                                             |
 
+## Affect modes and experiments (ADR 0013)
+
+| Requirement                                                             | Implementation                                               | Tests                                                                                                |
+| ----------------------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| `off`: affect does not evolve and reaches no decision                   | `Affect.advance`, `Affect.feel` return early                 | `test_off_appraises_nothing_and_the_state_never_moves`                                               |
+| `record_only` appraises and journals exactly as `active`                | one appraisal path; `Affect.feel`                            | `test_record_only_journals_exactly_what_active_journals`                                             |
+| Only `active` affect reaches a decision                                 | `Affect.bias`, `Affect.tolerance` answer neutrally otherwise | `test_only_active_affect_reaches_a_decision`, `test_neither_consumption_point_answers_unless_active` |
+| The mode is consulted only where state evolves and where it is consumed | `affect.py`                                                  | `test_the_mode_is_consulted_only_at_the_consumption_boundary`                                        |
+| Negative control: `off` and `record_only` decide identically            | same                                                         | `test_off_and_record_only_make_the_same_decisions`, `tests/cli/experiment.test.ts`                   |
+| The mode is Person's configuration, never the runtime's                 | `[affect] mode`, `CognitionSettings.affect_mode`             | `packages/config/tests/test_config.py`, `instrumentation stays outside Person and the runtime`       |
+| The recorded bias always accounts for the priority                      | `GoalStack.update` refreshes base and bias with priority     | `test_the_recorded_bias_always_accounts_for_the_priority`                                            |
+| Independent, seeded, reproducible runs with full metadata               | `apps/cli/src/experiment.ts`                                 | `tests/cli/experiment.test.ts`                                                                       |
+| The seed changes the world and never reaches Person                     | seed applied to the fixture definition only                  | `the seed changes the world and never reaches Person`                                                |
+| No aggregate score                                                      | `measure` returns named metrics only                         | by construction; `docs/evidence/experiments/README.md`                                               |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

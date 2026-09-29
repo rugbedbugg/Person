@@ -53,6 +53,9 @@ class CognitionSettings:
     exploration_bonus: float
     minimum_support: int
     rng_seed: int | None
+    #: How far affect is switched on (ADR 0013). Cognition's alone: the
+    #: runtime neither reads nor receives it.
+    affect_mode: str = "active"
 
     def cross_check(self, *, learning_mode: str, evidence_directory: str) -> None:
         """Fail closed when the runtime disagrees with the file we read."""
@@ -98,4 +101,5 @@ def load_cognition_settings(filename: str | Path) -> CognitionSettings:
         exploration_bonus=learning.get("explorationBonus", 0.15),
         minimum_support=learning.get("minimumSupport", 3),
         rng_seed=runtime.get("rngSeed"),
+        affect_mode=document.get("affect", {}).get("mode", "active"),
     )

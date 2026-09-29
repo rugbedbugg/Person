@@ -273,7 +273,15 @@ class GoalStack:
                     self.active_id = None
                 continue
             if goal_id in proposed:
-                self.entries[goal_id] = replace(goal, priority=proposed[goal_id].priority)
+                fresh = proposed[goal_id]
+                # Priority, and what it is made of, move together: a record
+                # carrying a stale base or affect bias would misstate why.
+                self.entries[goal_id] = replace(
+                    goal,
+                    priority=fresh.priority,
+                    base_priority=fresh.base_priority,
+                    affect_bias=fresh.affect_bias,
+                )
             elif goal.status == "ACTIVE":
                 self.entries[goal_id] = replace(
                     goal, status="SUSPENDED", suspension_reason="no_longer_proposed"

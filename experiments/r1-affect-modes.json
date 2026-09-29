@@ -1,0 +1,14 @@
+{
+  "name": "r1-affect-modes",
+  "description": "R1 (ADR 0013): the same fixture world on the same seeds with affect off (P0), record-only (P1) and active (P2). Learning off, so the only thing that differs between conditions is affect.",
+  "world": "../fixtures/worlds/vertical-slice.json",
+  "config": "../examples/fixture.toml",
+  "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "conditions": [
+    { "id": "P0", "affectMode": "off" },
+    { "id": "P1", "affectMode": "record_only" },
+    { "id": "P2", "affectMode": "active" }
+  ],
+  "maxDecisions": 60,
+  "learningMode": "off"
+}
