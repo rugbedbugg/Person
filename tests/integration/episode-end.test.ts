@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { FixtureWorld } from "#fixture-world";
+import { REPOSITORY } from "../support/harness.ts";
 import { runEpisode } from "../support/runtime.ts";
 
 /**
@@ -52,5 +54,38 @@ test(
         readdirSync(path.join(evidenceDirectory, "snapshots")).length > 0,
       "and cognition wrote its final snapshot",
     );
+  },
+);
+
+/** A body that, like Mineflayer, forgets the world's clock once disconnected. */
+class ForgetfulWorld extends FixtureWorld {
+  #gone = false;
+  override async disconnect(): Promise<void> {
+    this.#gone = true;
+    await super.disconnect();
+  }
+  override snapshot(): ReturnType<FixtureWorld["snapshot"]> {
+    const snapshot = super.snapshot();
+    return this.#gone ? { ...snapshot, tick: 0 } : snapshot;
+  }
+}
+
+test(
+  "an episode's length is measured before the body is let go",
+  { timeout: 300000 },
+  async () => {
+    const definition = JSON.parse(
+      readFileSync(
+        path.join(REPOSITORY, "fixtures/worlds/vertical-slice.json"),
+        "utf8",
+      ),
+    );
+    const { report } = await runEpisode({
+      worldObject: new ForgetfulWorld(definition),
+      cognitionCommand: COGNITION,
+      maxDecisions: 4,
+    });
+    assert.ok(report.elapsedTicks > 0, `elapsed ${report.elapsedTicks}`);
+    assert.ok(report.endTick >= report.decisions.at(-1)!.tick);
   },
 );
