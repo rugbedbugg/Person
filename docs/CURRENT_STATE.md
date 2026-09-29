@@ -1,16 +1,27 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `feat/causal-learning`, based on `8a6d264` (tip of `feat/lan-validation` after PR #14)
+**Last verified against:** branch `docs/status-sync`, based on `12f2acc` (tip of `feat/lan-validation` after PR #15)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
-**Date:** 2026-09-26
+**Date:** 2026-09-29
 
 This file is strictly factual. It describes what exists in the source tree and
 what has been run. **`docs/PERSON_SPEC.md` specifies a great deal that is not
-here**, including the perception firewall's sense model, semantic, spatial,
-social and autobiographical memory, consolidation, belief, affect, language, social cognition, projects, web
-research, external chat, the Baritone motor backend and the 1.16.5 target.
-That specification's architecture was reconciled on 2026-09-22 and **changed
-no code**. None of it appears below, because none of it exists.
+here**, including an attention model, semantic, social and autobiographical
+memory, consolidation, a knowledge store, language, social cognition and
+relationships, web research, external chat, the Baritone motor backend and the
+1.16.5 target. Since the architecture was frozen on 2026-09-22, the perception
+firewall, bounded gaze and information seeking, episodic memory, a spatial
+model and cognitive home, persistent projects, affect, learned effect
+reliability and causal hypotheses have been built, each described below. All of
+them are TESTED IN FIXTURE only; none has run against Minecraft.
+
+Development since the freeze followed an operator roadmap, merged into
+`feat/lan-validation` one pull request at a time: A information seeking (PR
+#6), B episodic memory (#8), C self-motion and places (#9, with the C8 fix in
+#10), D persistent projects (#11), E affect (#12, with the perceived-path-risk
+fix in #13), F learned effect reliability (#14), F2 causal hypotheses and
+experiments (#15). The next research track is affect experiment infrastructure;
+nothing of it exists yet.
 
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
@@ -95,6 +106,7 @@ Two implementations, same skill code:
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
+- **Experienced time (ADR 0006, partly implemented):** Person's own clock counts only ticks between observations it received, is journalled on `episode_ended`, and resumes after a restart; memory accessibility, affect decay, project cooldowns and experiment patience run on it. External time, the five operational states and death semantics are not implemented
 
 ### Evidence & Persistence (`packages/persistence/`)
 
@@ -175,7 +187,7 @@ Parameters: scalars only. No command, script, chat, or coordinate fields possibl
 | look                      | ✅ pass | ❌ `bot.look` not in the double | ❌ not run                | one gaze step; Person stays facing  |
 
 **Status vocabulary used strictly:** Fixture / Adapter / Live. Two skills are
-marked Live; the other nineteen are not. Live evidence is the three
+marked Live; the other twenty-one are not. Live evidence is the three
 `person skill-test` reports described in `REALITY_VALIDATION.md`, which are
 local operator artifacts under `runs/` and are **not committed** (`runs/` is
 gitignored).
@@ -234,7 +246,12 @@ gitignored).
 | Causal hypotheses, grounding gate, experiments         | IMPLEMENTED + TESTED IN FIXTURE (integration test)                        |
 
 **Future providers (placeholder, raise not implemented):**
-WorldModelProvider, AffectProvider, LanguageProvider, SocialProvider, ProjectProvider, ExplorationProvider
+WorldModelProvider, LanguageProvider, SocialProvider, ExplorationProvider.
+Memory, projects and affect left the list when they were built (ADR 0007, ADR
+0009, ADR 0010), and a test asserts that no placeholder outlives its
+implementation. The world model and exploration placeholders are already
+partly overtaken by effect beliefs and hypotheses (ADR 0011, ADR 0012) and
+stay until their own systems are designed.
 
 ---
 
@@ -311,11 +328,11 @@ the intended order is basic gathering, and it has not been started.
 
 ## 10. Fixture / Conformance Status
 
-| Environment                                                          | Purpose                                           | Status                                             |
-| -------------------------------------------------------------------- | ------------------------------------------------- | -------------------------------------------------- |
-| Deterministic fixture world (`fixtures/src/`)                        | Integration tests, skill logic, evidence pipeline | Fully exercised — 184 Node tests, 129 Python tests |
-| Mineflayer conformance double (`tests/support/mineflayer-double.ts`) | Adapter vs real 1.16.1 data tables                | 27 tests — exercises adapter code paths            |
-| Protocol corpus (`fixtures/protocol-corpus/`)                        | Cross-runtime schema agreement                    | 29 messages — both runtimes agree                  |
+| Environment                                                          | Purpose                                           | Status                                  |
+| -------------------------------------------------------------------- | ------------------------------------------------- | --------------------------------------- |
+| Deterministic fixture world (`fixtures/src/`)                        | Integration tests, skill logic, evidence pipeline | Fully exercised; counts in section 13   |
+| Mineflayer conformance double (`tests/support/mineflayer-double.ts`) | Adapter vs real 1.16.1 data tables                | 27 tests — exercises adapter code paths |
+| Protocol corpus (`fixtures/protocol-corpus/`)                        | Cross-runtime schema agreement                    | 29 messages — both runtimes agree       |
 
 ---
 
@@ -326,6 +343,13 @@ the intended order is basic gathering, and it has not been started.
 **Milestone 2, stages 1 and 2 complete:** Single-skill live validation. `wait_safely` and `return_home` run live through `person skill-test` on 2026-09-16, both SUCCESS. Stages 3–8 (gathering, crafting, mining, placement, containers, hunting) not started.
 
 **Phase 0 architecture reconciliation (2026-09-22):** documentation only. `docs/PERSON_SPEC.md` architecture frozen, six ADRs written, no production behaviour changed. **Phase 0.5 normalization (2026-09-22):** the frozen architecture was integrated into PERSON_SPEC's numbered sections in place, so it is read linearly rather than as an override layer; see `docs/PROJECT_HISTORY.md`.
+
+**The live evidence is older than the current body contract.** Every live run
+used `observationVersion` 1. Versions 2 to 7 (relative percepts and the
+vision cone, recognition gating, the ledger label, self-motion, the retired
+`homeDistance`, perceived path risk), the `look` and `look_around` skills, the
+C7 route-veto repair and everything in cognition since 2026-09-16 have never
+run against Minecraft.
 
 **Remaining blockers for live validation (from REALITY_VALIDATION.md):**
 
@@ -828,8 +852,8 @@ runtime would allow a direct route home), not a distance.
 | No language-model proposer is wired; the deterministic contrast proposer is the only reasoner                                     | ADR 0012                   |
 | No consolidation and no knowledge store; nothing is promoted to knowledge                                                         | ADR 0012, C6               |
 | Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                                                             | REALITY_VALIDATION.md      |
-| No belief, semantic/spatial memory, affect, language, social or project system                                                    | Known Deviations C6, above |
-| Memory changes one decision: how long a search at a recognised place lasts                                                        | ADR 0007, ADR 0008         |
+| No semantic, social or autobiographical memory, no knowledge store, no language, social system or relationships                   | Known Deviations C6, above |
+| Memory changes two decisions: how long a search at a recognised place lasts, and a restarted project's reasons                    | ADR 0007, ADR 0008, 0009   |
 | Place recognition is by drifting estimate and coarse scene only; no landmark identity                                             | ADR 0008, C4               |
 | A small teleport inside the locomotion bound is felt as ordinary motion                                                           | ADR 0008                   |
 | Actions are remembered without their referent until C4 is resolved                                                                | ADR 0007, C4               |
@@ -842,9 +866,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 269     | 269     |
-| Python (all) | 265     | 265     |
-| **Total**    | **534** | **534** |
+| Node (all)   | 276     | 276     |
+| Python (all) | 319     | 319     |
+| **Total**    | **595** | **595** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -864,11 +888,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `feat/causal-learning` on 2026-09-26: Node 276 pass / 0 fail,
-Python 318 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `docs/status-sync` on 2026-09-29: Node 276 pass / 0 fail,
+Python 319 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
-267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14.
+267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
+276 / 318 after PR #15.
 
 ---
 
@@ -883,7 +908,7 @@ Python 318 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 | `docs/EVALUATION.md`           | What automated suite proves / does not prove                           |
 | `docs/ARCHITECTURE.md`         | Current and target process diagrams, packages, decision loop           |
 | `docs/PERSON_SPEC.md`          | Full architectural specification (source of truth); read top to bottom |
-| `docs/decisions/`              | ADRs 0001–0006, frozen 2026-09-22                                      |
+| `docs/decisions/`              | ADRs 0001–0012; 0012 accepted 2026-09-29                               |
 | `docs/SEMANTIC_TARGETING.md`   | The referent scheme compositional actions will need                    |
 | `docs/evidence/skill-tests/`   | Tracked copies of the three live skill-test reports, with provenance   |
 | `docs/BARITONE_FEASIBILITY.md` | Phase 1 spike: the Baritone 1.16.5 navigation verdict and its evidence |

@@ -1489,8 +1489,13 @@ I already knew this.
 
 **CURRENTLY IMPLEMENTED:** one adjacent distinction, the training context on
 every statistic, which keeps fixture evidence from standing in for Minecraft
-evidence. That is provenance about where an experience happened, not about how
-a belief was acquired, and no belief store exists to carry the latter.
+evidence. That is provenance about where an experience happened. **And (ADR
+0012, fixture only):** the four classes `INITIAL`, `PERSONAL_OBSERVATION`,
+`PERSONAL_EXPERIMENT` and `INFERENCE` are carried by causal hypotheses and
+their evidence: a hypothesis is inference, its evidence is Person's own
+observation or experiment, and skill contracts and the vocabulary are initial
+knowledge. The other classes above (told, read, another Person) have no
+channel yet, because nothing external reaches Person.
 
 Canonical initial Person starts at approximately experienced-player Minecraft
 knowledge, detailed in section 45.1. It is not initialized with a catalog of
@@ -1582,8 +1587,9 @@ a whitelist from what cognition was given or did, the journal records each
 encoding, and the memory store is rebuilt from those records alone. Retrieval
 (section 25) is by typed cue, at most three memories at a time, ranked by cue
 relevance times an accessibility that decays with experienced time and more
-slowly with salience. Semantic, spatial, social and autobiographical memory,
-consolidation and interference measurement are not implemented.
+slowly with salience. A first spatial memory exists too (ADR 0008, section
+24.4). Semantic, social and autobiographical memory, consolidation and
+interference measurement are not implemented.
 `PlacementLedger` (`apps/node-runtime/src/runtime/placement-ledger.ts`,
 formerly `WorldMemory`) is a runtime-owned ownership and placement ledger, not
 Person's memory. See `docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6.
@@ -3251,9 +3257,15 @@ elapsed. It does not remember them.
 
 **CURRENTLY IMPLEMENTED:** both clocks are already recorded on every protocol
 message and every evidence event, as `tick` and `timestamp` (section 7).
-Nothing yet reasons about the gap between two timestamps, and `SUSPENDED` is
-not a state the system knows it was in; it is simply the absence of events.
-See `docs/decisions/0006-two-clock-lifecycle.md`.
+**And (ADR 0006, accepted and partially implemented, fixture only):** Person's
+experienced time, which counts only Minecraft ticks between observations it
+actually received, is journalled on `episode_ended` and reconstructed after a
+restart, so nothing is counted for time the process did not run. Memory
+accessibility, affect decay, project cooldowns and experiment patience run on
+it. Nothing yet reasons about external time or the gap between two
+timestamps, and none of the lifecycle states in section 60.1 is represented:
+`SUSPENDED` is simply the absence of events. See
+`docs/decisions/0006-two-clock-lifecycle.md`.
 
 ---
 
@@ -3556,9 +3568,11 @@ Rule:
 
 These phases were written before the Baritone direction (section 6.1) existed.
 Their contents remain the intended contents; their order is no longer a
-schedule. The next milestone is the bounded Baritone spike described in
-`docs/decisions/0001-baritone-motor-backend.md`, which is embodiment work
-rather than any phase below.
+schedule. The Baritone feasibility spike (ADR 0001, PR #2) is done;
+integration has not begun. Since 2026-09-22 work has followed an operator
+roadmap instead (`docs/PROJECT_HISTORY.md`, phase 9), which has built parts
+of several phases below: memory, places, projects, affect, and the first
+prediction, belief and experiment machinery, all TESTED IN FIXTURE only.
 
 ## Phase 0 — Runtime Foundation
 

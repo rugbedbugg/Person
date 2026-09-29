@@ -65,25 +65,27 @@ These invariants are established by the repository's implementation and commit h
 
 ### Frozen 2026-09-22
 
-These constrain work that has not started. They are not yet enforced by tests,
-which is exactly why an agent has to hold them.
+Some of these now have code and tests behind them, named in the last column;
+the rest constrain work that has not started and are enforced by nothing but
+an agent holding them.
 
-| Invariant                                                                            | Where it is decided                                    |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------ |
-| Physical truth, perception, belief, memory, knowledge and reasoning stay distinct    | PERSON_SPEC section 26                                 |
-| A motor backend's world knowledge does not become Person's perception                | PERSON_SPEC section 8, ADR 0002                        |
-| The event store is engineering truth; Person gets recollection, not a database query | PERSON_SPEC section 24, ADR 0003                       |
-| Baritone is motor cortex, not cognition; no command strings reach cognition          | PERSON_SPEC section 6.1, ADR 0001                      |
-| Targets are runtime-issued referents, never coordinates chosen by cognition          | PERSON_SPEC section 10.1, `docs/SEMANTIC_TARGETING.md` |
-| Unrestricted subjects is not unrestricted external agency                            | PERSON_SPEC section 45.2, ADR 0004                     |
-| Cognitive autonomy is not environmental authority; a refusal is reported honestly    | PERSON_SPEC section 3, ADR 0005                        |
-| Raising one capability axis must not silently raise another                          | PERSON_SPEC section 4.1                                |
-| No cognition is fabricated for a period when the process did not run                 | PERSON_SPEC section 60, ADR 0006                       |
-| Containment, self-preservation and property policy are separate concerns             | PERSON_SPEC section 13, `docs/SAFETY.md`               |
-| Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC section 51.1                               |
+| Invariant                                                                            | Where it is decided                                    | Enforced by tests                                                                                                         |
+| ------------------------------------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
+| Physical truth, perception, belief, memory, knowledge and reasoning stay distinct    | PERSON_SPEC section 26                                 | Partly: `test_memory.py`, `test_affect.py` (`test_affect_is_not_belief`), `test_no_hypothesis_is_ever_declared_knowledge` |
+| A motor backend's world knowledge does not become Person's perception                | PERSON_SPEC section 8, ADR 0002                        | Yes: `tests/observation/perception-firewall.test.ts`, `vision.test.ts`                                                    |
+| The event store is engineering truth; Person gets recollection, not a database query | PERSON_SPEC section 24, ADR 0003                       | Yes: `test_memory_cannot_read_the_journal_for_itself`, `test_no_arbitrary_query_interface_to_memory_exists`               |
+| Baritone is motor cortex, not cognition; no command strings reach cognition          | PERSON_SPEC section 6.1, ADR 0001                      | No Baritone exists; the command-field test covers the protocol                                                            |
+| Targets are runtime-issued referents, never coordinates chosen by cognition          | PERSON_SPEC section 10.1, `docs/SEMANTIC_TARGETING.md` | No: skills still choose their own targets (C4)                                                                            |
+| Unrestricted subjects is not unrestricted external agency                            | PERSON_SPEC section 45.2, ADR 0004                     | No: nothing external exists                                                                                               |
+| Cognitive autonomy is not environmental authority; a refusal is reported honestly    | PERSON_SPEC section 3, ADR 0005                        | Yes: validator and attribution tests                                                                                      |
+| Raising one capability axis must not silently raise another                          | PERSON_SPEC section 4.1                                | No                                                                                                                        |
+| No cognition is fabricated for a period when the process did not run                 | PERSON_SPEC section 60, ADR 0006                       | Partly: the experienced-time clock (restart tests in `test_memory.py`, `test_affect.py`)                                  |
+| Containment, self-preservation and property policy are separate concerns             | PERSON_SPEC section 13, `docs/SAFETY.md`               | No: still documentary (C2)                                                                                                |
+| Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC section 51.1                               | Partly: `operatorIntervention` on skill-test reports                                                                      |
 
 Known disagreements between the frozen architecture and the current code are
-listed in **`docs/CURRENT_STATE.md`, "Known Deviations"** (C1-C7). Each needs a
+listed in **`docs/CURRENT_STATE.md`, "Known Deviations"** (C1-C8; C1, C3, C7
+and C8 are resolved, C2, C4, C5 and C6 are open). Each needs a
 decision before the code it touches is changed. **Do not resolve one silently.**
 
 ---
@@ -189,8 +191,8 @@ When documenting any capability, use only these terms:
 
 ---
 
-_Last updated: 2026-09-22_
-_Baseline for this update: `48728e8` (feat/lan-validation)_
+_Last updated: 2026-09-29_
+_Baseline for this update: `12f2acc` (feat/lan-validation, after PR #15)_
 _Tag: `v0.1.0-foundation` (`6b99830`)_
 
 HEAD moves. Do not trust the line above as a current-branch reference; run
