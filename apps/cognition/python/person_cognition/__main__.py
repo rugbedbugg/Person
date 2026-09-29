@@ -8,6 +8,7 @@ standard error, which the runtime captures but never parses as protocol.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from collections.abc import Iterator
 from pathlib import Path
@@ -15,6 +16,7 @@ from typing import TextIO
 
 from person_config import ConfigError, load_cognition_settings
 
+from .affect import research_bounds
 from .effects import main as compare_effects
 from .loop import CognitionLoop
 
@@ -53,7 +55,21 @@ def main(argv: list[str] | None = None) -> int:
             "starts no cognition loop, reads no evidence, and proposes nothing."
         ),
     )
+    parser.add_argument(
+        "--affect-bounds",
+        action="store_true",
+        help=(
+            "Print what affect could do at most under the current architecture, as JSON, "
+            "for the experiment harness (ADR 0013). Starts no cognition loop."
+        ),
+    )
     arguments = parser.parse_args(argv)
+
+    if arguments.affect_bounds:
+        # A static property of the code, for research tooling. Nothing here
+        # can become a decision, and Person never consults it.
+        sys.stdout.write(json.dumps(research_bounds(), sort_keys=True) + "\n")
+        return 0
 
     if arguments.compare_effects:
         # Deliberately before anything else is constructed. This path must not

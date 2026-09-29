@@ -346,3 +346,59 @@ def adjusted(state: AffectState) -> Affect:
     affect = Affect(AffectRecord())
     affect.state = replace(state)
     return affect
+
+
+# ---------------------------------------------------------- research bounds
+#
+# What affect could do at most under the current architecture (R1.5): a
+# static property of the code above, for the experiment harness to judge
+# whether a decision gave affect any opportunity. Person never consults it.
+
+#: The characters a goal can have for affect. `fixed` goals (urgent survival,
+#: experimental trials) receive no bias at all.
+CHARACTERS: tuple[str, ...] = ("protective", "outgoing", "fixed")
+_EXEMPLAR: Mapping[str, tuple[frozenset[str], str]] = {
+    "protective": (frozenset({"safe"}), "homeostasis"),
+    "outgoing": (frozenset({"tool_tier"}), "homeostasis"),
+    "fixed": (frozenset(), "emergency"),
+}
+
+
+def bias_swings(steps: int = 20) -> dict[str, dict[str, float]]:
+    """The largest `bias(a) - bias(b)` any reachable state can produce.
+
+    Found by evaluating `Affect.bias` itself over a grid of the state space,
+    which includes every vertex, so it follows the code rather than restating
+    it. One state biases both goals, which is why two goals of the same
+    character can never be reordered by affect.
+    """
+    affect = Affect(AffectRecord())
+
+    def axis(dimension: str) -> list[float]:
+        low, high = RANGES[dimension]
+        return [low + (high - low) * index / steps for index in range(steps + 1)]
+
+    swings = {a: dict.fromkeys(CHARACTERS, 0.0) for a in CHARACTERS}
+    for valence in axis("valence"):
+        for unease in axis("unease"):
+            for control in axis("control"):
+                affect.state = AffectState(valence, unease, control)
+                bias = {
+                    character: affect.bias(facts, source)
+                    for character, (facts, source) in _EXEMPLAR.items()
+                }
+                for a in CHARACTERS:
+                    for b in CHARACTERS:
+                        swings[a][b] = max(swings[a][b], round(bias[a] - bias[b], 4))
+    return swings
+
+
+def research_bounds() -> dict[str, Any]:
+    """Everything the harness needs to judge affect's opportunity."""
+    return {
+        "bias_limit": BIAS_LIMIT,
+        "tolerance_range": list(TOLERANCE_RANGE),
+        "half_lives": dict(HALF_LIVES),
+        "ranges": {dimension: list(RANGES[dimension]) for dimension in DIMENSIONS},
+        "swings": bias_swings(),
+    }
