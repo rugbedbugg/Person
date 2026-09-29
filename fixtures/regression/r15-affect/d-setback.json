@@ -1,0 +1,2129 @@
+{
+  "scenario": {
+    "world": "fixtures/worlds/benchmarks/development/d-setback.json",
+    "seed": 1,
+    "affectMode": "active",
+    "learningMode": "off",
+    "maxExperiencedTicks": 6000,
+    "maxDecisions": 5000
+  },
+  "recordedAt": "5548bbd",
+  "note": "R1.5 reference (ADR 0014): with interoception off, R2 code must reproduce these exactly.",
+  "trace": [
+    {
+      "tick": 0,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_f19cc2109d8b9f18",
+      "requestedSkill": "build_basic_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "build_basic_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 150,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 152,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 154,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 156,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 158,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 160,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 162,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 164,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 166,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 766,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 768,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 770,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 772,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1372,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1374,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1376,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1378,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1380,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1382,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1384,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1386,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1388,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1988,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1990,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1992,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1994,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1996,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1998,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2000,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2002,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2004,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2604,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2606,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2608,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2610,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3210,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3212,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3214,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3814,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "INTERRUPTED"
+    },
+    {
+      "tick": 4014,
+      "goalId": "goal_survive_immediate",
+      "goalType": "SURVIVE_IMMEDIATE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4026,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4038,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4050,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4062,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4074,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4086,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "REPLACE",
+      "executedSkill": "flee",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4098,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4698,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5298,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5898,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    }
+  ],
+  "affect": [
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1.0
+      },
+      "before": {
+        "valence": 0.0,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.05,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "experienced_tick": 0
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.0491,
+        "unease": 0.0,
+        "control": 0.0496
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.1491,
+        "unease": 0.0,
+        "control": 0.0996
+      },
+      "experienced_tick": 150
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.1491,
+        "unease": 0.0,
+        "control": 0.0996
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.2491,
+        "unease": 0.0,
+        "control": 0.1496
+      },
+      "experienced_tick": 150
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.2491,
+        "unease": 0.0,
+        "control": 0.1496
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0.0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.2991,
+        "unease": 0.0,
+        "control": 0.1796
+      },
+      "experienced_tick": 150
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.299,
+        "unease": 0.0,
+        "control": 0.1796
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.399,
+        "unease": 0.0,
+        "control": 0.2296
+      },
+      "experienced_tick": 152
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.3989,
+        "unease": 0.0,
+        "control": 0.2296
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.4989,
+        "unease": 0.0,
+        "control": 0.2796
+      },
+      "experienced_tick": 154
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.4988,
+        "unease": 0.0,
+        "control": 0.2796
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.5988,
+        "unease": 0.0,
+        "control": 0.3296
+      },
+      "experienced_tick": 156
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.5987,
+        "unease": 0.0,
+        "control": 0.3296
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.6987,
+        "unease": 0.0,
+        "control": 0.3796
+      },
+      "experienced_tick": 158
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.6985,
+        "unease": 0.0,
+        "control": 0.3796
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.7985,
+        "unease": 0.0,
+        "control": 0.4296
+      },
+      "experienced_tick": 160
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.7983,
+        "unease": 0.0,
+        "control": 0.4296
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.8983,
+        "unease": 0.0,
+        "control": 0.4796
+      },
+      "experienced_tick": 162
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.8981,
+        "unease": 0.0,
+        "control": 0.4795
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.9981,
+        "unease": 0.0,
+        "control": 0.5295
+      },
+      "experienced_tick": 164
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.9979,
+        "unease": 0.0,
+        "control": 0.5294
+      },
+      "delta": {
+        "valence": 0.0021,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1.0,
+        "unease": 0.0,
+        "control": 0.5794
+      },
+      "experienced_tick": 166
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 1.0,
+        "unease": 0.0,
+        "control": 0.5794
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "after": {
+        "valence": 0.95,
+        "unease": 0.0,
+        "control": 0.5794
+      },
+      "experienced_tick": 166
+    },
+    {
+      "trigger": "goal_blocked_establish_storage",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.8864,
+        "unease": 0.0,
+        "control": 0.5597
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.7864,
+        "unease": 0.0,
+        "control": 0.5097
+      },
+      "experienced_tick": 766
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.7864,
+        "unease": 0.0,
+        "control": 0.5097
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.8864,
+        "unease": 0.0,
+        "control": 0.5597
+      },
+      "experienced_tick": 766
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.8862,
+        "unease": 0.0,
+        "control": 0.5596
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.9862,
+        "unease": 0.0,
+        "control": 0.6096
+      },
+      "experienced_tick": 768
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.986,
+        "unease": 0.0,
+        "control": 0.6095
+      },
+      "delta": {
+        "valence": 0.014,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1.0,
+        "unease": 0.0,
+        "control": 0.6595
+      },
+      "experienced_tick": 770
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": 0.9998,
+        "unease": 0.0,
+        "control": 0.6594
+      },
+      "delta": {
+        "valence": 0.0002,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1.0,
+        "unease": 0.0,
+        "control": 0.7094
+      },
+      "experienced_tick": 772
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 1.0,
+        "unease": 0.0,
+        "control": 0.7094
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "after": {
+        "valence": 0.95,
+        "unease": 0.0,
+        "control": 0.7094
+      },
+      "experienced_tick": 772
+    },
+    {
+      "trigger": "goal_blocked_establish_storage",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.8864,
+        "unease": 0.0,
+        "control": 0.6852
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.7864,
+        "unease": 0.0,
+        "control": 0.6352
+      },
+      "experienced_tick": 1372
+    },
+    {
+      "trigger": "project_abandoned_improve_home",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.7864,
+        "unease": 0.0,
+        "control": 0.6352
+      },
+      "delta": {
+        "valence": -0.12,
+        "unease": 0.0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.6664,
+        "unease": 0.0,
+        "control": 0.5552
+      },
+      "experienced_tick": 1372
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.6648,
+        "unease": 0.0,
+        "control": 0.5544
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "after": {
+        "valence": 0.6148,
+        "unease": 0.0,
+        "control": 0.5544
+      },
+      "experienced_tick": 1388
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.5736,
+        "unease": 0.0,
+        "control": 0.5355
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.4736,
+        "unease": 0.0,
+        "control": 0.4855
+      },
+      "experienced_tick": 1988
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.4728,
+        "unease": 0.0,
+        "control": 0.4847
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "after": {
+        "valence": 0.4228,
+        "unease": 0.0,
+        "control": 0.4847
+      },
+      "experienced_tick": 2004
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.3945,
+        "unease": 0.0,
+        "control": 0.4682
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.2945,
+        "unease": 0.0,
+        "control": 0.4182
+      },
+      "experienced_tick": 2604
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.2942,
+        "unease": 0.0,
+        "control": 0.4182
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "after": {
+        "valence": 0.2442,
+        "unease": 0.0,
+        "control": 0.4182
+      },
+      "experienced_tick": 2610
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.2278,
+        "unease": 0.0,
+        "control": 0.404
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.1278,
+        "unease": 0.0,
+        "control": 0.354
+      },
+      "experienced_tick": 3210
+    },
+    {
+      "trigger": "project_abandoned_secure_food_supply",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": 0.1278,
+        "unease": 0.0,
+        "control": 0.354
+      },
+      "delta": {
+        "valence": -0.12,
+        "unease": 0.0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.0078,
+        "unease": 0.0,
+        "control": 0.274
+      },
+      "experienced_tick": 3210
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.0078,
+        "unease": 0.0,
+        "control": 0.274
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0.0,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.0422,
+        "unease": 0.0,
+        "control": 0.274
+      },
+      "experienced_tick": 3214
+    },
+    {
+      "trigger": "goal_blocked_establish_storage",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": -0.0394,
+        "unease": 0.0,
+        "control": 0.2647
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.1394,
+        "unease": 0.0,
+        "control": 0.2147
+      },
+      "experienced_tick": 3814
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.1362,
+        "unease": 0.0,
+        "control": 0.2122
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.2812,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.1362,
+        "unease": 0.2812,
+        "control": 0.2122
+      },
+      "experienced_tick": 4014
+    },
+    {
+      "trigger": "harm",
+      "components": {
+        "health_lost": 2.0
+      },
+      "before": {
+        "valence": -0.1362,
+        "unease": 0.2812,
+        "control": 0.2122
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.16,
+        "control": -0.06
+      },
+      "after": {
+        "valence": -0.2362,
+        "unease": 0.4412,
+        "control": 0.1522
+      },
+      "experienced_tick": 4014
+    },
+    {
+      "trigger": "goal_blocked_maintain_reserves",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": -0.2362,
+        "unease": 0.4412,
+        "control": 0.1522
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.3362,
+        "unease": 0.4412,
+        "control": 0.1022
+      },
+      "experienced_tick": 4014
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.3362,
+        "unease": 0.4412,
+        "control": 0.1022
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.05,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.3362,
+        "unease": 0.4912,
+        "control": 0.0022
+      },
+      "experienced_tick": 4014
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.3357,
+        "unease": 0.4878,
+        "control": 0.0022
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.2812,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.3357,
+        "unease": 0.769,
+        "control": 0.0022
+      },
+      "experienced_tick": 4026
+    },
+    {
+      "trigger": "goal_blocked_survive_immediate",
+      "components": {
+        "goal_congruence": -1.0
+      },
+      "before": {
+        "valence": -0.3357,
+        "unease": 0.769,
+        "control": 0.0022
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.4357,
+        "unease": 0.769,
+        "control": -0.0478
+      },
+      "experienced_tick": 4026
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.4357,
+        "unease": 0.769,
+        "control": -0.0478
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.05,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.4357,
+        "unease": 0.819,
+        "control": -0.1478
+      },
+      "experienced_tick": 4026
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.4351,
+        "unease": 0.8133,
+        "control": -0.1477
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.1867,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.4351,
+        "unease": 1.0,
+        "control": -0.1477
+      },
+      "experienced_tick": 4038
+    },
+    {
+      "trigger": "harm",
+      "components": {
+        "health_lost": 2.0
+      },
+      "before": {
+        "valence": -0.4351,
+        "unease": 1.0,
+        "control": -0.1477
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.06
+      },
+      "after": {
+        "valence": -0.5351,
+        "unease": 1.0,
+        "control": -0.2077
+      },
+      "experienced_tick": 4038
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.5351,
+        "unease": 1.0,
+        "control": -0.2077
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.5351,
+        "unease": 1.0,
+        "control": -0.3077
+      },
+      "experienced_tick": 4038
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.5344,
+        "unease": 0.9931,
+        "control": -0.3075
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0069,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.5344,
+        "unease": 1.0,
+        "control": -0.3075
+      },
+      "experienced_tick": 4050
+    },
+    {
+      "trigger": "harm",
+      "components": {
+        "health_lost": 2.0
+      },
+      "before": {
+        "valence": -0.5344,
+        "unease": 1.0,
+        "control": -0.3075
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.06
+      },
+      "after": {
+        "valence": -0.6344,
+        "unease": 1.0,
+        "control": -0.3675
+      },
+      "experienced_tick": 4050
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.6344,
+        "unease": 1.0,
+        "control": -0.3675
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.6344,
+        "unease": 1.0,
+        "control": -0.4675
+      },
+      "experienced_tick": 4050
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.6335,
+        "unease": 0.9931,
+        "control": -0.4672
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0069,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.6335,
+        "unease": 1.0,
+        "control": -0.4672
+      },
+      "experienced_tick": 4062
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.6335,
+        "unease": 1.0,
+        "control": -0.4672
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.6335,
+        "unease": 1.0,
+        "control": -0.5672
+      },
+      "experienced_tick": 4062
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.6326,
+        "unease": 0.9931,
+        "control": -0.5668
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0069,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.6326,
+        "unease": 1.0,
+        "control": -0.5668
+      },
+      "experienced_tick": 4074
+    },
+    {
+      "trigger": "harm",
+      "components": {
+        "health_lost": 2.0
+      },
+      "before": {
+        "valence": -0.6326,
+        "unease": 1.0,
+        "control": -0.5668
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0,
+        "control": -0.06
+      },
+      "after": {
+        "valence": -0.7326,
+        "unease": 1.0,
+        "control": -0.6268
+      },
+      "experienced_tick": 4074
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.7326,
+        "unease": 1.0,
+        "control": -0.6268
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.7326,
+        "unease": 1.0,
+        "control": -0.7268
+      },
+      "experienced_tick": 4074
+    },
+    {
+      "trigger": "perceived_threat",
+      "components": {
+        "threat": 0.9375
+      },
+      "before": {
+        "valence": -0.7316,
+        "unease": 0.9931,
+        "control": -0.7263
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0069,
+        "control": 0.0
+      },
+      "after": {
+        "valence": -0.7316,
+        "unease": 1.0,
+        "control": -0.7263
+      },
+      "experienced_tick": 4086
+    },
+    {
+      "trigger": "overridden",
+      "components": {
+        "controllability": -1.0
+      },
+      "before": {
+        "valence": -0.7316,
+        "unease": 1.0,
+        "control": -0.7263
+      },
+      "delta": {
+        "valence": 0.0,
+        "unease": 0.0,
+        "control": -0.1
+      },
+      "after": {
+        "valence": -0.7316,
+        "unease": 1.0,
+        "control": -0.8263
+      },
+      "experienced_tick": 4086
+    },
+    {
+      "trigger": "harm",
+      "components": {
+        "health_lost": 2.0
+      },
+      "before": {
+        "valence": -0.7306,
+        "unease": 0.9931,
+        "control": -0.8257
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0.0069,
+        "control": -0.06
+      },
+      "after": {
+        "valence": -0.8306,
+        "unease": 1.0,
+        "control": -0.8857
+      },
+      "experienced_tick": 4098
+    },
+    {
+      "trigger": "goal_complete_survive_immediate",
+      "components": {
+        "goal_congruence": 1.0
+      },
+      "before": {
+        "valence": -0.8306,
+        "unease": 1.0,
+        "control": -0.8857
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0.0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.7306,
+        "unease": 1.0,
+        "control": -0.8357
+      },
+      "experienced_tick": 4098
+    }
+  ],
+  "priorities": [
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400.0,
+      "affect_bias": 0.0,
+      "priority": 400.0
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -0.62,
+      "priority": 299.38
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -2.245,
+      "priority": 297.755
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -2.87,
+      "priority": 297.13
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -3.495,
+      "priority": 296.505
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -4.12,
+      "priority": 295.88
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -4.745,
+      "priority": 295.255
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -5.37,
+      "priority": 294.63
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -5.994,
+      "priority": 294.006
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -6.617,
+      "priority": 293.383
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -6.996,
+      "priority": 213.004
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -6.995,
+      "priority": 293.005
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -7.619,
+      "priority": 292.381
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300.0,
+      "affect_bias": -8.242,
+      "priority": 291.758
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 19.645,
+      "priority": 519.645
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.266,
+      "priority": 515.266
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.263,
+      "priority": 515.263
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.259,
+      "priority": 515.259
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.255,
+      "priority": 515.255
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.251,
+      "priority": 515.251
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.248,
+      "priority": 515.248
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.244,
+      "priority": 515.244
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500.0,
+      "affect_bias": 15.24,
+      "priority": 515.24
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 13.864,
+      "priority": 313.864
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.986,
+      "priority": 311.986
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.984,
+      "priority": 311.984
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.981,
+      "priority": 311.981
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.979,
+      "priority": 311.979
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.976,
+      "priority": 311.976
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.974,
+      "priority": 311.974
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.971,
+      "priority": 311.971
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 11.969,
+      "priority": 311.969
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -5.853,
+      "priority": 214.147
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 8.908,
+      "priority": 308.908
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 8.906,
+      "priority": 308.906
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300.0,
+      "affect_bias": 8.905,
+      "priority": 308.905
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -5.05,
+      "priority": 214.95
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -3.425,
+      "priority": 216.575
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -3.425,
+      "priority": 216.575
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_survive_immediate",
+      "base_priority": 993.75,
+      "affect_bias": 0.0,
+      "priority": 993.75
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10.0,
+      "affect_bias": 0.0,
+      "priority": 10.0
+    }
+  ]
+}
