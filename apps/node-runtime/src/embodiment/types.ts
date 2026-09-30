@@ -243,6 +243,16 @@ export interface Embodiment {
    */
   look(direction: GazeDirection): Promise<void>;
   waitTicks(ticks: number): Promise<void>;
+  /**
+   * Simulated bodies only: let the world move on by one tick.
+   *
+   * A real server's clock runs whether or not Person acts. A simulated one
+   * advances only inside actions, so an attempt that takes no time and changes
+   * nothing would stop its world, and a Person that proposed it again would
+   * find everything exactly as it was, forever. Dispatch calls this after such
+   * an attempt. It is a guarantee of progress, not a model of reaction time.
+   */
+  passTick?(): void;
   /** Registers a Person-placed container so its provenance is tracked. */
   registerOwnedStorage(position: Position, storageId: string): void;
 }

@@ -303,6 +303,14 @@ export async function dispatchSkill(
     expectedEffects: resolveEffects(executedSpec, executedParameters),
   });
 
+  // Something ran and was interrupted before any time passed. A simulated
+  // world would otherwise be exactly where it was when Person next looked. The
+  // tick passes after the outcome, so nothing in it is attributed to the
+  // attempt. Zero-tick failures are left alone: they are ordinary, informative
+  // outcomes, and the runtime's stall detector guards against their repeating.
+  if (result.status === "INTERRUPTED" && result.elapsedTicks === 0)
+    deps.embodiment.passTick?.();
+
   return {
     verdict,
     validation,
