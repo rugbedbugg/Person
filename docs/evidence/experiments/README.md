@@ -7,6 +7,11 @@ omitted), and the printed summary (`summary.txt`). Absolute paths are
 replaced by `<repo>`. Every run can be repeated exactly from its commit, plan,
 condition and seed.
 
+The raw journals behind these results are archived as release assets, with
+their hashes and the journal-only rebuild checks, in `ARCHIVES.md`. The
+archives are the original bytes, so unlike the files here their metadata
+keeps absolute local paths.
+
 **All of this is TESTED IN FIXTURE.** None of it is Minecraft evidence, and
 none of it bears on whether Person feels anything (`docs/RESEARCH.md`).
 
