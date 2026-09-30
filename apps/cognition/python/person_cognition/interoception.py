@@ -110,6 +110,12 @@ class Interoception:
         #: is perceived.
         self.exposure: float | None = None
 
+    def lose_continuity(self) -> None:
+        """The world went away (I2): no transition is felt across the absence,
+        and a threat seen afterwards is a new exposure."""
+        self.previous = None
+        self.exposure = None
+
     def sense(self, observation: Mapping[str, Any]) -> Sensed:
         reading = BodyReading.of(observation)
         events: list[Appraisal] = []

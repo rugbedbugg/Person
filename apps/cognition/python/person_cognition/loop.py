@@ -57,7 +57,7 @@ from .affect import (
     appraise_threat,
 )
 from .context import decision_context
-from .continuity import plan_root, self_knowledge, session_payload
+from .continuity import OperationalView, plan_root, self_knowledge, session_payload
 from .effect_learning import EffectBeliefs, Trial, admitted_to, classify, reliability_term
 from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .hypotheses import (
@@ -170,6 +170,12 @@ class CognitionLoop:
         #: rebuilt from the journal. Cognition sees only `self_knowledge`.
         self.continuity = ContinuityRecord()
         self.self_knowledge: SelfKnowledge | None = None
+        #: Whether the world is available to the body now (I2); all Person
+        #: may know of its operational state.
+        self.operational = OperationalView(world=None)
+        #: Lifecycle events are written only for a founded root; a legacy
+        #: root acquires no lifecycle history it never had (I2).
+        self._lifecycle = False
         self._lock: RootLock | None = None
         #: Projects Person has taken up, rebuilt from its own records.
         self.project_book = ProjectBook()
@@ -305,6 +311,7 @@ class CognitionLoop:
     def handle(self, message: dict[str, Any]) -> None:
         handler = {
             "SessionHello": self.on_session_hello,
+            "WorldAvailability": self.on_world_availability,
             "Observation": self.on_observation,
             "ValidationDecision": self.on_validation,
             "SkillStarted": self.on_skill_started,
@@ -375,6 +382,8 @@ class CognitionLoop:
             )
             self.store.identity = self._identity_binding(plan.found)
         self.self_knowledge = self_knowledge(self.continuity, self.identity.person_id, session)
+        self._lifecycle = not plan.legacy
+        self.operational = OperationalView(world=None)
         # Working memory starts empty: the past comes back only when cued.
         self.memory = Memory(self.memory_store, training_context=self.training_context)
         # Waking where it last knew it was, less sure of it: nothing about the
@@ -392,7 +401,10 @@ class CognitionLoop:
         self.offered = tuple(str(skill) for skill in message["skillIds"])
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
-        self._record("session_started", message["tick"], session, timestamp=message["timestamp"])
+        if self._lifecycle:
+            self._record(
+                "session_started", message["tick"], session, timestamp=message["timestamp"]
+            )
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
         for note in report.notes:
             self._log(f"evidence restore: {note}")
@@ -431,16 +443,18 @@ class CognitionLoop:
             self._finish_routine("INTERRUPTED", message["tick"], reason="episode_ended")
             if self.interoception_on:
                 self._appraise_step(message["tick"])
-            if self.store is not None:
+            if self.store is not None and self._lifecycle:
                 self._record(
                     "session_ended",
                     message["tick"],
                     {
                         "session_id": self.identity.session_id if self.identity else None,
                         "reason": "episode_ended",
+                        "reasons": list(message["reasonCodes"])[:8],
                     },
                     timestamp=message["timestamp"],
                 )
+            if self.store is not None:
                 self.store.write_snapshot(self.reducers)
                 self.summary.write(
                     self.store.directory,
@@ -1687,6 +1701,32 @@ class CognitionLoop:
         if founding is None:
             return None
         return {"person_id": founding.person_id, "founding": founding.fingerprint()}
+
+    def on_world_availability(self, message: dict[str, Any]) -> None:
+        """The world became available to the body, or stopped being (I2).
+
+        An operational state, not a verdict on the run. While it is
+        unavailable no observation arrives, so nothing is experienced, and
+        nothing is invented for the absence: the baselines that compare one
+        observation with the last are dropped, so the time away is not
+        counted as lived and a change of body across it is not felt as an
+        event.
+        """
+        state = message["state"]
+        if state == self.operational.world:
+            return
+        self.operational = OperationalView(world=state)
+        if state == "unavailable":
+            self.memory.lose_continuity()
+            self.interoception.lose_continuity()
+            self._felt_health = None
+        if self._lifecycle:
+            self._record(
+                "world_availability_changed",
+                message["tick"],
+                {"state": state, "reasons": list(message["reasonCodes"])[:8]},
+                timestamp=message["timestamp"],
+            )
 
     def close(self) -> None:
         """Let go of the continuity root. A process that ends without this

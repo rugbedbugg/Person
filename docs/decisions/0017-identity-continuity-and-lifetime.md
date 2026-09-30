@@ -118,6 +118,26 @@ spot-checks. They were never one continuous individual.
 - Out of scope: values, preferences, personality and any self-model beyond
   the identity record.
 
+## Implementation status
+
+- **I1 (PR #29):** founding, root binding, session continuity, the coarse gap
+  and the self-knowledge projection. TESTED IN FIXTURE with synthetic
+  identities.
+- **I2:** operational state as an explicit state machine, WORLD_AVAILABLE and
+  WORLD_UNAVAILABLE, reported by the runtime's `WorldAvailability` and
+  journalled as `world_availability_changed` only on a change. Losing the
+  world ends an episode as interrupted, never failed, after the configured
+  reconnection budget; reconnecting continues the same Person in the same
+  session. Suspension is classified at the next session start (after a clean
+  end or a crash, with the world's state then); a crash writes nothing, and
+  nothing is invented for it. Absence is not experienced and no transition is
+  felt across it. Legacy roots acquire no lifecycle events. Cognition sees only
+  whether the world is available. TESTED IN FIXTURE with synthetic identities.
+- **I3:** not started. DEAD, TERMINATED and respawn belong to it.
+- **Separate by design:** identity and continuity (I1), cognitive lifecycle
+  (sessions), embodiment connection (the runtime's), operational state (I2)
+  and death (I3).
+
 ## Consequences
 
 ### Positive

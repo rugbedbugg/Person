@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/world-availability.schema.json",
+  "title": "WorldAvailability",
+  "description": "Whether the world is available to Person's body right now (ADR 0017, I2). An operational state, not a verdict on the run: the runtime sends it when cognition is ready and whenever the connection to the world is lost or regained.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["type", "state", "reasonCodes"],
+  "properties": {
+    "type": {
+      "const": "WorldAvailability"
+    },
+    "state": {
+      "enum": ["available", "unavailable"]
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    }
+  }
+}

@@ -379,6 +379,13 @@ export interface EpisodeEvent extends Envelope {
   reasonCodes: string[];
 }
 
+/** Whether the world is available to the body now (ADR 0017, I2). */
+export interface WorldAvailability extends Envelope {
+  type: "WorldAvailability";
+  state: "available" | "unavailable";
+  reasonCodes: string[];
+}
+
 export interface SessionHello extends Envelope {
   type: "SessionHello";
   learningMode: LearningMode;
@@ -452,5 +459,6 @@ export type NodeMessage =
   | SkillStarted
   | SkillOutcome
   | EmergencyEvent
-  | EpisodeEvent;
+  | EpisodeEvent
+  | WorldAvailability;
 export type ProtocolMessage = CognitionMessage | NodeMessage;

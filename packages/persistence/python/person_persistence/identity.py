@@ -109,6 +109,12 @@ class ContinuityRecord:
         self.events_seen = 0
         self.last_session: dict[str, Any] | None = None
         self.last_timestamp: str | None = None
+        #: The world's last recorded availability in the current session:
+        #: "available", "unavailable", or None before the runtime said (I2).
+        self.world: str | None = None
+        #: The world's availability when the previous session stopped, known
+        #: once a new session has begun.
+        self.world_at_previous_end: str | None = None
         #: Events that break the founding rule; nonzero means a corrupt root.
         self.violations: list[str] = []
 
@@ -121,6 +127,8 @@ class ContinuityRecord:
         elif self.events_seen == 0:
             self.legacy = True
         if event.type == "session_started":
+            self.world_at_previous_end = self.world
+            self.world = None
             self.last_session = {
                 "session_id": event.payload.get("session_id"),
                 "started_at": event.timestamp,
@@ -132,6 +140,8 @@ class ContinuityRecord:
             and self.last_session["session_id"] == event.payload.get("session_id")
         ):
             self.last_session = {**self.last_session, "ended": True}
+        elif event.type == "world_availability_changed":
+            self.world = str(event.payload.get("state"))
         self.events_seen += 1
         self.last_timestamp = event.timestamp
 
@@ -142,6 +152,8 @@ class ContinuityRecord:
             "events_seen": self.events_seen,
             "last_session": self.last_session,
             "last_timestamp": self.last_timestamp,
+            "world": self.world,
+            "world_at_previous_end": self.world_at_previous_end,
             "violations": list(self.violations),
         }
 
@@ -153,6 +165,8 @@ class ContinuityRecord:
         self.events_seen = int(body.get("events_seen", 0))
         self.last_session = body.get("last_session")
         self.last_timestamp = body.get("last_timestamp")
+        self.world = body.get("world")
+        self.world_at_previous_end = body.get("world_at_previous_end")
         self.violations = list(body.get("violations", []))
 
 

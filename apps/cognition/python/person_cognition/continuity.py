@@ -90,7 +90,28 @@ def session_payload(record: ContinuityRecord, session_id: str, now: str) -> dict
         "previous_session_id": previous["session_id"] if previous else None,
         "previous_ended_cleanly": previous["ended"] if previous else None,
         "gap": gap_category(record.last_timestamp, now),
+        # Suspension is known only now, from how the last session ended and
+        # this one begins (I2): the process was not running in between.
+        "suspension": (
+            {
+                "after": "clean_end" if previous["ended"] else "crash",
+                "world_at_end": record.world,
+            }
+            if previous
+            else None
+        ),
     }
+
+
+@dataclass(frozen=True, slots=True)
+class OperationalView:
+    """What Person may know of its operational state (ADR 0017, I2).
+
+    Only whether the world is available to its body now: not why, not for how
+    long, and nothing of the runtime's connection machinery.
+    """
+
+    world: str | None
 
 
 def self_knowledge(

@@ -14,6 +14,7 @@ NODE_MESSAGE_TYPES: Final[tuple[str, ...]] = (
     "SkillOutcome",
     "EmergencyEvent",
     "EpisodeEvent",
+    "WorldAvailability",
 )
 
 COGNITION_MESSAGE_TYPES: Final[tuple[str, ...]] = (
@@ -33,6 +34,7 @@ SCHEMA_FILES: Final[dict[str, str]] = {
     "SkillOutcome": "skill-outcome.schema.json",
     "EmergencyEvent": "emergency-event.schema.json",
     "EpisodeEvent": "episode-event.schema.json",
+    "WorldAvailability": "world-availability.schema.json",
     "CognitionReady": "cognition-ready.schema.json",
     "GoalDecision": "goal-decision.schema.json",
     "PolicyDecision": "policy-decision.schema.json",

@@ -40,6 +40,9 @@ export interface PersonConfig {
     maxDecisions: number;
     maxTicks: number;
     decisionIntervalMs: number;
+    /** ADR 0017, I2: tries to reach the world again before giving up. */
+    reconnectAttempts: number;
+    reconnectIntervalMs: number;
     fixtureWorld?: string;
   };
   learning: {

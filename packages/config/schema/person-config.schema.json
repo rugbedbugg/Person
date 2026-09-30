@@ -42,6 +42,17 @@
           "minimum": 0,
           "maximum": 60000
         },
+        "reconnectAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000,
+          "description": "ADR 0017, I2: how many times the runtime tries to reach the world again after losing it, before ending the episode as world_unavailable. 0, the default, ends it at once."
+        },
+        "reconnectIntervalMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3600000
+        },
         "fixtureWorld": { "type": "string", "minLength": 1 }
       }
     },

@@ -203,7 +203,15 @@ def test_no_method_reachable_from_cognition_returns_the_store() -> None:
         for name, value in inspect.getmembers(Memory)
         if not name.startswith("_") and callable(value)
     }
-    assert public == {"recall", "experience", "payload", "encoded", "observe_time"}
+    # `lose_continuity` (ADR 0017, I2) returns nothing and exposes no record.
+    assert public == {
+        "recall",
+        "experience",
+        "payload",
+        "encoded",
+        "observe_time",
+        "lose_continuity",
+    }
     source = (REPOSITORY / "apps/cognition/python/person_cognition/loop.py").read_text(
         encoding="utf-8"
     )
