@@ -119,6 +119,14 @@ Weights, band thresholds, caps, tonic coefficients and recovery constants are
 implementation parameters, chosen on development worlds only and frozen before
 any held-out evaluation.
 
+## Outcome (2026-09-30)
+
+R2 is closed: `docs/evidence/experiments/R2-CLOSURE.md`. The confirmatory V2
+held-out suite supported interoceptive affect as state, consistently across
+the held-out classes, and gave no held-out evidence that it changes behaviour
+in the channels V2 exercised; the exploration channel remained untested. This
+ADR's architecture stays Accepted and in use, with its parameters frozen.
+
 ## The R1.5 references (updated 2026-09-30)
 
 There are two, and they are not interchangeable.

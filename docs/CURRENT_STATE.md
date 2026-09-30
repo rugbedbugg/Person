@@ -33,8 +33,11 @@ fixed four correctness bugs, below; no affect rule changed. R2 (ADR 0014,
 and is recorded INVALID. ADR 0015 (#21) fixed that livelock, phantom
 `SECURE_FOOD` successes and unbounded snapshots, so the R2 results are
 historical. Held-out D2 (`experiments/benchmarks/heldout-d2/`) replaces D: it
-was generated from a seed declared in advance and frozen before any run, and
-has not been run.
+was generated from a seed declared in advance and frozen before any run. After
+ADR 0016 (hostiles obey walls) the confirmatory V2 suite (A2, B2, C2, D2) ran
+once and closed R2 (`docs/evidence/experiments/R2-CLOSURE.md`): support for
+interoceptive affect as state, and no held-out evidence that it changes
+behaviour in the channels exercised.
 
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
