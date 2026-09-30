@@ -299,6 +299,10 @@ export class PersonRuntime {
           const terminal = this.config.lifecycle?.death === "permadeath";
           this.#sendLife("died", terminal, snapshot.tick);
           if (!terminal && (await this.#respawn())) continue;
+          // Losing the world while dead is losing the world: the reconnection
+          // path decides. Cognition records the death once, however often the
+          // dead body is seen.
+          if (!terminal && !this.#embodiment.snapshot().connected) continue;
           outcome = "failed";
           reason = "death";
           break;
@@ -412,7 +416,16 @@ export class PersonRuntime {
   /** Brings the same Person's body back, if this body can (I3). */
   async #respawn(): Promise<boolean> {
     if (!this.#embodiment.respawn) return false;
-    await this.#embodiment.respawn();
+    try {
+      await this.#embodiment.respawn();
+    } catch (error) {
+      // A respawn that did not happen is not reported; the Person stays
+      // awaiting one, and the next run tries again.
+      this.#onDiagnostic("respawn_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
     if (!this.#embodiment.snapshot().alive) return false;
     // Motion across a death was never felt.
     this.#selfMotion = new SelfMotionSense();
