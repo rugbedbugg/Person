@@ -7,6 +7,9 @@ omitted), and the printed summary (`summary.txt`). Absolute paths are
 replaced by `<repo>`. Every run can be repeated exactly from its commit, plan,
 condition and seed.
 
+**R2 is closed:** see `R2-CLOSURE.md` for what the confirmatory V2 suite
+(`v2-heldout/`) shows and what it does not.
+
 The raw journals behind these results are archived as release assets, with
 their hashes and the journal-only rebuild checks, in `ARCHIVES.md`. The
 archives are the original bytes, so unlike the files here their metadata
