@@ -31,6 +31,7 @@ Sent by the runtime:
 | `SkillOutcome`       | What actually happened                                                                           |
 | `EmergencyEvent`     | The kernel acted at L0 or L1                                                                     |
 | `EpisodeEvent`       | Episode started or ended                                                                         |
+| `WorldAvailability`  | Whether the world is available to the body now: an operational state, not a verdict (ADR 0017)   |
 
 Sent by cognition:
 

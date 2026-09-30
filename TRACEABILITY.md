@@ -400,6 +400,18 @@ claim without reading the whole tree.
 | Legacy roots stay readable, never given a founding          | `plan_root`                                                | `test_a_legacy_root_is_read_and_resumed_but_never_given_a_founding`                                                                                                                 |
 | Cognition gets a bounded projection, not the record         | `SelfKnowledge`                                            | `test_cognition_receives_a_bounded_projection_not_the_record`                                                                                                                       |
 
+## Operational state (ADR 0017, I2)
+
+| Requirement                                                              | Implementation                                                                   | Tests                                                                                                                                                   |
+| ------------------------------------------------------------------------ | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Losing the world interrupts, it does not fail, and it is recorded        | `PersonRuntime` (`WorldAvailability`, reconnect budget), `on_world_availability` | `losing the world with no reconnection budget interrupts the episode, it does not fail it`                                                              |
+| Reconnecting continues the same Person and session                       | runtime reconnect, fresh `SelfMotionSense`                                       | `reaching the world again continues the same Person in the same session`                                                                                |
+| Time without the world is not experienced; nothing is invented across it | `Memory.lose_continuity`, `Interoception.lose_continuity`                        | `test_minecraft_disappearing_while_cognition_lives_is_a_state_not_an_end`, `test_restart_after_a_long_world_absence`                                    |
+| Suspension is retrospective, from the session boundary                   | `session_payload` (`suspension`), `ContinuityRecord.world_at_previous_end`       | `test_crash_while_embodied_is_a_suspension_after_a_crash_with_nothing_invented`, `test_clean_shutdown_while_embodied_is_a_suspension_after_a_clean_end` |
+| Only real changes are recorded                                           | the state guard in `on_world_availability`                                       | `test_repeated_connect_and_disconnect_cycles_record_only_real_changes`                                                                                  |
+| Legacy stores acquire no lifecycle history                               | `CognitionLoop._lifecycle`                                                       | `test_a_legacy_store_acquires_no_lifecycle_history`                                                                                                     |
+| Person knows only whether the world is available                         | `OperationalView`                                                                | `test_person_knows_only_whether_the_world_is_available`                                                                                                 |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |
