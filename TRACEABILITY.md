@@ -41,7 +41,7 @@ claim without reading the whole tree.
 | Requirement                                  | Implementation                                           | Tests                                                                          |
 | -------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
 | Typed SkillSpec contract                     | `packages/skills/specs/*.json`, `skill-spec.schema.json` | `packages/skills` registries load and validate at import; `tests/architecture` |
-| All 23 skills implemented for real           | `apps/node-runtime/src/skills/impl/`                     | `tests/skills/`, `tests/integration/survival-routine.test.ts`                  |
+| All 24 skills implemented for real           | `apps/node-runtime/src/skills/impl/`                     | `tests/skills/`, `tests/integration/survival-routine.test.ts`                  |
 | Implementations match the library exactly    | `SKILL_IMPLEMENTATIONS`                                  | `tests/architecture/architecture.test.ts`                                      |
 | No placeholder implementations               | same                                                     | `tests/architecture/architecture.test.ts`                                      |
 | Precondition enforcement                     | `SkillRegistry.resolveParameters`, per-skill guards      | `tests/skills/resources.test.ts`, `tests/skills/food-and-shelter.test.ts`      |
@@ -465,6 +465,18 @@ claim without reading the whole tree.
 | A death during the last decision is reported in its own session | `PersonRuntime` checks world and body before the budgets | `a death during the last decision is reported before the session ends`                                                                           |
 | A skill whose body is dead at its end is a death                | `SkillRunner`                                            | `a move that fails because the body died ends the skill as DEATH, not FAILED`, `a move that fails on a living body is still an ordinary failure` |
 | A move stops the moment the body dies                           | `MineflayerEmbodiment.moveTo`                            | `a move stops the moment the body dies, instead of running out its timeout`                                                                      |
+
+## Air-deprivation emergency (ADR 0019)
+
+| Requirement                                                        | Implementation                        | Tests                                                                                                                                                                                                 |
+| ------------------------------------------------------------------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| An air emergency restores air, never flees                         | `SafetyKernel.assess` (`restore_air`) | `an air emergency is answered by restoring air, not by fleeing`, `with a hostile nearby and air critical, the runtime restores air instead of fleeing`                                                |
+| Air comes first; ordinary flee keeps its meaning                   | `SafetyKernel.assess`                 | `air still comes first with a hostile nearby, and ordinary flee keeps its meaning`                                                                                                                    |
+| Open water: swim up; blocked straight up: the next open column     | `restoreAir`, `nearestAir`, `ascend`  | `in open water the body swims up to air`, `with the way straight up blocked, the body reaches air by the next open column`, `holding jump in open water rises until the head is in air, then lets go` |
+| No reachable air: a bounded failure, no digging, no zero-time loop | `restoreAir`                          | `with no reachable air the skill fails cleanly, bounded, and digs nothing`, `an air emergency with no way out is one emergency per decision, and a respawn leaves none of it`                         |
+| Death, respawn and world loss end the escape                       | skill checkpoints, `ascend`           | `a body that drowns during the escape ends it as DEATH`, `a world lost during the escape ends it as DISCONNECTED`, `a stroke ends when the body dies`, `a stroke ends when the connection is lost`    |
+| Under-water plants are never air                                   | `blockKind`                           | `plants that grow only under water read as water, so they are never mistaken for air`                                                                                                                 |
+| The fixture loses air under water                                  | `FixtureWorld`                        | `the fixture loses air under water, and breathes again at the surface`                                                                                                                                |
 
 ## Tick budgets
 

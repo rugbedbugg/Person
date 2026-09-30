@@ -82,11 +82,11 @@ Python cognition  →  SkillInvocation  →  [TRUST BOUNDARY]  →  Node validat
 
 ### Skills (`packages/skills/`, `apps/node-runtime/src/skills/impl/`)
 
-**23 skills, all implemented** (architecture test asserts spec/impl sets identical, no placeholders):
+**24 skills, all implemented** (architecture test asserts spec/impl sets identical, no placeholders):
 
 | Category   | Skills                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------- |
-| Emergency  | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
+| Emergency  | `flee`, `dig_in`, `restore_air` (ADR 0019), `wait_safely`, `return_home`                           |
 | Food       | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
 | Resources  | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
 | Crafting   | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
@@ -382,7 +382,7 @@ episodes against Minecraft, eight decisions each. `look_around` was also
 validated through `person skill-test`. Recorded separately from the LAN runs in
 `REALITY_VALIDATION.md`, "Dedicated-server validation".
 
-**Twenty of twenty-three skills have never been validated live** through
+**Twenty-one of twenty-four skills have never been validated live** through
 `person skill-test`. In the two short autonomous episodes `look`,
 `gather_wood` and `craft_basic_tools` also ran and succeeded (one `gather_wood`
 timed out), and `build_basic_shelter` and `repair_shelter` ran and failed; one
@@ -927,7 +927,7 @@ runtime would allow a direct route home), not a distance.
 | Breath appraisal is exercised only by tests: no fixture world lowers air                                                                     | ADR 0014                   |
 | The experiment harness measures from per-decision deltas; the body is not sampled continuously                                               | ADR 0013                   |
 | Mineflayer respawn and reconnection exercised live once (E3 rehearsal, dedicated server), not on a LAN world                                 | REALITY_VALIDATION.md      |
-| The L0 suffocation emergency answers with `flee`, which does not surface: a live rehearsal body drowned                                      | E3 rehearsal               |
+| The L0 suffocation emergency now restores air (`restore_air`, ADR 0019); TESTED IN FIXTURE and CONFORMANCE-TESTED, one live check pending    | ADR 0019                   |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                           | IMPLEMENTATION_REPORT.md   |
 | Inventory reconciliation on resume not reimplemented                                                                                         | IMPLEMENTATION_REPORT.md   |
 | `loot_permitted_container` withdraws all types up to amount                                                                                  | IMPLEMENTATION_REPORT.md   |
@@ -952,9 +952,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 405     | 405     |
+| Node (all)   | 420     | 420     |
 | Python (all) | 455     | 455     |
-| **Total**    | **860** | **860** |
+| **Total**    | **875** | **875** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -974,7 +974,7 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `docs/e3-rehearsal` on 2026-09-30: Node 405 pass / 0 fail,
+Verified on `safety/air-emergency` on 2026-09-30: Node 420 pass / 0 fail,
 Python 455 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;

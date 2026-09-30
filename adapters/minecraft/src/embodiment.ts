@@ -869,6 +869,41 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       );
   }
 
+  /**
+   * Swims straight up by holding jump (ADR 0019), until the head is in
+   * breathable space, the budget is spent, or the body dies or is lost.
+   * Whether it got there is for the caller to see; this only strokes.
+   */
+  async ascend(options: { maxTicks: number }): Promise<void> {
+    const bot = this.bot;
+    if (!this.#connected) throw new DisconnectedError();
+    const generation = this.#generation;
+    const deadline = Date.now() + Math.max(50, options.maxTicks * 50);
+    const headInAir = (): boolean => {
+      const head = point(bot.entity.position);
+      const block = this.blockAt({ ...head, y: head.y + 1 });
+      return (
+        block !== null &&
+        !block.solid &&
+        block.kind !== "water" &&
+        block.kind !== "lava"
+      );
+    };
+    bot.pathfinder?.setGoal(null);
+    try {
+      bot.setControlState("jump", true);
+      while (Date.now() < deadline && !headInAir()) {
+        if (generation !== this.#generation || !this.#connected)
+          throw new DisconnectedError();
+        if ((bot.health ?? 0) <= 0)
+          throw new EmbodimentError("died", "Person died while swimming");
+        await delay(50);
+      }
+    } finally {
+      if (generation === this.#generation) bot.setControlState("jump", false);
+    }
+  }
+
   async moveTo(target: Position, options: MoveOptions = {}): Promise<void> {
     const bot = this.bot;
     if (!this.#connected) throw new DisconnectedError();

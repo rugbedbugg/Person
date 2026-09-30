@@ -363,6 +363,7 @@ export interface EmergencyEvent extends Envelope {
   action:
     | "flee"
     | "dig_in"
+    | "restore_air"
     | "eat_to_target"
     | "return_home"
     | "cancel_skill"

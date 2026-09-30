@@ -3,7 +3,12 @@ import type { WorldSnapshot } from "../embodiment/types.ts";
 import type { PermissionGate } from "./permissions.ts";
 
 export type EmergencyAction =
-  "flee" | "dig_in" | "eat_to_target" | "return_home" | "cancel_skill";
+  | "flee"
+  | "dig_in"
+  | "eat_to_target"
+  | "return_home"
+  | "restore_air"
+  | "cancel_skill";
 
 export interface EmergencyAssessment {
   level: "L0" | "L1";
@@ -154,11 +159,13 @@ export class SafetyKernel {
         reasonCodes: ["standing_in_hazard", `hazard_${standingHazard.kind}`],
       };
 
+    // Air deprivation restores air (ADR 0019). Fleeing moves sideways, away
+    // from hostiles, and a body under water that only moves sideways drowns.
     if (snapshot.air <= t.lowAir)
       return {
         level: "L0",
         trigger: "suffocation",
-        action: "flee",
+        action: "restore_air",
         reasonCodes: ["air_below_threshold"],
       };
 

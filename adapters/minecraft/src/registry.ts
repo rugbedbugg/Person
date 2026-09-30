@@ -19,7 +19,17 @@ export function blockKind(name: string): BlockKind {
   if (name.endsWith("_planks")) return "planks";
   if (name === "dirt" || name === "coarse_dirt") return "dirt";
   if (name === "grass_block") return "grass";
-  if (name === "water") return "water";
+  // Kelp, seagrass and bubble columns only exist under water in 1.16: a head
+  // inside one is a head under water (ADR 0019).
+  if (
+    name === "water" ||
+    name === "kelp" ||
+    name === "kelp_plant" ||
+    name === "seagrass" ||
+    name === "tall_seagrass" ||
+    name === "bubble_column"
+  )
+    return "water";
   if (name === "lava") return "lava";
   if (name === "fire" || name === "soul_fire") return "fire";
   if (name === "cactus") return "cactus";

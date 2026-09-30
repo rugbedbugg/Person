@@ -1,0 +1,28 @@
+{
+  "id": "restore_air",
+  "version": 1,
+  "category": "emergency",
+  "summary": "Reach the nearest locally reachable breathable space when air runs out (ADR 0019).",
+  "parameters": {
+    "max_rise": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 16,
+      "default": 12,
+      "description": "How far above the head breathable space is looked for."
+    }
+  },
+  "preconditions": [],
+  "expectedEffects": [],
+  "possibleFailures": ["no_reachable_air", "timed_out", "death"],
+  "requiredPermissions": [],
+  "costLimits": {
+    "maxTicks": 300,
+    "maxDistance": 16,
+    "minHealth": 0
+  },
+  "interruptionPolicy": "uninterruptible",
+  "completionEvidence": ["position_reached", "vitals_delta"],
+  "risk": 0.2,
+  "emergency": true
+}

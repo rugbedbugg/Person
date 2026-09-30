@@ -51,7 +51,7 @@ vocabulary, and the registry refuses a spec that invents one.
 
 | Category   | Skills                                                                                             |
 | ---------- | -------------------------------------------------------------------------------------------------- |
-| Emergency  | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
+| Emergency  | `flee`, `dig_in`, `restore_air`, `wait_safely`, `return_home`                                      |
 | Food       | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
 | Resources  | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
 | Crafting   | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |

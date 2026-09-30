@@ -259,6 +259,13 @@ export interface Embodiment {
    * respawn-configured death, and reports it; cognition never asks for it.
    */
   respawn?(): Promise<void>;
+  /**
+   * Swims straight up (ADR 0019), for bodies that can: at most `maxTicks`,
+   * stopping as soon as the head is in breathable space, the way up is
+   * blocked, or the body dies or is disconnected. Only the air-restoring
+   * emergency uses it.
+   */
+  ascend?(options: { maxTicks: number }): Promise<void>;
   /** Registers a Person-placed container so its provenance is tracked. */
   registerOwnedStorage(position: Position, storageId: string): void;
 }
