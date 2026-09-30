@@ -17,6 +17,7 @@ from typing import Any
 
 import pytest
 from person_cognition.deliberation import SterilityFailure
+from person_cognition.deliberation import sterile as sterile_module
 from person_cognition.deliberation.providers import (
     CODEX_DISABLED_FEATURES,
     BudgetExhausted,
@@ -24,7 +25,7 @@ from person_cognition.deliberation.providers import (
     ClaudeCodeModel,
     CodexModel,
 )
-from person_cognition.deliberation.sterile import Credential, Sandbox, self_check
+from person_cognition.deliberation.sterile import Credential, Sandbox, SterilityError, self_check
 
 
 @pytest.fixture
@@ -97,6 +98,9 @@ def use(monkeypatch: pytest.MonkeyPatch, canned: Canned) -> Canned:
         return canned(self, argv, stdin=stdin, timeout_s=timeout_s)
 
     monkeypatch.setattr(Sandbox, "run", run)
+    # The canned process never runs, so a host without bubblewrap (CI) can
+    # still test the adapters. Production fails closed without it.
+    monkeypatch.setattr(sterile_module, "bubblewrap", lambda: "/nonexistent/bwrap")
     return canned
 
 
@@ -452,3 +456,11 @@ def test_an_app_server_refusal_is_unavailable(tmp_path: Path, credential: Path) 
         tmp_path, credential, [{"id": 2, "error": {"code": -32000, "message": "not logged in"}}]
     )
     assert backend.deliberate("I", "C", timeout_s=10).status == "unavailable"
+
+
+def test_without_bubblewrap_no_sterile_backend_runs(
+    tmp_path: Path, credential: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(sterile_module.shutil, "which", lambda name: None)
+    with pytest.raises(SterilityError, match="bubblewrap"):
+        claude(tmp_path, credential).deliberate("I", "C", timeout_s=10)
