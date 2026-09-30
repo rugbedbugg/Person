@@ -1,0 +1,31 @@
+{
+  "probe": "2026-10-01-b (codex exec, call 1)",
+  "detector": "v1: every item type other than agent_message and reasoning is a sterility failure",
+  "result": "SterilityFailure item_error; backend disabled; raw output quarantined locally (0600), not committed",
+  "event_shape": [
+    {
+      "type": "thread.started",
+      "item": null
+    },
+    {
+      "type": "item.completed",
+      "item": "error"
+    },
+    {
+      "type": "turn.started",
+      "item": null
+    },
+    {
+      "type": "item.completed",
+      "item": "agent_message"
+    },
+    {
+      "type": "turn.completed",
+      "item": null
+    }
+  ],
+  "diagnostic": "the error item was the CLI's own notice that code mode is unavailable because its host is disabled and will fail closed",
+  "classification": "false positive: a capability withheld, not exercised (reviewer, 2026-10-01)",
+  "amendment": "events classified as message / known diagnostic / tool or capability / unknown; unknown degrades one answer only",
+  "quarantine_sha256_prefix": "5516053dcdfffafd"
+}

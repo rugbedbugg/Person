@@ -160,6 +160,21 @@ and later proceduralization, habit success and invalidation.
   shows `record_only` changes nothing but its own evidence. TESTED with
   scripted models; no provider is wired.
 
+- **C2:** sterile subscription backends behind the same interface:
+  `ClaudeCodeModel` (print mode), `CodexModel` (`codex exec`) and
+  `CodexAppServerModel` (the official app-server, with our instruction as its
+  `baseInstructions`). Profile `sterile-v1`: provider-native tool removal,
+  then a fresh HOME and configuration holding only the one bind-mounted auth
+  file, then bubblewrap with no view of the host and a neutral hostname.
+  Event streams are classified; a tool or capability is a sterility failure
+  (rejected, quarantined locally, backend disabled), an unknown event
+  degrades one answer. Hard call budgets are checked before any process is
+  spawned. Probes with synthetic canaries passed host isolation, zero tools
+  and context use for all three transports
+  (`docs/evidence/deliberation/2026-10-01-c2-sterility/`); the app-server
+  transport cut Codex's input from about 18.6k to 5.1k tokens and is preferred
+  for C7. Still `record_only`; no live Minecraft.
+
 ## Consequences
 
 ### Positive

@@ -1,0 +1,70 @@
+{
+  "codex-app-server": {
+    "budget": {
+      "attempted": 1,
+      "completed": 1,
+      "input_tokens": 5127,
+      "max_calls": 1,
+      "output_tokens": 259,
+      "rejected": 0,
+      "sterility_failures": 0,
+      "unavailable": 0
+    },
+    "cli": "codex-cli 0.159.2",
+    "diagnostics": [],
+    "disabled": null,
+    "model": "gpt-6-astra",
+    "passed": true,
+    "positive_v2": {
+      "context_canary": false,
+      "fact_canary": true,
+      "file_canary": false,
+      "input_tokens": 5127,
+      "instruction_canary": false,
+      "rejections": [],
+      "status": "completed",
+      "tools_exposed": null,
+      "verdict": "admitted"
+    },
+    "records": [
+      {
+        "context_sha256": "d526a5b115d214cb4794e675627ef4b2c47ba395e753761bdbac1e7d9ecc00e2",
+        "deliberation_id": "dlb_3810aba30b28416f",
+        "instruction_sha256": "adbd400c47190c35683c7dc8a220d83f39456be1822a8f331b7db5241346b8f0",
+        "model": "gpt-6-astra",
+        "provider": "codex",
+        "reason": "reflection",
+        "type": "deliberation_requested"
+      },
+      {
+        "backend_version": "codex app-server codex-cli 0.159.2; sterile-v1",
+        "deliberation_id": "dlb_3810aba30b28416f",
+        "latency_ms": 11678,
+        "model": "gpt-6-astra",
+        "output_sha256": "67c2fcee7a74f28f4caedf826c2e33646e9e3f4805b24c15372787515a8994cb",
+        "provider": "codex",
+        "rejections": [],
+        "type": "deliberation_completed",
+        "verdict": "admitted"
+      }
+    ],
+    "self_check": {
+      "environment": [
+        "HOME",
+        "LANG",
+        "PATH",
+        "PWD",
+        "SHLVL",
+        "TMPDIR",
+        "_"
+      ],
+      "exit": 0,
+      "home_entries": [
+        "/sandbox/home/.codex",
+        "/sandbox/home/.codex/auth.json"
+      ],
+      "profile": "sterile-v1",
+      "visible": []
+    }
+  }
+}

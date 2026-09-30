@@ -1,0 +1,100 @@
+{
+  "claude-code": {
+    "budget": {
+      "attempted": 2,
+      "completed": 2,
+      "input_tokens": 4,
+      "max_calls": 3,
+      "output_tokens": 1555,
+      "rejected": 0,
+      "sterility_failures": 0,
+      "unavailable": 0
+    },
+    "cli": "2.1.285 (Claude Code)",
+    "disabled": null,
+    "model": "claude-opus-5-5",
+    "negative": {
+      "context_canary": false,
+      "file_canary": false,
+      "instruction_canary": false,
+      "rejections": [],
+      "status": "completed",
+      "tools_exposed": [
+        "StructuredOutput"
+      ],
+      "verdict": "admitted"
+    },
+    "passed": true,
+    "positive": {
+      "context_canary": true,
+      "file_canary": false,
+      "instruction_canary": false,
+      "rejections": [],
+      "status": "completed",
+      "tools_exposed": [
+        "StructuredOutput"
+      ],
+      "verdict": "admitted"
+    },
+    "records": [
+      {
+        "context_sha256": "b5695c54b1fdd79a24c49d4e3cb89e93b0573a194611f18d0e5fe4b062bae4f3",
+        "deliberation_id": "dlb_07ead9eb66a9474b",
+        "instruction_sha256": "adbd400c47190c35683c7dc8a220d83f39456be1822a8f331b7db5241346b8f0",
+        "model": "claude-opus-5-5",
+        "provider": "claude-code",
+        "reason": "reflection",
+        "type": "deliberation_requested"
+      },
+      {
+        "backend_version": "claude-code 2.1.285 (Claude Code); sterile-v1",
+        "deliberation_id": "dlb_07ead9eb66a9474b",
+        "latency_ms": 10040,
+        "model": "claude-opus-5-5",
+        "output_sha256": "a8418e2e74e4e52136b92f3ff1a1d77bee16e2f954df23a9aae90f91fbc6721d",
+        "provider": "claude-code",
+        "rejections": [],
+        "type": "deliberation_completed",
+        "verdict": "admitted"
+      },
+      {
+        "context_sha256": "7c3317242d9a6caec4cfd48f2393e9f6a50a7eb392b3a68ff89c556a17ab7a8f",
+        "deliberation_id": "dlb_20121dc957344a56",
+        "instruction_sha256": "adbd400c47190c35683c7dc8a220d83f39456be1822a8f331b7db5241346b8f0",
+        "model": "claude-opus-5-5",
+        "provider": "claude-code",
+        "reason": "reflection",
+        "type": "deliberation_requested"
+      },
+      {
+        "backend_version": "claude-code 2.1.285 (Claude Code); sterile-v1",
+        "deliberation_id": "dlb_20121dc957344a56",
+        "latency_ms": 9293,
+        "model": "claude-opus-5-5",
+        "output_sha256": "3d32a473d087b8a4b5a64ce14b3e29e8e1795da85cfb2cd5bfac9b37da5718da",
+        "provider": "claude-code",
+        "rejections": [],
+        "type": "deliberation_completed",
+        "verdict": "admitted"
+      }
+    ],
+    "self_check": {
+      "environment": [
+        "HOME",
+        "LANG",
+        "PATH",
+        "PWD",
+        "SHLVL",
+        "TMPDIR",
+        "_"
+      ],
+      "exit": 0,
+      "home_entries": [
+        "/sandbox/home/.claude",
+        "/sandbox/home/.claude/.credentials.json"
+      ],
+      "profile": "sterile-v1",
+      "visible": []
+    }
+  }
+}
