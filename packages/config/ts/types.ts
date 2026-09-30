@@ -52,6 +52,10 @@ export interface PersonConfig {
     explorationBonus: number;
     minimumSupport: number;
   };
+  /** What a death means (ADR 0017, I3); the runtime's alone. */
+  lifecycle?: {
+    death?: "respawn" | "permadeath";
+  };
   /** Who this Person is (ADR 0017): written once, into the founding event. */
   identity?: {
     name?: string;

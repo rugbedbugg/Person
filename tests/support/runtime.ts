@@ -20,6 +20,8 @@ export interface RuntimeRunOptions extends HarnessOptions {
   operatorIntervention?: { reason?: string };
   /** ADR 0017, I2: reconnection budget after the world is lost. */
   reconnectAttempts?: number;
+  /** ADR 0017, I3: what a death means. */
+  death?: "respawn" | "permadeath";
 }
 
 /** Runs a complete episode with a real cognition subprocess over stdio. */
@@ -49,6 +51,7 @@ export async function runEpisode(options: RuntimeRunOptions): Promise<{
       evidenceDirectory,
     },
     cognition: { ...config.cognition, command: options.cognitionCommand },
+    ...(options.death ? { lifecycle: { death: options.death } } : {}),
   };
   const world =
     options.worldObject ??

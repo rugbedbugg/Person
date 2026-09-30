@@ -170,6 +170,49 @@ class ContinuityRecord:
         self.violations = list(body.get("violations", []))
 
 
+#: Life status (ADR 0017, I3). `awaiting_respawn` is engineering-facing: a
+#: non-terminal death has been recorded and no respawn yet.
+LIFE_STATES: tuple[str, ...] = ("alive", "awaiting_respawn", "terminated")
+
+
+class LifeRecord:
+    """Whether this Person is alive, awaiting a respawn, or terminated.
+
+    Its own axis: nothing here reads world availability or sessions. A
+    terminal death is terminal by itself, so a crash between recording it and
+    anything after it still reconstructs a terminated Person.
+    """
+
+    def __init__(self) -> None:
+        self.reset()
+
+    def reset(self) -> None:
+        self.status = "alive"
+        self.deaths = 0
+        self.respawns = 0
+
+    def apply(self, event: EvidenceEvent) -> None:
+        if self.status == "terminated":
+            return
+        if event.type == "person_died":
+            self.deaths += 1
+            self.status = "terminated" if event.payload.get("terminal") else "awaiting_respawn"
+        elif event.type == "person_terminated":
+            self.status = "terminated"
+        elif event.type == "person_respawned" and self.status == "awaiting_respawn":
+            self.respawns += 1
+            self.status = "alive"
+
+    def to_json(self) -> dict[str, Any]:
+        return {"status": self.status, "deaths": self.deaths, "respawns": self.respawns}
+
+    def load_json(self, body: Mapping[str, Any]) -> None:
+        self.reset()
+        self.status = str(body["status"])
+        self.deaths = int(body.get("deaths", 0))
+        self.respawns = int(body.get("respawns", 0))
+
+
 @dataclass(frozen=True, slots=True)
 class SelfKnowledge:
     """What cognition may know about its own identity and continuity.

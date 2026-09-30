@@ -22,16 +22,17 @@ schema change that only one side understands fails the build.
 
 Sent by the runtime:
 
-| Type                 | Meaning                                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------------------ |
-| `SessionHello`       | Session facts: learning mode, training context, evidence directory, seed, skill library revision |
-| `Observation`        | Normalised semantic world state                                                                  |
-| `ValidationDecision` | The authoritative verdict on a proposal                                                          |
-| `SkillStarted`       | Execution has begun, with the starting vitals and inventory                                      |
-| `SkillOutcome`       | What actually happened                                                                           |
-| `EmergencyEvent`     | The kernel acted at L0 or L1                                                                     |
-| `EpisodeEvent`       | Episode started or ended                                                                         |
-| `WorldAvailability`  | Whether the world is available to the body now: an operational state, not a verdict (ADR 0017)   |
+| Type                 | Meaning                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `SessionHello`       | Session facts: learning mode, training context, evidence directory, seed, skill library revision        |
+| `Observation`        | Normalised semantic world state                                                                         |
+| `ValidationDecision` | The authoritative verdict on a proposal                                                                 |
+| `SkillStarted`       | Execution has begun, with the starting vitals and inventory                                             |
+| `SkillOutcome`       | What actually happened                                                                                  |
+| `EmergencyEvent`     | The kernel acted at L0 or L1                                                                            |
+| `EpisodeEvent`       | Episode started or ended                                                                                |
+| `LifeEvent`          | The body died (with whether that is terminal) or was respawned; no cause, place or inventory (ADR 0017) |
+| `WorldAvailability`  | Whether the world is available to the body now: an operational state, not a verdict (ADR 0017)          |
 
 Sent by cognition:
 

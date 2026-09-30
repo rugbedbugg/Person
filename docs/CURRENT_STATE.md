@@ -136,7 +136,12 @@ Two implementations, same skill code:
   - **Suspension:** known only at the next session start, as the interval after a clean end or a crash, with the world's state at that end.
   - **Legacy roots:** acquire no lifecycle events.
   - **What Person sees:** only whether the world is available now.
-  - **Not built yet:** death semantics (I3).
+  - **Life status (I3):** its own axis (alive; awaiting a respawn, which is engineering-facing; terminated), rebuilt from the journal.
+  - **Death comes from the runtime:** only the trusted runtime observes a death, and `[lifecycle] death` (respawn by default, or permadeath) decides whether it is terminal.
+  - **Respawn:** the same Person, session, memories, experienced time and projects continue. The death is one salient `died` memory of what Person knew: body, threat in view, goal and project. Its affect is recorded in the `person_died` evidence, not in memory (ADR 0010). Body continuity is dropped, so the respawned body is not felt as a recovery.
+  - **Permadeath:** the terminal flag on the death record is enough by itself, so a crash right after it still reconstructs termination. A terminated Person refuses to start, whatever the configuration now says.
+  - **After a crash before a respawn:** the next run respawns the body before Person perceives anything.
+  - **What reaches Person:** no cause, place or inventory.
   - **Status:** TESTED IN FIXTURE, with synthetic identities only; the canonical Person-000 root does not exist yet.
 - **Experienced time (ADR 0006, partly implemented):** Person's own clock counts only ticks between observations it received, is journalled on `episode_ended`, and resumes after a restart; memory accessibility, affect decay, project cooldowns and experiment patience run on it. External time, the five operational states and death semantics are not implemented
 
@@ -147,8 +152,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone), affect_tonic (schema v10; the pressures, the offset they set, the time covered and the state before and after), person_founded, session_started and session_ended (schema v11; identity and session continuity, ADR 0017), world_availability_changed (schema v12; the world's availability to the body, written only on a change)
-- **Schema versions:** new records are `person-evidence-v12`; v1 to v11 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone), affect_tonic (schema v10; the pressures, the offset they set, the time covered and the state before and after), person_founded, session_started and session_ended (schema v11; identity and session continuity, ADR 0017), world_availability_changed (schema v12; the world's availability to the body, written only on a change), person_died, person_respawned and person_terminated (schema v13; life status, ADR 0017 I3)
+- **Schema versions:** new records are `person-evidence-v13`; v1 to v12 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -173,6 +178,7 @@ Two implementations, same skill code:
 | EmergencyEvent     |                 |
 | EpisodeEvent       |                 |
 | WorldAvailability  |                 |
+| LifeEvent          |                 |
 
 Every message carries: `protocolVersion`, `messageId`, `personId`, `sessionId`, `worldId`, `tick`, `timestamp`, `type`
 
@@ -934,9 +940,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 351     | 351     |
-| Python (all) | 430     | 430     |
-| **Total**    | **781** | **781** |
+| Node (all)   | 354     | 354     |
+| Python (all) | 442     | 442     |
+| **Total**    | **796** | **796** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -956,12 +962,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `person/operational-state` on 2026-09-30: Node 351 pass / 0 fail,
-Python 430 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `person/death-semantics` on 2026-09-30: Node 354 pass / 0 fail,
+Python 442 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30.
 
 ---
 

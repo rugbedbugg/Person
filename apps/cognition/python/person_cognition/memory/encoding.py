@@ -200,6 +200,40 @@ def hurt(before: float, observation: Mapping[str, Any]) -> EpisodeDraft | None:
     )
 
 
+def died(
+    *,
+    health: float | None,
+    food: float | None,
+    threat_in_view: bool,
+    goal_type: str | None,
+    project_kind: str | None,
+    message_id: str | None,
+) -> EpisodeDraft:
+    """Person's own death, from what it knew (ADR 0017, I3).
+
+    Only the body it last felt, whether a threat was in view, and what it was
+    doing. Never a cause, a place in the world, or the items it lost: the
+    runtime knows those, Person does not. How it felt is journalled with the
+    death as engineering evidence, and kept out of memory (ADR 0010).
+    """
+    details: dict[str, Any] = {
+        "outcome": "died",
+        "health_before": health,
+        "food_before": food,
+        "threat_in_view": threat_in_view,
+        "goal": goal_type,
+        "project": project_kind,
+    }
+    subjects = ("self", "danger")
+    return EpisodeDraft(
+        kind="died",
+        subjects=subjects,
+        details=details,
+        provenance=Provenance("proprioceptive", message_id=message_id),
+        salience=base_salience("died", subjects, details),
+    )
+
+
 def searched(
     sought: tuple[str, ...], conclusion: str, looks: int, decision_id: str | None
 ) -> EpisodeDraft:

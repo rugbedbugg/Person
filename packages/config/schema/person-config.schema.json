@@ -75,6 +75,14 @@
         "minimumSupport": { "type": "integer", "minimum": 1, "maximum": 100 }
       }
     },
+    "lifecycle": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "ADR 0017, I3: what a death means. Read by the trusted runtime, never by cognition. respawn (the default): the same Person continues. permadeath: the Person is terminated, irreversibly; changing this afterwards resurrects no one.",
+      "properties": {
+        "death": { "enum": ["respawn", "permadeath"] }
+      }
+    },
     "identity": {
       "type": "object",
       "additionalProperties": false,

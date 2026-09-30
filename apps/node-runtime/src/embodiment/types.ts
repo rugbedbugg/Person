@@ -253,6 +253,12 @@ export interface Embodiment {
    * an attempt. It is a guarantee of progress, not a model of reaction time.
    */
   passTick?(): void;
+  /**
+   * Brings a dead body back as the same Person (ADR 0017, I3), for bodies
+   * that can: Minecraft's respawn. The runtime calls it only for a
+   * respawn-configured death, and reports it; cognition never asks for it.
+   */
+  respawn?(): Promise<void>;
   /** Registers a Person-placed container so its provenance is tracked. */
   registerOwnedStorage(position: Position, storageId: string): void;
 }

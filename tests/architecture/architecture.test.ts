@@ -111,6 +111,8 @@ test("cognition may only send decisions; the runtime owns every verdict", () => 
     "EpisodeEvent",
     // ADR 0017, I2: a fact the runtime owns, told to cognition.
     "WorldAvailability",
+    // ADR 0017, I3: likewise; cognition can neither die nor end itself.
+    "LifeEvent",
   ];
   assert.deepEqual(
     [...validator.messageTypes].sort(),
