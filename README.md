@@ -175,7 +175,7 @@ perception firewall. On a local dedicated server (2026-09-29): a six-check
 checkpoint of the current body contract (observation v7, gaze, the perception
 firewall, the kernel's threat detection, restart reconstruction), one
 `look_around` validation, and the first two autonomous episodes, of eight
-decisions each. Twenty of the twenty-three skills have never been validated
+decisions each. Twenty-one of the twenty-four skills have never been validated
 live, and most safety mechanisms have been proven only in the fixture and
 against a conformance double. `REALITY_VALIDATION.md` is explicit about what
 that leaves open, and about where the evidence for those runs lives.

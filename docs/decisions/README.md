@@ -75,6 +75,7 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0016](0016-fixture-hostiles-obey-walls.md)                | Fixture hostiles obey walls                                            | Accepted                           | 2026-09-30 |
 | [0017](0017-identity-continuity-and-lifetime.md)           | Identity, continuity and operational lifetime                          | Accepted                           | 2026-09-30 |
 | [0018](0018-first-ada-readiness-and-canonical-history.md)  | First-Ada readiness and canonical history                              | Accepted                           | 2026-09-30 |
+| [0019](0019-air-deprivation-emergency-response.md)         | Air-deprivation emergency response                                     | Accepted                           | 2026-09-30 |
 
 ADRs 0001 to 0006 were written during the Phase 0 canonical architecture
 reconciliation (`docs/PERSON_SPEC.md`, frozen 2026-09-22) and changed no
