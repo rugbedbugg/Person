@@ -1,0 +1,88 @@
+# ADR 0019 targeted live check: validation-001, air deprivation only, on the
+# throwaway E3 world. Infrastructure validation, not research.
+
+configVersion = 2
+personId = "validation-001"
+worldId = "validation-e3-rehearsal"
+
+[identity]
+name = "AirCheck"
+designation = "Validation-001"
+
+[runtime]
+embodiment = "minecraft"
+trainingContext = "minecraft_normal"
+outputDirectory = "./output"
+rngSeed = 20260930
+maxDecisions = 14
+maxTicks = 48000
+decisionIntervalMs = 1500
+# E1 under test: the same running cognition must survive a real disconnect.
+reconnectAttempts = 5
+reconnectIntervalMs = 5000
+
+[learning]
+mode = "off"
+evidenceDirectory = "./root"
+snapshotEveryEvents = 25
+explorationBonus = 0.15
+minimumSupport = 3
+
+[lifecycle]
+death = "respawn"
+
+[affect]
+mode = "active"
+
+[server]
+host = "127.0.0.1"
+port = 25565
+version = "1.16.1"
+
+[bot]
+username = "PersonAirCheck"
+auth = "offline"
+
+[authorization]
+worldOwnerApproved = true
+dedicatedIdentity = true
+resourceAreasAreUnowned = true
+naturalDaylightCycle = true
+normalDifficulty = true
+
+[cognition]
+command = ["uv", "run", "--project", "/home/rugbedbugg/Projects/Python/Person", "person-cognition", "--config", "/home/rugbedbugg/Projects/Python/Person/runs/validation/air/validation-001.toml"]
+startTimeoutMs = 20000
+decisionTimeoutMs = 5000
+
+[world]
+# World spawn of validation-e3-rehearsal is (48, 77, -240).
+home = { x = 48, y = 77, z = -240 }
+exploration = { min = { x = 0, y = 0, z = -288 }, max = { x = 96, y = 255, z = -192 } }
+resourceAreas = [{ min = { x = 0, y = 0, z = -288 }, max = { x = 96, y = 255, z = -192 } }]
+protectedAreas = []
+
+[permissions.containers.existing]
+withdraw = false
+deposit = false
+
+[permissions.containers.owned]
+withdraw = true
+deposit = true
+
+[permissions.hunting]
+passiveUnnamedAnimals = true
+namedAnimals = false
+tamedAnimals = false
+
+[permissions.players]
+combat = false
+
+[permissions.villagers]
+harm = false
+
+[permissions.building]
+enabled = true
+
+[permissions.protectedAreas]
+enforcement = "strict"
