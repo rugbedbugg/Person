@@ -179,3 +179,39 @@ test(
     );
   },
 );
+
+test(
+  "a death during the last decision is reported before the session ends",
+  { timeout: 300000 },
+  async () => {
+    // E3 live rehearsal, 2026-09-30: the body died during the final
+    // decision's skill, the loop left on its decision budget, and the death
+    // was never reported.
+    const evidenceDirectory = temporaryDirectory("person-life-");
+    const { report } = await runEpisode({
+      worldObject: new FixtureWorld(doomed),
+      cognitionCommand: COGNITION,
+      evidenceDirectory,
+      personId: "test-person-000",
+      maxDecisions: 1,
+      death: "respawn",
+    });
+    assert.equal(report.decisions.length, 1, "the budget still holds");
+    assert.equal(report.reason, "decision_budget_reached");
+    const types = journal(evidenceDirectory).map((e) => e.type);
+    assert.equal(types.filter((t) => t === "person_died").length, 1);
+    assert.equal(types.filter((t) => t === "person_respawned").length, 1);
+    assert.ok(
+      types.indexOf("person_died") < types.indexOf("session_ended"),
+      "reported within the session it happened in",
+    );
+    const died = journal(evidenceDirectory).find(
+      (e) => e.type === "skill_failed" || e.type === "skill_interrupted",
+    );
+    assert.equal(
+      died?.payload["status"],
+      "DEATH",
+      "the skill died with the body",
+    );
+  },
+);

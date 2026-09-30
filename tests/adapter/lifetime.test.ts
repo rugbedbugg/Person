@@ -249,3 +249,19 @@ test("an explicit disconnect retires the client, so its own end says nothing", a
   assert.deepEqual(fatal, []);
   assert.equal(bots.length, 1, "nothing reconnected");
 });
+
+test("a move stops the moment the body dies, instead of running out its timeout", async () => {
+  const { embodiment, bots } = connections({});
+  await embodiment.connect();
+  const bot = bots[0]!;
+  // A route the pathfinder is still walking when the body dies.
+  (bot.pathfinder as { goto: () => Promise<void> }).goto = () =>
+    new Promise(() => {});
+  const started = Date.now();
+  const moving = embodiment.moveTo({ x: 10, y: 64, z: 10 }, { maxTicks: 1200 });
+  await tick();
+  bot.damage(20);
+  await assert.rejects(moving, { reason: "died" });
+  assert.ok(Date.now() - started < 1000, "stopped at once, not after 60 s");
+  await embodiment.disconnect();
+});
