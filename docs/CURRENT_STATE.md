@@ -436,7 +436,7 @@ could rest on.
 4. Server-side placement/crafting/smelting/container timing untested
 5. Real mob behavior / flee adequacy unknown (both live worlds were Peaceful)
 6. Tick budgets still not revised on live measurement
-7. Death/respawn designed and TESTED IN FIXTURE (ADR 0017); the Mineflayer adapter's respawn and reconnection are CONFORMANCE-TESTED only, never run live
+7. Death/respawn designed and TESTED IN FIXTURE (ADR 0017); the Mineflayer respawn, dead joins and reconnection were exercised once each against the dedicated server in the E3 rehearsal (2026-09-30), with a validation identity
 
 ---
 
@@ -926,7 +926,8 @@ runtime would allow a direct route home), not a distance.
 | A zero-time success repeated at one tick is not guarded; zero-time failures stop the fixture clock until the stall detector ends the episode | ADR 0015                   |
 | Breath appraisal is exercised only by tests: no fixture world lowers air                                                                     | ADR 0014                   |
 | The experiment harness measures from per-decision deltas; the body is not sampled continuously                                               | ADR 0013                   |
-| Mineflayer respawn and reconnection are conformance-tested only; neither has run against Minecraft                                           | ADR 0017                   |
+| Mineflayer respawn and reconnection exercised live once (E3 rehearsal, dedicated server), not on a LAN world                                 | REALITY_VALIDATION.md      |
+| The L0 suffocation emergency answers with `flee`, which does not surface: a live rehearsal body drowned                                      | E3 rehearsal               |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                           | IMPLEMENTATION_REPORT.md   |
 | Inventory reconciliation on resume not reimplemented                                                                                         | IMPLEMENTATION_REPORT.md   |
 | `loot_permitted_container` withdraws all types up to amount                                                                                  | IMPLEMENTATION_REPORT.md   |
@@ -951,9 +952,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 401     | 401     |
+| Node (all)   | 405     | 405     |
 | Python (all) | 455     | 455     |
-| **Total**    | **856** | **856** |
+| **Total**    | **860** | **860** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -973,12 +974,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `person/preflight` on 2026-09-30: Node 401 pass / 0 fail,
+Verified on `docs/e3-rehearsal` on 2026-09-30: Node 405 pass / 0 fail,
 Python 455 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31; 371 / 442 after PR #33; 371 / 452 after PR #34.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31; 371 / 442 after PR #33; 371 / 452 after PR #34; 401 / 455 after PR #35; 405 / 455 after PR #36.
 
 ---
 

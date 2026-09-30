@@ -458,6 +458,14 @@ claim without reading the whole tree.
 | A world's manifest is written once, into a generated, pinned world  | `writeWorldManifest`, `manifestPath` | `a world's manifest is written once, into a generated and pinned world`                                                                                                                       |
 | A backup is verified, excludes the lock, and never touches the root | `scripts/evidence/backup-root.py`    | `test_a_backup_is_a_verified_byte_copy_and_leaves_the_root_untouched`, `test_a_backup_is_refused_while_the_root_is_being_lived`, `test_a_backup_inside_its_own_root_or_of_nothing_is_refused` |
 
+## Deaths at the edges (ADR 0017, found by E3)
+
+| Requirement                                                     | Implementation                                           | Tests                                                                                                                                            |
+| --------------------------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| A death during the last decision is reported in its own session | `PersonRuntime` checks world and body before the budgets | `a death during the last decision is reported before the session ends`                                                                           |
+| A skill whose body is dead at its end is a death                | `SkillRunner`                                            | `a move that fails because the body died ends the skill as DEATH, not FAILED`, `a move that fails on a living body is still an ordinary failure` |
+| A move stops the moment the body dies                           | `MineflayerEmbodiment.moveTo`                            | `a move stops the moment the body dies, instead of running out its timeout`                                                                      |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |
