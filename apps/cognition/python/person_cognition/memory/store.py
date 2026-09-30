@@ -172,6 +172,15 @@ class Memory:
             self._now += tick - self._last_tick
         self._last_tick = tick
 
+    def lose_continuity(self) -> None:
+        """The world went away (I2): the next observation starts a new span.
+
+        Whatever time passes before it is not experienced, and a body that
+        changed meanwhile is not remembered as having been hurt.
+        """
+        self._last_tick = None
+        self._last_health = None
+
     # -------------------------------------------------------------- encoding
 
     def experience(self, observation: Mapping[str, Any]) -> list[EpisodeDraft]:
