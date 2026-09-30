@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 #: The kinds of episode the foundation encodes.
-KINDS: frozenset[str] = frozenset({"perceived", "acted", "endangered", "hurt", "searched"})
+KINDS: frozenset[str] = frozenset({"perceived", "acted", "endangered", "hurt", "searched", "died"})
 
 #: What an episode can be about. Closed, so a cue cannot smuggle in a query.
 SUBJECTS: frozenset[str] = frozenset(

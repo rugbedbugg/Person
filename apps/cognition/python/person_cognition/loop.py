@@ -23,6 +23,8 @@ from person_persistence import (
     EvidenceEvent,
     EvidenceStore,
     Founding,
+    IdentityError,
+    LifeRecord,
     RootLock,
     SelfKnowledge,
     new_event,
@@ -169,6 +171,11 @@ class CognitionLoop:
         #: Who this Person is and how its sessions have run (ADR 0017),
         #: rebuilt from the journal. Cognition sees only `self_knowledge`.
         self.continuity = ContinuityRecord()
+        #: Alive, awaiting a respawn, or terminated (ADR 0017, I3): its own
+        #: axis, rebuilt from the journal alone.
+        self.life = LifeRecord()
+        #: The last observation Person received, for what it knew at a death.
+        self._last_observation: dict[str, Any] | None = None
         self.self_knowledge: SelfKnowledge | None = None
         #: Whether the world is available to the body now (I2); all Person
         #: may know of its operational state.
@@ -214,6 +221,7 @@ class CognitionLoop:
             self.effect_beliefs,
             self.hypothesis_book,
             self.continuity,
+            self.life,
         )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -312,6 +320,7 @@ class CognitionLoop:
         handler = {
             "SessionHello": self.on_session_hello,
             "WorldAvailability": self.on_world_availability,
+            "LifeEvent": self.on_life_event,
             "Observation": self.on_observation,
             "ValidationDecision": self.on_validation,
             "SkillStarted": self.on_skill_started,
@@ -369,6 +378,14 @@ class CognitionLoop:
         )
         self.store.identity = self._identity_binding(founded)
         report = self.store.restore(self.reducers)
+        if self.life.status == "terminated":
+            # A terminated Person is never resumed, whatever the configuration
+            # now says (ADR 0017, I3). Its evidence stays readable.
+            self.close()
+            raise IdentityError(
+                f"{self.identity.person_id} is terminated; its evidence is read-only and "
+                "it cannot be resumed"
+            )
         # What this session learns of the gap, before it writes anything: a
         # Person's very first session has no gap to learn.
         session = session_payload(self.continuity, self.identity.session_id, message["timestamp"])
@@ -418,6 +435,7 @@ class CognitionLoop:
                 "restoredEvents": report.replayed_events,
                 "restoredRoutines": len(self.statistics.routines),
                 "snapshotTick": report.snapshot_tick,
+                "lifeStatus": self.life.status,
             }
         )
 
@@ -480,6 +498,7 @@ class CognitionLoop:
 
     def _observe(self, message: dict[str, Any]) -> None:
         tick = message["tick"]
+        self._last_observation = message
         # Where Person is comes first: its sense of place decides whether it
         # believes it is home, and what it notices is remembered there.
         self.spatial.feel(message["selfMotion"], frozenset(remembering.noticed(message)))
@@ -1717,9 +1736,7 @@ class CognitionLoop:
             return
         self.operational = OperationalView(world=state)
         if state == "unavailable":
-            self.memory.lose_continuity()
-            self.interoception.lose_continuity()
-            self._felt_health = None
+            self._drop_body_continuity()
         if self._lifecycle:
             self._record(
                 "world_availability_changed",
@@ -1727,6 +1744,81 @@ class CognitionLoop:
                 {"state": state, "reasons": list(message["reasonCodes"])[:8]},
                 timestamp=message["timestamp"],
             )
+
+    def on_life_event(self, message: dict[str, Any]) -> None:
+        """The trusted runtime observed a death, or brought the body back (I3).
+
+        Never cognition's own conclusion. A repeated message changes nothing.
+        A death is recorded with its `terminal` flag first, so a crash right
+        after it still reconstructs the right state; it is remembered as an
+        episode from what Person knew; and continuity with the body before it
+        is dropped, so the next observation is the body as it is now, not a
+        recovery. Projects are kept: whether they still matter is for later
+        deliberation, not for death to decide.
+        """
+        tick = message["tick"]
+        if message["event"] == "died":
+            if self.life.status != "alive":
+                return
+            terminal = bool(message["terminal"])
+            state = self.affect.state
+            self._record(
+                "person_died",
+                tick,
+                {
+                    "terminal": terminal,
+                    "experienced_tick": self.memory.now,
+                    # Engineering evidence: how Person felt as it died. Kept
+                    # out of the death memory, since affect never touches
+                    # memory (ADR 0010).
+                    "affect": {
+                        "valence": round(state.valence, 4),
+                        "unease": round(state.unease, 4),
+                        "control": round(state.control, 4),
+                    },
+                },
+                timestamp=message["timestamp"],
+            )
+            self._remember([self._death_memory(message)], tick)
+            if terminal:
+                self._record(
+                    "person_terminated",
+                    tick,
+                    {"after": "terminal_death"},
+                    timestamp=message["timestamp"],
+                )
+            if self.active is not None:
+                self._finish_routine("INTERRUPTED", tick, reason="died")
+            self._drop_body_continuity()
+        elif message["event"] == "respawned":
+            if self.life.status != "awaiting_respawn":
+                return
+            self._record(
+                "person_respawned",
+                tick,
+                {"experienced_tick": self.memory.now},
+                timestamp=message["timestamp"],
+            )
+            self._drop_body_continuity()
+
+    def _death_memory(self, message: dict[str, Any]) -> EpisodeDraft:
+        seen = self._last_observation
+        active = self.goals.active
+        project = self.projects.current()
+        return remembering.died(
+            health=float(seen["vitals"]["health"]) if seen else None,
+            food=float(seen["vitals"]["food"]) if seen else None,
+            threat_in_view=bool(seen and seen["nearby"]["hostiles"]),
+            goal_type=active.goal_type if active is not None else None,
+            project_kind=project.kind if project is not None else None,
+            message_id=str(message["messageId"]),
+        )
+
+    def _drop_body_continuity(self) -> None:
+        """What compares one observation with the last starts again (I2, I3)."""
+        self.memory.lose_continuity()
+        self.interoception.lose_continuity()
+        self._felt_health = None
 
     def close(self) -> None:
         """Let go of the continuity root. A process that ends without this

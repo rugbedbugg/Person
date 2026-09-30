@@ -17,6 +17,8 @@ BASE: Mapping[str, float] = {
     "acted": 0.2,
     "searched": 0.3,
     "hurt": 0.5,
+    #: A death is the most salient thing that can happen to Person (spec 61).
+    "died": 1.0,
     "endangered": 0.8,
 }
 

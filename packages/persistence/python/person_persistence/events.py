@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v12"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v13"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -33,6 +33,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v10",
     "person-evidence-v11",
     "person-evidence-v12",
+    "person-evidence-v13",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -109,6 +110,15 @@ EVENT_TYPES: tuple[str, ...] = (
     #: (ADR 0017, I2): an operational state, never a verdict on the run, and
     #: written only when the state actually changes.
     "world_availability_changed",
+    #: The trusted runtime observed the body die (ADR 0017, I3). `terminal`
+    #: is authoritative: a terminal death is, by itself, the end of that
+    #: Person, whether or not a `person_terminated` record follows it.
+    "person_died",
+    #: The same Person's body was brought back after a death.
+    "person_respawned",
+    #: Readability only: the Person a terminal death ended. Termination is
+    #: reconstructed from the death record, never from this alone.
+    "person_terminated",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -142,6 +152,10 @@ V10_EVENT_TYPES: frozenset[str] = frozenset({"affect_tonic"})
 V11_EVENT_TYPES: frozenset[str] = frozenset({"person_founded", "session_started", "session_ended"})
 #: Event types introduced with the twelfth.
 V12_EVENT_TYPES: frozenset[str] = frozenset({"world_availability_changed"})
+#: Event types introduced with the thirteenth.
+V13_EVENT_TYPES: frozenset[str] = frozenset(
+    {"person_died", "person_respawned", "person_terminated"}
+)
 
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
@@ -157,6 +171,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V10_EVENT_TYPES, "person-evidence-v10"),
     **dict.fromkeys(V11_EVENT_TYPES, "person-evidence-v11"),
     **dict.fromkeys(V12_EVENT_TYPES, "person-evidence-v12"),
+    **dict.fromkeys(V13_EVENT_TYPES, "person-evidence-v13"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
