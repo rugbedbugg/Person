@@ -328,9 +328,20 @@ def test_encoding_copies_only_whitelisted_fields(view: dict[str, Any]) -> None:
     observation = seeing(view, smuggled) | {"worldSnapshot": {"secret": True}}
     draft = remembering.perceived(observation, "wood", remembering.noticed(observation)["wood"])
 
-    body = json.dumps({"details": draft.details, "provenance": draft.provenance.to_json()})
-    for forbidden in ("position", "entityId", "991", "worldSnapshot", "secret", '"x"'):
+    kept = {"details": draft.details, "provenance": draft.provenance.to_json()}
+    body = json.dumps(kept)
+    for forbidden in ("position", "entityId", "worldSnapshot", "secret", '"x"'):
         assert forbidden not in body
+    # The smuggled id, looked for as a value: the provenance carries a random
+    # message id, and a text search for its digits failed by chance.
+    def values(node: Any) -> list[Any]:
+        if isinstance(node, dict):
+            return [v for child in node.values() for v in values(child)]
+        if isinstance(node, list):
+            return [v for child in node for v in values(child)]
+        return [node]
+
+    assert 991 not in values(kept) and "991" not in values(kept)
     assert set(draft.details) == {"what", "count", "recognised", "nearest_range", "day_phase"}
 
 
