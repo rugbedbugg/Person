@@ -63,6 +63,8 @@ class CognitionSettings:
     identity_designation: str | None = None
     #: Where this Person's evidence comes from (fixture, Minecraft, replay).
     training_context: str = "fixture"
+    #: ADR 0020: off (default) or record_only. Cognition's alone.
+    deliberation_mode: str = "off"
 
     def cross_check(self, *, learning_mode: str, evidence_directory: str) -> None:
         """Fail closed when the runtime disagrees with the file we read."""
@@ -113,4 +115,5 @@ def load_cognition_settings(filename: str | Path) -> CognitionSettings:
         identity_name=document.get("identity", {}).get("name"),
         identity_designation=document.get("identity", {}).get("designation"),
         training_context=runtime.get("trainingContext", "fixture"),
+        deliberation_mode=document.get("deliberation", {}).get("mode", "off"),
     )
