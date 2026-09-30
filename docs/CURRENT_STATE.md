@@ -320,17 +320,21 @@ stay until their own systems are designed.
 
 ## 8. CLI / Debug / Validation Capabilities
 
-| Command                                                | Purpose                                                       | Live-Safe                                      |
-| ------------------------------------------------------ | ------------------------------------------------------------- | ---------------------------------------------- |
-| `person run`                                           | Autonomous episode                                            | ✅ (learning off by default)                   |
-| `person learn --mode shadow\|supervised`               | Put learner in control                                        | ⚠️ safety kernel still decides                 |
-| `person validate <config>`                             | Config schema + cognition cross-check                         | ✅ no connection                               |
-| `person inspect skills\|evidence\|config\|predictions` | Debug introspection                                           | ✅ no connection                               |
-| `person observe`                                       | Connect, capture one observation, validate schema, disconnect | ✅ runs no skill, writes no evidence           |
-| `person compare <ref> <actual>`                        | Diff observations, flag suspicious defaults                   | ✅ no connection                               |
-| `person status`                                        | Read runtime telemetry (never connects)                       | ✅ read-only                                   |
-| `person skill-test --skill X`                          | Single-skill validation through shared dispatch               | ⚠️ changes world, marks operator contamination |
-| `person experiment --plan <file>`                      | Seeded fixture runs per condition, metrics and comparisons    | ✅ fixture only, never connects                |
+| Command                                                           | Purpose                                                       | Live-Safe                                      |
+| ----------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------- |
+| `person run`                                                      | Autonomous episode                                            | ✅ (learning off by default)                   |
+| `person learn --mode shadow\|supervised`                          | Put learner in control                                        | ⚠️ safety kernel still decides                 |
+| `person validate <config>`                                        | Config schema + cognition cross-check                         | ✅ no connection                               |
+| `person inspect skills\|evidence\|config\|predictions`            | Debug introspection                                           | ✅ no connection                               |
+| `person observe`                                                  | Connect, capture one observation, validate schema, disconnect | ✅ runs no skill, writes no evidence           |
+| `person compare <ref> <actual>`                                   | Diff observations, flag suspicious defaults                   | ✅ no connection                               |
+| `person status`                                                   | Read runtime telemetry (never connects)                       | ✅ read-only                                   |
+| `person skill-test --skill X`                                     | Single-skill validation through shared dispatch               | ⚠️ changes world, marks operator contamination |
+| `person experiment --plan <file>`                                 | Seeded fixture runs per condition, metrics and comparisons    | ✅ fixture only, never connects                |
+| `person preflight --config X --server-dir D --backup B [--found]` | Fail-closed check before a founding or embodiment (ADR 0018)  | ✅ read-only, never connects                   |
+| `person world-manifest --server-dir D --purpose P`                | Records a generated world's identity, once (ADR 0018)         | ✅ writes only the manifest                    |
+| `person-cognition --inspect-root DIR`                             | A root's state, life status and lock holder (ADR 0018)        | ✅ read-only, takes no lock                    |
+| `scripts/evidence/backup-root.py ROOT DEST`                       | Verified backup of a root not in use (ADR 0018)               | ✅ reads the root only                         |
 
 **Aliases:** `shroud` = `person`, `shroud-train` = `person learn`
 

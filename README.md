@@ -64,6 +64,8 @@ person validate <file> [--migrate]
 person inspect  evidence|skills|config|predictions [--config <file>] [--json]
 person compare  <reference-observation.json> <actual-observation.json> [--json]
 person experiment --plan <plan.json> [--out <directory>] [--json]
+person preflight --config <file> --server-dir <dir> --backup <dir> [--found] [--json]
+person world-manifest --server-dir <dir> --purpose <text>
 
 Every connecting command also accepts:
 person ... --operator-intervention[=reason]   mark the run as contaminated
@@ -71,6 +73,10 @@ person ... --operator-intervention[=reason]   mark the run as contaminated
 
 `shroud` is an alias for `person`, and `shroud-train` for `person learn`, for
 compatibility with the previous runtime's habits.
+
+`preflight` is the read-only, fail-closed check before a founding or an
+embodiment, and `world-manifest` records a new world's identity once; the
+procedure around them is `docs/FOUNDING_RUNBOOK.md`.
 
 `observe` connects, takes one observation and stops. It is the smallest thing
 that can be done against a live Minecraft world, and the right first one.

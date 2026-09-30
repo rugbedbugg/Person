@@ -447,6 +447,17 @@ claim without reading the whole tree.
 | Inspection is read-only: no lock, no file created or touched            | `inspect_root`, `lock_holder`     | `test_inspecting_an_absent_root_creates_nothing`, `test_inspecting_a_live_root_changes_nothing_in_it`, `test_the_inspect_command_prints_the_report_and_starts_nothing`                             |
 | Inspection reports state, life status and the lock holder               | `inspect_root`                    | `test_inspection_reports_a_death_awaiting_respawn_and_a_termination`, `test_inspection_tells_a_legacy_root_from_a_founded_one`, `test_inspection_reports_who_holds_the_lock_and_whether_they_live` |
 
+## Preflight, world manifest and backups (ADR 0018, E2b)
+
+| Requirement                                                         | Implementation                       | Tests                                                                                                                                                                                         |
+| ------------------------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A correct setup passes and pins revision, config and world          | `preflight`                          | `a complete, correct setup for a founding passes and pins what it checked`                                                                                                                    |
+| The preflight is read-only                                          | `preflight`                          | `the preflight changes nothing it looks at`, `the preflight reads a real root through cognition, without touching it`                                                                         |
+| Every unsafe or unproven condition fails closed                     | `preflight`                          | `the preflight refuses …` (one test per defect, including an inspection that cannot run)                                                                                                      |
+| Embodiment needs a founded, living root of this Person              | `preflight`                          | `embodying needs a founded root of this Person, never a terminated one`                                                                                                                       |
+| A world's manifest is written once, into a generated, pinned world  | `writeWorldManifest`, `manifestPath` | `a world's manifest is written once, into a generated and pinned world`                                                                                                                       |
+| A backup is verified, excludes the lock, and never touches the root | `scripts/evidence/backup-root.py`    | `test_a_backup_is_a_verified_byte_copy_and_leaves_the_root_untouched`, `test_a_backup_is_refused_while_the_root_is_being_lived`, `test_a_backup_inside_its_own_root_or_of_nothing_is_refused` |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |
