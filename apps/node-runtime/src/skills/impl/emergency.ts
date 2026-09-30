@@ -234,7 +234,11 @@ export const waitSafely: SkillImplementation = async (context) => {
   while (waited < total) {
     context.checkpoint();
     const snapshot = context.snapshot();
-    if (context.kernel.threats(snapshot).some((entity) => entity.distance <= 8))
+    // The kernel's contact range, not a margin of this skill's own. A hostile
+    // the kernel does not count as immediate is no reason to stop waiting: a
+    // wait refused on privileged knowledge the kernel does not act on tells
+    // Person nothing, and Person would only propose it again.
+    if (context.kernel.threatState(snapshot) === "immediate")
       throw new SkillFailure(
         "threat_appeared",
         "INTERRUPTED",

@@ -41,6 +41,7 @@ import {
   EpisodeReportBuilder,
   summariseEpisode,
   writeEpisodeReport,
+  type DecisionRecord,
   type EpisodeReport,
 } from "../reporting/episode-report.ts";
 import { StatusWriter, statusPath } from "../reporting/status.ts";
@@ -264,6 +265,7 @@ export class PersonRuntime {
       this.#sendEpisodeEvent("started", ["session_start"]);
 
       let decisions = 0;
+      const stall = new StallDetector();
       while (decisions < runtime.maxDecisions) {
         const snapshot = this.#embodiment.snapshot();
         if (!snapshot.connected) {
@@ -283,6 +285,15 @@ export class PersonRuntime {
         decisions += 1;
         this.#decisionCount = decisions;
         await this.#decide(builder);
+        if (stall.observe(builder.report.decisions.at(-1))) {
+          outcome = "failed";
+          reason = "runtime_livelock";
+          this.#onDiagnostic("runtime_livelock", {
+            repeats: STALL_LIMIT,
+            tick: this.#embodiment.snapshot().tick,
+          });
+          break;
+        }
         if (runtime.decisionIntervalMs > 0)
           await new Promise((resolve) =>
             setTimeout(resolve, runtime.decisionIntervalMs),
@@ -561,3 +572,49 @@ export class PersonRuntime {
 }
 
 export { summariseEpisode };
+
+/**
+ * How many identical zero-time failures in a row end an episode.
+ *
+ * Across every recorded fixture run the longest legitimate streak was 3; the
+ * R2 held-out D livelock repeated one for thousands of decisions.
+ */
+export const STALL_LIMIT = 16;
+
+/**
+ * Notices an episode that has stopped going anywhere.
+ *
+ * A decision that took no time, did not succeed, and repeats the previous one
+ * exactly, at the same world tick, leaves Person where it was. Repeated
+ * without end it is a runtime fault, not behaviour, and the episode ends with
+ * `runtime_livelock` rather than spending its whole decision budget there.
+ * It changes nothing Person does before that point.
+ */
+export class StallDetector {
+  #last: string | null = null;
+  #repeats = 0;
+
+  observe(decision: DecisionRecord | undefined): boolean {
+    if (
+      !decision ||
+      decision.elapsedTicks > 0 ||
+      decision.status === "SUCCESS"
+    ) {
+      this.#last = null;
+      this.#repeats = 0;
+      return false;
+    }
+    const signature = [
+      decision.tick,
+      decision.goalId,
+      decision.requestedSkill,
+      decision.executedSkill,
+      decision.validation,
+      decision.status,
+      decision.requestedSkillStatus,
+    ].join("|");
+    this.#repeats = signature === this.#last ? this.#repeats + 1 : 1;
+    this.#last = signature;
+    return this.#repeats >= STALL_LIMIT;
+  }
+}

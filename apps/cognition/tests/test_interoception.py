@@ -374,3 +374,31 @@ def test_the_switch_is_consulted_only_where_r2_contributes() -> None:
     assert 0 < len(uses) <= 10, uses
     affect = (COGNITION / "affect.py").read_text(encoding="utf-8")
     assert "interoception" not in affect, "affect's state and authority know nothing of the switch"
+
+
+# ------------------------------------------------ nothing achieved, nothing felt
+
+
+@pytest.mark.parametrize("interoception", [True, False])
+def test_food_already_at_its_goal_is_neither_chosen_nor_appraised(
+    tmp_path: Path, view: dict[str, Any], interoception: bool
+) -> None:
+    # SECURE_FOOD is proposed below 18 and complete from 16. At 16 and 17 it
+    # used to be queued and completed at every observation, and each phantom
+    # completion was appraised as a success. It is neither now, in R1.5
+    # appraisal or R2.
+    harness = Harness(tmp_path, interoception=interoception)
+    harness.hello()
+    tick = 100
+    for food in [17, 16, 17, 16, 17]:
+        document = at(view, tick)
+        document["vitals"]["food"] = food
+        goal, policy, invocation = harness.observe(document)
+        assert goal["goal"]["goalType"] != "SECURE_FOOD", goal
+        harness.complete(invocation, policy)
+        tick += 20
+    for record in records(tmp_path, "affect_appraised"):
+        assert record["trigger"] != "goal_complete_secure_food", record
+        for consequence in record.get("consequences", []):
+            assert consequence.get("goal") != "SECURE_FOOD", record
+            assert "secure_food" not in json.dumps(consequence), record

@@ -245,3 +245,55 @@ def test_every_context_identifier_fits_the_protocol() -> None:
         )
     )
     assert pattern.fullmatch(longest.identifier()), longest.identifier()
+
+
+def test_a_goal_proposed_already_satisfied_is_never_queued_or_completed(
+    observation: dict[str, Any],
+) -> None:
+    # Food 16 and 17 are below full, so SECURE_FOOD is proposed, and at or
+    # above its completion level of 16. It used to be queued and completed
+    # again at every observation: a phantom success, appraised each time.
+    provider = SurvivalGoalProvider()
+    stack = GoalStack()
+    for tick, food in enumerate([17, 16, 17, 16]):
+        nearly = deepcopy(observation)
+        nearly["vitals"]["food"] = food
+        state = symbolic_state(nearly)
+        proposals = provider.propose(nearly, state, tick)
+        assert any(goal.goal_type == "SECURE_FOOD" for goal in proposals)
+        stack.update(proposals, state, tick)
+    assert [event for event in stack.history if event[1] == "goal_secure_food"] == []
+
+    hungry = deepcopy(observation)
+    hungry["vitals"]["food"] = 12
+    state = symbolic_state(hungry)
+    stack.update(provider.propose(hungry, state, 10), state, 10)
+    assert stack.entries["goal_secure_food"].status in {"QUEUED", "ACTIVE"}
+
+
+@pytest.mark.parametrize("goal_type", ["SECURE_SHELTER", "ESTABLISH_TOOLS", "PROJECT_ANYTHING"])
+def test_no_goal_type_is_queued_when_proposed_already_satisfied(goal_type: str) -> None:
+    from person_cognition import Goal
+    from person_skills import Condition
+
+    def proposal(tick: int) -> Goal:
+        return Goal(
+            goal_id=f"goal_{goal_type.lower()}",
+            goal_type=goal_type,
+            priority=500.0,
+            source="test",
+            created_at_tick=tick,
+            status="QUEUED",
+            completion_condition=(Condition("some_fact", ">=", 3),),
+            reason_codes=("test",),
+        )
+
+    stack = GoalStack()
+    met = {"some_fact": 3.0}
+    for tick in range(4):
+        assert stack.update([proposal(tick)], met, tick) is None
+    assert stack.entries == {} and stack.history == []
+
+    unmet = {"some_fact": 1.0}
+    chosen = stack.update([proposal(9)], unmet, 9)
+    assert chosen is not None and chosen.goal_type == goal_type

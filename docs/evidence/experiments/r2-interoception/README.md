@@ -1,6 +1,9 @@
 # R2: interoceptive affect
 
-ADR 0014, 2026-09-29. **TESTED IN FIXTURE.** Nothing here is Minecraft
+ADR 0014, 2026-09-29. **TESTED IN FIXTURE.** **Historical:** every run here
+was produced under the phantom `SECURE_FOOD` completion defect, fixed on the
+ADR 0015 branch (see finding E and `fixtures/regression/r15-affect/README.md`).
+Clean R2 evidence needs a fresh run. Nothing here is Minecraft
 evidence (the live spot-check is recorded separately, below), and nothing
 here bears on whether Person feels anything (`docs/RESEARCH.md`).
 

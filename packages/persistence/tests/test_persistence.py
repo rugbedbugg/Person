@@ -17,6 +17,7 @@ from person_persistence import (
 )
 from person_persistence.demonstrations import DemonstrationError, file_digest, load_manifest
 from person_persistence.events import EvidenceError
+from person_persistence.snapshot import SNAPSHOTS_KEPT
 
 
 def make_event(index: int, previous: str | None = None, **payload: Any) -> EvidenceEvent:
@@ -289,3 +290,40 @@ def test_demonstration_manifests_require_review_and_a_matching_hash(tmp_path: Pa
     manifest.write_text(json.dumps(body), encoding="utf-8")
     with pytest.raises(DemonstrationError, match="hash mismatch"):
         load_manifest(manifest)
+
+
+def test_only_the_newest_snapshots_are_kept(tmp_path: Path) -> None:
+    # A long or stuck run used to keep every snapshot: 25 GB for one world in
+    # the R2 held-out D run. Snapshots are derivable, so a few suffice.
+    snapshots = SnapshotStore(tmp_path)
+    for sequence in range(1, 11):
+        snapshots.write(
+            sequence=sequence,
+            last_event_id=None,
+            event_count=sequence,
+            tick=sequence,
+            policy_revision=0,
+            body={"n": sequence},
+        )
+    kept = snapshots.available()
+    assert len(kept) == SNAPSHOTS_KEPT
+    assert [snapshots.read(path)["sequence"] for path in kept] == list(
+        range(11 - SNAPSHOTS_KEPT, 11)
+    )
+
+
+def test_a_damaged_newest_snapshot_falls_back_to_a_kept_older_one(tmp_path: Path) -> None:
+    store = EvidenceStore(tmp_path, snapshot_every=2)
+    reducer = Counter()
+    previous = None
+    for index in range(20):
+        previous = store.append(make_event(index, previous), reducer).event_id
+    kept = store.snapshots.available()
+    assert 1 < len(kept) <= SNAPSHOTS_KEPT
+    kept[-1].write_text("{broken", encoding="utf-8")
+
+    restarted = EvidenceStore(tmp_path, snapshot_every=2)
+    rebuilt = Counter()
+    report = restarted.restore(rebuilt)
+    assert report.from_snapshot is True
+    assert rebuilt.seen == reducer.seen

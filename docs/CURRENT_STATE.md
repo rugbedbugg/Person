@@ -871,39 +871,37 @@ runtime would allow a direct route home), not a distance.
 
 ## 12. Known Limitations / Backlog
 
-| Limitation                                                                                                                         | Source                     |
-| ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| Mineflayer adapter validated live for observation, 3 skills by skill-test and two 8-decision autonomous episodes                   | REALITY_VALIDATION.md      |
-| No dig-down skill (mine_stone/coal need exposed stone)                                                                             | IMPLEMENTATION_REPORT.md   |
-| Fixture is simulation, not Minecraft                                                                                               | IMPLEMENTATION_REPORT.md   |
-| Planner bounded (depth/branch/node caps) — may return no plan                                                                      | IMPLEMENTATION_REPORT.md   |
-| Goals: survival and two project kinds; no social, exploration or invented projects                                                 | ADR 0009                   |
-| Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal                                              | ADR 0010                   |
-| Affect has an opportunity to change a goal choice only where base priorities sit within its swing; in the R1.5 suite, only world B | R1.5 notes                 |
-| The exploration channel changed no routine choice in the R1.5 suite                                                                | R1.5 notes                 |
-| **Defect:** an unseen, non-immediate hostile makes `wait_safely` interrupt at 0 ticks forever in the fixture (zero-time livelock)  | R2 held-out D, to fix      |
-| **Defect:** `SECURE_FOOD` is proposed at food 16 and 17 although already complete, and appraised as completed every observation    | R2 live spot-check, to fix |
-| **Defect:** cognition snapshots are never pruned; a long or stuck run grows disk use without bound                                 | R2 held-out D, to fix      |
-| Breath appraisal is exercised only by tests: no fixture world lowers air                                                           | ADR 0014                   |
-| The experiment harness measures from per-decision deltas; the body is not sampled continuously                                     | ADR 0013                   |
-| Death ends episode — no respawn/recovery loop                                                                                      | IMPLEMENTATION_REPORT.md   |
-| Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                 | IMPLEMENTATION_REPORT.md   |
-| Inventory reconciliation on resume not reimplemented                                                                               | IMPLEMENTATION_REPORT.md   |
-| `loot_permitted_container` withdraws all types up to amount                                                                        | IMPLEMENTATION_REPORT.md   |
-| One Person per runtime (multi-Person not supported)                                                                                | IMPLEMENTATION_REPORT.md   |
-| Tick budgets invented in fixture (4 ticks/step, 12/dig)                                                                            | REALITY_VALIDATION.md      |
-| Effect beliefs cover inventory, body and threat facts only; ledger-derived effects (building, storage, furnace) teach nothing yet  | ADR 0011                   |
-| Hypotheses name one perceived condition and one declared effect; no multi-factor, delayed or undeclared-effect hypotheses          | ADR 0012                   |
-| No language-model proposer is wired; the deterministic contrast proposer is the only reasoner                                      | ADR 0012                   |
-| No consolidation and no knowledge store; nothing is promoted to knowledge                                                          | ADR 0012, C6               |
-| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                                                              | REALITY_VALIDATION.md      |
-| No semantic, social or autobiographical memory, no knowledge store, no language, social system or relationships                    | Known Deviations C6, above |
-| Memory changes two decisions: how long a search at a recognised place lasts, and a restarted project's reasons                     | ADR 0007, ADR 0008, 0009   |
-| Place recognition is by drifting estimate and coarse scene only; no landmark identity                                              | ADR 0008, C4               |
-| A small teleport inside the locomotion bound is felt as ordinary motion                                                            | ADR 0008                   |
-| Actions are remembered without their referent until C4 is resolved                                                                 | ADR 0007, C4               |
-| No attention model: perception is capped deterministically, nearest first                                                          | Known Deviations C1, above |
-| Information seeking is gaze only and per goal                                                                                      | Known Deviations C1        |
+| Limitation                                                                                                                                   | Source                     |
+| -------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
+| Mineflayer adapter validated live for observation, 3 skills by skill-test and two 8-decision autonomous episodes                             | REALITY_VALIDATION.md      |
+| No dig-down skill (mine_stone/coal need exposed stone)                                                                                       | IMPLEMENTATION_REPORT.md   |
+| Fixture is simulation, not Minecraft                                                                                                         | IMPLEMENTATION_REPORT.md   |
+| Planner bounded (depth/branch/node caps) — may return no plan                                                                                | IMPLEMENTATION_REPORT.md   |
+| Goals: survival and two project kinds; no social, exploration or invented projects                                                           | ADR 0009                   |
+| Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal                                                        | ADR 0010                   |
+| Affect has an opportunity to change a goal choice only where base priorities sit within its swing; in the R1.5 suite, only world B           | R1.5 notes                 |
+| The exploration channel changed no routine choice in the R1.5 suite                                                                          | R1.5 notes                 |
+| A zero-time success repeated at one tick is not guarded; zero-time failures stop the fixture clock until the stall detector ends the episode | ADR 0015                   |
+| Breath appraisal is exercised only by tests: no fixture world lowers air                                                                     | ADR 0014                   |
+| The experiment harness measures from per-decision deltas; the body is not sampled continuously                                               | ADR 0013                   |
+| Death ends episode — no respawn/recovery loop                                                                                                | IMPLEMENTATION_REPORT.md   |
+| Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                           | IMPLEMENTATION_REPORT.md   |
+| Inventory reconciliation on resume not reimplemented                                                                                         | IMPLEMENTATION_REPORT.md   |
+| `loot_permitted_container` withdraws all types up to amount                                                                                  | IMPLEMENTATION_REPORT.md   |
+| One Person per runtime (multi-Person not supported)                                                                                          | IMPLEMENTATION_REPORT.md   |
+| Tick budgets invented in fixture (4 ticks/step, 12/dig)                                                                                      | REALITY_VALIDATION.md      |
+| Effect beliefs cover inventory, body and threat facts only; ledger-derived effects (building, storage, furnace) teach nothing yet            | ADR 0011                   |
+| Hypotheses name one perceived condition and one declared effect; no multi-factor, delayed or undeclared-effect hypotheses                    | ADR 0012                   |
+| No language-model proposer is wired; the deterministic contrast proposer is the only reasoner                                                | ADR 0012                   |
+| No consolidation and no knowledge store; nothing is promoted to knowledge                                                                    | ADR 0012, C6               |
+| Single-skill live validation: stages 1 and 2 done, 3 to 8 not started                                                                        | REALITY_VALIDATION.md      |
+| No semantic, social or autobiographical memory, no knowledge store, no language, social system or relationships                              | Known Deviations C6, above |
+| Memory changes two decisions: how long a search at a recognised place lasts, and a restarted project's reasons                               | ADR 0007, ADR 0008, 0009   |
+| Place recognition is by drifting estimate and coarse scene only; no landmark identity                                                        | ADR 0008, C4               |
+| A small teleport inside the locomotion bound is felt as ordinary motion                                                                      | ADR 0008                   |
+| Actions are remembered without their referent until C4 is resolved                                                                           | ADR 0007, C4               |
+| No attention model: perception is capped deterministically, nearest first                                                                    | Known Deviations C1, above |
+| Information seeking is gaze only and per goal                                                                                                | Known Deviations C1        |
 
 ---
 
@@ -911,9 +909,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 309     | 309     |
-| Python (all) | 365     | 365     |
-| **Total**    | **674** | **674** |
+| Node (all)   | 328     | 328     |
+| Python (all) | 373     | 373     |
+| **Total**    | **701** | **701** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -933,12 +931,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `research/interoceptive-affect` on 2026-09-30: Node 309 pass / 0 fail,
-Python 365 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `fix/zero-time-interruption` on 2026-09-30: Node 328 pass / 0 fail,
+Python 373 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20.
 
 ---
 

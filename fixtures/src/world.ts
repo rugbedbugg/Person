@@ -337,6 +337,10 @@ export class FixtureWorld implements Embodiment {
 
   // ---------------------------------------------------------------- time
 
+  passTick(): void {
+    this.#advance(1);
+  }
+
   #advance(ticks: number): void {
     this.#invalidate();
     for (let step = 0; step < Math.max(0, ticks); step++) {

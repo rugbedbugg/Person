@@ -29,7 +29,8 @@ export const lookAround: SkillImplementation = async (context) => {
   // Turning your back on something that is already on top of you is not a
   // survey, it is a mistake. The kernel will preempt anyway; failing here says
   // why rather than leaving it to look like an interrupted sweep.
-  if (context.kernel.threats(snapshot).some((entity) => entity.distance <= 8))
+  // Contact range is the kernel's definition, never a second one here.
+  if (context.kernel.threatState(snapshot) === "immediate")
     throw new SkillFailure(
       "threat_appeared",
       "INTERRUPTED",

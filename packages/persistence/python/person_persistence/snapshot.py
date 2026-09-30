@@ -16,6 +16,11 @@ from typing import Any
 
 SNAPSHOT_VERSION = 1
 
+#: How many snapshots a store keeps. More than one, so a damaged newest
+#: snapshot still leaves a recent one to start from; few, because each is
+#: derivable from the journal and a long run would otherwise keep thousands.
+SNAPSHOTS_KEPT = 3
+
 
 class SnapshotError(ValueError):
     """The snapshot cannot be trusted and must be ignored."""
@@ -44,9 +49,10 @@ def _checksum(body: dict[str, Any]) -> str:
 
 
 class SnapshotStore:
-    def __init__(self, directory: Path) -> None:
+    def __init__(self, directory: Path, *, keep: int = SNAPSHOTS_KEPT) -> None:
         self.directory = Path(directory)
         self.directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+        self.keep = max(1, keep)
 
     def _path(self, sequence: int) -> Path:
         return self.directory / f"cognition-{sequence:06d}.json"
@@ -74,7 +80,12 @@ class SnapshotStore:
             "body": body,
         }
         document["checksum"] = _checksum(document)
-        return write_atomic_json(self._path(sequence), document)
+        written = write_atomic_json(self._path(sequence), document)
+        # Only once the new one is safely on disk do the oldest go.
+        for stale in self.available()[: -self.keep]:
+            if stale != written:
+                stale.unlink(missing_ok=True)
+        return written
 
     def read(self, path: Path) -> dict[str, Any]:
         try:

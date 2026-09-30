@@ -164,6 +164,18 @@ function buildOutcome(
 }
 
 /**
+ * Whether the runtime, not Person, decided what ran: the kernel replaced the
+ * proposal before it started, or preempted it in flight.
+ *
+ * Not the same as `SkillOutcome.emergency`, which is also true when Person
+ * itself proposed exactly what an emergency called for.
+ */
+export const runtimeTookControl = (
+  verdict: ValidationOutcome,
+  result: ExecutionResult | null,
+): boolean => verdict.decision === "REPLACE" || Boolean(result?.preemption);
+
+/**
  * Validates one proposal and executes whatever the verdict allows.
  *
  * A REJECT produces an INVALIDATED outcome and nothing physical happens. A
@@ -302,6 +314,20 @@ export async function dispatchSkill(
     result,
     expectedEffects: resolveEffects(executedSpec, executedParameters),
   });
+
+  // Something ran, took no time and did not work, and either it was
+  // interrupted or the runtime was in control of it. Either can come from
+  // knowledge Person does not have, and a simulated world would otherwise be
+  // exactly where it was when Person next looked. The tick passes after the
+  // outcome, so nothing in it is attributed to the attempt. Person's own
+  // zero-tick failures are left alone: they are ordinary, informative
+  // outcomes, and the runtime's stall detector guards against their repeating.
+  if (
+    result.status !== "SUCCESS" &&
+    result.elapsedTicks === 0 &&
+    (result.status === "INTERRUPTED" || runtimeTookControl(verdict, result))
+  )
+    deps.embodiment.passTick?.();
 
   return {
     verdict,
