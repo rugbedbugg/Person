@@ -1,6 +1,6 @@
 # CURRENT_STATE.md — Factual Snapshot of Person
 
-**Last verified against:** branch `validation/dedicated-checkpoint`, based on `6183dff` (tip of `feat/lan-validation` after PR #18)
+**Last verified against:** branch `research/interoceptive-affect`, based on `5548bbd` (tip of `feat/lan-validation` after PR #19)
 **Tag:** `v0.1.0-foundation` (`6b99830`)
 **Date:** 2026-09-29
 
@@ -110,6 +110,7 @@ Two implementations, same skill code:
 - **Learned effect reliability (ADR 0011):** uncertain beliefs about how reliably each skill's declared effects follow, learned from audited prediction error, gated by learning mode, and under `supervised` adding a term of at most ±0.1 to routine scores, recorded separately as `learned_effect` (`person_cognition/effect_learning.py`)
 - **Causal hypotheses and experiments (ADR 0012):** typed, falsifiable single-condition hypotheses ("when it rains, gathering berries is less likely to yield berries") in a closed vocabulary of perceived weather, day phase and Person's own places; proposed from unexplained variation or repeated prediction error by a deterministic contrast proposer (a language-model proposer can be plugged in through the same bounded context and grounding gate, none is wired); admitted with no evidence; tested by bounded experiments whose trials are ordinary `INVESTIGATE` goals using only the intervention; interventional evidence weighs twice observational, and no standing is claimed without intervention on both sides; under `supervised` a supported hypothesis whose condition holds adds at most ±0.1 to routine scores, recorded as `hypothesis_effect` (`person_cognition/hypotheses/`)
 - **Affect (ADR 0010):** a continuous, bounded, decaying state (`valence`, `unease`, `control`) appraised by deterministic rules from percepts, the body, reported outcomes and Person's own goal, project and search outcomes; it adjusts non-urgent goal priorities within ±25 (base and adjustment journalled separately) and scales the policy's exploration tolerance; it never runs a skill, touches memory salience, or reaches the runtime (`person_cognition/affect.py`). An affect mode (ADR 0013), set in Person's configuration and read by cognition only, switches it: `off` (nothing evolves, nothing is consumed), `record_only` (appraised and journalled exactly as `active`, reaching no decision) and `active` (the default); the mode is written on `episode_started`
+- **Interoceptive affect (ADR 0014, R2):** health, food and breath reach affect as phasic events appraised once (harm, hunger or breath entering a worse band or recovering, a threat's onset or escalation) and as tonic conditions (hunger, vulnerability, breathlessness, perceived threat) that shift the level affect settles toward, integrated exactly in experienced time and independent of observation cadence. The body never moves `control`. One causal event (an action with its consequences, a search with the goal it blocked) is one appraisal listing everything it brought about; the idle placeholder is never appraised. `[affect] interoception = "off"` reproduces R1.5 appraisal exactly, for research. TESTED IN FIXTURE (`person_cognition/interoception.py`)
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
@@ -122,8 +123,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone)
-- **Schema versions:** new records are `person-evidence-v9`; v1 to v8 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone), affect_tonic (schema v10; the pressures, the offset they set, the time covered and the state before and after)
+- **Schema versions:** new records are `person-evidence-v10`; v1 to v9 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -468,10 +469,13 @@ for current perception or for a recollection, and `home.ownedStorage` sits in
 the `home` block for the same reason. Person's own memory reaches cognition by
 a separate, bounded path (ADR 0007).
 
-**Proprioception.** Health, food, saturation, air, armour, status effects,
-whether Person is alive, and the inventory are reported as body state rather
-than as vision. Saturation is a hidden stat in vanilla, and is kept on the
-grounds that how recently you ate well is something a body knows about itself.
+**Proprioception.** Health, food, breath, armour, status effects, whether
+Person is alive, and the inventory are reported as body state rather than as
+vision. Breath is the ten bubbles a player sees, not the server's air counter.
+Saturation, a hidden stat in vanilla, used to be reported on the grounds that
+how recently you ate well is something a body knows; since
+`observationVersion` 8 (ADR 0014) it is not, because a player is not shown it,
+and Person may one day learn something like it from experience instead.
 Exact position is not proprioception and is not reported.
 
 **Hearing does not exist.** Nothing carries sound, chat or event audio into
@@ -877,7 +881,10 @@ runtime would allow a direct route home), not a distance.
 | Affect appraisal is a hand-tuned table; no social, memory-driven or novelty appraisal                                              | ADR 0010                   |
 | Affect has an opportunity to change a goal choice only where base priorities sit within its swing; in the R1.5 suite, only world B | R1.5 notes                 |
 | The exploration channel changed no routine choice in the R1.5 suite                                                                | R1.5 notes                 |
-| One world event is appraised once per goal it completes; a sustained threat once per observation                                   | R1.5 notes, for R2         |
+| **Defect:** an unseen, non-immediate hostile makes `wait_safely` interrupt at 0 ticks forever in the fixture (zero-time livelock)  | R2 held-out D, to fix      |
+| **Defect:** `SECURE_FOOD` is proposed at food 16 and 17 although already complete, and appraised as completed every observation    | R2 live spot-check, to fix |
+| **Defect:** cognition snapshots are never pruned; a long or stuck run grows disk use without bound                                 | R2 held-out D, to fix      |
+| Breath appraisal is exercised only by tests: no fixture world lowers air                                                           | ADR 0014                   |
 | The experiment harness measures from per-decision deltas; the body is not sampled continuously                                     | ADR 0013                   |
 | Death ends episode — no respawn/recovery loop                                                                                      | IMPLEMENTATION_REPORT.md   |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                 | IMPLEMENTATION_REPORT.md   |
@@ -904,9 +911,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 299     | 299     |
-| Python (all) | 345     | 345     |
-| **Total**    | **644** | **644** |
+| Node (all)   | 309     | 309     |
+| Python (all) | 365     | 365     |
+| **Total**    | **674** | **674** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -926,12 +933,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `validation/dedicated-checkpoint` on 2026-09-29: Node 299 pass / 0 fail,
-Python 345 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `research/interoceptive-affect` on 2026-09-30: Node 309 pass / 0 fail,
+Python 365 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19.
 
 ---
 
