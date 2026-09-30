@@ -18,6 +18,8 @@ export interface RuntimeRunOptions extends HarnessOptions {
   episodeId?: string;
   personId?: string;
   operatorIntervention?: { reason?: string };
+  /** ADR 0017, I2: reconnection budget after the world is lost. */
+  reconnectAttempts?: number;
 }
 
 /** Runs a complete episode with a real cognition subprocess over stdio. */
@@ -35,7 +37,12 @@ export async function runEpisode(options: RuntimeRunOptions): Promise<{
   const runtimeConfig = {
     ...config,
     ...(options.personId ? { personId: options.personId } : {}),
-    runtime: { ...config.runtime, maxDecisions: options.maxDecisions ?? 12 },
+    runtime: {
+      ...config.runtime,
+      maxDecisions: options.maxDecisions ?? 12,
+      reconnectAttempts: options.reconnectAttempts ?? 0,
+      reconnectIntervalMs: 0,
+    },
     learning: {
       ...config.learning,
       mode: options.learningMode ?? "off",

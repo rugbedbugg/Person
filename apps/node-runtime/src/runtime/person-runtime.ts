@@ -101,7 +101,7 @@ export class PersonRuntime {
   };
   #previousOutcome: PreviousOutcome | null = null;
   /** Person's sense of its own motion, for the life of this session. */
-  readonly #selfMotion = new SelfMotionSense();
+  #selfMotion = new SelfMotionSense();
   readonly #status: StatusWriter;
   readonly #operatorIntervention: { flagged: boolean; reason: string | null };
   #emergencyCount = 0;
@@ -263,14 +263,25 @@ export class PersonRuntime {
       ).policyRevision;
 
       this.#sendEpisodeEvent("started", ["session_start"]);
+      this.#sendWorld("available", ["connected"]);
 
       let decisions = 0;
       const stall = new StallDetector();
       while (decisions < runtime.maxDecisions) {
         const snapshot = this.#embodiment.snapshot();
         if (!snapshot.connected) {
-          outcome = "failed";
-          reason = "disconnected";
+          // Losing the world is a state, not the end of Person (ADR 0017,
+          // I2): say so, try to reach it again within the configured budget,
+          // and only then end the episode, as interrupted rather than failed.
+          this.#sendWorld("unavailable", ["connection_lost"], snapshot.tick);
+          if (await this.#reconnect()) {
+            // Motion across the absence was never felt.
+            this.#selfMotion = new SelfMotionSense();
+            this.#sendWorld("available", ["reconnected"]);
+            continue;
+          }
+          outcome = "interrupted";
+          reason = "world_unavailable";
           break;
         }
         if (!snapshot.alive) {
@@ -341,6 +352,44 @@ export class PersonRuntime {
       report,
     );
     return report;
+  }
+
+  /** Tells cognition whether the world is available to the body now (I2). */
+  #sendWorld(
+    state: "available" | "unavailable",
+    reasonCodes: string[],
+    tick?: number,
+  ): void {
+    let at = tick ?? 0;
+    try {
+      if (tick === undefined) at = this.#embodiment.snapshot().tick;
+    } catch {
+      // A body that cannot report its tick still has a state to report.
+    }
+    this.#channel.send({
+      ...this.#envelope("WorldAvailability", at),
+      type: "WorldAvailability",
+      state,
+      reasonCodes,
+    });
+  }
+
+  /** Tries to reach the world again, within the configured budget. */
+  async #reconnect(): Promise<boolean> {
+    const { reconnectAttempts, reconnectIntervalMs } = this.config.runtime;
+    for (let attempt = 0; attempt < reconnectAttempts; attempt++) {
+      if (reconnectIntervalMs > 0)
+        await new Promise((resolve) =>
+          setTimeout(resolve, reconnectIntervalMs),
+        );
+      try {
+        await this.#embodiment.connect();
+        if (this.#embodiment.snapshot().connected) return true;
+      } catch {
+        // Still unavailable; try again, or give up when the budget is spent.
+      }
+    }
+    return false;
   }
 
   /** Mirrors the live facts into the status file for an operator watching. */

@@ -45,6 +45,8 @@ const DEFAULTS = {
     maxDecisions: 400,
     maxTicks: 72000,
     decisionIntervalMs: 0,
+    reconnectAttempts: 0,
+    reconnectIntervalMs: 1000,
   },
   learning: {
     evidenceDirectory: "",
