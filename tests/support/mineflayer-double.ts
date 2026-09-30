@@ -355,6 +355,35 @@ export class MineflayerDouble extends EventEmitter {
     });
   }
 
+  /** Held movement controls, as `bot.setControlState` sets them. */
+  readonly controls: Record<string, boolean> = {};
+  #swim: NodeJS.Timeout | undefined;
+
+  /**
+   * Holding jump in water rises a block every 50 ms, while the block above
+   * is not solid: close enough to a swim stroke for the adapter's purposes.
+   */
+  setControlState(control: string, on: boolean): void {
+    this.controls[control] = on;
+    this.calls.push(`${control}:${on}`);
+    clearInterval(this.#swim);
+    if (control !== "jump" || !on) return;
+    this.#swim = setInterval(() => {
+      const at = this.entity.position;
+      const feet = this.blockAt(at);
+      const up = this.blockAt(at.offset(0, 2, 0));
+      if (feet?.["name"] !== "water" || up?.["boundingBox"] === "block") return;
+      this.entity.position = at.offset(0, 1, 0);
+    }, 50);
+    this.#swim.unref?.();
+  }
+
+  clearControlStates(): void {
+    clearInterval(this.#swim);
+    for (const control of Object.keys(this.controls))
+      this.controls[control] = false;
+  }
+
   // ----------------------------------------------------------------- world
 
   blockAt(position: {
