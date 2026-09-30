@@ -1,0 +1,4 @@
+  state     ready, world ready
+  updated   2026-09-30T14:50:50.354Z (24s ago)
+  where     overworld at 39,74,-267 health=20 food=20 tick=27655
+  learning  mode=off policyRevision=0 trainingContext=minecraft_normal decisions=7

@@ -1,0 +1,11 @@
+{
+  "manifestVersion": 1,
+  "levelName": "validation-e3-rehearsal",
+  "seed": "6016296545845284926",
+  "jarSha256": "2782d547724bc3ffc0ef6e97b2790e75c1df89241f9d4645b58c706f5e6c935b",
+  "difficulty": "easy",
+  "gamemode": "survival",
+  "spawnMonsters": true,
+  "createdAt": "2026-09-30T14:26:59.222Z",
+  "purpose": "E3 validation rehearsal (validation-000); infrastructure validation, not research"
+}

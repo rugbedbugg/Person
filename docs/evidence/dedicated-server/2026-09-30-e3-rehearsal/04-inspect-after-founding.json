@@ -1,0 +1,31 @@
+{
+    "directory": "runs/validation/e3/root",
+    "founding": {
+        "designation": "Validation-000",
+        "founded_at": "2026-09-30T14:27:26.190376Z",
+        "founding_experienced_tick": 0,
+        "identity_schema_version": "person-identity-v1",
+        "name": "Rehearsal",
+        "person_id": "validation-000"
+    },
+    "journal": {
+        "duplicates": 0,
+        "events": 1,
+        "truncated": 0
+    },
+    "last_session": null,
+    "life": {
+        "deaths": 0,
+        "respawns": 0,
+        "status": "alive"
+    },
+    "lock": {
+        "live": false,
+        "pid": null
+    },
+    "persons": [
+        "validation-000"
+    ],
+    "state": "founded",
+    "world": null
+}

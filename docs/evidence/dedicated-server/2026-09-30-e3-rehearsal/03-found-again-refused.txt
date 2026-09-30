@@ -1,0 +1,2 @@
+person-cognition: validation-000 is already founded; founding happens once
+exit=2
