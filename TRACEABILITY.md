@@ -438,6 +438,15 @@ claim without reading the whole tree.
 | Losing the world while dead reconnects, and the death is recorded once | the runtime's death branch                               | `a death around a reconnection is found on the new connection`, `a connection lost while dead is reconnected, found still dead, and respawned once`                                                                                                                                          |
 | A shutdown reconnects nothing                                          | `PersonRuntime`                                          | `an ordinary run with a reconnection budget connects exactly once, and its shutdown reconnects nothing`                                                                                                                                                                                      |
 
+## First-Ada readiness (ADR 0018)
+
+| Requirement                                                             | Implementation                    | Tests                                                                                                                                                                                              |
+| ----------------------------------------------------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A validation identity is its own namespace                              | `VALIDATION`, `is_validation`     | `test_a_validation_identity_is_its_own_namespace`                                                                                                                                                  |
+| It is founded only by the founding command, with a name and designation | `founded_explicitly`, `plan_root` | `test_ordinary_startup_never_founds_a_validation_identity`, `test_a_validation_founding_needs_a_name_and_a_designation`, `test_a_founded_validation_identity_resumes_like_a_canonical_person`      |
+| Inspection is read-only: no lock, no file created or touched            | `inspect_root`, `lock_holder`     | `test_inspecting_an_absent_root_creates_nothing`, `test_inspecting_a_live_root_changes_nothing_in_it`, `test_the_inspect_command_prints_the_report_and_starts_nothing`                             |
+| Inspection reports state, life status and the lock holder               | `inspect_root`                    | `test_inspection_reports_a_death_awaiting_respawn_and_a_termination`, `test_inspection_tells_a_legacy_root_from_a_founded_one`, `test_inspection_reports_who_holds_the_lock_and_whether_they_live` |
+
 ## Tick budgets
 
 | Requirement                               | Implementation                           | Tests                                            |

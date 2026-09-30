@@ -145,6 +145,8 @@ Two implementations, same skill code:
   - **Permadeath:** the terminal flag on the death record is enough by itself, so a crash right after it still reconstructs termination. A terminated Person refuses to start, whatever the configuration now says.
   - **After a crash before a respawn:** the next run respawns the body before Person perceives anything.
   - **What reaches Person:** no cause, place or inventory.
+  - **Validation identities (ADR 0018):** `validation-NNN` is founded only by the founding command, like `person-NNN`, but is never a Person serial; rehearsals use it.
+  - **Inspection (ADR 0018):** `person-cognition --inspect-root DIR` reports a root's state, founding, life status, last session, world and lock holder, taking no lock and writing nothing.
   - **Status:** TESTED IN FIXTURE, with synthetic identities only; the canonical Person-000 root does not exist yet.
 - **Experienced time (ADR 0006, partly implemented):** Person's own clock counts only ticks between observations it received, is journalled on `episode_ended`, and resumes after a restart; memory accessibility, affect decay, project cooldowns and experiment patience run on it. External time as a coarse gap, world availability, suspension and death semantics are implemented under ADR 0017; SLEEPING is not implemented
 
