@@ -109,3 +109,44 @@ test("every benchmark world is a valid fixture world", () => {
       assert.equal(world.definition.name, definition.name);
     }
 });
+
+test("held-out D2 is frozen as its manifest records, and regenerates from its seed", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { temporaryDirectory } = await import("../support/harness.ts");
+  const manifest = JSON.parse(
+    readFileSync(
+      path.join(REPOSITORY, "experiments/benchmarks/heldout-d2/MANIFEST.json"),
+      "utf8",
+    ),
+  ) as { seedUsed: string; files: Record<string, string> };
+  for (const [file, hash] of Object.entries(manifest.files))
+    assert.equal(
+      createHash("sha256")
+        .update(readFileSync(path.join(REPOSITORY, file)))
+        .digest("hex"),
+      hash,
+      `${file} changed after D2 was frozen`,
+    );
+  const out = temporaryDirectory("person-d2-check-");
+  execFileSync(
+    process.execPath,
+    [
+      "scripts/benchmarks/generate-setback.ts",
+      manifest.seedUsed,
+      path.join(out, "world.json"),
+      path.join(out, "plan.json"),
+    ],
+    { cwd: REPOSITORY },
+  );
+  assert.equal(
+    readFileSync(path.join(out, "world.json"), "utf8"),
+    readFileSync(
+      path.join(
+        REPOSITORY,
+        "fixtures/worlds/benchmarks/heldout-d2/d2-setback.json",
+      ),
+      "utf8",
+    ),
+    "the committed world is exactly what the declared seed generates",
+  );
+});
