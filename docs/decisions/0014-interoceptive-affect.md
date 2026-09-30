@@ -1,6 +1,6 @@
 # ADR 0014: Interoceptive affect, phasic events and tonic conditions
 
-**Status:** Proposed
+**Status:** Accepted (2026-09-30)
 **Date:** 2026-09-29
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
@@ -8,7 +8,9 @@
 affect; discrete events and persistent conditions are separated; tonic
 pressure integrates in experienced time; one causal event is one appraisal;
 a persisting threat is onset plus exposure; the idle placeholder has no
-affective meaning; nothing downstream of affect changes (2026-09-29)
+affective meaning; nothing downstream of affect changes (2026-09-29);
+accepted in substance, after its R1.5 reference language was brought up to
+date with PR #21 (2026-09-30)
 
 ---
 
@@ -100,10 +102,10 @@ formed from, not what affect may do.
 ### Research switch
 
 13. **`[affect] interoception = "on" | "off"`**, default `on`. `off` is a
-    frozen research baseline that reproduces R1.5 appraisal exactly, its
+    frozen research baseline that reproduces R1.5 appraisal, its
     duplications included, so R1.5 and R2 can be compared inside one code
-    revision; a test checks the reproduction against reference runs recorded
-    at `5548bbd`. The two settings share the appraisal and state code; the
+    revision. What "reproduces" is checked against changed with PR #21 (ADR
+    0015); see "The R1.5 references" below. The two settings share the appraisal and state code; the
     switch is consulted only where R2 contributes (tonic pressure, grouping of
     consequences, the idle exclusion, threat onset and exposure, body
     transitions). It is independent of the affect mode.
@@ -117,13 +119,36 @@ Weights, band thresholds, caps, tonic coefficients and recovery constants are
 implementation parameters, chosen on development worlds only and frozen before
 any held-out evaluation.
 
+## The R1.5 references (updated 2026-09-30)
+
+There are two, and they are not interchangeable.
+
+- **Historical, `fixtures/regression/r15-affect/`**, recorded at `5548bbd`
+  before any R2 change. Immutable. It contains phantom `SECURE_FOOD`
+  completion appraisals: at food 16 and 17 the goal was proposed although
+  already complete, and completed and appraised at every observation.
+- **Corrected, `fixtures/regression/r15-affect-corrected/`**, recorded after
+  PR #21 stopped `GoalStack` from queuing goals already satisfied. This is the
+  baseline used from now on: with `interoception = off` the current code must
+  reproduce it exactly, decisions, appraisals and priority adjustments.
+
+The current code does **not** reproduce the historical reference byte for
+byte, and is not meant to. `tests/integration/r15-reference.test.ts` pins the
+difference instead: the same decisions and goal choices, and the historical
+appraisals minus exactly the phantom completions (10, 13 and 13 in the three
+scenarios). Affect bias differs where affect no longer carries them.
+
+The R2 results produced before PR #21
+(`docs/evidence/experiments/r2-interoception/`) are historical in the same
+sense: they include the phantom appraisals.
+
 ## Settled while implementing (2026-09-29)
 
 - **Tonic pressure is an offset held until the next observation**, toward
   which each dimension relaxes exactly (`settle`). Under interoception the
   affect state is not rounded between steps; rounding once per observation
-  would itself depend on cadence. R1.5 keeps its rounding, which the reference
-  runs require.
+  would itself depend on cadence. R1.5 keeps its rounding, which both
+  reference sets require.
 - **R1.5 harm touched control; R2 harm does not** (decision 3).
 - **Eating is two events**: the action's outcome, with its consequences, and
   the body's recovery from hunger. The operator allowed "recovered after
@@ -152,7 +177,8 @@ any held-out evaluation.
   weighing on it without a stream of repeated events.
 - Affect no longer depends on observation cadence, on how many goals one act
   touched, or on the scheduler's idle bookkeeping.
-- R1.5 and R2 can be compared in one revision.
+- R1.5 and R2 can be compared in one revision, against the corrected R1.5
+  baseline.
 
 ### Negative
 
@@ -185,9 +211,11 @@ any held-out evaluation.
 
 ## Relevant Commits / Documents
 
-| Reference                                    | Description                           |
-| -------------------------------------------- | ------------------------------------- |
-| ADR 0010, ADR 0013                           | Affect, its modes and its measurement |
-| ADR 0006                                     | Experienced time                      |
-| `docs/evidence/experiments/r1.5-benchmarks/` | The R1.5 findings R2 answers          |
-| `fixtures/regression/r15-affect/`            | R1.5 reference runs                   |
+| Reference                                    | Description                                                          |
+| -------------------------------------------- | -------------------------------------------------------------------- |
+| ADR 0010, ADR 0013                           | Affect, its modes and its measurement                                |
+| ADR 0006                                     | Experienced time                                                     |
+| `docs/evidence/experiments/r1.5-benchmarks/` | The R1.5 findings R2 answers                                         |
+| `fixtures/regression/r15-affect/`            | R1.5 reference runs, historical (`5548bbd`), with phantom appraisals |
+| `fixtures/regression/r15-affect-corrected/`  | R1.5 reference runs, corrected after PR #21, the baseline in use     |
+| ADR 0015                                     | The fixes that separate the two reference sets                       |
