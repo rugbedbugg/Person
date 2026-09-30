@@ -126,6 +126,7 @@ Two implementations, same skill code:
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
+- **Deliberation boundary (ADR 0020, Accepted; increment C1):** a provider-neutral `CognitiveModel` interface, a bounded `DeliberationContext` built read-only from existing projections (no raw affect, every collection capped), a structured what-and-why `DeliberationProposal` (no skill invocation, ordering or parameters), a grounding gate that admits only proposals whose premises and expected effects Person could justify, canonical-JSON input hashes, and journal records with the raw provider text kept only in an operator audit artifact. `[deliberation] mode` is `off` by default or `record_only`. **No behavioural path:** nothing in the decision loop calls it, and a structural-isolation test shows `record_only` changes nothing but its own evidence. Scripted models only; no provider is wired (`person_cognition/deliberation/`)
 - **Identity and continuity (ADR 0017, Accepted; increments I1 to I3):**
   - **Founding:** a new continuity root begins with `person_founded`, written once and first.
   - **Binding:** a founded root opens only as its own Person; snapshots carry the Person and founding fingerprint and are refused on a mismatch; one process holds a root at a time (lock).
@@ -157,8 +158,8 @@ Two implementations, same skill code:
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
 - **Statistics keyed by training context** — fixture/live evidence never merges
-- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone), affect_tonic (schema v10; the pressures, the offset they set, the time covered and the state before and after), person_founded, session_started and session_ended (schema v11; identity and session continuity, ADR 0017), world_availability_changed (schema v12; the world's availability to the body, written only on a change), person_died, person_respawned and person_terminated (schema v13; life status, ADR 0017 I3)
-- **Schema versions:** new records are `person-evidence-v13`; v1 to v12 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone), affect_tonic (schema v10; the pressures, the offset they set, the time covered and the state before and after), person_founded, session_started and session_ended (schema v11; identity and session continuity, ADR 0017), world_availability_changed (schema v12; the world's availability to the body, written only on a change), person_died, person_respawned and person_terminated (schema v13; life status, ADR 0017 I3), deliberation_requested, deliberation_completed and deliberation_unavailable (schema v14; ADR 0020 C1, engineering evidence nothing is rebuilt from)
+- **Schema versions:** new records are `person-evidence-v14`; v1 to v13 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
@@ -953,8 +954,8 @@ runtime would allow a direct route home), not a distance.
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
 | Node (all)   | 420     | 420     |
-| Python (all) | 455     | 455     |
-| **Total**    | **875** | **875** |
+| Python (all) | 490     | 490     |
+| **Total**    | **910** | **910** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -974,12 +975,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `safety/air-emergency` on 2026-09-30: Node 420 pass / 0 fail,
-Python 455 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `cognition/deliberation-boundary` on 2026-09-30: Node 420 pass / 0 fail,
+Python 490 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31; 371 / 442 after PR #33; 371 / 452 after PR #34; 401 / 455 after PR #35; 405 / 455 after PR #36.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31; 371 / 442 after PR #33; 371 / 452 after PR #34; 401 / 455 after PR #35; 405 / 455 after PR #36; 420 / 455 after PR #38.
 
 ---
 
