@@ -523,7 +523,13 @@ export class FixtureWorld implements Embodiment {
     const feet = this.blockAt(this.#position);
     if (feet?.hazard && feet.kind === "lava" && this.#tick % 10 === 0)
       this.#damage(4);
-    if (!this.blockAt(this.#position)?.hazard && this.#air < 300)
+    // Under water the body loses a unit of air a tick and, with none left,
+    // two health a second, as Minecraft's does (ADR 0019); with its head out
+    // of the water it breathes again.
+    if (this.#submerged()) {
+      this.#air = Math.max(0, this.#air - 1);
+      if (this.#air === 0 && this.#tick % 20 === 0) this.#damage(2);
+    } else if ((!feet?.hazard || feet.kind === "water") && this.#air < 300)
       this.#air = Math.min(300, this.#air + 10);
     if (this.#health > 0 && this.#threatFree())
       this.#lastSafePosition = { ...this.#position };
@@ -667,6 +673,32 @@ export class FixtureWorld implements Embodiment {
     if (!this.#connected) throw new DisconnectedError();
   }
 
+  /** Whether the body's head is under water. */
+  #submerged(): boolean {
+    return (
+      definitionOf(this.#nameAt({ ...this.#position, y: this.#position.y + 1 }))
+        .kind === "water"
+    );
+  }
+
+  /**
+   * A position a submerged body can swim into: nothing solid at feet or head,
+   * water at one of them and no other hazard, and permitted. Only a body
+   * already under water swims, so paths on land are unchanged (ADR 0019).
+   */
+  #swimmable(position: Position): boolean {
+    const feet = definitionOf(this.#nameAt(position));
+    const head = definitionOf(this.#nameAt({ ...position, y: position.y + 1 }));
+    if (feet.solid || head.solid) return false;
+    if (feet.kind !== "water" && head.kind !== "water") return false;
+    if (
+      (feet.hazard && feet.kind !== "water") ||
+      (head.hazard && head.kind !== "water")
+    )
+      return false;
+    return this.#guard ? this.#guard.canEnter(position) : true;
+  }
+
   /** A position Person can stand in: clear feet and head, solid floor, permitted. */
   #walkable(position: Position): boolean {
     const feet = definitionOf(this.#nameAt(position));
@@ -701,7 +733,11 @@ export class FixtureWorld implements Embodiment {
     const frontier: { key: string; estimate: number }[] = [
       { key: startKey, estimate: distance(start, target) },
     ];
+    const swimming = this.#submerged();
+    const passable = (position: Position): boolean =>
+      this.#walkable(position) || (swimming && this.#swimmable(position));
     const steps: [number, number][] = [
+      ...(swimming ? [[0, 0] as [number, number]] : []),
       [1, 0],
       [-1, 0],
       [0, 1],
@@ -752,7 +788,8 @@ export class FixtureWorld implements Embodiment {
           const nextCost = walked + 1;
           if ((cost.get(key) ?? Number.POSITIVE_INFINITY) <= nextCost) continue;
           if (distance(next, target) > 160) continue;
-          if (!this.#walkable(next)) continue;
+          if ((dx !== 0 || dz !== 0 || dy !== 0) && !passable(next)) continue;
+          if (dx === 0 && dz === 0 && dy === 0) continue;
           cost.set(key, nextCost);
           cameFrom.set(key, currentKey);
           positions.set(key, next);
@@ -817,6 +854,22 @@ export class FixtureWorld implements Embodiment {
     this.#yaw = yaw;
     this.#pitch = pitch;
     this.#invalidate();
+  }
+
+  /** Swims straight up, one cell per stroke, while the head is under water. */
+  async ascend(options: { maxTicks: number }): Promise<void> {
+    this.#requireConnection();
+    let spent = 0;
+    while (this.#submerged() && spent < options.maxTicks) {
+      const up = { ...this.#position, y: this.#position.y + 1 };
+      if (!this.#swimmable(up) && !this.#walkable(up)) return;
+      this.#position = up;
+      this.#advance(4);
+      spent += 4;
+      if (this.#health <= 0)
+        throw new EmbodimentError("death", "Died while swimming");
+      if (!this.#connected) throw new DisconnectedError();
+    }
   }
 
   async moveTo(position: Position, options: MoveOptions = {}): Promise<void> {

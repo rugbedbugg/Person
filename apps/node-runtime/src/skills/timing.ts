@@ -30,6 +30,7 @@ export const emptyTimings = (): SkillTimings => ({
 
 const PHASES: Record<string, TimedPhase> = {
   moveTo: "navigation",
+  ascend: "navigation",
   waitTicks: "waiting",
   dig: "interaction",
   place: "interaction",
@@ -123,6 +124,14 @@ export function instrument(embodiment: Embodiment): {
       timed("withdraw", () => embodiment.withdraw(position, items)),
     waitTicks: (ticks: number): Promise<void> =>
       timed("waitTicks", () => embodiment.waitTicks(ticks)),
+    ...(embodiment.ascend
+      ? {
+          ascend: (options: { maxTicks: number }): Promise<void> =>
+            timed("ascend", () =>
+              (embodiment.ascend as NonNullable<Embodiment["ascend"]>)(options),
+            ),
+        }
+      : {}),
     registerOwnedStorage: (position: Position, storageId: string): void =>
       embodiment.registerOwnedStorage(position, storageId),
   };
