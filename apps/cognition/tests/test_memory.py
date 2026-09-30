@@ -332,6 +332,7 @@ def test_encoding_copies_only_whitelisted_fields(view: dict[str, Any]) -> None:
     body = json.dumps(kept)
     for forbidden in ("position", "entityId", "worldSnapshot", "secret", '"x"'):
         assert forbidden not in body
+
     # The smuggled id, looked for as a value: the provenance carries a random
     # message id, and a text search for its digits failed by chance.
     def values(node: Any) -> list[Any]:
