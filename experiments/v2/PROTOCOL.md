@@ -118,3 +118,22 @@ occurred are reported as mechanism diagnostics, not as the replication unit.
 - After V2: stop before any interpretive write-up that claims more than the
   predeclared classifications.
 - The V2 held-out suite is run once and never rerun.
+
+## Amendments
+
+### 1. Candidate `29d29e5` superseded before any held-out run (2026-09-30)
+
+The final freeze at `29d29e5` was superseded by the operator's decision,
+before any of A2 to D2 was run and before any held-out result was inspected.
+
+- **Why:** a known fixture defect. Hostiles walked through solid blocks and
+  attacked through them, so D2's health, threat and recovery results would
+  partly have measured the artifact.
+- **Fixed by ADR 0016:** hostiles obey walls, for movement and for every
+  attack, and no kernel, skill, cognition or R2 parameter changed.
+- **References:** the R1.5 references gain the fixture-realism baseline, with
+  its bridge pinned.
+- **Revalidated:** A2, B2 and C2 statically, with records identical to the
+  frozen ones; D2 by its manifest and regeneration. None was redrawn.
+- **Next:** the development rerun is repeated at the new candidate revision,
+  then the final readiness review.
