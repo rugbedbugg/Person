@@ -59,19 +59,24 @@ error was found.
      emergency skill mid-flight, so the skill stops itself, reporting
      `threat_appeared`, and the validator replaces Person's next proposal with
      `flee`. That is one honest handoff, not a loop.
-2. **Simulated time moves after a zero-time interruption.** When an executed
-   skill ends `INTERRUPTED` after 0 ticks, dispatch calls the optional
-   embodiment hook `passTick()`, and the fixture advances by exactly one tick.
-   An interruption can come from runtime control Person cannot see, so it is
-   the class that can hold a world still.
+2. **Runtime control cannot stop simulated time.** When an executed skill
+   ends in anything but `SUCCESS` after 0 ticks, and either it was
+   `INTERRUPTED` or the runtime was in control of it (`runtimeTookControl`:
+   the validator replaced the proposal, or the kernel preempted it), dispatch
+   calls the optional embodiment hook `passTick()`, and the fixture advances by
+   exactly one tick. Both can come from knowledge Person does not have.
+   Runtime control is defined by provenance, not by `SkillOutcome.emergency`,
+   which is also true when Person itself proposed what an emergency called
+   for.
    - It runs after the outcome is built, so nothing in the tick is attributed
      to the attempt.
    - One tick is a guarantee of progress, not a model of reaction time: there
      is no measurement to set a longer one from.
    - The Minecraft body does not implement the hook; a server's clock runs on
      its own.
-   - Zero-tick failures and successes are untouched. By the count above, no
-     existing run changes, and the frozen R1.5 references replay exactly.
+   - Person's own zero-tick failures, and all successes, are untouched. No
+     recorded run had a zero-tick non-success under runtime control, so no
+     existing run changes, and the R1.5 references replay exactly.
 3. **A stalled episode ends as a fault.** The runtime ends an episode with
    `runtime_livelock` after `STALL_LIMIT` (16) consecutive decisions that took
    no time, did not succeed, and were identical: same tick, goal, requested
@@ -80,6 +85,21 @@ error was found.
    changes nothing Person does before the limit.
 4. **Nothing new reaches cognition.** An outcome beside an unseen hostile says
    exactly what it said before. No field names the hostile.
+
+## The regression rerun
+
+The original held-out D was rerun with the real learner as a regression check
+(P0 and R2act, seed 101, medium horizon; output under `runs/`, not evidence).
+With the interruption-only floor it found a second loop: from tick 6020 the
+kernel replaced every proposal with `flee`, and `flee` failed after 0 ticks
+with `no_safe_route`, most likely from inside the shelter. The stall detector
+ended the episode as `runtime_livelock` after 16 identical decisions. That is
+why the floor covers runtime control as well as interruptions.
+
+With the floor as decided, both runs reach the end of the horizon (72
+decisions, tick 24108, `tick_budget_reached`). At most 3 decisions share a
+tick, as in the old runs. `flee` fails 10 times while the skeleton is near, and
+Person loses 12 health, because the fixture skeleton shoots through walls.
 
 ## Consequences
 
@@ -105,6 +125,10 @@ error was found.
   not been seen to.
 - Whether every non-success should cost simulated time is deferred: it would
   change existing fixture trajectories.
+- The kernel orders `flee` without knowing whether fleeing is possible, for
+  example from inside a sealed shelter, and the fixture skeleton's ranged
+  attack ignores walls. Whether the kernel should stand fast in a shelter, and
+  how the fixture models line of fire, are separate decisions.
 
 ## Alternatives considered
 
@@ -122,8 +146,12 @@ error was found.
 - boundaries at 7, 8 and 16 blocks for both skills;
 - a seen and an unseen hostile give the same outcome;
 - nothing about an unseen hostile appears in an outcome;
-- the floor applies to zero-tick interruptions, and not to zero-tick
-  failures, successes or timed attempts;
+- the floor applies to zero-tick interruptions, to a kernel replacement that
+  fails at 0 ticks, and to a preemption whose emergency skill does not
+  succeed at 0 ticks; not to Person's own zero-tick failures, successes or
+  timed attempts;
+- runtime control means replacement or preemption, not an emergency-type
+  skill, nor Person proposing what the emergency called for;
 - the stall detector fires on the 16th identical zero-time failure, resets on
   any difference, and ends a scripted `deposit_owned_storage` loop;
 - an idle wait beside an unseen hostile never repeats at one tick, and the

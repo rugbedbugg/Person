@@ -24,6 +24,7 @@ import {
   StallDetector,
   buildObservation,
   dispatchSkill,
+  runtimeTookControl,
   type DecisionRecord,
   type ExecutionResult,
   type SkillRunner,
@@ -184,35 +185,65 @@ function invocation(skillId: string): SkillInvocation {
   };
 }
 
+type Reply = Pick<ExecutionResult, "status" | "elapsedTicks"> & {
+  preempted?: boolean;
+};
+
+/** A runner that reports what it is told to, and never moves the world. */
+function scripted(bench: Harness, replies: Reply[]): SkillRunner {
+  const queue = [...replies];
+  return {
+    run: async (request: { skillId: string }): Promise<ExecutionResult> => {
+      const reply = queue.shift() ?? { status: "SUCCESS", elapsedTicks: 0 };
+      const now = bench.world.snapshot();
+      return {
+        skillId: request.skillId,
+        status: reply.status,
+        reasonCodes: reply.status === "SUCCESS" ? [] : ["stub"],
+        effects: [],
+        evidenceKinds: ["elapsed_ticks"],
+        evidenceDetails: {},
+        elapsedTicks: reply.elapsedTicks,
+        healthBefore: now.health,
+        healthAfter: now.health,
+        foodBefore: now.food,
+        foodAfter: now.food,
+        inventoryBefore: now.inventory,
+        inventoryAfter: now.inventory,
+        inventoryDelta: [],
+        preemption: reply.preempted
+          ? (bench.kernel.assess(now) ?? {
+              level: "L1",
+              trigger: "immediate_threat",
+              action: "flee",
+              reasonCodes: ["stub"],
+            })
+          : null,
+        timings: {
+          navigationTicks: 0,
+          interactionTicks: 0,
+          waitingTicks: 0,
+        },
+        budgetPressure: 0,
+      } as unknown as ExecutionResult;
+    },
+  } as unknown as SkillRunner;
+}
+
+/** Ticks the world moved during one dispatch, and the validator's verdict. */
 async function dispatchWith(
   bench: Harness,
   skillId: string,
-  status: ExecutionResult["status"],
-  elapsedTicks: number,
-): Promise<number> {
+  replies: Reply[],
+): Promise<{ moved: number; decision: string; runtime: boolean }> {
   const before = bench.world.snapshot().tick;
-  // The stub runs a real 20-tick wait to borrow a well-formed result, then
-  // reports the status and duration under test.
-  const runner = {
-    run: async (): Promise<ExecutionResult> => {
-      const now = bench.world.snapshot();
-      return {
-        ...(await bench.run("wait_safely", { ticks: 20 })),
-        status,
-        reasonCodes: status === "SUCCESS" ? [] : ["stub"],
-        elapsedTicks,
-        healthBefore: now.health,
-        healthAfter: now.health,
-      };
-    },
-  } as unknown as SkillRunner;
-  await dispatchSkill(
+  const dispatched = await dispatchSkill(
     invocation(skillId),
     { goalId: "goal_idle", routineId: "r_test", contextId: "c_test" },
     {
       registry: skillRegistry(),
       validator: bench.validator,
-      runner,
+      runner: scripted(bench, replies),
       embodiment: bench.world,
       envelope: (type: MessageType, tick: number) =>
         ({
@@ -227,29 +258,81 @@ async function dispatchWith(
         }) as Envelope,
     },
   );
-  return bench.world.snapshot().tick - before;
+  return {
+    moved: bench.world.snapshot().tick - before,
+    decision: dispatched.verdict.decision,
+    runtime: runtimeTookControl(dispatched.verdict, dispatched.result),
+  };
 }
 
 test("the fixture world moves on after an attempt interrupted before any time passed", async () => {
   const bench = await harness({ world });
-  // 20 ticks for the borrowed wait, 1 for the progress floor.
-  assert.equal(await dispatchWith(bench, "wait_safely", "INTERRUPTED", 0), 21);
+  const { moved } = await dispatchWith(bench, "wait_safely", [
+    { status: "INTERRUPTED", elapsedTicks: 0 },
+  ]);
+  assert.equal(moved, 1);
 });
 
-test("the progress floor leaves zero-tick failures, successes and timed attempts alone", async () => {
-  for (const [status, elapsed] of [
-    ["FAILED", 0],
-    ["UNREACHABLE", 0],
-    ["SUCCESS", 0],
-    ["INTERRUPTED", 5],
+test("Person's own zero-tick failures, successes and timed attempts do not move the world", async () => {
+  for (const reply of [
+    { status: "FAILED", elapsedTicks: 0 },
+    { status: "UNREACHABLE", elapsedTicks: 0 },
+    { status: "SUCCESS", elapsedTicks: 0 },
+    { status: "INTERRUPTED", elapsedTicks: 5 },
   ] as const) {
     const bench = await harness({ world });
+    const result = await dispatchWith(bench, "wait_safely", [reply]);
+    assert.equal(result.runtime, false);
     assert.equal(
-      await dispatchWith(bench, "wait_safely", status, elapsed),
-      20,
-      `${status} after ${elapsed} ticks`,
+      result.moved,
+      0,
+      `${reply.status} after ${reply.elapsedTicks}`,
     );
   }
+});
+
+test("a kernel replacement that fails at 0 ticks moves the world one tick", async () => {
+  // Held-out D, after the first fix: the kernel replaces an idle wait with
+  // flee, and flee finds no route that increases clearance.
+  const bench = await harness({ world });
+  bench.world.spawn("skeleton", behind(5));
+  const result = await dispatchWith(bench, "wait_safely", [
+    { status: "FAILED", elapsedTicks: 0 },
+  ]);
+  assert.equal(result.decision, "REPLACE");
+  assert.equal(result.runtime, true);
+  assert.equal(result.moved, 1);
+});
+
+test("a preemption whose emergency skill does not succeed at 0 ticks moves the world one tick", async () => {
+  const bench = await harness({ world });
+  const result = await dispatchWith(bench, "gather_wood", [
+    { status: "PREEMPTED", elapsedTicks: 0, preempted: true },
+    { status: "UNREACHABLE", elapsedTicks: 0 },
+  ]);
+  assert.equal(result.decision, "ACCEPT");
+  assert.equal(result.runtime, true);
+  assert.equal(result.moved, 1);
+});
+
+test("runtime control means replacement or preemption, not an emergency-type skill", async () => {
+  // wait_safely is an emergency skill; Person proposing it in a calm world is
+  // still Person's decision.
+  const bench = await harness({ world });
+  const result = await dispatchWith(bench, "wait_safely", [
+    { status: "FAILED", elapsedTicks: 0 },
+  ]);
+  assert.equal(result.decision, "ACCEPT");
+  assert.equal(result.runtime, false);
+  // And Person proposing exactly what the emergency calls for is Person's too.
+  const threatened = await harness({ world });
+  threatened.world.spawn("zombie", behind(5));
+  const matched = await dispatchWith(threatened, "flee", [
+    { status: "FAILED", elapsedTicks: 0 },
+  ]);
+  assert.equal(matched.decision, "ACCEPT");
+  assert.equal(matched.runtime, false);
+  assert.equal(matched.moved, 0);
 });
 
 // ------------------------------------------------------------ stall detector
@@ -314,10 +397,14 @@ test("the original held-out D world no longer freezes at its skeleton", async ()
   const { report } = await runEpisode({
     worldFile: "fixtures/worlds/benchmarks/heldout/d-setback.json",
     cognitionCommand: [NODE, SCRIPTED, "wait_safely", "--ticks=600"],
-    maxDecisions: 24,
+    maxDecisions: 40,
   });
-  const atSpawn = report.decisions.filter((d) => d.tick === 6000).length;
-  assert.ok(atSpawn <= 2, `${atSpawn} decisions at tick 6000`);
+  assert.notEqual(report.reason, "runtime_livelock");
+  const ticks = report.decisions.map((d) => d.tick);
+  const most = Math.max(
+    ...[...new Set(ticks)].map((t) => ticks.filter((u) => u === t).length),
+  );
+  assert.ok(most <= 2, `${most} decisions at one tick`);
   const last = report.decisions.at(-1);
   assert.ok(last && last.tick > 6000, `ended at ${last?.tick}`);
 });
