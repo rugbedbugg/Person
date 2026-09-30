@@ -276,7 +276,9 @@ export class PersonRuntime {
 
       let decisions = 0;
       const stall = new StallDetector();
-      while (!unrevived && decisions < runtime.maxDecisions) {
+      // The budgets are checked after the world and the body, so a death or
+      // a lost world during the last decision is still seen and reported.
+      while (!unrevived) {
         const snapshot = this.#embodiment.snapshot();
         if (!snapshot.connected) {
           // Losing the world is a state, not the end of Person (ADR 0017,
@@ -307,6 +309,10 @@ export class PersonRuntime {
           reason = "death";
           break;
         }
+        if (decisions >= runtime.maxDecisions) {
+          reason = "decision_budget_reached";
+          break;
+        }
         if (snapshot.tick - builder.report.startTick >= runtime.maxTicks) {
           reason = "tick_budget_reached";
           break;
@@ -328,8 +334,6 @@ export class PersonRuntime {
             setTimeout(resolve, runtime.decisionIntervalMs),
           );
       }
-      if (decisions >= runtime.maxDecisions)
-        reason ??= "decision_budget_reached";
       this.#sendEpisodeEvent("ended", [reason ?? "completed"]);
     } catch (error) {
       outcome =
