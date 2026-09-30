@@ -28,7 +28,13 @@ harness, with a first P0/P1/P2 matrix in `docs/evidence/experiments/`. R1.5
 followed: four benchmark worlds of different decision geometry, horizons in
 Person's time, per-channel opportunity and saturation analysis, and a frozen
 held-out split (`docs/evidence/experiments/r1.5-benchmarks/`). It exposed and
-fixed four correctness bugs, below; no affect rule changed.
+fixed four correctness bugs, below; no affect rule changed. R2 (ADR 0014,
+#20) made affect feel the body; its held-out D froze in a zero-time livelock
+and is recorded INVALID. ADR 0015 (#21) fixed that livelock, phantom
+`SECURE_FOOD` successes and unbounded snapshots, so the R2 results are
+historical. Held-out D2 (`experiments/benchmarks/heldout-d2/`) replaces D: it
+was generated from a seed declared in advance and frozen before any run, and
+has not been run.
 
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
@@ -909,9 +915,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 328     | 328     |
+| Node (all)   | 332     | 332     |
 | Python (all) | 373     | 373     |
-| **Total**    | **701** | **701** |
+| **Total**    | **705** | **705** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -931,12 +937,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `fix/zero-time-interruption` on 2026-09-30: Node 328 pass / 0 fail,
+Verified on `research/heldout-d2` on 2026-09-30: Node 332 pass / 0 fail,
 Python 373 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21.
 
 ---
 
