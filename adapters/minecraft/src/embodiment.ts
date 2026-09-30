@@ -156,6 +156,13 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
   #startTick = 0;
   #lastDamageTick: number | null = null;
   #lastHealth: number | null = null;
+  /**
+   * Which client is current (ADR 0017). Every connection, and every explicit
+   * disconnect, starts a new generation, and a client's listeners act only
+   * while theirs is current. So a retired client's late `end` or `error`
+   * cannot mark its replacement disconnected, whatever order events arrive in.
+   */
+  #generation = 0;
 
   constructor(config: PersonConfig, options: MineflayerOptions = {}) {
     super();
@@ -185,6 +192,11 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         "Minecraft embodiment needs server and bot config",
       );
 
+    // A reconnection retires the previous client before its replacement
+    // exists.
+    if (this.#bot) await this.disconnect();
+    const generation = ++this.#generation;
+    const current = (): boolean => generation === this.#generation;
     const bot = this.#createBot({
       host: server.host,
       port: server.port,
@@ -212,7 +224,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     const failed = new Promise<never>((_resolve, reject) => {
       const fail = (failure: EmbodimentError): void => {
         loginFailure ??= failure;
-        this.#connected = false;
+        if (current()) this.#connected = false;
         reject(failure);
       };
       bot.once("kicked", (reason: unknown) =>
@@ -238,25 +250,34 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     failed.catch(() => {});
 
     bot.on("kicked", (reason: unknown) => {
+      if (!current()) return;
       this.#connected = false;
       this.emit("fatal", `server_kicked: ${String(reason).slice(0, 200)}`);
     });
     bot.on("error", (error: Error) => {
+      if (!current()) return;
       this.#connected = false;
       this.emit("fatal", `connection_error: ${error.message}`);
     });
     bot.on("end", () => {
+      if (!current()) return;
       this.#connected = false;
       this.emit("fatal", "disconnected");
     });
     bot.on("health", () => {
+      if (!current()) return;
       const health = bot.health ?? 0;
       if (this.#lastHealth !== null && health < this.#lastHealth)
         this.#lastDamageTick = Number(bot.time.age ?? 0);
       this.#lastHealth = health;
     });
 
-    const spawned = once(bot, "spawn");
+    // Mineflayer emits `spawn` only for a living body. A player who left the
+    // world dead rejoins at the death screen, with a `death` and no `spawn`;
+    // that is still a connection, to a body the runtime must deal with.
+    const settled = new AbortController();
+    const spawned = once(bot, "spawn", { signal: settled.signal });
+    const joinedDead = once(bot, "death", { signal: settled.signal });
     let spawnTimer: NodeJS.Timeout | undefined;
     const timedOut = new Promise<never>((_resolve, reject) => {
       spawnTimer = setTimeout(
@@ -275,13 +296,18 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       // diagnosable failure. It is cleared as soon as the race settles.
     });
     try {
-      await Promise.race([spawned, failed, timedOut]);
+      await Promise.race([spawned, joinedDead, failed, timedOut]);
     } finally {
       if (spawnTimer) clearTimeout(spawnTimer);
+      settled.abort();
     }
     await bot.waitForChunksToLoad();
     await this.#awaitReadiness();
     this.#assertWorldRules();
+    if (!current())
+      throw new DisconnectedError(
+        "The connection was replaced before it became ready",
+      );
 
     if (bot.username.toLowerCase() !== botConfig.username.toLowerCase())
       throw new EmbodimentError(
@@ -298,6 +324,64 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     this.#configureMovement();
     this.#startTick = Number(bot.time.age ?? 0);
     this.#connected = true;
+    this.#lastSafePosition = here;
+  }
+
+  /**
+   * Minecraft's respawn (ADR 0017, I3), which only the runtime asks for.
+   *
+   * The body is back only when the server has spawned it and the world around
+   * it is as ready as at a first connection, never merely because the request
+   * was sent. A lost connection, a server that never answers, or a respawn
+   * outside the exploration area is refused, so the runtime reports no
+   * respawn that did not happen.
+   */
+  async respawn(): Promise<void> {
+    const bot = this.bot;
+    if (!this.#connected)
+      throw new DisconnectedError("The Minecraft client is not connected");
+    if ((bot.health ?? 0) > 0) return;
+    const generation = this.#generation;
+    const settled = new AbortController();
+    const spawned = once(bot, "spawn", { signal: settled.signal });
+    const lost = once(bot, "end", { signal: settled.signal }).then(() => {
+      throw new DisconnectedError("The connection closed during a respawn");
+    });
+    let timer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(
+        () =>
+          reject(
+            new EmbodimentError(
+              "spawn_timeout",
+              `The server did not respawn Person within ${this.#connectTimeoutMs}ms`,
+            ),
+          ),
+        this.#connectTimeoutMs,
+      );
+    });
+    try {
+      bot.respawn();
+      await Promise.race([spawned, lost, timedOut]);
+    } finally {
+      if (timer) clearTimeout(timer);
+      settled.abort();
+    }
+    await bot.waitForChunksToLoad();
+    await this.#awaitReadiness();
+    this.#assertWorldRules();
+    if (generation !== this.#generation || !this.#connected)
+      throw new DisconnectedError("The connection was lost during a respawn");
+    const here = point(bot.entity.position);
+    if (!contains(this.#config.world.exploration, here))
+      throw new EmbodimentError(
+        "spawn_outside_bounds",
+        `Respawned at ${positionKey(here)}, outside the configured exploration area`,
+      );
+    // A new body: nothing it was doing, and no harm it remembers.
+    bot.pathfinder?.setGoal(null);
+    this.#stuck = false;
+    this.#lastDamageTick = null;
     this.#lastSafePosition = here;
   }
 
@@ -417,6 +501,8 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
    */
   async disconnect(): Promise<void> {
     this.#connected = false;
+    // Whatever the retired client says from now on is about nothing.
+    this.#generation++;
     const bot = this.#bot;
     this.#bot = null;
     if (!bot) return;
