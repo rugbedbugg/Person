@@ -152,3 +152,25 @@ def test_c_fails_when_food_is_not_the_top_goal(tmp_path: Path) -> None:
 def test_c_fails_without_the_supervised_learner(tmp_path: Path) -> None:
     observation = observe(world("development", "c-exploration"), tmp_path)
     assert "supervised" in failing("C", observation, "off")["why"]
+
+
+@pytest.mark.parametrize(
+    ("cls", "name"),
+    [("A", "a2-wide-margin"), ("B", "b2-near-tie"), ("C", "c2-exploration")],
+)
+def test_the_frozen_v2_worlds_are_instances_of_their_classes(
+    cls: str, name: str, tmp_path: Path
+) -> None:
+    # Static, like the check that admitted them; never a run.
+    plan = json.loads(
+        (REPOSITORY / f"experiments/r2/heldout/{name}.json").read_text(encoding="utf-8")
+    )
+    observation = observe(WORLDS / "heldout-v2" / f"{name}.json", tmp_path)
+    record = validator.validate(cls, observation, plan["learningMode"])
+    assert record["result"] == "PASS", record
+    recorded = json.loads(
+        (REPOSITORY / f"experiments/benchmarks/heldout-v2/validation/{cls}2.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert recorded["result"] == "PASS"

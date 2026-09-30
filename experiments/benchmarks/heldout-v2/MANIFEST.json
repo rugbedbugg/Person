@@ -1,0 +1,30 @@
+{
+  "frozen": "2026-09-30",
+  "procedureCommit": "4023090",
+  "seeds": {
+    "A2": "person-heldout-a2-2026-09-30",
+    "B2": "person-heldout-b2-2026-09-30",
+    "C2": "person-heldout-c2-2026-09-30"
+  },
+  "validation": {
+    "A2": "PASS",
+    "B2": "PASS",
+    "C2": "PASS"
+  },
+  "purpose": "Held-out A2, B2 and C2 of the V2 suite, with D2 (../heldout-d2/). Generated once from the committed procedure, no retries, and statically validated as instances of their classes. Do not run or inspect their results while designing a model; the V2 suite is evaluated once, as an operator-authorized evaluation. Nothing is tuned from them. Changing any file requires an explicit operator decision and a new manifest.",
+  "files": {
+    "experiments/benchmarks/heldout-v2/PROCEDURE.md": "5f93e63a32e16d09c42a5f5ac07eab16093b447c1fc6d23515cc4573a789cd99",
+    "scripts/benchmarks/generate-classes.ts": "f2c9dab8cb02fc5d1f8b274f72b1e54c6664a2f4ca8896e35e2718e76926d87c",
+    "scripts/benchmarks/initial-observation.ts": "2ccfdcb87ec63db080b22a057d50239b94c75da91b00b7a18512ccc31cf71ce3",
+    "scripts/benchmarks/validate_class.py": "e1ffa492dc9f15bcdb98b24e52ecfb7a8f8c041062e7594998a64d32e00ee525",
+    "fixtures/worlds/benchmarks/heldout-v2/a2-wide-margin.json": "96cc2580e1d71df66467644fc1ab0f4d8756a9c7f35d8fbd9c44cebe5931b1e2",
+    "experiments/r2/heldout/a2-wide-margin.json": "a75b39dee2ab6ecd80060c67650141c2a5be89c051087a72f839bf5b7b9b24a0",
+    "fixtures/worlds/benchmarks/heldout-v2/b2-near-tie.json": "28cb192dcbb7fb787faaf41d28c5dad736ed8e2a565bbde3b92f223451493e25",
+    "experiments/r2/heldout/b2-near-tie.json": "f9beebd108dc17a7e28e9cda89d94ddb82cf91c67727331770d5e8d69fb0612f",
+    "fixtures/worlds/benchmarks/heldout-v2/c2-exploration.json": "727a7b8b1d27a5b64553a986260589c8cc540d35a622b8e26eb26266f76277f8",
+    "experiments/r2/heldout/c2-exploration.json": "411378cdd8994898d0a4319f9f9f39c6b12a62a1c065fea810bdd8abc715b0bc",
+    "experiments/benchmarks/heldout-v2/validation/A2.json": "1e0c41b1ec1ae25b87b99a218b88cecb403b899799f2b11c37acde8f213c3612",
+    "experiments/benchmarks/heldout-v2/validation/B2.json": "81a0f285f7e8bd1ee7efc317797a1257c4b9c7af85db827bf30ecec24233589c",
+    "experiments/benchmarks/heldout-v2/validation/C2.json": "5be707e5706a230f1e5c041182752820d2a700dbf4b5f101779eed46716d2f14"
+  }
+}
