@@ -1060,6 +1060,20 @@ hashes and the final root: `docs/evidence/dedicated-server/2026-09-30-e3-rehears
   review; it needs a safety-semantics ADR.
 - One run of each is infrastructure validation, not a behavioural result.
 
+## ADR 0019 air check, 2026-09-30 (dedicated server)
+
+**Targeted infrastructure validation with a validation identity**, after the
+suffocation fix (PR #38, revision `d4b3beb`). `validation-001` ("AirCheck",
+account `PersonAirCheck`, whitelisted alone, no operators) was founded and
+embodied on the throwaway E3 world; the console built a sealed water tank
+with an air pocket and teleported the body under water. Twice the kernel's
+`suffocation` emergency ran `restore_air`, never `flee`, and both escapes
+reached air in 40 ticks, with breath then recovering; no death, and nothing
+privileged in memory. Restoring air does not leave deep water, so the
+emergency recurred about every 15 s while the body stayed in the tank; that
+is an open observation for the readiness review. Record:
+`docs/evidence/dedicated-server/2026-09-30-adr0019-air-check/`.
+
 ## Affect experiments (fixture only)
 
 The first affect experiments (ADR 0013) ran on 2026-09-29 in the fixture

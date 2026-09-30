@@ -927,7 +927,7 @@ runtime would allow a direct route home), not a distance.
 | Breath appraisal is exercised only by tests: no fixture world lowers air                                                                     | ADR 0014                   |
 | The experiment harness measures from per-decision deltas; the body is not sampled continuously                                               | ADR 0013                   |
 | Mineflayer respawn and reconnection exercised live once (E3 rehearsal, dedicated server), not on a LAN world                                 | REALITY_VALIDATION.md      |
-| The L0 suffocation emergency now restores air (`restore_air`, ADR 0019); TESTED IN FIXTURE and CONFORMANCE-TESTED, one live check pending    | ADR 0019                   |
+| The L0 suffocation emergency now restores air (`restore_air`, ADR 0019); TESTED IN FIXTURE, CONFORMANCE-TESTED and checked live once         | ADR 0019                   |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                           | IMPLEMENTATION_REPORT.md   |
 | Inventory reconciliation on resume not reimplemented                                                                                         | IMPLEMENTATION_REPORT.md   |
 | `loot_permitted_container` withdraws all types up to amount                                                                                  | IMPLEMENTATION_REPORT.md   |
