@@ -4,8 +4,9 @@
  * An unseen skeleton sat between the kernel's contact range (7) and a second,
  * skill-local threshold (8). `wait_safely` refused to wait, the kernel did not
  * take over, the fixture clock did not move, and Person re-proposed the same
- * wait forever. Safety now has one definition, the kernel's, and the fixture
- * world always moves on after an attempt that took no time and did not work.
+ * wait forever. Safety now has one definition, the kernel's; the fixture
+ * moves on one tick after a zero-time interruption or zero-time failure under
+ * runtime control; and a repeated zero-time failure ends the episode.
  */
 import test from "node:test";
 import assert from "node:assert/strict";

@@ -1,13 +1,14 @@
-# ADR 0015: One contact range, and simulated time that always moves
+# ADR 0015: One contact range and bounded simulated progress under runtime control
 
-**Status:** Proposed
+**Status:** Accepted (2026-09-30)
 **Date:** 2026-09-30
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Operator decision:** fix the zero-time livelock found in the R2 held-out D
 run on a separate correctness branch, without leaking the hidden hostile into
 cognition, choosing the semantics consistent with the safety ADRs
-(2026-09-29)
+(2026-09-29); architecture accepted, and renamed from "simulated time that
+always moves", which claimed more than the decision (2026-09-30)
 
 ---
 
