@@ -16,6 +16,7 @@ export const NODE_MESSAGE_TYPES = [
   "SkillOutcome",
   "EmergencyEvent",
   "EpisodeEvent",
+  "WorldAvailability",
 ] as const;
 
 /** Message types the cognition process is allowed to emit. */
@@ -45,6 +46,7 @@ export const SCHEMA_FILES: Readonly<Record<MessageType, string>> =
     SkillOutcome: "skill-outcome.schema.json",
     EmergencyEvent: "emergency-event.schema.json",
     EpisodeEvent: "episode-event.schema.json",
+    WorldAvailability: "world-availability.schema.json",
     CognitionReady: "cognition-ready.schema.json",
     GoalDecision: "goal-decision.schema.json",
     PolicyDecision: "policy-decision.schema.json",
