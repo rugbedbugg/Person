@@ -204,8 +204,8 @@ spot-checks. They were never one continuous individual.
   explicit binding with provenance (rule 6).
 - SLEEPING, or any clock access beyond the coarse gap category.
 - A decision that consumes the self-knowledge projection.
-- The first live run of the Mineflayer respawn and reconnection: until
-  then they are CONFORMANCE-TESTED only.
+- The Mineflayer respawn and reconnection ran live once, in the E3
+  rehearsal (ADR 0018); a wider live record may revisit their limits.
 
 ## Relevant commits and docs
 

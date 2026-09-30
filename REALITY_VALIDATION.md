@@ -1031,6 +1031,35 @@ and threat exposure were **not** exercised live. The check also exposed a
 goal-provider inconsistency (`SECURE_FOOD` proposed while already complete at
 food 16 and 17). Evidence: `docs/evidence/dedicated-server/2026-09-29-r2/`.
 
+## E3 live rehearsal, 2026-09-30 (dedicated server)
+
+**Dedicated-server infrastructure validation with a validation identity,
+recorded apart from the LAN runs.** `validation-000` ("Rehearsal") was
+founded, preflighted and embodied on a new throwaway level
+(`validation-e3-rehearsal`, seed drawn once at random) of the same local
+1.16.1 server, bound to 127.0.0.1, whitelist of one (`PersonRehearsal`), no
+operators. Person-000 does not exist and was not involved. Full record,
+hashes and the final root: `docs/evidence/dedicated-server/2026-09-30-e3-rehearsal/`.
+
+- **Exercised once each, all passing:** founding exactly once; preflight for
+  the founding and every embodiment; three sessions with clean restarts that
+  learned their gap; a console `kick` survived by the same running cognition
+  through the real Mineflayer reconnection, with no stale-client effect;
+  console `kill`s and two natural deaths, each respawned through Mineflayer
+  within 0.4 s in the same identity and session; a rejoin to a body left dead;
+  clean shutdowns; read-only reconstruction (5 deaths, 5 respawns, 1024
+  events, chain intact). No cause, coordinates or console provenance reached
+  any Person-facing record.
+- **Defect found and fixed (PR #36):** a death during the final decision's
+  skill went unreported, and skills ran on a dead body for up to 2 min 21 s.
+  Only the affected check was repeated, at `17a62a0`: a `kill` mid-skill now
+  ends the skill as `DEATH` in 0.62 s and is recorded in its own session.
+  The lineage's third death is recorded one session late, as lived.
+- **Open finding:** a drowning. The L0 `suffocation` emergency answers with
+  `flee`, which does not surface. Recorded for the first-Ada readiness
+  review; it needs a safety-semantics ADR.
+- One run of each is infrastructure validation, not a behavioural result.
+
 ## Affect experiments (fixture only)
 
 The first affect experiments (ADR 0013) ran on 2026-09-29 in the fixture

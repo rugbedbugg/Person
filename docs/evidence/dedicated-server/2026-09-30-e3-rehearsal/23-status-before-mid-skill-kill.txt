@@ -1,0 +1,2 @@
+  updated   2026-09-30T15:31:10.562Z (14s ago)
+  doing     goal=SECURE_SHELTER routine=r_46630eeb628a9f95 skill=gather_wood

@@ -1,0 +1,52 @@
+person preflight (found)
+  software
+    PASS  revision: 413740d672e95cefde2efed994479e6745518c5f
+    PASS  clean working tree: nothing uncommitted
+    PASS  ADR 0017 accepted: Accepted (2026-09-30)
+    PASS  ADR 0018 accepted: Accepted (2026-09-30)
+  configuration
+    PASS  schema-valid: runs/validation/e3/validation-000.toml
+    PASS  explicit affect.mode: active
+    PASS  explicit learning.mode: off
+    PASS  explicit lifecycle.death: respawn
+    PASS  explicit runtime.reconnectAttempts: 5
+    PASS  explicit runtime.reconnectIntervalMs: 5000
+    PASS  Minecraft embodiment: minecraft
+  identity
+    PASS  canonical or validation identity: validation-000
+    PASS  name and designation: name Rehearsal, designation Validation-000 (expected Validation-000)
+    PASS  root state: /home/rugbedbugg/Projects/Python/Person/runs/validation/e3/root holds no Person yet
+    PASS  no foreign evidence: none
+    PASS  no lock held: unlocked
+    PASS  journal intact: 0 events, 0 truncated
+  persistence
+    PASS  writable: /home/rugbedbugg/Projects/Python/Person/runs/validation/e3
+    PASS  free space: 311128 MiB free, 1024 MiB needed
+    PASS  empty evidence path: /home/rugbedbugg/Projects/Python/Person/runs/validation/e3/root does not exist yet
+    PASS  dedicated evidence path: neither containing the repository nor nested inside another root
+    PASS  backup destination: /home/rugbedbugg/Projects/Python/Person/runs/validation/e3/backups, outside the evidence root
+  minecraft
+    PASS  loopback target: 127.0.0.1 -> 127.0.0.1
+    PASS  world manifest: validation-e3-rehearsal, seed 6016296545845284926, E3 validation rehearsal (validation-000); infrastructure validation, not research
+    PASS  server jar: 2782d547724bc3ffc0ef6e97b2790e75c1df89241f9d4645b58c706f5e6c935b
+    PASS  world named by the manifest: level-name=validation-e3-rehearsal (expected validation-e3-rehearsal)
+    PASS  seed of the manifest: level-seed=6016296545845284926 (expected 6016296545845284926)
+    PASS  whitelist on: white-list=true (expected true)
+    PASS  enforce-whitelist: enforce-whitelist=true (expected true)
+    PASS  gamemode: gamemode=survival (expected survival)
+    PASS  force-gamemode: force-gamemode=true (expected true)
+    PASS  difficulty: difficulty=easy (expected easy)
+    PASS  spawn-monsters: spawn-monsters=true (expected true)
+    PASS  offline accounts: online-mode=false (expected false)
+    PASS  port of the configuration: server-port=25565 (expected 25565)
+    PASS  training context matches difficulty: minecraft_normal on easy
+    PASS  Person whitelisted: PersonRehearsal (fa5ed248-3875-3342-93cc-5e07d06550a1)
+    PASS  Person not an operator: 0 operator(s)
+    PASS  Person has never entered this world: no player data
+
+  revision 413740d672e95cefde2efed994479e6745518c5f
+  personId validation-000
+  config sha256 0f0125dff56a69b6aa3f1defddcfd160caddf860f2e31682baa8d7ef8a5f6f4b
+  world manifest sha256 db0186ef4e0a191849803b9cace4198b6c8e274160082a0106d33f57628736a8
+
+READY: every check passed.

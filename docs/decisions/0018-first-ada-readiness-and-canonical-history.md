@@ -94,6 +94,12 @@ world-manifest` (written once, inside a generated world, from its pinned
   history policy are `docs/FOUNDING_RUNBOOK.md`. The configuration schema
   accepts `Validation-NNN` designations. TESTED against synthetic servers and
   roots; never run against the live server.
+- **E3 (2026-09-30):** one live rehearsal with `validation-000` on a
+  throwaway world passed every criterion
+  (`docs/evidence/dedicated-server/2026-09-30-e3-rehearsal/`). It found one
+  lifecycle defect, fixed in PR #36 and re-checked live, and one open
+  body-safety finding (the suffocation emergency does not surface) for the
+  readiness review.
 
 ## Consequences
 

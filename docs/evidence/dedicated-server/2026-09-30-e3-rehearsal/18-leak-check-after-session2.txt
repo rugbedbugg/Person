@@ -1,0 +1,20 @@
+{'person_founded': 1, 'session_started': 2, 'session_ended': 2, 'person_died': 2, 'person_respawned': 2, 'person_terminated': 0, 'world_availability_changed': 4, 'episode_started': 2, 'episode_ended': 2}
+persons: ['validation-000']
+'kick' in Person-facing records: False
+'kill' in Person-facing records: True
+'console' in Person-facing records: False
+'operator' in Person-facing records: False
+'e3' in Person-facing records: True
+'validation stimulus' in Person-facing records: False
+'fell out' in Person-facing records: False
+'x":' in Person-facing records: False
+'coordinates' in Person-facing records: False
+'inventory' in Person-facing records: True
+'cause' in Person-facing records: False
+death memory detail keys: [['food_before', 'goal', 'health_before', 'outcome', 'project', 'threat_in_view'], ['food_before', 'goal', 'health_before', 'outcome', 'project', 'threat_in_view']]
+operator_intervention marker (engineering, episode events): [['session_start'], ['decision_budget_reached'], ['session_start', 'operator_intervention'], ['decision_budget_reached', 'operator_intervention']]
+evidence chain intact: True
+kill -> ['nce": 0.3, "details": {"skill": "gather_wood', 'nce": 0.4, "details": {"skill": "gather_wood', 'nce": 0.5, "details": {"skill": "gather_wood', 'nce": 0.5, "details": {"skill": "wait_safely', 'nce": 0.7, "details": {"skill": "flee", "sta', 'nce": 0.7, "details": {"skill": "wait_safely']
+e3 -> ['", "decision_id": "3db046e3-597a-5fd2-96a6', '-c9bc-4f5d-ad76-a1f7edee7e3e", "decision_i', '19166-0900-4acf-8c92-07c9e316cd21", "decis', '7707-0b74-4792-a801-69297e3af990", "decisi', 'alled": ["d1cdac1f-f5ae-4e3c-86d5-c306b508', 'd80599", "d1cdac1f-f5ae-4e3c-86d5-c306b508']
+inventory -> ['": true, "effects": [], "inventory": [], "health_', ': ["defensive_strike"], "inventory": [], "health_', ': false, "effects": [], "inventory": ["birch_log:', ': false, "effects": [], "inventory": ["oak_log:+1', ': false, "effects": [], "inventory": [], "health_', 's": ["wood_increased"], "inventory": ["birch_log:']
+standalone 'kill' (not within 'skill'): False

@@ -1,0 +1,2699 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "ep_muo9hury",
+  "personId": "validation-000",
+  "worldId": "validation-e3-rehearsal",
+  "sessionId": "3c0a8aed-033a-4906-b517-ae618a07a8f5",
+  "trainingContext": "minecraft_normal",
+  "learningMode": "off",
+  "rngSeed": 20260930,
+  "policyRevision": 0,
+  "skillLibraryRevision": "501983c9be777a91",
+  "protocolVersion": "shroud-learning-v2",
+  "startedAt": "2026-09-30T15:30:18.265Z",
+  "startTick": 49726,
+  "finishedAt": "2026-09-30T15:37:53.693Z",
+  "outcome": "completed",
+  "reason": "decision_budget_reached",
+  "endTick": 58806,
+  "elapsedTicks": 9080,
+  "decisions": [
+    {
+      "decisionId": "c0888afe-5c4f-5729-8015-0778174654c6",
+      "tick": 49746,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_4",
+        "recalls_unfound_search",
+        "searched_here_before"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "right"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "7b6a8f9e-5902-4f37-b0d2-40e75a304882"
+    },
+    {
+      "decisionId": "ecd82735-3f3d-5ca3-a0fe-83b6157d2ddc",
+      "tick": 49806,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "safe",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "flee",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "PREEMPTED",
+      "emergency": true,
+      "healthDelta": -9.833333969116211,
+      "foodDelta": -5,
+      "elapsedTicks": 560,
+      "budgetTicks": 600,
+      "budgetPressure": 0.9333,
+      "navigationTicks": 540,
+      "interactionTicks": 20,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "rotten_flesh",
+          "delta": 2
+        }
+      ],
+      "outcomeMessageId": "5d494fca-8b27-442a-8bc1-8f8e57276ee6"
+    },
+    {
+      "decisionId": "3ee56970-4f8a-5890-bf61-9f1daaccf3e2",
+      "tick": 50446,
+      "contextId": "h_low.f_sufficient.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "food_band_below_full"
+      ],
+      "routineId": "r_4b48ef885aff609a",
+      "routineName": "secure_food__gather_plant_food_eat_to_target",
+      "routineSteps": [
+        "gather_plant_food",
+        "eat_to_target"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_plant_food",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 6
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_plant_food",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "plant_food",
+          "op": "+=",
+          "value": 6
+        },
+        {
+          "fact": "edible_food",
+          "op": "+=",
+          "value": 6
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "gather_plant_food",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 40,
+      "budgetTicks": 2400,
+      "budgetPressure": 0.0167,
+      "navigationTicks": 0,
+      "interactionTicks": 40,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "6507a54c-5e39-44f9-affe-04a70fadebe8"
+    },
+    {
+      "decisionId": "db6a3a16-a2ac-52ba-8efe-796f3f82b4ab",
+      "tick": 50546,
+      "contextId": "h_low.f_sufficient.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "food_band_below_full"
+      ],
+      "routineId": "r_4b48ef885aff609a",
+      "routineName": "secure_food__gather_plant_food_eat_to_target",
+      "routineSteps": [
+        "gather_plant_food",
+        "eat_to_target"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_plant_food",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 6
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_plant_food",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "plant_food",
+          "op": "+=",
+          "value": 6
+        },
+        {
+          "fact": "edible_food",
+          "op": "+=",
+          "value": 6
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "gather_plant_food",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 60,
+      "budgetTicks": 2400,
+      "budgetPressure": 0.025,
+      "navigationTicks": 0,
+      "interactionTicks": 60,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "oak_sapling",
+          "delta": 1
+        }
+      ],
+      "outcomeMessageId": "4ab0ad8e-6209-48ca-9810-3007597f0798"
+    },
+    {
+      "decisionId": "3ebb9f12-03c1-50f9-bbf8-07680f180b6a",
+      "tick": 50646,
+      "contextId": "h_low.f_sufficient.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "food_band_below_full"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_plant_food",
+        "looks_remaining_7"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "down"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "0c166377-fea4-497c-9018-34f44b3e1656"
+    },
+    {
+      "decisionId": "a9cd14c0-d786-5011-9656-90db1cb721ec",
+      "tick": 50691,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_7",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "right"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 15,
+      "budgetTicks": 40,
+      "budgetPressure": 0.375,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "fcf500b6-302e-48b0-80b5-5495b58a653b"
+    },
+    {
+      "decisionId": "0028559e-cff5-59b6-88b7-aa91c2d4864b",
+      "tick": 50746,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "fuel",
+          "op": "+=",
+          "value": 32
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "gather_wood",
+      "status": "DEATH",
+      "requestedSkillStatus": "DEATH",
+      "emergency": false,
+      "healthDelta": -20,
+      "foodDelta": 0,
+      "elapsedTicks": 300,
+      "budgetTicks": 2400,
+      "budgetPressure": 0.125,
+      "navigationTicks": 300,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "36a27532-3fef-4d3a-b439-09ef1a379aa8"
+    },
+    {
+      "decisionId": "78197e47-f28a-54e0-a0f7-401811fbb6f8",
+      "tick": 51095,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_7"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "right"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 11,
+      "budgetTicks": 40,
+      "budgetPressure": 0.275,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "5d0eaf26-9fb7-4d95-896c-1fe64b210dee"
+    },
+    {
+      "decisionId": "32c0df96-c194-525a-b7d6-ace426538b93",
+      "tick": 51146,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "fuel",
+          "op": "+=",
+          "value": 32
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "gather_wood",
+      "status": "TIMED_OUT",
+      "requestedSkillStatus": "TIMED_OUT",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 2480,
+      "budgetTicks": 2400,
+      "budgetPressure": 1.0333,
+      "navigationTicks": 820,
+      "interactionTicks": 1660,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "arrow",
+          "delta": 1
+        },
+        {
+          "name": "birch_log",
+          "delta": 1
+        },
+        {
+          "name": "oak_log",
+          "delta": 11
+        }
+      ],
+      "outcomeMessageId": "50450074-e30d-44d4-8f4e-cfd07fa90085"
+    },
+    {
+      "decisionId": "82971598-4bd0-56bb-b2e3-b64cd6a1e964",
+      "tick": 53666,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_7"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "right"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "bde7558b-0447-4b2f-a65f-949f186dcd5e"
+    },
+    {
+      "decisionId": "8e2ed3da-5cbd-557f-a8e0-689a3234b46e",
+      "tick": 53706,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "safe",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "flee",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "PREEMPTED",
+      "emergency": true,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 60,
+      "budgetTicks": 600,
+      "budgetPressure": 0.1,
+      "navigationTicks": 60,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "bd36e88e-19c2-4fcc-aeef-6ff53edb7fdb"
+    },
+    {
+      "decisionId": "5524c478-1c43-5521-8dc4-a6aa813b4454",
+      "tick": 55786,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "shelter_incomplete"
+      ],
+      "routineId": "r_f19cc2109d8b9f18",
+      "routineName": "secure_shelter__build_basic_shelter",
+      "routineSteps": [
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "build_basic_shelter",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "building_materials",
+          "op": ">=",
+          "value": 25
+        },
+        {
+          "fact": "building_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "home_known",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "building_materials",
+          "op": "-=",
+          "value": 25
+        },
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "at_home",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "build_basic_shelter",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": -1,
+      "elapsedTicks": 280,
+      "budgetTicks": 3600,
+      "budgetPressure": 0.0778,
+      "navigationTicks": 280,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "ffef49bb-dff4-49f4-810a-40a31265a12c"
+    },
+    {
+      "decisionId": "d87d416c-a6a3-5cdc-908b-1a789d47b575",
+      "tick": 56106,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_7",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "764e52d1-c280-4a19-882f-68a29ee16deb"
+    },
+    {
+      "decisionId": "6d34a414-27a0-56f8-8c66-aa786e583ddf",
+      "tick": 56146,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_6",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "cf9a3ba4-ccb0-47fb-837a-d9aa7a0f4e73"
+    },
+    {
+      "decisionId": "a79ad438-16e3-56a3-901e-1205e8642370",
+      "tick": 56186,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_5",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "69a1e370-e264-4348-a317-3cd11641b11a"
+    },
+    {
+      "decisionId": "f3ccb93e-49a3-5298-b467-b169e90dedf7",
+      "tick": 56226,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_4",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "5977d33b-fe74-450d-9e34-7a9408909d7a"
+    },
+    {
+      "decisionId": "fe044e7e-cd30-5bd5-a3ee-3ff684948e9b",
+      "tick": 56266,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_3",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "cafaef29-03f3-46d0-a5c2-5e39f01a1aa3"
+    },
+    {
+      "decisionId": "0bc985eb-72f9-5ec1-b5ff-30f8c2e5b3ea",
+      "tick": 56326,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_2",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "93599456-800c-41e6-9738-35214a773158"
+    },
+    {
+      "decisionId": "5cae1a7c-6a1e-5520-8783-896ff4927f20",
+      "tick": 56366,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_1",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "37a94715-fe90-4f3a-95a0-a0c05474459f"
+    },
+    {
+      "decisionId": "4f034acf-864d-5448-a97c-8ebe2b240c0d",
+      "tick": 56406,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "looks_remaining_0",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "faca163b-95a2-4a98-9632-d31c3ede6e91"
+    },
+    {
+      "decisionId": "9870b810-dfb4-5543-8755-79d56bfd845c",
+      "tick": 56446,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_idle_wait",
+      "routineName": "idle__wait_safely",
+      "routineSteps": [
+        "wait_safely"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "preconditions": [
+        {
+          "fact": "safe",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "rested",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L1",
+      "validationReasonCodes": [],
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 720,
+      "budgetTicks": 12000,
+      "budgetPressure": 0.06,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 720,
+      "inventoryDelta": [],
+      "outcomeMessageId": "c82b5315-c2b2-442c-9970-e262cd670bb0"
+    },
+    {
+      "decisionId": "c1a91549-0e32-5f3f-8be1-ebee2184015c",
+      "tick": 57206,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "goalReasonCodes": [
+        "no_owned_storage"
+      ],
+      "routineId": "r_6d9cbf8e0752d44d",
+      "routineName": "establish_storage__craft_chest_return_home",
+      "routineSteps": [
+        "craft_chest",
+        "return_home",
+        "place_owned_chest"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "craft_chest",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "wood",
+          "op": ">=",
+          "value": 2
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "wood",
+          "op": "-=",
+          "value": 2
+        },
+        {
+          "fact": "chest_item",
+          "op": "+=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "craft_chest",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 40,
+      "budgetTicks": 1200,
+      "budgetPressure": 0.0333,
+      "navigationTicks": 0,
+      "interactionTicks": 40,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "chest",
+          "delta": 1
+        },
+        {
+          "name": "crafting_table",
+          "delta": 1
+        },
+        {
+          "name": "oak_log",
+          "delta": -4
+        }
+      ],
+      "outcomeMessageId": "764216fa-e408-42e3-9737-03f26aab90ab"
+    },
+    {
+      "decisionId": "4732026b-1a2f-55c4-adfc-a8c6e165ca58",
+      "tick": 57266,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "goalReasonCodes": [
+        "no_owned_storage"
+      ],
+      "routineId": "r_6d9cbf8e0752d44d",
+      "routineName": "establish_storage__craft_chest_return_home",
+      "routineSteps": [
+        "craft_chest",
+        "return_home",
+        "place_owned_chest"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "return_home",
+      "requestedParameters": {
+        "max_distance": 128
+      },
+      "preconditions": [
+        {
+          "fact": "home_known",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "at_home",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L1",
+      "validationReasonCodes": [],
+      "executedSkill": "return_home",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 2400,
+      "budgetPressure": 0.0083,
+      "navigationTicks": 20,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "8b956a41-c166-4c16-8475-f314bd67c4e1"
+    },
+    {
+      "decisionId": "7961d82e-a7dc-51f8-9fee-f190245965f9",
+      "tick": 57306,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_1",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "project_improve_home",
+        "milestone_shelter"
+      ],
+      "routineId": "r_33fa6ab1022940be",
+      "routineName": "secure_shelter__repair_shelter",
+      "routineSteps": [
+        "repair_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "shelter_known",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "building_permitted",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "repair_shelter",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 2400,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "e4b98217-01b9-447e-88be-1c8d9dc2e46c"
+    },
+    {
+      "decisionId": "89572669-7f4d-5b35-a301-b156e4a5090b",
+      "tick": 57346,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_1",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "project_improve_home",
+        "milestone_shelter"
+      ],
+      "routineId": "r_33fa6ab1022940be",
+      "routineName": "secure_shelter__repair_shelter",
+      "routineSteps": [
+        "repair_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "shelter_known",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "building_permitted",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "repair_shelter",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 2400,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "e071aa03-30d1-46f4-8e2a-e0bead0a53bc"
+    },
+    {
+      "decisionId": "54249d24-b692-5d52-9ad7-780d537a2e45",
+      "tick": 57406,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_1",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "project_improve_home",
+        "milestone_shelter"
+      ],
+      "routineId": "r_33fa6ab1022940be",
+      "routineName": "secure_shelter__repair_shelter",
+      "routineSteps": [
+        "repair_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "shelter_known",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "building_permitted",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "repair_shelter",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 2400,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "cae88792-82d3-4274-9dc7-2ab6d1371c05"
+    },
+    {
+      "decisionId": "aaae924a-c18e-5f00-af01-b8cae42ed477",
+      "tick": 57446,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "goalReasonCodes": [
+        "no_owned_storage"
+      ],
+      "routineId": "r_727ac7d724a04345",
+      "routineName": "establish_storage__place_owned_chest",
+      "routineSteps": [
+        "place_owned_chest"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "place_owned_chest",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "chest_item",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "at_home",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "building_permitted",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "chest_item",
+          "op": "-=",
+          "value": 1
+        },
+        {
+          "fact": "owned_storage_available",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "place_owned_chest",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 1200,
+      "budgetPressure": 0.0167,
+      "navigationTicks": 0,
+      "interactionTicks": 20,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "7d9b0fd2-f3d7-46a8-ab09-daf995ec162b"
+    },
+    {
+      "decisionId": "ae2bde65-4e49-5a48-a7ec-0e0f0f9486ff",
+      "tick": 57506,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_1",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "project_improve_home",
+        "milestone_shelter"
+      ],
+      "routineId": "r_33fa6ab1022940be",
+      "routineName": "secure_shelter__repair_shelter",
+      "routineSteps": [
+        "repair_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "preconditions": [
+        {
+          "fact": "shelter_known",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "building_materials",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "building_permitted",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "repair_shelter",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 2400,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "0ad6d5d7-2d99-4f03-b320-3ef885ad1f33"
+    },
+    {
+      "decisionId": "c3427410-325d-53f2-be00-61e872ec42be",
+      "tick": 57546,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "goalReasonCodes": [
+        "stored_food_reserve_low"
+      ],
+      "routineId": "r_b4ea0c59f3659a0d",
+      "routineName": "maintain_reserves__deposit_owned_storage",
+      "routineSteps": [
+        "deposit_owned_storage"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "preconditions": [
+        {
+          "fact": "owned_storage_available",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "at_home",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "stored_surplus",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "deposit_owned_storage",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 1200,
+      "budgetPressure": 0.0167,
+      "navigationTicks": 0,
+      "interactionTicks": 20,
+      "waitingTicks": 0,
+      "inventoryDelta": [
+        {
+          "name": "oak_log",
+          "delta": -11
+        }
+      ],
+      "outcomeMessageId": "af4066b7-3e31-41e5-afe0-093719dcb9c2"
+    },
+    {
+      "decisionId": "9cb5438e-9aa5-5782-8fd5-1a7c683db456",
+      "tick": 57586,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_7",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "4b228975-0718-44d0-a80d-214bd383f2ee"
+    },
+    {
+      "decisionId": "13900afa-eef9-5838-b04c-fe16a792084b",
+      "tick": 57646,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_6",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "8c1d0869-5fe9-409f-a5d8-13459d010a49"
+    },
+    {
+      "decisionId": "fec151bb-33b0-5ade-96b9-3a9f2e38fde0",
+      "tick": 57686,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_5",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "40d01484-a9c6-45e7-8f14-ee1b5bcbbfa5"
+    },
+    {
+      "decisionId": "e06f4e18-287b-52d7-b51a-c31ca2cdbea4",
+      "tick": 57726,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_4",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "8f16e5ac-7080-41fe-87a1-ec982913fdd6"
+    },
+    {
+      "decisionId": "e349826b-d45f-5e6a-a5ac-a52553e98d68",
+      "tick": 57766,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_3",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "b8470b00-63f8-42e6-a57e-364cca7bf183"
+    },
+    {
+      "decisionId": "77c8ed12-2fcc-55e0-8c93-1656c781bcbf",
+      "tick": 57826,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_2",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "0de46ab6-5da8-42f1-8d59-0a22c68ed4c2"
+    },
+    {
+      "decisionId": "3dcd915b-edf8-5f1c-92e8-4138f130719c",
+      "tick": 57866,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_1",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "f25f9af1-dc3d-4b58-8a2b-199970567624"
+    },
+    {
+      "decisionId": "62af53d0-8eac-5d5c-baf2-d82e855099ab",
+      "tick": 57906,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_0",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "a678434a-c874-49db-ae44-5585816c2ac8"
+    },
+    {
+      "decisionId": "916384db-9544-52dd-ae99-eac7e815debd",
+      "tick": 57966,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_idle_wait",
+      "routineName": "idle__wait_safely",
+      "routineSteps": [
+        "wait_safely"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "preconditions": [
+        {
+          "fact": "safe",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "rested",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L1",
+      "validationReasonCodes": [],
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 720,
+      "budgetTicks": 12000,
+      "budgetPressure": 0.06,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 720,
+      "inventoryDelta": [],
+      "outcomeMessageId": "d5a2f68d-ed2e-4045-88ba-0d1813e21903"
+    },
+    {
+      "decisionId": "124781fe-9b12-5695-9bb1-13a8abac3b60",
+      "tick": 58726,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "goalReasonCodes": [
+        "stored_food_reserve_low"
+      ],
+      "routineId": "r_b4ea0c59f3659a0d",
+      "routineName": "maintain_reserves__deposit_owned_storage",
+      "routineSteps": [
+        "deposit_owned_storage"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "preconditions": [
+        {
+          "fact": "owned_storage_available",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "at_home",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "stored_surplus",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED",
+      "requestedSkillStatus": "FAILED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 1200,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "3d7f6d48-f1ef-4db3-ac9a-fe664eb2b352"
+    },
+    {
+      "decisionId": "ef17f818-d15a-5461-b600-c492cdcd986f",
+      "tick": 58766,
+      "contextId": "h_healthy.f_full.d_day.t_none.hm_at_home.tt_none.fs_none",
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "goalReasonCodes": [
+        "project_secure_food_supply",
+        "milestone_cooked_food"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_animal",
+        "wants_reachable_stone",
+        "looks_remaining_1",
+        "recalls_unfound_search",
+        "searched_here_before"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "39f5bdbe-d5dc-483d-8c95-2e86263d4d70"
+    }
+  ],
+  "safetyOverrides": [
+    {
+      "tick": 49866,
+      "level": "L1",
+      "trigger": "immediate_threat",
+      "action": "flee",
+      "preemptedSkill": "gather_wood"
+    },
+    {
+      "tick": 55686,
+      "level": "L1",
+      "trigger": "immediate_threat",
+      "action": "flee",
+      "preemptedSkill": "gather_wood"
+    }
+  ],
+  "storageProvenance": [
+    {
+      "storageId": "storage_49_77_-242",
+      "worldId": "validation-e3-rehearsal",
+      "dimension": "overworld",
+      "position": {
+        "x": 49,
+        "y": 77,
+        "z": -242
+      },
+      "createdByPerson": "validation-000",
+      "creationEvent": "place_owned_chest@tick:57466",
+      "homeId": "home_primary",
+      "lastVerified": "2026-09-30T15:36:50.746Z"
+    }
+  ],
+  "tickBudgets": [
+    {
+      "skill": "gather_wood",
+      "runs": 2,
+      "budgetTicks": 2400,
+      "meanElapsedTicks": 1390,
+      "maxElapsedTicks": 2480,
+      "worstPressure": 1.0333,
+      "meanNavigationTicks": 560,
+      "meanInteractionTicks": 830,
+      "timeouts": 1
+    },
+    {
+      "skill": "flee",
+      "runs": 2,
+      "budgetTicks": 600,
+      "meanElapsedTicks": 310,
+      "maxElapsedTicks": 560,
+      "worstPressure": 0.9333,
+      "meanNavigationTicks": 300,
+      "meanInteractionTicks": 10,
+      "timeouts": 0
+    },
+    {
+      "skill": "look",
+      "runs": 22,
+      "budgetTicks": 40,
+      "meanElapsedTicks": 8.5,
+      "maxElapsedTicks": 20,
+      "worstPressure": 0.5,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "build_basic_shelter",
+      "runs": 1,
+      "budgetTicks": 3600,
+      "meanElapsedTicks": 280,
+      "maxElapsedTicks": 280,
+      "worstPressure": 0.0778,
+      "meanNavigationTicks": 280,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "wait_safely",
+      "runs": 2,
+      "budgetTicks": 12000,
+      "meanElapsedTicks": 720,
+      "maxElapsedTicks": 720,
+      "worstPressure": 0.06,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "craft_chest",
+      "runs": 1,
+      "budgetTicks": 1200,
+      "meanElapsedTicks": 40,
+      "maxElapsedTicks": 40,
+      "worstPressure": 0.0333,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 40,
+      "timeouts": 0
+    },
+    {
+      "skill": "gather_plant_food",
+      "runs": 2,
+      "budgetTicks": 2400,
+      "meanElapsedTicks": 50,
+      "maxElapsedTicks": 60,
+      "worstPressure": 0.025,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 50,
+      "timeouts": 0
+    },
+    {
+      "skill": "place_owned_chest",
+      "runs": 1,
+      "budgetTicks": 1200,
+      "meanElapsedTicks": 20,
+      "maxElapsedTicks": 20,
+      "worstPressure": 0.0167,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 20,
+      "timeouts": 0
+    },
+    {
+      "skill": "deposit_owned_storage",
+      "runs": 2,
+      "budgetTicks": 1200,
+      "meanElapsedTicks": 10,
+      "maxElapsedTicks": 20,
+      "worstPressure": 0.0167,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 10,
+      "timeouts": 0
+    },
+    {
+      "skill": "return_home",
+      "runs": 1,
+      "budgetTicks": 2400,
+      "meanElapsedTicks": 20,
+      "maxElapsedTicks": 20,
+      "worstPressure": 0.0083,
+      "meanNavigationTicks": 20,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "repair_shelter",
+      "runs": 4,
+      "budgetTicks": 2400,
+      "meanElapsedTicks": 0,
+      "maxElapsedTicks": 0,
+      "worstPressure": 0,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    }
+  ],
+  "totals": {
+    "decisions": 40,
+    "accepted": 40,
+    "replaced": 0,
+    "rejected": 0,
+    "learnedDecisions": 0,
+    "fallbackDecisions": 40,
+    "successes": 30,
+    "failures": 10,
+    "emergencies": 2,
+    "healthLost": 29.83333396911621,
+    "resourceDelta": [
+      {
+        "name": "arrow",
+        "delta": 1
+      },
+      {
+        "name": "birch_log",
+        "delta": 1
+      },
+      {
+        "name": "chest",
+        "delta": 1
+      },
+      {
+        "name": "crafting_table",
+        "delta": 1
+      },
+      {
+        "name": "oak_log",
+        "delta": -4
+      },
+      {
+        "name": "oak_sapling",
+        "delta": 1
+      },
+      {
+        "name": "rotten_flesh",
+        "delta": 2
+      }
+    ]
+  }
+}
