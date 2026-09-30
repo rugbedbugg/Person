@@ -1,0 +1,144 @@
+{
+  "claude-code": {
+    "budget": {
+      "attempted": 1,
+      "completed": 1,
+      "input_tokens": 2526,
+      "max_calls": 1,
+      "output_tokens": 628,
+      "rejected": 0,
+      "sterility_failures": 0,
+      "unavailable": 0
+    },
+    "cli": "2.1.285 (Claude Code)",
+    "diagnostics": [],
+    "disabled": null,
+    "model": "claude-opus-5-5",
+    "passed": false,
+    "positive_v2": {
+      "context_canary": false,
+      "fact_canary": true,
+      "file_canary": false,
+      "instruction_canary": false,
+      "rejections": [
+        "schema"
+      ],
+      "status": "completed",
+      "tools_exposed": [
+        "StructuredOutput"
+      ],
+      "verdict": "rejected"
+    },
+    "records": [
+      {
+        "context_sha256": "d526a5b115d214cb4794e675627ef4b2c47ba395e753761bdbac1e7d9ecc00e2",
+        "deliberation_id": "dlb_02c1fe5b719c44b7",
+        "instruction_sha256": "adbd400c47190c35683c7dc8a220d83f39456be1822a8f331b7db5241346b8f0",
+        "model": "claude-opus-5-5",
+        "provider": "claude-code",
+        "reason": "reflection",
+        "type": "deliberation_requested"
+      },
+      {
+        "backend_version": "claude-code 2.1.285 (Claude Code); sterile-v1",
+        "deliberation_id": "dlb_02c1fe5b719c44b7",
+        "latency_ms": 7867,
+        "model": "claude-opus-5-5",
+        "output_sha256": "7bd68993365141c7063e0945deccbcd1b977584fb6eb4cbecf36515aa2547757",
+        "provider": "claude-code",
+        "rejections": [
+          "schema"
+        ],
+        "type": "deliberation_completed",
+        "verdict": "rejected"
+      }
+    ],
+    "self_check": {
+      "environment": [
+        "HOME",
+        "LANG",
+        "PATH",
+        "PWD",
+        "SHLVL",
+        "TMPDIR",
+        "_"
+      ],
+      "exit": 0,
+      "home_entries": [
+        "/sandbox/home/.claude",
+        "/sandbox/home/.claude/.credentials.json"
+      ],
+      "profile": "sterile-v1",
+      "visible": []
+    }
+  },
+  "codex": {
+    "budget": {
+      "attempted": 1,
+      "completed": 1,
+      "input_tokens": 9286,
+      "max_calls": 1,
+      "output_tokens": 240,
+      "rejected": 0,
+      "sterility_failures": 0,
+      "unavailable": 0
+    },
+    "cli": "codex-cli 0.159.2",
+    "diagnostics": [
+      "Code Mode is unavailable because code-mode host is disabled. Code mode will fail closed; enable `features.code_mode_host` and install `codex-code-mode-host`."
+    ],
+    "disabled": null,
+    "model": "gpt-6-astra",
+    "passed": true,
+    "positive_v2": {
+      "context_canary": false,
+      "fact_canary": true,
+      "file_canary": false,
+      "instruction_canary": false,
+      "rejections": [],
+      "status": "completed",
+      "tools_exposed": null,
+      "verdict": "admitted"
+    },
+    "records": [
+      {
+        "context_sha256": "d526a5b115d214cb4794e675627ef4b2c47ba395e753761bdbac1e7d9ecc00e2",
+        "deliberation_id": "dlb_6c6f646acff64aa9",
+        "instruction_sha256": "adbd400c47190c35683c7dc8a220d83f39456be1822a8f331b7db5241346b8f0",
+        "model": "gpt-6-astra",
+        "provider": "codex",
+        "reason": "reflection",
+        "type": "deliberation_requested"
+      },
+      {
+        "backend_version": "codex codex-cli 0.159.2; sterile-v1",
+        "deliberation_id": "dlb_6c6f646acff64aa9",
+        "latency_ms": 14727,
+        "model": "gpt-6-astra",
+        "output_sha256": "b46f8888ba9285cccf9cff5d35c53761c45f58b98c761003e0f8f3c81888e107",
+        "provider": "codex",
+        "rejections": [],
+        "type": "deliberation_completed",
+        "verdict": "admitted"
+      }
+    ],
+    "self_check": {
+      "environment": [
+        "HOME",
+        "LANG",
+        "PATH",
+        "PWD",
+        "SHLVL",
+        "TMPDIR",
+        "_"
+      ],
+      "exit": 0,
+      "home_entries": [
+        "/sandbox/home/.codex",
+        "/sandbox/home/.codex/auth.json"
+      ],
+      "profile": "sterile-v1",
+      "visible": []
+    }
+  }
+}

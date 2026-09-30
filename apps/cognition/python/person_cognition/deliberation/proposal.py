@@ -57,6 +57,61 @@ write text without digits, positions or commands; at most 3 strategies,
 """
 
 DIRECTIONS: tuple[str, ...] = ("increase", "decrease", "achieve", "avoid")
+
+
+def _object(properties: dict[str, object]) -> dict[str, object]:
+    return {
+        "type": "object",
+        "additionalProperties": False,
+        "required": sorted(properties),
+        "properties": properties,
+    }
+
+
+_REFS: dict[str, object] = {"type": "array", "items": {"type": "string"}}
+_EFFECT = _object({"fact": {"type": "string"}, "direction": {"type": "string"}})
+
+#: The answer's shape, as the providers' structured-output modes take it: the
+#: strict subset both accept (every key required, optional ones nullable, no
+#: bounds). It shapes the answer; the gate, not the schema, decides it.
+PROPOSAL_JSON_SCHEMA: dict[str, object] = _object(
+    {
+        "assessment": _object({"summary": {"type": "string"}, "premises": _REFS}),
+        "uncertainties": {
+            "type": "array",
+            "items": _object({"about": {"type": "string"}, "premises": _REFS}),
+        },
+        "strategies": {
+            "type": "array",
+            "items": _object(
+                {
+                    "id": {"type": "string"},
+                    "goal_type": {"type": "string"},
+                    "project_kind": {"type": ["string", "null"]},
+                    "desired": {"type": "array", "items": _EFFECT},
+                    "expected": {
+                        "type": "array",
+                        "items": _object(
+                            {
+                                "fact": {"type": "string"},
+                                "direction": {"type": "string"},
+                                "support": _REFS,
+                            }
+                        ),
+                    },
+                    "capability_refs": _REFS,
+                    "premises": _REFS,
+                }
+            ),
+        },
+        "preferred": {"type": ["string", "null"]},
+        "evidence_needed": {
+            "type": "array",
+            "items": _object({"kind": {"type": "string"}, "about": {"type": "string"}}),
+        },
+        "confidence": {"type": "number"},
+    }
+)
 EVIDENCE_KINDS: tuple[str, ...] = ("observe", "recall", "test")
 STRATEGY_IDS: tuple[str, ...] = ("s1", "s2", "s3")
 
@@ -186,7 +241,10 @@ def gate(text: str, context: DeliberationContext) -> Verdict:
         ids.append(str(strategy.get("id")))
         if strategy.get("goal_type") not in goal_types:
             problems.add("unknown_vocabulary")
-        if "project_kind" in strategy and strategy["project_kind"] not in project_kinds:
+        if (
+            strategy.get("project_kind") is not None
+            and strategy["project_kind"] not in project_kinds
+        ):
             problems.add("unknown_vocabulary")
         cited = _refs(strategy.get("premises", []), 8, problems)
         if not cited:
