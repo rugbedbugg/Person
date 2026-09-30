@@ -56,8 +56,14 @@ response.
 
 ## Implementation status
 
-TESTED IN FIXTURE and CONFORMANCE-TESTED; one targeted live validation with a
-validation identity is required before E4.
+- **PR #38:** TESTED IN FIXTURE and CONFORMANCE-TESTED.
+- **Targeted live check (2026-09-30):** `validation-001` submerged in a
+  sealed tank on the throwaway E3 world. Both air emergencies were answered by
+  `restore_air`, never `flee`, and both reached air in 40 ticks; no death,
+  nothing privileged in memory
+  (`docs/evidence/dedicated-server/2026-09-30-adr0019-air-check/`). Restoring
+  air does not leave deep water, so the emergency recurs while the body stays
+  in it; that is recorded for the readiness review, not part of this ADR.
 
 ## Consequences
 

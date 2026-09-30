@@ -1,0 +1,838 @@
+{
+  "schemaVersion": 1,
+  "episodeId": "ep_muobbolq",
+  "personId": "validation-001",
+  "worldId": "validation-e3-rehearsal",
+  "sessionId": "8ae16180-2398-4fd8-b8ca-64fc9e851c4a",
+  "trainingContext": "minecraft_normal",
+  "learningMode": "off",
+  "rngSeed": 20260930,
+  "policyRevision": 0,
+  "skillLibraryRevision": "897abf1fb0c2f9af",
+  "protocolVersion": "shroud-learning-v2",
+  "startedAt": "2026-09-30T16:21:29.446Z",
+  "startTick": 59892,
+  "finishedAt": "2026-09-30T16:22:20.526Z",
+  "outcome": "completed",
+  "reason": "decision_budget_reached",
+  "endTick": 60892,
+  "elapsedTicks": 1000,
+  "decisions": [
+    {
+      "decisionId": "af012ce6-6775-5d63-b4cb-84b8bc2dada2",
+      "tick": 59892,
+      "contextId": "h_healthy.f_full.d_dusk.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_7"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "079e637e-c758-4345-b18e-e6975e23957f"
+    },
+    {
+      "decisionId": "4512af2f-97e7-5337-a56a-ba2e03c5f97c",
+      "tick": 59952,
+      "contextId": "h_healthy.f_full.d_dusk.t_none.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_46630eeb628a9f95",
+      "routineName": "secure_shelter__gather_wood_build_basic_shelter",
+      "routineSteps": [
+        "gather_wood",
+        "build_basic_shelter"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 32
+      },
+      "preconditions": [
+        {
+          "fact": "reachable_wood",
+          "op": ">=",
+          "value": 1
+        },
+        {
+          "fact": "harvesting_permitted",
+          "op": "==",
+          "value": 1
+        },
+        {
+          "fact": "inventory_space",
+          "op": ">=",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "restore_air",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "PREEMPTED",
+      "emergency": true,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 40,
+      "budgetTicks": 300,
+      "budgetPressure": 0.1333,
+      "navigationTicks": 40,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "b544fdda-fb27-424a-ab93-c776678b8333"
+    },
+    {
+      "decisionId": "e868f41a-6975-5efd-8132-6062c3c05586",
+      "tick": 60312,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_survive_immediate",
+      "goalType": "SURVIVE_IMMEDIATE",
+      "goalReasonCodes": [
+        "threat_present"
+      ],
+      "routineId": "r_idle_wait",
+      "routineName": "idle__wait_safely",
+      "routineSteps": [
+        "wait_safely"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "preconditions": [
+        {
+          "fact": "safe",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "rested",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L1",
+      "validationReasonCodes": [],
+      "executedSkill": "wait_safely",
+      "status": "INTERRUPTED",
+      "requestedSkillStatus": "INTERRUPTED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 12000,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "6c1f8ae1-9299-408f-b42e-13586916fb0c"
+    },
+    {
+      "decisionId": "084ded44-2b14-53ac-b8a1-14fcbda32986",
+      "tick": 60372,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_7"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "26963d4c-fc9b-4ff8-9432-80fcdae752d3"
+    },
+    {
+      "decisionId": "ab920f99-a5a0-539f-a8f9-b6db732c7fc8",
+      "tick": 60412,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_6"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "4e3acbb0-5801-4f6c-b4b6-4e98a5779758"
+    },
+    {
+      "decisionId": "2f372e21-bd7d-58de-a98a-5ff45f81ad7e",
+      "tick": 60452,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_5"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "2d5de5af-68b2-44e0-bd90-6382499f7e9e"
+    },
+    {
+      "decisionId": "3ffbc537-f8ea-59d3-9e47-74b2e254fe74",
+      "tick": 60492,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_4"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "f50b39fd-a5d3-4491-82a0-86a3c672a532"
+    },
+    {
+      "decisionId": "e7cc5004-06c0-5be9-a54e-2420a6e1b24b",
+      "tick": 60552,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_3"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [],
+      "validation": "REPLACE",
+      "validationLevel": "L0",
+      "validationReasonCodes": [
+        "suffocation",
+        "air_below_threshold"
+      ],
+      "executedSkill": "restore_air",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "PREEMPTED",
+      "emergency": true,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 40,
+      "budgetTicks": 300,
+      "budgetPressure": 0.1333,
+      "navigationTicks": 40,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "802c0de1-1a64-4573-a4ea-8e037580ee4a"
+    },
+    {
+      "decisionId": "e83c26b8-9fef-5c7b-a4ae-b1f033d1d7ba",
+      "tick": 60612,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_2"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "d74d4681-3bec-4add-b2ce-60737f1f4548"
+    },
+    {
+      "decisionId": "78fa40cc-d15f-56b1-bc50-dfa0ae05fdfb",
+      "tick": 60672,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_1"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "a021fbff-af50-403f-a42e-b5fed9cc6bc2"
+    },
+    {
+      "decisionId": "b54941f1-ce80-51bf-91a7-200f49f9f569",
+      "tick": 60712,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_wood",
+        "looks_remaining_0"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "698fc74c-d2a6-4af6-b6c8-bbbd4b4892f3"
+    },
+    {
+      "decisionId": "2c5ce0c7-7084-579b-abcb-023038266c09",
+      "tick": 60752,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "goalReasonCodes": [
+        "night_approaching"
+      ],
+      "routineId": "r_idle_wait",
+      "routineName": "idle__wait_safely",
+      "routineSteps": [
+        "wait_safely"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "preconditions": [
+        {
+          "fact": "safe",
+          "op": "==",
+          "value": 1
+        }
+      ],
+      "expectedEffects": [
+        {
+          "fact": "rested",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L1",
+      "validationReasonCodes": [],
+      "executedSkill": "wait_safely",
+      "status": "INTERRUPTED",
+      "requestedSkillStatus": "INTERRUPTED",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 12000,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "3867f52f-d35e-4daa-8d6b-4d3c03496e30"
+    },
+    {
+      "decisionId": "c736960c-802c-5380-a0ff-89e7447cb735",
+      "tick": 60812,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "wants_reachable_wood",
+        "looks_remaining_7",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 0,
+      "budgetTicks": 40,
+      "budgetPressure": 0,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "17f54805-ca46-49e0-9d08-bc41ff50f706"
+    },
+    {
+      "decisionId": "8016a0f5-05ab-5a48-9451-d03e4a23ba5b",
+      "tick": 60852,
+      "contextId": "h_healthy.f_full.d_dusk.t_immediate.hm_unknown.tt_none.fs_none",
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "goalReasonCodes": [
+        "tool_tier_below_stone"
+      ],
+      "routineId": "r_seek_evidence",
+      "routineName": "seek_evidence__look",
+      "routineSteps": [
+        "look"
+      ],
+      "learnedOrFallback": "fallback",
+      "policyConfidence": 0.5,
+      "policyReasonCodes": [
+        "seeking_evidence",
+        "wants_reachable_stone",
+        "wants_reachable_wood",
+        "looks_remaining_6",
+        "recalls_unfound_search"
+      ],
+      "evidenceRefs": [],
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "preconditions": [],
+      "expectedEffects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "validation": "ACCEPT",
+      "validationLevel": "L2",
+      "validationReasonCodes": [],
+      "executedSkill": "look",
+      "status": "SUCCESS",
+      "requestedSkillStatus": "SUCCESS",
+      "emergency": false,
+      "healthDelta": 0,
+      "foodDelta": 0,
+      "elapsedTicks": 20,
+      "budgetTicks": 40,
+      "budgetPressure": 0.5,
+      "navigationTicks": 0,
+      "interactionTicks": 0,
+      "waitingTicks": 0,
+      "inventoryDelta": [],
+      "outcomeMessageId": "b727b67b-e767-4642-9894-628ae0ceb02a"
+    }
+  ],
+  "safetyOverrides": [
+    {
+      "tick": 60252,
+      "level": "L0",
+      "trigger": "suffocation",
+      "action": "restore_air",
+      "preemptedSkill": "gather_wood"
+    },
+    {
+      "tick": 60552,
+      "level": "L0",
+      "trigger": "suffocation",
+      "action": "restore_air",
+      "preemptedSkill": "look"
+    }
+  ],
+  "storageProvenance": [],
+  "tickBudgets": [
+    {
+      "skill": "look",
+      "runs": 10,
+      "budgetTicks": 40,
+      "meanElapsedTicks": 8,
+      "maxElapsedTicks": 20,
+      "worstPressure": 0.5,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "restore_air",
+      "runs": 2,
+      "budgetTicks": 300,
+      "meanElapsedTicks": 40,
+      "maxElapsedTicks": 40,
+      "worstPressure": 0.1333,
+      "meanNavigationTicks": 40,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    },
+    {
+      "skill": "wait_safely",
+      "runs": 2,
+      "budgetTicks": 12000,
+      "meanElapsedTicks": 0,
+      "maxElapsedTicks": 0,
+      "worstPressure": 0,
+      "meanNavigationTicks": 0,
+      "meanInteractionTicks": 0,
+      "timeouts": 0
+    }
+  ],
+  "totals": {
+    "decisions": 14,
+    "accepted": 13,
+    "replaced": 1,
+    "rejected": 0,
+    "learnedDecisions": 0,
+    "fallbackDecisions": 14,
+    "successes": 12,
+    "failures": 2,
+    "emergencies": 2,
+    "healthLost": 0,
+    "resourceDelta": []
+  }
+}
