@@ -20,7 +20,14 @@ from pathlib import Path
 from typing import Any
 
 from .context import CONTEXT_SCHEMA, DeliberationContext
-from .model import CognitiveModel, ModelResponse, canonical_json, sha256_text
+from .model import (
+    CognitiveModel,
+    ModelResponse,
+    ProviderDegraded,
+    SterilityFailure,
+    canonical_json,
+    sha256_text,
+)
 from .proposal import INSTRUCTION_TEMPLATE, PROPOSAL_SCHEMA, Verdict, gate
 
 MODES: tuple[str, ...] = ("off", "record_only")
@@ -85,6 +92,31 @@ class Deliberator:
             response = self.model.deliberate(
                 INSTRUCTION_TEMPLATE, context_text, timeout_s=TIMEOUT_S
             )
+        except (SterilityFailure, ProviderDegraded) as failure:
+            sterility = isinstance(failure, SterilityFailure)
+            # An answer from a backend that was not sterile is not an answer.
+            # Only the category and the hash are recorded; the raw output is
+            # quarantined by the adapter, never here.
+            self._record(
+                "deliberation_completed",
+                {
+                    "deliberation_id": deliberation_id,
+                    "output_sha256": (
+                        failure.output_sha256 if isinstance(failure, SterilityFailure) else None
+                    ),
+                    "latency_ms": int((time.monotonic() - started) * 1000),
+                    "provider": failure.provider,
+                    "model": self.model.model,
+                    "backend_version": "unverified",
+                    "verdict": "rejected",
+                    "rejections": [
+                        f"{'sterility_failure' if sterility else 'degraded'}:{failure.category}"
+                    ],
+                    "proposal": None,
+                    "stated_confidence": None,
+                },
+            )
+            return Outcome(deliberation_id, "completed", None)
         except Exception:  # an adapter that raises is a backend that failed
             response = ModelResponse(
                 status="unavailable",
@@ -121,6 +153,11 @@ class Deliberator:
                 "rejections": list(verdict.rejections),
                 "proposal": verdict.proposal,
                 "stated_confidence": verdict.confidence,
+                "input_tokens": response.input_tokens,
+                "output_tokens": response.output_tokens,
+                # Person's own share of the input, so a harness's overhead is
+                # never read as what Person needed to think.
+                "person_context_chars": len(context_text),
             },
         )
         return Outcome(deliberation_id, "completed", verdict)

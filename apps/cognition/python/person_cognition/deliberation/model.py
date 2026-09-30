@@ -28,6 +28,33 @@ def sha256_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+class SterilityFailure(RuntimeError):
+    """A backend showed or used a capability it must not have (ADR 0020 rule 6).
+
+    Carries only the violation category and the hash of the quarantined raw
+    output: never the output itself.
+    """
+
+    def __init__(self, provider: str, category: str, output_sha256: str | None) -> None:
+        super().__init__(f"{provider}: sterility failure ({category})")
+        self.provider = provider
+        self.category = category
+        self.output_sha256 = output_sha256
+
+
+class ProviderDegraded(RuntimeError):
+    """A response carried an event the backend does not recognise.
+
+    Not evidence of a capability: this one answer is rejected, and the
+    backend stays enabled. Carries only the category.
+    """
+
+    def __init__(self, provider: str, category: str) -> None:
+        super().__init__(f"{provider}: degraded response ({category})")
+        self.provider = provider
+        self.category = category
+
+
 @dataclass(frozen=True, slots=True)
 class ModelResponse:
     """What an adapter reports for one call."""
@@ -42,6 +69,14 @@ class ModelResponse:
     text: str | None = None
     #: One of `UNAVAILABLE_REASONS`, when unavailable.
     reason: str | None = None
+    #: What kind of backend answered, e.g. `codex_exec`; whether it carries a
+    #: provider-owned harness prompt, and whether that prompt is opaque to us.
+    harness: str = "direct"
+    provider_owned_harness: bool = False
+    opaque_harness: bool = False
+    #: Token counts the provider reports, when it does.
+    input_tokens: int | None = None
+    output_tokens: int | None = None
 
     def __post_init__(self) -> None:
         if self.status not in ("answered", "unavailable"):
@@ -56,6 +91,9 @@ class ModelResponse:
             "provider": self.provider,
             "model": self.model,
             "backend_version": self.backend_version,
+            "harness": self.harness,
+            "provider_owned_harness": self.provider_owned_harness,
+            "opaque_harness": self.opaque_harness,
         }
 
 
