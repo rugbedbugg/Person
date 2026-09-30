@@ -11,17 +11,21 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 from person_persistence import (
     ContinuityRecord,
     EvidenceEvent,
+    EvidenceJournal,
     EvidenceStore,
     Founding,
     IdentityError,
+    LifeRecord,
     RootLock,
     SelfKnowledge,
+    founded_explicitly,
     gap_category,
-    is_canonical,
+    lock_holder,
     new_event,
 )
 
@@ -47,12 +51,12 @@ def plan_root(
 ) -> RootPlan:
     """Decide how to open a root as `person_id`, or refuse."""
     if first is None:
-        if is_canonical(person_id) and not founding_command:
+        if founded_explicitly(person_id) and not founding_command:
             raise IdentityError(
-                f"{person_id} is a canonical Person; its continuity root is founded only "
-                "by the operator's founding command, never by ordinary startup"
+                f"{person_id} is a canonical or validation identity; its continuity root "
+                "is founded only by the operator's founding command, never by ordinary startup"
             )
-        if is_canonical(person_id) and (not name or not designation):
+        if founded_explicitly(person_id) and (not name or not designation):
             raise IdentityError(f"founding {person_id} needs a name and a designation")
         return RootPlan(
             found=Founding(
@@ -175,3 +179,51 @@ def found(
         return plan.found
     finally:
         lock.release()
+
+
+def inspect_root(evidence_directory: Path) -> dict[str, Any]:
+    """What an operator may know of a root before touching it (ADR 0018).
+
+    Engineering truth for the operator, never for cognition. It takes no lock
+    and creates, writes and touches nothing: an absent root stays absent, and
+    a stale lock is reported, not taken over.
+    """
+    directory = Path(evidence_directory)
+    journal = directory / "journal"
+    report: dict[str, Any] = {
+        "directory": str(directory),
+        "state": "absent",
+        "founding": None,
+        "persons": [],
+        "life": None,
+        "last_session": None,
+        "world": None,
+        "journal": {"events": 0, "truncated": 0, "duplicates": 0},
+        "lock": lock_holder(directory),
+    }
+    if not journal.is_dir() or not any(journal.glob("[0-9]*.jsonl")):
+        return report
+    reader = EvidenceJournal(journal)
+    continuity = ContinuityRecord()
+    life = LifeRecord()
+    persons: set[str] = set()
+    events = 0
+    for event in reader.read():
+        continuity.apply(event)
+        life.apply(event)
+        persons.add(event.person_id)
+        events += 1
+    report.update(
+        state="founded" if continuity.founding else "legacy",
+        founding=continuity.founding.payload() if continuity.founding else None,
+        persons=sorted(persons),
+        life={"status": life.status, "deaths": life.deaths, "respawns": life.respawns},
+        last_session=continuity.last_session,
+        world=continuity.world,
+        journal={
+            "events": events,
+            "truncated": reader.truncated_records,
+            "duplicates": reader.duplicate_records,
+        },
+    )
+    return report

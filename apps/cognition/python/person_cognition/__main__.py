@@ -15,10 +15,10 @@ from pathlib import Path
 from typing import TextIO
 
 from person_config import ConfigError, load_cognition_settings
-from person_persistence import IdentityError
+from person_persistence import EvidenceError, IdentityError, JournalCorruption
 
 from .affect import research_bounds
-from .continuity import found
+from .continuity import found, inspect_root
 from .effects import main as compare_effects
 from .loop import CognitionLoop
 
@@ -67,6 +67,15 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--inspect-root",
+        metavar="EVIDENCE_DIRECTORY",
+        help=(
+            "Print what an operator may know of a continuity root, as JSON, and exit "
+            "(ADR 0018): its state, founding, life status, last session, world and lock. "
+            "Read-only: takes no lock and writes nothing. Starts no cognition."
+        ),
+    )
+    parser.add_argument(
         "--affect-bounds",
         action="store_true",
         help=(
@@ -80,6 +89,15 @@ def main(argv: list[str] | None = None) -> int:
         # A static property of the code, for research tooling. Nothing here
         # can become a decision, and Person never consults it.
         sys.stdout.write(json.dumps(research_bounds(), sort_keys=True) + "\n")
+        return 0
+
+    if arguments.inspect_root:
+        try:
+            report = inspect_root(Path(arguments.inspect_root))
+        except (OSError, EvidenceError, JournalCorruption) as error:
+            sys.stderr.write(f"person-cognition: {error}\n")
+            return 2
+        sys.stdout.write(json.dumps(report, sort_keys=True) + "\n")
         return 0
 
     if arguments.compare_effects:

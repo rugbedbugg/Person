@@ -24,6 +24,10 @@ IDENTITY_SCHEMA_VERSION = "person-identity-v1"
 #: A canonical Person's identifier: `person-000`, `person-001`, ... A
 #: canonical Person is founded only by the operator, never by startup.
 CANONICAL = re.compile(r"^person-\d{3}$")
+#: A validation identity: `validation-000`, ... Founded only by the founding
+#: command, like a canonical Person, so a rehearsal takes the same path; never
+#: a member of the Person serial namespace (ADR 0018).
+VALIDATION = re.compile(r"^validation-\d{3}$")
 #: Upper bounds, in seconds, of each gap category; beyond the last is `longer`.
 GAP_CATEGORIES: tuple[tuple[float, str], ...] = (
     (3600.0, "minutes"),
@@ -39,6 +43,15 @@ class IdentityError(RuntimeError):
 
 def is_canonical(person_id: str) -> bool:
     return CANONICAL.fullmatch(person_id) is not None
+
+
+def is_validation(person_id: str) -> bool:
+    return VALIDATION.fullmatch(person_id) is not None
+
+
+def founded_explicitly(person_id: str) -> bool:
+    """Whether only the operator's founding command may found this identity."""
+    return is_canonical(person_id) or is_validation(person_id)
 
 
 @dataclass(frozen=True, slots=True)
@@ -270,6 +283,15 @@ class RootLock:
             return int(self.path.read_text(encoding="utf-8").strip())
         except (OSError, ValueError):
             return None
+
+
+def lock_holder(directory: Path) -> dict[str, Any]:
+    """Who holds a root's lock, and whether that process lives. Reads only."""
+    try:
+        pid: int | None = int((Path(directory) / LOCK_NAME).read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        pid = None
+    return {"pid": pid, "live": pid is not None and _alive(pid)}
 
 
 def _alive(pid: int) -> bool:

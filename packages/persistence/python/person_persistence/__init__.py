@@ -21,8 +21,11 @@ from .identity import (
     LifeRecord,
     RootLock,
     SelfKnowledge,
+    founded_explicitly,
     gap_category,
     is_canonical,
+    is_validation,
+    lock_holder,
 )
 from .journal import EvidenceJournal, JournalCorruption
 from .snapshot import SnapshotError, SnapshotStore
@@ -37,8 +40,11 @@ __all__ = [
     "LifeRecord",
     "RootLock",
     "SelfKnowledge",
+    "founded_explicitly",
     "gap_category",
     "is_canonical",
+    "is_validation",
+    "lock_holder",
     "SUPPORTED_EVIDENCE_SCHEMAS",
     "DemonstrationError",
     "DemonstrationManifest",
