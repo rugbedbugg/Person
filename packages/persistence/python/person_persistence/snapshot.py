@@ -69,8 +69,9 @@ class SnapshotStore:
         tick: int,
         policy_revision: int,
         body: dict[str, Any],
+        identity: dict[str, Any] | None = None,
     ) -> Path:
-        document = {
+        document: dict[str, Any] = {
             "version": SNAPSHOT_VERSION,
             "sequence": sequence,
             "last_event_id": last_event_id,
@@ -79,6 +80,10 @@ class SnapshotStore:
             "policy_revision": policy_revision,
             "body": body,
         }
+        # Which Person this state belongs to (ADR 0017). Absent for a legacy
+        # root, so a legacy snapshot keeps exactly its old shape.
+        if identity is not None:
+            document["identity"] = identity
         document["checksum"] = _checksum(document)
         written = write_atomic_json(self._path(sequence), document)
         # Only once the new one is safely on disk do the oldest go.

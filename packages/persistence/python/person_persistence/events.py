@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v10"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v11"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -31,6 +31,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v8",
     "person-evidence-v9",
     "person-evidence-v10",
+    "person-evidence-v11",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -95,6 +96,14 @@ EVENT_TYPES: tuple[str, ...] = (
     #: state before and after. With `affect_appraised`, the affect record is
     #: rebuilt from these alone. Never scored.
     "affect_tonic",
+    #: The first event of a continuity root: who this Person is, and when it
+    #: began (ADR 0017). Written once, never changed; nothing precedes it.
+    "person_founded",
+    #: A cognition process began living this Person's life, and what it
+    #: learned about the gap since the last recorded event (ADR 0017).
+    "session_started",
+    #: A cognition process ended cleanly. A crash writes nothing.
+    "session_ended",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -124,6 +133,8 @@ V9_EVENT_TYPES: frozenset[str] = frozenset(
 
 #: Event types introduced with the tenth.
 V10_EVENT_TYPES: frozenset[str] = frozenset({"affect_tonic"})
+#: Event types introduced with the eleventh.
+V11_EVENT_TYPES: frozenset[str] = frozenset({"person_founded", "session_started", "session_ended"})
 
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
@@ -137,6 +148,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V8_EVENT_TYPES, "person-evidence-v8"),
     **dict.fromkeys(V9_EVENT_TYPES, "person-evidence-v9"),
     **dict.fromkeys(V10_EVENT_TYPES, "person-evidence-v10"),
+    **dict.fromkeys(V11_EVENT_TYPES, "person-evidence-v11"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
