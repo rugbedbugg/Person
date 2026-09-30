@@ -58,6 +58,11 @@ class CognitionSettings:
     affect_mode: str = "active"
     #: ADR 0014: interoceptive affect. Off is a frozen R1.5 research baseline.
     interoception: bool = True
+    #: ADR 0017: the name and designation a new continuity root is founded with.
+    identity_name: str | None = None
+    identity_designation: str | None = None
+    #: Where this Person's evidence comes from (fixture, Minecraft, replay).
+    training_context: str = "fixture"
 
     def cross_check(self, *, learning_mode: str, evidence_directory: str) -> None:
         """Fail closed when the runtime disagrees with the file we read."""
@@ -105,4 +110,7 @@ def load_cognition_settings(filename: str | Path) -> CognitionSettings:
         rng_seed=runtime.get("rngSeed"),
         affect_mode=document.get("affect", {}).get("mode", "active"),
         interoception=document.get("affect", {}).get("interoception", "on") == "on",
+        identity_name=document.get("identity", {}).get("name"),
+        identity_designation=document.get("identity", {}).get("designation"),
+        training_context=runtime.get("trainingContext", "fixture"),
     )

@@ -14,6 +14,15 @@ from .events import (
     EvidenceEvent,
     new_event,
 )
+from .identity import (
+    ContinuityRecord,
+    Founding,
+    IdentityError,
+    RootLock,
+    SelfKnowledge,
+    gap_category,
+    is_canonical,
+)
 from .journal import EvidenceJournal, JournalCorruption
 from .snapshot import SnapshotError, SnapshotStore
 from .store import EvidenceReducer, EvidenceStore, RestoreReport
@@ -21,6 +30,13 @@ from .store import EvidenceReducer, EvidenceStore, RestoreReport
 __all__ = [
     "EVENT_TYPES",
     "EVIDENCE_SCHEMA_VERSION",
+    "ContinuityRecord",
+    "Founding",
+    "IdentityError",
+    "RootLock",
+    "SelfKnowledge",
+    "gap_category",
+    "is_canonical",
     "SUPPORTED_EVIDENCE_SCHEMAS",
     "DemonstrationError",
     "DemonstrationManifest",

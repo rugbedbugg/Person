@@ -15,8 +15,10 @@ from pathlib import Path
 from typing import TextIO
 
 from person_config import ConfigError, load_cognition_settings
+from person_persistence import IdentityError
 
 from .affect import research_bounds
+from .continuity import found
 from .effects import main as compare_effects
 from .loop import CognitionLoop
 
@@ -56,6 +58,15 @@ def main(argv: list[str] | None = None) -> int:
         ),
     )
     parser.add_argument(
+        "--found",
+        action="store_true",
+        help=(
+            "Found the configured Person: write its founding event into an empty "
+            "evidence directory and exit (ADR 0017). The only way a canonical "
+            "Person (person-NNN) comes into existence. Starts no cognition."
+        ),
+    )
+    parser.add_argument(
         "--affect-bounds",
         action="store_true",
         help=(
@@ -80,6 +91,26 @@ def main(argv: list[str] | None = None) -> int:
         except (OSError, ValueError, KeyError) as error:
             sys.stderr.write(f"person-cognition: {error}\n")
             return 2
+        return 0
+
+    if arguments.found:
+        if not arguments.config:
+            sys.stderr.write("person-cognition: --found needs --config\n")
+            return 2
+        try:
+            chosen = load_cognition_settings(arguments.config)
+            founding = found(
+                evidence_directory=chosen.evidence_directory,
+                person_id=chosen.person_id,
+                world_id=chosen.world_id,
+                name=chosen.identity_name,
+                designation=chosen.identity_designation,
+                training_context=chosen.training_context,
+            )
+        except (ConfigError, IdentityError) as error:
+            sys.stderr.write(f"person-cognition: {error}\n")
+            return 2
+        sys.stdout.write(json.dumps(founding.payload(), sort_keys=True) + "\n")
         return 0
 
     settings = None

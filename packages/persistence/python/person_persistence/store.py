@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any, Protocol
 
 from .events import EvidenceEvent
+from .identity import IdentityError
 from .journal import EvidenceJournal, JournalCorruption
 from .snapshot import SnapshotError, SnapshotStore
 
@@ -70,6 +71,9 @@ class EvidenceStore:
         self._snapshot_sequence = 0
         self._last_tick = 0
         self._policy_revision = 0
+        #: The Person this root belongs to, once known: its personId and the
+        #: founding record's fingerprint (ADR 0017). None for a legacy root.
+        self.identity: dict[str, Any] | None = None
 
     # --------------------------------------------------------------- restore
 
@@ -82,6 +86,12 @@ class EvidenceStore:
             snapshot = self.snapshots.latest_valid()
         except SnapshotError as error:  # pragma: no cover - latest_valid swallows these
             report.notes.append(f"snapshot ignored: {error}")
+        if snapshot is not None and snapshot.get("identity") != self.identity:
+            # A snapshot of another Person, or of this root before or after a
+            # different founding: never load it (ADR 0017).
+            raise IdentityError(
+                f"snapshot belongs to {snapshot.get('identity')}, this root to {self.identity}"
+            )
         if snapshot is not None:
             try:
                 reducer.load_json(snapshot["body"])
@@ -174,7 +184,14 @@ class EvidenceStore:
             tick=self._last_tick,
             policy_revision=self._policy_revision,
             body=reducer.to_json(),
+            identity=self.identity,
         )
+
+    def first_event(self) -> EvidenceEvent | None:
+        """The journal's first record, which for a founded root is its founding."""
+        for event in self.journal.read():
+            return event
+        return None
 
     @property
     def policy_revision(self) -> int:

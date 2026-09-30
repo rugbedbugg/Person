@@ -213,7 +213,15 @@ test(
           lastBefore.event_id,
           "the chain continues across the restart",
         );
-        assert.ok(fresh.every((event) => event.episode_id === "ep_second"));
+        // A session begins before its episode does (ADR 0017): the restart's
+        // session_started comes first, outside any episode; everything else
+        // belongs to the second episode.
+        assert.equal(fresh[0]?.type, "session_started");
+        assert.ok(
+          fresh
+            .filter((event) => !event.type.startsWith("session_"))
+            .every((event) => event.episode_id === "ep_second"),
+        );
 
         const selections = fresh.filter(
           (event) => event.type === "routine_selected",
