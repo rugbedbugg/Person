@@ -264,10 +264,19 @@ export class PersonRuntime {
 
       this.#sendEpisodeEvent("started", ["session_start"]);
       this.#sendWorld("available", ["connected"]);
+      // A Person that died and was never brought back gets its respawn now,
+      // before it perceives anything (ADR 0017, I3).
+      let unrevived = false;
+      if ((ready as { lifeStatus?: string }).lifeStatus === "awaiting_respawn")
+        unrevived = !(await this.#respawn());
+      if (unrevived) {
+        outcome = "failed";
+        reason = "death";
+      }
 
       let decisions = 0;
       const stall = new StallDetector();
-      while (decisions < runtime.maxDecisions) {
+      while (!unrevived && decisions < runtime.maxDecisions) {
         const snapshot = this.#embodiment.snapshot();
         if (!snapshot.connected) {
           // Losing the world is a state, not the end of Person (ADR 0017,
@@ -285,6 +294,11 @@ export class PersonRuntime {
           break;
         }
         if (!snapshot.alive) {
+          // Life is its own axis (ADR 0017, I3). The runtime, never
+          // cognition, says a death happened and whether it is terminal.
+          const terminal = this.config.lifecycle?.death === "permadeath";
+          this.#sendLife("died", terminal, snapshot.tick);
+          if (!terminal && (await this.#respawn())) continue;
           outcome = "failed";
           reason = "death";
           break;
@@ -372,6 +386,38 @@ export class PersonRuntime {
       state,
       reasonCodes,
     });
+  }
+
+  /** Tells cognition the body died, or came back (I3). */
+  #sendLife(
+    event: "died" | "respawned",
+    terminal: boolean,
+    tick?: number,
+  ): void {
+    let at = tick ?? 0;
+    try {
+      if (tick === undefined) at = this.#embodiment.snapshot().tick;
+    } catch {
+      // The event stands even if the body cannot report its tick.
+    }
+    this.#channel.send({
+      ...this.#envelope("LifeEvent", at),
+      type: "LifeEvent",
+      event,
+      terminal,
+      reasonCodes: [event === "died" ? "body_died" : "body_respawned"],
+    });
+  }
+
+  /** Brings the same Person's body back, if this body can (I3). */
+  async #respawn(): Promise<boolean> {
+    if (!this.#embodiment.respawn) return false;
+    await this.#embodiment.respawn();
+    if (!this.#embodiment.snapshot().alive) return false;
+    // Motion across a death was never felt.
+    this.#selfMotion = new SelfMotionSense();
+    this.#sendLife("respawned", false);
+    return true;
   }
 
   /** Tries to reach the world again, within the configured budget. */

@@ -313,6 +313,25 @@ export class FixtureWorld implements Embodiment {
 
   // ---------------------------------------------------------------- lifecycle
 
+  /**
+   * Minecraft's respawn, for the fixture (ADR 0017, I3): the same body back
+   * at the world's spawn with full health and food, and, as in survival
+   * without keepInventory, nothing it carried. The world goes on as it was.
+   */
+  async respawn(): Promise<void> {
+    this.#invalidate();
+    this.#health = 20;
+    this.#food = 20;
+    this.#saturation = 5;
+    this.#air = 300;
+    this.#position = { ...this.definition.spawn };
+    this.#yaw = this.definition.spawnYaw ?? 0;
+    this.#inventory.clear();
+    this.#lastDamageTick = null;
+    this.#lastSafePosition = { ...this.#position };
+    this.#advance(0);
+  }
+
   async connect(): Promise<void> {
     this.#connected = true;
     this.#lastSafePosition = { ...this.#position };
