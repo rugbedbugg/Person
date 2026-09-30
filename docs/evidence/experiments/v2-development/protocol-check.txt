@@ -1,0 +1,4 @@
+runs: {'valid': 240} cells: 48
+r2-dev-a-wide-margin A control, R2act priority changes: 0 (protocol expects 0 on A2)
+r2-dev-b-near-tie B criterion (descriptive here): REPLICATED: opportunity seeds 5/5, changed 5/5, divergent 5/5
+problems: 0

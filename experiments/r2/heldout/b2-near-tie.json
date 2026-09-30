@@ -1,0 +1,49 @@
+{
+  "name": "r2-heldout-b2-b-near-tie",
+  "description": "Class B, generated from seed \"person-heldout-b2-2026-09-30\" by scripts/benchmarks/generate-classes.ts as experiments/benchmarks/heldout-v2/PROCEDURE.md declares; class-defining bundle from fixtures/worlds/benchmarks/heldout/b-near-tie.json. HELD OUT: frozen before any run; run once, as part of the operator-authorized V2 suite; nothing is tuned from it.",
+  "split": "heldout",
+  "benchmarkClass": "B",
+  "world": "../../../fixtures/worlds/benchmarks/heldout-v2/b2-near-tie.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [201, 202, 203, 204, 205],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "A15",
+      "affectMode": "active",
+      "interoception": "off"
+    },
+    {
+      "id": "R2rec",
+      "affectMode": "record_only",
+      "interoception": "on"
+    },
+    {
+      "id": "R2act",
+      "affectMode": "active",
+      "interoception": "on"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}

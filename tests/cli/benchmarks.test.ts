@@ -150,3 +150,52 @@ test("held-out D2 is frozen as its manifest records, and regenerates from its se
     "the committed world is exactly what the declared seed generates",
   );
 });
+
+test("held-out A2, B2 and C2 are frozen as their manifest records, and regenerate from their seeds", async () => {
+  const { execFileSync } = await import("node:child_process");
+  const { temporaryDirectory } = await import("../support/harness.ts");
+  const manifest = JSON.parse(
+    readFileSync(
+      path.join(REPOSITORY, "experiments/benchmarks/heldout-v2/MANIFEST.json"),
+      "utf8",
+    ),
+  ) as { seeds: Record<string, string>; files: Record<string, string> };
+  for (const [file, hash] of Object.entries(manifest.files))
+    assert.equal(
+      createHash("sha256")
+        .update(readFileSync(path.join(REPOSITORY, file)))
+        .digest("hex"),
+      hash,
+      `${file} changed after V2 was frozen`,
+    );
+  const names: Record<string, string> = {
+    A2: "a2-wide-margin",
+    B2: "b2-near-tie",
+    C2: "c2-exploration",
+  };
+  for (const [world, seed] of Object.entries(manifest.seeds)) {
+    const out = temporaryDirectory("person-v2-check-");
+    execFileSync(
+      process.execPath,
+      [
+        "scripts/benchmarks/generate-classes.ts",
+        world[0]!,
+        seed,
+        path.join(out, "world.json"),
+        path.join(out, "plan.json"),
+      ],
+      { cwd: REPOSITORY },
+    );
+    assert.equal(
+      readFileSync(path.join(out, "world.json"), "utf8"),
+      readFileSync(
+        path.join(
+          REPOSITORY,
+          `fixtures/worlds/benchmarks/heldout-v2/${names[world]}.json`,
+        ),
+        "utf8",
+      ),
+      `${world} is exactly what its declared seed generates`,
+    );
+  }
+});
