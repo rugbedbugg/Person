@@ -1,0 +1,49 @@
+{
+  "name": "r2-heldout-d2-setback",
+  "description": "Class D, setback and recovery, generated from seed \"person-heldout-d2-2026-09-30\" by scripts/benchmarks/generate-setback.ts as experiments/benchmarks/heldout-d2/PROCEDURE.md declares. Replaces the INVALID held-out D. HELD OUT: frozen before any run; run once, as an operator-authorized evaluation; nothing is tuned from it.",
+  "split": "heldout",
+  "benchmarkClass": "D",
+  "world": "../../../fixtures/worlds/benchmarks/heldout-d2/d2-setback.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [201, 202, 203, 204, 205],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "A15",
+      "affectMode": "active",
+      "interoception": "off"
+    },
+    {
+      "id": "R2rec",
+      "affectMode": "record_only",
+      "interoception": "on"
+    },
+    {
+      "id": "R2act",
+      "affectMode": "active",
+      "interoception": "on"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}
