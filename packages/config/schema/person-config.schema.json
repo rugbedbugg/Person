@@ -64,6 +64,19 @@
         "minimumSupport": { "type": "integer", "minimum": 1, "maximum": 100 }
       }
     },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Who this Person is (ADR 0017), written once into the founding event of a new continuity root. A canonical Person (personId person-NNN) is founded only by the operator's founding command.",
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "designation": {
+          "type": "string",
+          "pattern": "^Person-[0-9]{3}$",
+          "description": "The canonical serial, e.g. Person-000; only for a canonical Person."
+        }
+      }
+    },
     "affect": {
       "type": "object",
       "additionalProperties": false,

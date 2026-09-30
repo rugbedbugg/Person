@@ -49,6 +49,11 @@ export interface PersonConfig {
     explorationBonus: number;
     minimumSupport: number;
   };
+  /** Who this Person is (ADR 0017): written once, into the founding event. */
+  identity?: {
+    name?: string;
+    designation?: string;
+  };
   /** Cognition's alone (ADR 0013): the runtime never reads it. */
   affect?: {
     mode: "off" | "record_only" | "active";

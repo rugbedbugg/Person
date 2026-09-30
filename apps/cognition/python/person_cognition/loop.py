@@ -18,7 +18,15 @@ from pathlib import Path
 from typing import Any
 
 from person_config import CognitionSettings
-from person_persistence import EvidenceEvent, EvidenceStore, new_event
+from person_persistence import (
+    ContinuityRecord,
+    EvidenceEvent,
+    EvidenceStore,
+    Founding,
+    RootLock,
+    SelfKnowledge,
+    new_event,
+)
 from person_planner import evidence_needed, plan_for, symbolic_state
 from person_policy import (
     DeterministicPolicyProvider,
@@ -49,6 +57,7 @@ from .affect import (
     appraise_threat,
 )
 from .context import decision_context
+from .continuity import plan_root, self_knowledge, session_payload
 from .effect_learning import EffectBeliefs, Trial, admitted_to, classify, reliability_term
 from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .hypotheses import (
@@ -157,6 +166,11 @@ class CognitionLoop:
         #: Person's places and its last estimate of where it is, rebuilt from
         #: its own records. Reached through `self.spatial` only.
         self.spatial_map = SpatialMap()
+        #: Who this Person is and how its sessions have run (ADR 0017),
+        #: rebuilt from the journal. Cognition sees only `self_knowledge`.
+        self.continuity = ContinuityRecord()
+        self.self_knowledge: SelfKnowledge | None = None
+        self._lock: RootLock | None = None
         #: Projects Person has taken up, rebuilt from its own records.
         self.project_book = ProjectBook()
         self.projects = ProjectManager(self.project_book)
@@ -193,6 +207,7 @@ class CognitionLoop:
             self.affect_record,
             self.effect_beliefs,
             self.hypothesis_book,
+            self.continuity,
         )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -251,6 +266,7 @@ class CognitionLoop:
         tick: int,
         payload: dict[str, Any],
         decision_id: str | None = None,
+        timestamp: str | None = None,
     ) -> EvidenceEvent | None:
         if self.store is None or self.identity is None:
             return None
@@ -266,6 +282,7 @@ class CognitionLoop:
             event_type=event_type,
             payload=payload,
             previous_event_id=self.previous_event_id,
+            timestamp=timestamp,
         )
         self.store.append(event, self.reducers)
         self.previous_event_id = event.event_id
@@ -327,7 +344,37 @@ class CognitionLoop:
             directory,
             snapshot_every=self.settings.snapshot_every_events if self.settings else 50,
         )
+        # Whose root is this (ADR 0017)? One process at a time; a founded root
+        # opens only as its own Person; an empty one is founded first.
+        self._lock = RootLock(directory).acquire()
+        plan = plan_root(
+            self.store.first_event(),
+            person_id=self.identity.person_id,
+            name=self.settings.identity_name if self.settings else None,
+            designation=self.settings.identity_designation if self.settings else None,
+            now=message["timestamp"],
+        )
+        existing = self.store.first_event()
+        founded = (
+            Founding.from_payload(existing.payload)
+            if existing is not None and existing.type == "person_founded"
+            else None
+        )
+        self.store.identity = self._identity_binding(founded)
         report = self.store.restore(self.reducers)
+        # What this session learns of the gap, before it writes anything: a
+        # Person's very first session has no gap to learn.
+        session = session_payload(self.continuity, self.identity.session_id, message["timestamp"])
+        if plan.found is not None:
+            # An empty root: the founding is its first event, before any other.
+            self._record(
+                "person_founded",
+                message["tick"],
+                plan.found.payload(),
+                timestamp=message["timestamp"],
+            )
+            self.store.identity = self._identity_binding(plan.found)
+        self.self_knowledge = self_knowledge(self.continuity, self.identity.person_id, session)
         # Working memory starts empty: the past comes back only when cued.
         self.memory = Memory(self.memory_store, training_context=self.training_context)
         # Waking where it last knew it was, less sure of it: nothing about the
@@ -345,6 +392,7 @@ class CognitionLoop:
         self.offered = tuple(str(skill) for skill in message["skillIds"])
         self.restore_notes = list(report.notes)
         self.previous_event_id = self.store.last_event_id
+        self._record("session_started", message["tick"], session, timestamp=message["timestamp"])
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
         for note in report.notes:
             self._log(f"evidence restore: {note}")
@@ -384,6 +432,15 @@ class CognitionLoop:
             if self.interoception_on:
                 self._appraise_step(message["tick"])
             if self.store is not None:
+                self._record(
+                    "session_ended",
+                    message["tick"],
+                    {
+                        "session_id": self.identity.session_id if self.identity else None,
+                        "reason": "episode_ended",
+                    },
+                    timestamp=message["timestamp"],
+                )
                 self.store.write_snapshot(self.reducers)
                 self.summary.write(
                     self.store.directory,
@@ -395,6 +452,7 @@ class CognitionLoop:
                     goals=self.goals,
                     restore_notes=self.restore_notes,
                 )
+            self.close()
             self.running = False
 
     # ------------------------------------------------------------ observation
@@ -1622,6 +1680,20 @@ class CognitionLoop:
                 "recovered": active.recovered,
             },
         )
+
+    @staticmethod
+    def _identity_binding(founding: Founding | None) -> dict[str, str] | None:
+        """What this root's snapshots must carry to be loaded (ADR 0017)."""
+        if founding is None:
+            return None
+        return {"person_id": founding.person_id, "founding": founding.fingerprint()}
+
+    def close(self) -> None:
+        """Let go of the continuity root. A process that ends without this
+        simply leaves its lock to be taken over, and no session_ended."""
+        if self._lock is not None:
+            self._lock.release()
+            self._lock = None
 
     # ------------------------------------------------------------------- run
 

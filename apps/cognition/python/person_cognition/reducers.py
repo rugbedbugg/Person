@@ -5,7 +5,8 @@ statistics read outcomes, the memory store reads encoded episodes, the
 spatial map reads the places Person formed and revisited, the project book
 reads the projects Person took up, the affect record reads appraisals, the
 effect beliefs read classified prediction evidence, and the hypothesis book
-reads causal trials, hypotheses, their evidence and investigations. None sees
+reads causal trials, hypotheses, their evidence and investigations; and the
+continuity record reads the founding and session events (ADR 0017). None sees
 the other's state, and each ignores the events it has no case for.
 """
 
@@ -14,7 +15,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import ContinuityRecord, EvidenceEvent
 from person_policy import RoutineStatistics
 
 from .affect import AffectRecord
@@ -35,6 +36,7 @@ class CognitiveReducers:
         affect: AffectRecord,
         effects: EffectBeliefs,
         hypotheses: HypothesisBook,
+        continuity: ContinuityRecord | None = None,
     ) -> None:
         self.statistics = statistics
         self.memory = memory
@@ -43,6 +45,7 @@ class CognitiveReducers:
         self.affect = affect
         self.effects = effects
         self.hypotheses = hypotheses
+        self.continuity = continuity if continuity is not None else ContinuityRecord()
 
     def reset(self) -> None:
         self.statistics.reset()
@@ -52,6 +55,7 @@ class CognitiveReducers:
         self.affect.reset()
         self.effects.reset()
         self.hypotheses.reset()
+        self.continuity.reset()
 
     def apply(self, event: EvidenceEvent) -> None:
         self.statistics.apply(event)
@@ -61,6 +65,7 @@ class CognitiveReducers:
         self.affect.apply(event)
         self.effects.apply(event)
         self.hypotheses.apply(event)
+        self.continuity.apply(event)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -71,6 +76,7 @@ class CognitiveReducers:
             "affect": self.affect.to_json(),
             "effects": self.effects.to_json(),
             "hypotheses": self.hypotheses.to_json(),
+            "continuity": self.continuity.to_json(),
         }
 
     def load_json(self, body: Mapping[str, Any]) -> None:
@@ -83,3 +89,4 @@ class CognitiveReducers:
         self.affect.load_json(body["affect"])
         self.effects.load_json(body["effects"])
         self.hypotheses.load_json(body["hypotheses"])
+        self.continuity.load_json(body["continuity"])
