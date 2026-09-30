@@ -386,6 +386,14 @@ export interface WorldAvailability extends Envelope {
   reasonCodes: string[];
 }
 
+/** The runtime observed a death, or a respawn (ADR 0017, I3). */
+export interface LifeEvent extends Envelope {
+  type: "LifeEvent";
+  event: "died" | "respawned";
+  terminal: boolean;
+  reasonCodes: string[];
+}
+
 export interface SessionHello extends Envelope {
   type: "SessionHello";
   learningMode: LearningMode;
@@ -405,6 +413,8 @@ export interface CognitionReady extends Envelope {
   restoredEvents: number;
   restoredRoutines: number;
   snapshotTick: number | null;
+  /** ADR 0017, I3: whether the reconstructed Person awaits a respawn. */
+  lifeStatus?: "alive" | "awaiting_respawn";
 }
 
 export interface GoalRecord {
@@ -460,5 +470,6 @@ export type NodeMessage =
   | SkillOutcome
   | EmergencyEvent
   | EpisodeEvent
-  | WorldAvailability;
+  | WorldAvailability
+  | LifeEvent;
 export type ProtocolMessage = CognitionMessage | NodeMessage;
