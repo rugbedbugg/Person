@@ -292,6 +292,10 @@ class GoalStack:
                 self.active_id = None
 
         for goal_id, goal in proposed.items():
+            # A goal already met is not wanted. Queuing it would only complete
+            # it again at the next update: a success nothing achieved.
+            if goal.satisfied_by(state):
+                continue
             existing = self.entries.get(goal_id)
             if existing is None or existing.status in {"COMPLETE", "FAILED", "ABANDONED"}:
                 self.entries[goal_id] = goal

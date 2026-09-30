@@ -1,0 +1,4577 @@
+{
+  "scenario": {
+    "world": "fixtures/worlds/benchmarks/development/b-near-tie.json",
+    "seed": 1,
+    "affectMode": "active",
+    "learningMode": "off",
+    "maxExperiencedTicks": 6000,
+    "maxDecisions": 5000
+  },
+  "recordedAt": "fix/zero-time-interruption, b155c7d plus the already-satisfied-goal fix (ADR 0015 branch), 2026-09-30",
+  "note": "CORRECTED R1.5 semantics: the canonical regression baseline. Recorded after GoalStack stopped queuing goals already satisfied, which removed phantom goal_complete_secure_food appraisals at food 16 and 17. Decisions are identical to the historical references in ../r15-affect/ (recorded at 5548bbd, before the fix); the bridge between them is pinned by tests/integration/r15-reference.test.ts.",
+  "trace": [
+    {
+      "tick": 0,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_f19cc2109d8b9f18",
+      "requestedSkill": "build_basic_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "build_basic_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 150,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 246,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 294,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 296,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 298,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 300,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 302,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 304,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 306,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 308,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 310,
+      "goalId": "goal_establish_tools",
+      "goalType": "ESTABLISH_TOOLS",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 910,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1006,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1054,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1150,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1198,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1294,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1342,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1438,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1486,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1582,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1630,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1726,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1774,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1870,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1918,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2014,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2062,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2158,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2206,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2302,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2350,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2446,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2494,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2590,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2638,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2734,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2782,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2878,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2926,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3022,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3070,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3166,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3214,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3310,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3358,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3454,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3502,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3598,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3646,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3742,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3790,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3886,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3934,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_0a5353238abca291",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4030,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_d61e839da7d4054c",
+      "requestedSkill": "craft_chest",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "craft_chest",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4060,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_d61e839da7d4054c",
+      "requestedSkill": "place_owned_chest",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "place_owned_chest",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4066,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_d61e839da7d4054c",
+      "requestedSkill": "withdraw_owned_storage",
+      "requestedParameters": {
+        "amount": 4,
+        "category": "food"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "withdraw_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4070,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_f193d5b300cadb94",
+      "requestedSkill": "withdraw_owned_storage",
+      "requestedParameters": {
+        "amount": 4,
+        "category": "food"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "withdraw_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4074,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_f193d5b300cadb94",
+      "requestedSkill": "withdraw_owned_storage",
+      "requestedParameters": {
+        "amount": 4,
+        "category": "food"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "withdraw_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4078,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_33fa6ab1022940be",
+      "requestedSkill": "repair_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "repair_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4126,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4136,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4138,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4140,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4142,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4144,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4146,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4148,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4150,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4152,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4752,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4752,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4754,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4756,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5356,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 5356,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 5356,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5956,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    }
+  ],
+  "affect": [
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "experienced_tick": 0
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.0491,
+        "unease": 0,
+        "control": 0.0496
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.1491,
+        "unease": 0,
+        "control": 0.0996
+      },
+      "experienced_tick": 150
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.1491,
+        "unease": 0,
+        "control": 0.0996
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.1991,
+        "unease": 0,
+        "control": 0.1296
+      },
+      "experienced_tick": 150
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.1991,
+        "unease": 0,
+        "control": 0.1296
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.2491,
+        "unease": 0,
+        "control": 0.1796
+      },
+      "experienced_tick": 150
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.2464,
+        "unease": 0,
+        "control": 0.1786
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.2964,
+        "unease": 0,
+        "control": 0.2086
+      },
+      "experienced_tick": 246
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.2964,
+        "unease": 0,
+        "control": 0.2086
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.3464,
+        "unease": 0,
+        "control": 0.2586
+      },
+      "experienced_tick": 246
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.3445,
+        "unease": 0,
+        "control": 0.2579
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.4445,
+        "unease": 0,
+        "control": 0.3079
+      },
+      "experienced_tick": 294
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.4445,
+        "unease": 0,
+        "control": 0.3079
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.4945,
+        "unease": 0,
+        "control": 0.3379
+      },
+      "experienced_tick": 294
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.4937,
+        "unease": 0,
+        "control": 0.3379
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 0.4437,
+        "unease": 0,
+        "control": 0.3379
+      },
+      "experienced_tick": 310
+    },
+    {
+      "trigger": "goal_blocked_establish_tools",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.414,
+        "unease": 0,
+        "control": 0.3264
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.314,
+        "unease": 0,
+        "control": 0.2764
+      },
+      "experienced_tick": 910
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.314,
+        "unease": 0,
+        "control": 0.2764
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.364,
+        "unease": 0,
+        "control": 0.3264
+      },
+      "experienced_tick": 910
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.36,
+        "unease": 0,
+        "control": 0.3246
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.41,
+        "unease": 0,
+        "control": 0.3546
+      },
+      "experienced_tick": 1006
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.41,
+        "unease": 0,
+        "control": 0.3546
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.46,
+        "unease": 0,
+        "control": 0.4046
+      },
+      "experienced_tick": 1006
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.4575,
+        "unease": 0,
+        "control": 0.4035
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.5575,
+        "unease": 0,
+        "control": 0.4535
+      },
+      "experienced_tick": 1054
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.5575,
+        "unease": 0,
+        "control": 0.4535
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.6075,
+        "unease": 0,
+        "control": 0.4835
+      },
+      "experienced_tick": 1054
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.6075,
+        "unease": 0,
+        "control": 0.4835
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.6575,
+        "unease": 0,
+        "control": 0.5335
+      },
+      "experienced_tick": 1054
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.6502,
+        "unease": 0,
+        "control": 0.5305
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.7002,
+        "unease": 0,
+        "control": 0.5605
+      },
+      "experienced_tick": 1150
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.7002,
+        "unease": 0,
+        "control": 0.5605
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.7502,
+        "unease": 0,
+        "control": 0.6105
+      },
+      "experienced_tick": 1150
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.7461,
+        "unease": 0,
+        "control": 0.6088
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.8461,
+        "unease": 0,
+        "control": 0.6588
+      },
+      "experienced_tick": 1198
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.8461,
+        "unease": 0,
+        "control": 0.6588
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.8961,
+        "unease": 0,
+        "control": 0.6888
+      },
+      "experienced_tick": 1198
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.8961,
+        "unease": 0,
+        "control": 0.6888
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.9461,
+        "unease": 0,
+        "control": 0.7388
+      },
+      "experienced_tick": 1198
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.9357,
+        "unease": 0,
+        "control": 0.7347
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.9857,
+        "unease": 0,
+        "control": 0.7647
+      },
+      "experienced_tick": 1294
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.9857,
+        "unease": 0,
+        "control": 0.7647
+      },
+      "delta": {
+        "valence": 0.0143,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.8147
+      },
+      "experienced_tick": 1294
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.8124
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.8624
+      },
+      "experienced_tick": 1342
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.8624
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.8924
+      },
+      "experienced_tick": 1342
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.8924
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.9424
+      },
+      "experienced_tick": 1342
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9372
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.9672
+      },
+      "experienced_tick": 1438
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.9672
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0.0328
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1438
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1486
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1486
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1486
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1582
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1582
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1630
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1630
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1630
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1726
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1726
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1774
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1774
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1774
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1870
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1870
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1918
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1918
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 1918
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2014
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2014
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2062
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2062
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2062
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2158
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2158
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2206
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2206
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2206
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2302
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2302
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2350
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2350
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2350
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2446
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2446
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2494
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2494
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2494
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2590
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2590
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2638
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2638
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2638
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2734
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2734
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2782
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2782
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2782
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2878
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2878
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2926
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2926
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 2926
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3022
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3022
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3070
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3070
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3070
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3166
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3166
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3214
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3214
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3214
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3310
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3310
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3358
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3358
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3358
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3454
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3454
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3502
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3502
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3502
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3598
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3598
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3646
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3646
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3646
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3742
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3742
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3790
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3790
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3790
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3886
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3886
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9945,
+        "unease": 0,
+        "control": 0.9972
+      },
+      "delta": {
+        "valence": 0.0055,
+        "unease": 0,
+        "control": 0.0028
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3934
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3934
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 3934
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.989,
+        "unease": 0,
+        "control": 0.9945
+      },
+      "delta": {
+        "valence": 0.011,
+        "unease": 0,
+        "control": 0.0055
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 4030
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 4030
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.9965,
+        "unease": 0,
+        "control": 0.9983
+      },
+      "delta": {
+        "valence": 0.0035,
+        "unease": 0,
+        "control": 0.0017
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 4060
+    },
+    {
+      "trigger": "goal_complete_establish_storage",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9993,
+        "unease": 0,
+        "control": 0.9997
+      },
+      "delta": {
+        "valence": 0.0007,
+        "unease": 0,
+        "control": 0.0003
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 4066
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 4066
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "experienced_tick": 4066
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 1
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.92,
+        "unease": 0,
+        "control": 0.92
+      },
+      "experienced_tick": 4066
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": 0.9196,
+        "unease": 0,
+        "control": 0.9198
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.8396,
+        "unease": 0,
+        "control": 0.8398
+      },
+      "experienced_tick": 4070
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": 0.8392,
+        "unease": 0,
+        "control": 0.8396
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.7592,
+        "unease": 0,
+        "control": 0.7596
+      },
+      "experienced_tick": 4074
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.7588,
+        "unease": 0,
+        "control": 0.7594
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.6588,
+        "unease": 0,
+        "control": 0.7094
+      },
+      "experienced_tick": 4078
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.6588,
+        "unease": 0,
+        "control": 0.7094
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.7088,
+        "unease": 0,
+        "control": 0.7594
+      },
+      "experienced_tick": 4078
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.7049,
+        "unease": 0,
+        "control": 0.7573
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.8049,
+        "unease": 0,
+        "control": 0.8073
+      },
+      "experienced_tick": 4126
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.8049,
+        "unease": 0,
+        "control": 0.8073
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.9049,
+        "unease": 0,
+        "control": 0.8573
+      },
+      "experienced_tick": 4126
+    },
+    {
+      "trigger": "project_completed_improve_home",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.9049,
+        "unease": 0,
+        "control": 0.8573
+      },
+      "delta": {
+        "valence": 0.0951,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.9073
+      },
+      "experienced_tick": 4126
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.9073
+      },
+      "delta": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 1,
+        "unease": 0,
+        "control": 0.9573
+      },
+      "experienced_tick": 4126
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.9972,
+        "unease": 0,
+        "control": 0.9559
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 0.9472,
+        "unease": 0,
+        "control": 0.9559
+      },
+      "experienced_tick": 4152
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.8838,
+        "unease": 0,
+        "control": 0.9233
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.7838,
+        "unease": 0,
+        "control": 0.8733
+      },
+      "experienced_tick": 4752
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": 0.7838,
+        "unease": 0,
+        "control": 0.8733
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.7038,
+        "unease": 0,
+        "control": 0.7933
+      },
+      "experienced_tick": 4752
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.7034,
+        "unease": 0,
+        "control": 0.7931
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 0.6534,
+        "unease": 0,
+        "control": 0.7931
+      },
+      "experienced_tick": 4756
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.6096,
+        "unease": 0,
+        "control": 0.7661
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.5096,
+        "unease": 0,
+        "control": 0.7161
+      },
+      "experienced_tick": 5356
+    },
+    {
+      "trigger": "project_abandoned_secure_food_supply",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.5096,
+        "unease": 0,
+        "control": 0.7161
+      },
+      "delta": {
+        "valence": -0.12,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.3896,
+        "unease": 0,
+        "control": 0.6361
+      },
+      "experienced_tick": 5356
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": 0.3896,
+        "unease": 0,
+        "control": 0.6361
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.3096,
+        "unease": 0,
+        "control": 0.5561
+      },
+      "experienced_tick": 5356
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": 0.3096,
+        "unease": 0,
+        "control": 0.5561
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": 0.2296,
+        "unease": 0,
+        "control": 0.4761
+      },
+      "experienced_tick": 5356
+    },
+    {
+      "trigger": "goal_blocked_maintain_reserves",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.2296,
+        "unease": 0,
+        "control": 0.4761
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.1296,
+        "unease": 0,
+        "control": 0.4261
+      },
+      "experienced_tick": 5356
+    }
+  ],
+  "priorities": [
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": 0,
+      "priority": 400
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -0.62,
+      "priority": 299.38
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -2.232,
+      "priority": 397.768
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 7.53,
+      "priority": 297.53
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.404,
+      "priority": 300.404
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.402,
+      "priority": 300.402
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.401,
+      "priority": 300.401
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.4,
+      "priority": 300.4
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.399,
+      "priority": 300.399
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.397,
+      "priority": 300.397
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.396,
+      "priority": 300.396
+    },
+    {
+      "goal_id": "goal_establish_tools",
+      "base_priority": 290,
+      "affect_bias": 10.395,
+      "priority": 300.395
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -4.08,
+      "priority": 295.92
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -4.058,
+      "priority": 395.942
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -5.044,
+      "priority": 294.956
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -6.631,
+      "priority": 393.369
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -7.61,
+      "priority": 292.39
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -9.184,
+      "priority": 390.816
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -10.155,
+      "priority": 289.845
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -11.715,
+      "priority": 388.285
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -12.431,
+      "priority": 387.569
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -12.465,
+      "priority": 287.535
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": 24.794,
+      "priority": 524.794
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": 24.935,
+      "priority": 524.935
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": 24.988,
+      "priority": 524.988
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": 22.992,
+      "priority": 522.992
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": 20.985,
+      "priority": 520.985
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -9.492,
+      "priority": 390.508
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -9.466,
+      "priority": 170.534
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.444,
+      "priority": 324.444
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.44,
+      "priority": 324.44
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.436,
+      "priority": 324.436
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.433,
+      "priority": 324.433
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.429,
+      "priority": 324.429
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.425,
+      "priority": 324.425
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.421,
+      "priority": 324.421
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.417,
+      "priority": 324.417
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 24.414,
+      "priority": 324.414
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -11.541,
+      "priority": 168.459
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 18.714,
+      "priority": 318.714
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 18.71,
+      "priority": 318.71
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 18.706,
+      "priority": 318.706
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -9.576,
+      "priority": 170.424
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -6.951,
+      "priority": 173.049
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10,
+      "affect_bias": 0,
+      "priority": 10
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10,
+      "affect_bias": 0,
+      "priority": 10
+    }
+  ]
+}
