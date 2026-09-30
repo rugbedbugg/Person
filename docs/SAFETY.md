@@ -93,6 +93,11 @@ code `limits_clamped_to_spec` rather than being silently honoured.
 A refusal is reported to Person honestly, as unavailable or failed, without
 exposing the containment design. See ADR 0005.
 
+Contact range has one definition, the kernel's `immediate` threat state. No
+skill keeps a threat margin of its own: `wait_safely`, which the kernel does
+not preempt mid-flight because it is an emergency skill, stops on the kernel's
+definition, and the next proposal is replaced. See ADR 0015.
+
 ## Protected areas
 
 Protected areas override every other permission and fail closed. They are
