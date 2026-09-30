@@ -133,7 +133,27 @@ spot-checks. They were never one continuous individual.
   nothing is invented for it. Absence is not experienced and no transition is
   felt across it. Legacy roots acquire no lifecycle events. Cognition sees only
   whether the world is available. TESTED IN FIXTURE with synthetic identities.
-- **I3:** not started. DEAD, TERMINATED and respawn belong to it.
+- **I3:** life status as its own axis, with alive, awaiting a respawn
+  (engineering-facing) and terminated, rebuilt by `LifeRecord`. The trusted
+  runtime alone reports a death (`LifeEvent`) and decides by configuration
+  whether it is terminal; cognition cannot die or end itself.
+  - A **respawn** continues the same Person, session, memories, experienced
+    time and projects. In-flight work is interrupted, and body continuity is
+    dropped, so the respawned body is the body as it is now.
+  - A **permadeath** is terminal by its death record alone, so a crash
+    immediately after it still reconstructs a terminated Person.
+    `person_terminated` is for readability only. Startup refuses a terminated
+    Person whatever the configuration now says, and its evidence stays
+    readable.
+  - After a crash before a respawn, the next run respawns the body before
+    Person perceives anything.
+  - The death is one salient `died` memory holding only what Person knew:
+    body condition, threat in view, goal and project. Its affect is recorded
+    in the `person_died` evidence rather than in memory, because ADR 0010
+    (Accepted) keeps affect out of memory by construction.
+  - A death on a legacy root is recorded too: it is real new history, not
+    silent. Legacy roots still acquire no session or world events.
+  - TESTED IN FIXTURE with synthetic identities.
 - **Separate by design:** identity and continuity (I1), cognitive lifecycle
   (sessions), embodiment connection (the runtime's), operational state (I2)
   and death (I3).
