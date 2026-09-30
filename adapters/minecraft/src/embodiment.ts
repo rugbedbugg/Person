@@ -884,6 +884,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
 
     let timer: NodeJS.Timeout | undefined;
     let onReset: ((reason: string) => void) | undefined;
+    let onDeath: (() => void) | undefined;
     try {
       const failure = new Promise<never>((_resolve, reject) => {
         onReset = (reason: string) => {
@@ -891,6 +892,11 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
             reject(new EmbodimentError("navigation_stuck", "Navigation stuck"));
         };
         bot.on("path_reset", onReset);
+        // A dead body goes nowhere: stop at once rather than letting the
+        // pathfinder run out its timeout on it (E3 live rehearsal).
+        onDeath = () =>
+          reject(new EmbodimentError("died", "Person died while moving"));
+        bot.on("death", onDeath);
         timer = setTimeout(
           () =>
             reject(
@@ -917,6 +923,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     } finally {
       if (timer) clearTimeout(timer);
       if (onReset) bot.off("path_reset", onReset);
+      if (onDeath) bot.off("death", onDeath);
     }
   }
 

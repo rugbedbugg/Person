@@ -223,7 +223,9 @@ export class SkillRunner {
     }
 
     const end = this.#embodiment.snapshot();
-    if (status === "SUCCESS" && !end.alive) status = "DEATH";
+    // A body dead at the end died during the skill, whatever else went wrong
+    // on the way: a failed move on a dead body is a death, not a failure.
+    if (!end.alive && end.connected) status = "DEATH";
     evidenceKinds.add("elapsed_ticks");
 
     const elapsed = Math.max(0, end.tick - start.tick);
