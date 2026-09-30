@@ -60,8 +60,17 @@ from .affect import (
 )
 from .context import decision_context
 from .continuity import OperationalView, plan_root, self_knowledge, session_payload
+from .deliberation import (
+    Capability,
+    CognitiveModel,
+    DeliberationContext,
+    Deliberator,
+    Outcome,
+    build_context,
+)
+from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
 from .effect_learning import EffectBeliefs, Trial, admitted_to, classify, reliability_term
-from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
+from .goals import GOAL_TYPES, Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .hypotheses import (
     CausalHypothesis,
     ContrastProposer,
@@ -210,6 +219,13 @@ class CognitionLoop:
         self.proposer: Proposer = ContrastProposer()
         #: The skills the runtime offered this session.
         self.offered: tuple[str, ...] = ()
+        #: ADR 0020, C1: off unless configured; a model only if one is given.
+        #: Nothing in this loop calls `request_deliberation` itself.
+        self.deliberation_mode = settings.deliberation_mode if settings else "off"
+        self.cognitive_model: CognitiveModel | None = None
+        self.deliberation_audit: Path | None = (
+            settings.output_directory / "deliberation-audit" if settings else None
+        )
         #: What Person perceives now: weather, day phase, and the place it is sure of.
         self._now: Perceived | None = None
         self.reducers = CognitiveReducers(
@@ -301,6 +317,132 @@ class CognitionLoop:
         self.store.append(event, self.reducers)
         self.previous_event_id = event.event_id
         return event
+
+    # ------------------------------------------------------------ deliberation
+
+    def deliberation_context(self, reason: str, refs: tuple[str, ...] = ()) -> DeliberationContext:
+        """The bounded context a model would be shown now (ADR 0020).
+
+        Reads projections only: it recalls nothing, records nothing and
+        changes nothing, so building it has no effect on Person.
+        """
+        known = self.self_knowledge
+        here = self.spatial.here()
+        working = [
+            {
+                "kind": held.episode.kind,
+                "subjects": list(held.episode.subjects),
+                "details": dict(held.episode.details),
+                "place": held.episode.place_id,
+                "source": held.episode.provenance.source,
+            }
+            for held in self.memory.working.items()
+        ]
+        beliefs = [
+            {
+                "skill": skill,
+                "fact": fact,
+                "estimate": round(belief.estimate or 0.0, 2),
+                "strength": round(belief.strength, 2),
+            }
+            for (context, skill, fact), belief in sorted(
+                self.effect_beliefs.tables["active"].items()
+            )
+            if context == self.training_context and belief.estimate is not None
+        ]
+        hypotheses = [
+            {
+                key: value
+                for key, value in hypothesis.to_json().items()
+                if key in ("condition", "intervention", "outcome", "lifecycle")
+            }
+            for _, hypothesis in sorted(self.hypothesis_book.hypotheses["active"].items())
+        ]
+        goals = [
+            {
+                "goal_type": goal.goal_type,
+                "priority": round(goal.priority, 1),
+                "active": goal.goal_id == self.goals.active_id,
+            }
+            for goal in self.goals.ranked
+        ]
+        projects = [
+            {
+                "kind": project.kind,
+                "status": project.status,
+                "interruptions": project.interruptions,
+                "blocks": project.blocks,
+            }
+            for project in self.project_book.projects()
+        ]
+        recent = [
+            {
+                "skill": error.get("executed_skill"),
+                "requested": error.get("requested_skill"),
+                "status": error.get("status"),
+                "emergency": bool(error.get("emergency")),
+                "severity": error.get("severity"),
+                "expected": [effect.get("fact") for effect in error.get("expected", [])][:4],
+                "unexplained": list(error.get("unexplained", []))[:4],
+            }
+            for error in self.prediction_errors[-8:]
+        ]
+        capabilities = [
+            Capability(
+                skill=spec.id,
+                summary=spec.summary,
+                effects=tuple(effect.fact for effect in spec.expected_effects),
+            )
+            for spec in (self.registry.get(skill) for skill in sorted(self.offered))
+            if not spec.emergency
+        ]
+        return build_context(
+            reason=reason,
+            request_refs=refs,
+            self_knowledge=(
+                {"name": known.name, "designation": known.designation, "last_gap": known.last_gap}
+                if known is not None
+                else None
+            ),
+            world_available=(
+                None if self.operational.world is None else self.operational.world == "available"
+            ),
+            observation=self._last_observation,
+            place=({"place_id": here.place_id, "confidence": here.confidence} if here else None),
+            working_memory=working,
+            beliefs=beliefs,
+            hypotheses=hypotheses,
+            goals=goals,
+            projects=projects,
+            recent=recent,
+            capabilities=capabilities,
+            vocabulary={
+                "goal_types": GOAL_TYPES,
+                "project_kinds": tuple(sorted(BY_KIND)),
+                "facts": tuple(sorted(self.registry.facts)),
+                "directions": DELIBERATION_DIRECTIONS,
+            },
+        )
+
+    def request_deliberation(self, reason: str, refs: tuple[str, ...] = ()) -> Outcome | None:
+        """Deliberate now and record it, reaching nothing (ADR 0020, C1).
+
+        For tests and offline evaluation only: in C1 nothing in the decision
+        loop calls this, because even a call that changes nothing spends the
+        world's time. With the mode off, or no model, nothing happens at all.
+        """
+        if self.deliberation_mode == "off" or self.cognitive_model is None:
+            return None
+        tick = int(self._last_observation["tick"]) if self._last_observation else 0
+        deliberator = Deliberator(
+            mode=self.deliberation_mode,
+            model=self.cognitive_model,
+            record=lambda event_type, payload: self._record(event_type, tick, payload),
+            audit_directory=self.deliberation_audit,
+        )
+        return deliberator.deliberate(
+            self.deliberation_context(reason, refs), experienced_tick=self.memory.now
+        )
 
     def _policy(self) -> DeterministicPolicyProvider | EvidencePolicyProvider:
         if self.learning_mode == "off" and self.settings is None:

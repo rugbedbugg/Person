@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v13"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v14"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -34,6 +34,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v11",
     "person-evidence-v12",
     "person-evidence-v13",
+    "person-evidence-v14",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -119,6 +120,11 @@ EVENT_TYPES: tuple[str, ...] = (
     #: Readability only: the Person a terminal death ended. Termination is
     #: reconstructed from the death record, never from this alone.
     "person_terminated",
+    # ADR 0020, C1: a deliberation was requested, answered (and gated), or
+    # could not be answered. Engineering evidence; nothing is rebuilt from it.
+    "deliberation_requested",
+    "deliberation_completed",
+    "deliberation_unavailable",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -156,6 +162,10 @@ V12_EVENT_TYPES: frozenset[str] = frozenset({"world_availability_changed"})
 V13_EVENT_TYPES: frozenset[str] = frozenset(
     {"person_died", "person_respawned", "person_terminated"}
 )
+#: Event types introduced with the fourteenth: deliberation (ADR 0020).
+V14_EVENT_TYPES: frozenset[str] = frozenset(
+    {"deliberation_requested", "deliberation_completed", "deliberation_unavailable"}
+)
 
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
@@ -172,6 +182,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V11_EVENT_TYPES, "person-evidence-v11"),
     **dict.fromkeys(V12_EVENT_TYPES, "person-evidence-v12"),
     **dict.fromkeys(V13_EVENT_TYPES, "person-evidence-v13"),
+    **dict.fromkeys(V14_EVENT_TYPES, "person-evidence-v14"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (

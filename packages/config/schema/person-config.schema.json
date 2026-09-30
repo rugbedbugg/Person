@@ -96,6 +96,14 @@
         }
       }
     },
+    "deliberation": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "ADR 0020: general deliberation by a replaceable model. Read by cognition only. off (the default): nothing is invoked or recorded. record_only: invoked and recorded, reaching no behaviour. active does not exist until adoption and arbitration are decided.",
+      "properties": {
+        "mode": { "enum": ["off", "record_only"] }
+      }
+    },
     "affect": {
       "type": "object",
       "additionalProperties": false,
