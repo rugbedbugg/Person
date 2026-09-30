@@ -356,6 +356,8 @@ stay until their own systems are designed.
 | Readiness validation (chunks, clock, inventory, vitals, dimension) | IMPLEMENTED + CONFORMANCE-TESTED |
 | World rules validation (survival, difficulty, daylight, overworld) | IMPLEMENTED + CONFORMANCE-TESTED |
 | Bounded disconnect (no orphan timer)                               | FIXED + CONFORMANCE-TESTED       |
+| Respawn, awaited to readiness; joining dead (ADR 0017)             | IMPLEMENTED + CONFORMANCE-TESTED |
+| Reconnection: a retired client cannot touch its replacement        | IMPLEMENTED + CONFORMANCE-TESTED |
 
 **First contact (2026-09-15):** `person observe` connected, spawned in bounds, produced schema-valid observation, disconnected cleanly. 4 observation defects found and fixed.
 **Second contact (2026-09-16):** All 4 corrections verified against real Minecraft.
@@ -428,7 +430,7 @@ could rest on.
 4. Server-side placement/crafting/smelting/container timing untested
 5. Real mob behavior / flee adequacy unknown (both live worlds were Peaceful)
 6. Tick budgets still not revised on live measurement
-7. Death/respawn designed and TESTED IN FIXTURE (ADR 0017); the Mineflayer adapter reports a death (health 0) but cannot yet respawn its body
+7. Death/respawn designed and TESTED IN FIXTURE (ADR 0017); the Mineflayer adapter's respawn and reconnection are CONFORMANCE-TESTED only, never run live
 
 ---
 
@@ -918,7 +920,7 @@ runtime would allow a direct route home), not a distance.
 | A zero-time success repeated at one tick is not guarded; zero-time failures stop the fixture clock until the stall detector ends the episode | ADR 0015                   |
 | Breath appraisal is exercised only by tests: no fixture world lowers air                                                                     | ADR 0014                   |
 | The experiment harness measures from per-decision deltas; the body is not sampled continuously                                               | ADR 0013                   |
-| Respawn is fixture-only: the Mineflayer adapter has no `respawn`, so a live death ends the episode awaiting a respawn                        | ADR 0017                   |
+| Mineflayer respawn and reconnection are conformance-tested only; neither has run against Minecraft                                           | ADR 0017                   |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                           | IMPLEMENTATION_REPORT.md   |
 | Inventory reconciliation on resume not reimplemented                                                                                         | IMPLEMENTATION_REPORT.md   |
 | `loot_permitted_container` withdraws all types up to amount                                                                                  | IMPLEMENTATION_REPORT.md   |
@@ -943,9 +945,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 354     | 354     |
+| Node (all)   | 371     | 371     |
 | Python (all) | 442     | 442     |
-| **Total**    | **796** | **796** |
+| **Total**    | **813** | **813** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -965,12 +967,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `person/death-semantics` on 2026-09-30: Node 354 pass / 0 fail,
+Verified on `person/adapter-lifetime` on 2026-09-30: Node 371 pass / 0 fail,
 Python 442 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31.
 
 ---
 
