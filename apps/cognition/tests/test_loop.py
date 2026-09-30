@@ -34,7 +34,11 @@ class Harness:
     """Drives a CognitionLoop in-process and captures what it says."""
 
     def __init__(
-        self, evidence: Path, learning_mode: str = "off", affect_mode: str = "active"
+        self,
+        evidence: Path,
+        learning_mode: str = "off",
+        affect_mode: str = "active",
+        interoception: bool = True,
     ) -> None:
         self.sent: list[dict[str, Any]] = []
         self.logs: list[str] = []
@@ -43,6 +47,7 @@ class Harness:
             write=lambda line: self.sent.append(decode_frame(line.rstrip("\n"))),
             log=self.logs.append,
             affect_mode=affect_mode,
+            interoception=interoception,
         )
         self.learning_mode = learning_mode
         self.evidence = evidence

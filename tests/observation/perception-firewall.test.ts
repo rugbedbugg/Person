@@ -195,3 +195,60 @@ test("what the ledger supplies is labelled as the ledger, never as recollection"
     "nothing the runtime supplies may claim to be remembered",
   );
 });
+
+// ------------------------------------------------ the body, as it is felt
+//
+// ADR 0014. A player is shown health, food and ten bubbles of breath, and is
+// not shown saturation or exhaustion. Cognition receives what a player is
+// shown, and nothing of Minecraft's hidden hunger mechanics.
+
+test("hidden saturation never reaches cognition", async () => {
+  const full = await harness({
+    world: {
+      vitals: { health: 20, food: 17, saturation: 20, air: 300, armor: 0 },
+    },
+  });
+  const empty = await harness({
+    world: {
+      vitals: { health: 20, food: 17, saturation: 0, air: 300, armor: 0 },
+    },
+  });
+  const felt = (bench: Harness) => {
+    const { messageId, timestamp, sessionId, ...rest } = observe(bench);
+    void messageId;
+    void timestamp;
+    void sessionId;
+    return rest;
+  };
+  assert.notEqual(
+    full.world.snapshot().saturation,
+    empty.world.snapshot().saturation,
+  );
+  assert.deepEqual(felt(full), felt(empty), "only the hidden value differed");
+  assert.ok(!("saturation" in observe(full).vitals));
+  assert.ok(!JSON.stringify(observe(full)).includes("exhaustion"));
+});
+
+test("breath is felt as the bubbles a player sees, not as a tick counter", async () => {
+  const bench = await harness();
+  const cases: [number, number][] = [
+    [300, 10],
+    [299, 10],
+    [150, 5],
+    [31, 2],
+    [30, 1],
+    [1, 1],
+    [0, 0],
+  ];
+  for (const [air, bubbles] of cases) {
+    bench.world.setVitals({ air });
+    const observation = observe(bench);
+    assert.equal(observation.vitals.breath, bubbles, `air ${air}`);
+    assert.ok(!("air" in observation.vitals));
+    assert.ok(protocolValidator().validate(observation).valid);
+  }
+});
+
+test("the observation declares the body contract it follows", async () => {
+  assert.equal(observe(await harness()).observationVersion, 8);
+});

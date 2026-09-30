@@ -56,6 +56,8 @@ class CognitionSettings:
     #: How far affect is switched on (ADR 0013). Cognition's alone: the
     #: runtime neither reads nor receives it.
     affect_mode: str = "active"
+    #: ADR 0014: interoceptive affect. Off is a frozen R1.5 research baseline.
+    interoception: bool = True
 
     def cross_check(self, *, learning_mode: str, evidence_directory: str) -> None:
         """Fail closed when the runtime disagrees with the file we read."""
@@ -102,4 +104,5 @@ def load_cognition_settings(filename: str | Path) -> CognitionSettings:
         minimum_support=learning.get("minimumSupport", 3),
         rng_seed=runtime.get("rngSeed"),
         affect_mode=document.get("affect", {}).get("mode", "active"),
+        interoception=document.get("affect", {}).get("interoception", "on") == "on",
     )

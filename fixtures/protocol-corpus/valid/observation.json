@@ -22,8 +22,7 @@
   "vitals": {
     "health": 14.0,
     "food": 7.0,
-    "saturation": 0.0,
-    "air": 300,
+    "breath": 10,
     "armor": 0,
     "statusEffects": [],
     "alive": true

@@ -98,8 +98,8 @@ def test_a_perceived_threat_raises_unease(tmp_path: Path, view: dict[str, Any]) 
     threatened["nearby"]["hostiles"] = [zombie(6.0)]
     harness.observe(threatened)
 
-    record = appraisals(tmp_path)[-1]
-    assert record["trigger"] == "perceived_threat"
+    # One onset for the exposure (ADR 0014), not an appraisal per observation.
+    record = next(r for r in appraisals(tmp_path) if r["trigger"] == "threat_onset")
     assert record["after"]["unease"] > record["before"]["unease"] == 0.0
     assert harness.loop.affect.state.unease > 0
 
@@ -145,13 +145,16 @@ def test_every_change_is_recorded_with_its_cause(tmp_path: Path, view: dict[str,
     threatened["nearby"]["hostiles"] = [zombie(4.0)]
     harness.observe(threatened)
     for record in appraisals(tmp_path):
-        assert set(record) == {
+        # Every record says what triggered it and what it changed; under
+        # ADR 0014 it also names its causal event.
+        assert set(record) >= {
             "trigger",
             "components",
             "before",
             "delta",
             "after",
             "experienced_tick",
+            "cause",
         }
         for dimension, change in record["delta"].items():
             assert record["after"][dimension] == pytest.approx(
@@ -254,7 +257,12 @@ def test_a_blockage_that_persists_is_appraised_once(tmp_path: Path, view: dict[s
     for tick in (110, 120, 130):
         harness.loop.goals.block(goal_id, "no_feasible_plan", tick)
     harness.observe(at(view, 140))
-    blocked = [r for r in appraisals(tmp_path) if r["trigger"].startswith("goal_blocked_")]
+    blocked = [r for r in appraisals(tmp_path) if r["trigger"].startswith("goal_blocked_")] + [
+        c
+        for r in appraisals(tmp_path)
+        for c in r.get("consequences", [])
+        if c["kind"] == "goal_blocked" and c["goal_id"] == goal_id
+    ]
     assert len(blocked) == 1, blocked
 
 
@@ -598,9 +606,9 @@ def test_the_mode_is_consulted_only_at_the_consumption_boundary() -> None:
             for node in ast.walk(function)
         )
     }
-    # Evolution (advance, feel) stops only when off; consumption (bias,
-    # tolerance) answers only when active. Appraisal itself never asks.
-    assert consulting == {"__init__", "advance", "feel", "bias", "tolerance"}
+    # Evolution (advance, apply_tonic, feel) stops only when off; consumption
+    # (bias, tolerance) answers only when active. Appraisal itself never asks.
+    assert consulting == {"__init__", "advance", "apply_tonic", "feel", "bias", "tolerance"}
     for name in ("appraise_threat", "appraise_harm", "appraise_outcome", "decay"):
         source = ast.get_source_segment(
             (COGNITION / "affect.py").read_text(encoding="utf-8"),

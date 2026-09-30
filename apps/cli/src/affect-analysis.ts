@@ -197,11 +197,14 @@ export function explorationChannel(
 
 interface Appraised {
   at: number;
+  kind: "phasic" | "tonic";
   trigger: string;
   components: unknown;
   before: Record<string, number>;
   delta: Record<string, number>;
   after: Record<string, number>;
+  /** The tonic offset in force from this record on (ADR 0014). */
+  offset: Record<string, number>;
 }
 
 export interface SaturationOptions {
@@ -214,11 +217,47 @@ export interface SaturationOptions {
 export const SATURATION: SaturationOptions = { near: 0.9, settled: 0.1 };
 
 /**
+ * Where a dimension is after `t` ticks, relaxing from `x0` toward `target`
+ * with half-life `h`: the exact solution affect itself integrates.
+ */
+const along = (x0: number, target: number, h: number, t: number): number =>
+  target + (x0 - target) * 0.5 ** (t / h);
+
+/** When the relaxation from `x0` toward `target` passes `level`, if ever. */
+function crossing(
+  x0: number,
+  target: number,
+  h: number,
+  level: number,
+): number | null {
+  const ratio = (level - target) / (x0 - target);
+  if (!(ratio > 0 && ratio <= 1)) return null;
+  return h * Math.log2(1 / ratio);
+}
+
+/** Time within [0, length] that the relaxation spends at or above `level`. */
+function above(
+  x0: number,
+  target: number,
+  h: number,
+  length: number,
+  level: number,
+): number {
+  if (x0 >= level && target >= level) return length;
+  const cross = crossing(x0, target, h, level);
+  if (x0 >= level) return Math.min(length, cross ?? length);
+  if (target > level)
+    return cross === null ? 0 : Math.max(0, length - Math.min(length, cross));
+  return 0;
+}
+
+/**
  * How affect moved over a run, in Person's experienced time.
  *
- * Between two appraisals a dimension only decays toward its baseline (zero
- * with the neutral temperament) with its half-life, so its whole trajectory
- * follows exactly from the journalled `after` values and the half-lives.
+ * Between two records a dimension relaxes toward its baseline shifted by the
+ * tonic offset in force (zero without interoception), with its half-life. So
+ * its whole trajectory follows exactly from the journalled states, the
+ * offsets set by `affect_tonic` records, and the half-lives.
  */
 export function saturation(
   events: JournalEvent[],
@@ -229,32 +268,48 @@ export function saturation(
   metrics: Record<string, number>;
   distributions: Record<string, Record<string, number>>;
 } {
-  const appraised: Appraised[] = events
-    .filter((event) => event.type === "affect_appraised")
-    .map((event) => ({
+  let offset: Record<string, number> = {};
+  const records: Appraised[] = [];
+  for (const event of events) {
+    if (event.type !== "affect_appraised" && event.type !== "affect_tonic")
+      continue;
+    if (event.type === "affect_tonic")
+      offset = (event.payload["offset"] ?? {}) as Record<string, number>;
+    const before = event.payload["before"] as Record<string, number>;
+    const after = event.payload["after"] as Record<string, number>;
+    records.push({
       at: Number(event.payload["experienced_tick"]),
-      trigger: String(event.payload["trigger"]),
+      kind: event.type === "affect_tonic" ? "tonic" : "phasic",
+      trigger: String(event.payload["trigger"] ?? "tonic"),
       components: event.payload["components"],
-      before: event.payload["before"] as Record<string, number>,
-      delta: event.payload["delta"] as Record<string, number>,
-      after: event.payload["after"] as Record<string, number>,
-    }));
+      before,
+      delta:
+        (event.payload["delta"] as Record<string, number> | undefined) ??
+        Object.fromEntries(
+          Object.keys(after).map((k) => [
+            k,
+            (after[k] ?? 0) - (before[k] ?? 0),
+          ]),
+        ),
+      after,
+      offset,
+    });
+  }
+  const appraised = records.filter((record) => record.kind === "phasic");
   const metrics: Record<string, number> = {
     affect_appraisals: appraised.length,
+    affect_tonic_updates: records.length - appraised.length,
   };
   const distributions: Record<string, Record<string, number>> = {};
-  const end = Math.max(experiencedEnd, appraised.at(-1)?.at ?? 0);
+  const end = Math.max(experiencedEnd, records.at(-1)?.at ?? 0);
 
   for (const dimension of Object.keys(bounds.half_lives).sort()) {
-    const halfLife = bounds.half_lives[dimension]!;
+    const h = bounds.half_lives[dimension]!;
     const [low, high] = bounds.ranges[dimension]!;
     const bound = Math.max(Math.abs(low), Math.abs(high));
     const threshold = options.near * bound;
-    const value = (x: number, elapsed: number) =>
-      x * 0.5 ** (elapsed / halfLife);
-    // Time for |x| to decay to `level`, from a start of |x0|.
-    const until = (x0: number, level: number) =>
-      Math.abs(x0) <= level ? 0 : halfLife * Math.log2(Math.abs(x0) / level);
+    const target = (record: Appraised) =>
+      Math.max(low, Math.min(high, record.offset[dimension] ?? 0));
 
     let nearTime = 0;
     let episodes = 0;
@@ -263,36 +318,45 @@ export function saturation(
     let inEpisode = false;
     let positive = 0;
     let negative = 0;
-    appraised.forEach((record, index) => {
+    let pressed = 0;
+    let offsetArea = 0;
+    records.forEach((record, index) => {
       const change = record.delta[dimension] ?? 0;
-      if (change > 0) positive += change;
-      if (change < 0) negative += change;
-      const start = record.at;
-      const stop = appraised[index + 1]?.at ?? end;
-      const length = Math.max(0, stop - start);
-      const x = record.after[dimension] ?? 0;
-      const near = Math.min(length, until(x, threshold));
-      if (Math.abs(x) >= threshold) {
-        if (!inEpisode) {
+      if (record.kind === "phasic") {
+        if (change > 0) positive += change;
+        if (change < 0) negative += change;
+      }
+      const length = Math.max(0, (records[index + 1]?.at ?? end) - record.at);
+      const x0 = record.after[dimension] ?? 0;
+      const goal = target(record);
+      if (goal !== 0) pressed += length;
+      offsetArea += goal * length;
+      const near =
+        above(x0, goal, h, length, threshold) +
+        above(-x0, -goal, h, length, threshold);
+      if (near > 0) {
+        if (inEpisode && Math.abs(x0) >= threshold) open += near;
+        else {
           episodes += 1;
-          inEpisode = true;
-          open = 0;
+          open = near;
         }
-        open += near;
         nearTime += near;
         longest = Math.max(longest, open);
-        if (near < length) inEpisode = false;
+        inEpisode = Math.abs(along(x0, goal, h, length)) >= threshold;
       } else inEpisode = false;
     });
 
-    const last = appraised.at(-1);
-    const final = last ? value(last.after[dimension] ?? 0, end - last.at) : 0;
-    // Recovery after the last appraisal that pushed this dimension away from
-    // baseline: follow the recorded trajectory from there until it settles,
-    // and project beyond the run's end by decay alone if it has not.
+    const last = records.at(-1);
+    const final = last
+      ? along(last.after[dimension] ?? 0, target(last), h, end - last.at)
+      : 0;
+    // Settling after the last record that pushed this dimension away from
+    // baseline: follow the trajectory from there until it is within the
+    // settled band. Beyond the run's end the last offset is assumed to hold;
+    // if that offset itself lies outside the band it never settles (-1).
     let recovery = 0;
     let away = -1;
-    appraised.forEach((record, index) => {
+    records.forEach((record, index) => {
       if (
         Math.abs(record.after[dimension] ?? 0) >
         Math.abs(record.before[dimension] ?? 0)
@@ -301,12 +365,21 @@ export function saturation(
     });
     if (away !== -1) {
       recovery = -1;
-      for (let index = away; index < appraised.length; index++) {
-        const record = appraised[index]!;
-        const stop = appraised[index + 1]?.at ?? Infinity;
-        const needed = until(record.after[dimension] ?? 0, options.settled);
-        if (record.at + needed <= stop) {
-          recovery = record.at + needed - appraised[away]!.at;
+      for (let index = away; index < records.length; index++) {
+        const record = records[index]!;
+        const x0 = record.after[dimension] ?? 0;
+        const goal = target(record);
+        const stop = records[index + 1]?.at ?? Infinity;
+        // Settled means within the band and not being pulled out of it: a
+        // segment whose target lies outside the band cannot settle.
+        let needed: number | null = null;
+        if (Math.abs(goal) < options.settled)
+          needed =
+            Math.abs(x0) < options.settled
+              ? 0
+              : crossing(x0, goal, h, Math.sign(x0) * options.settled);
+        if (needed !== null && record.at + needed <= stop) {
+          recovery = record.at + needed - records[away]!.at;
           break;
         }
       }
@@ -320,6 +393,9 @@ export function saturation(
     metrics[key("ticks_to_settle_after_last_push")] = Math.round(recovery);
     metrics[key("input_positive")] = Number(positive.toFixed(4));
     metrics[key("input_negative")] = Number(negative.toFixed(4));
+    metrics[key("tonic_time_fraction")] = ratio(pressed, end);
+    metrics[key("tonic_offset_mean")] =
+      end === 0 ? 0 : Number((offsetArea / end).toFixed(4));
 
     const byTrigger: Record<string, number> = {};
     for (const record of appraised) {
@@ -359,7 +435,13 @@ export function saturation(
     const name = [...triggers].sort().join("+");
     together[name] = (together[name] ?? 0) + 1;
   }
-  const threat = appraised.filter((r) => r.trigger === "perceived_threat");
+  // Threat appraisals: per observation under R1.5, onsets and escalations
+  // under ADR 0014.
+  const threat = appraised.filter((r) =>
+    ["perceived_threat", "threat_onset", "threat_escalation"].includes(
+      r.trigger,
+    ),
+  );
   const gaps = threat
     .slice(1)
     .map((record, index) => record.at - threat[index]!.at);

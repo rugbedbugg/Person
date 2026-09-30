@@ -363,3 +363,22 @@ def test_no_hypothesis_is_ever_declared_knowledge() -> None:
     for path in sources:
         match = pattern.search(_code(path))
         assert match is None, f"{path.name}: {match.group(0) if match else ''}"
+
+
+def test_hidden_hunger_mechanics_never_reach_cognition() -> None:
+    # ADR 0014: a player is not shown saturation or exhaustion, and neither is
+    # Person. They are not in the observation, so nothing in cognition (its
+    # memory, its affect, its evidence) can hold them.
+    schema = json.loads(
+        (REPOSITORY / "packages/protocol/schemas/observation.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    vitals = schema["properties"]["vitals"]["properties"]
+    assert "saturation" not in vitals and "exhaustion" not in vitals
+    assert "air" not in vitals, "breath is felt in bubbles, not as the air counter"
+    for root in COGNITION_ROOTS:
+        for path in root.rglob("*.py"):
+            text = path.read_text(encoding="utf-8").lower()
+            for word in ("saturation", "exhaustion"):
+                assert word not in text, f"{path.name} mentions {word}"

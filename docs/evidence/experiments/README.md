@@ -12,6 +12,13 @@ none of it bears on whether Person feels anything (`docs/RESEARCH.md`).
 
 ## R1: affect modes, 2026-09-29
 
+> **Superseded for scientific comparison (operator decision, 2026-09-29).**
+> Every R1 run was affected by at least one correctness defect fixed during
+> R1.5 (the lost episode end, the repeated re-block appraisal, the abandoned
+> project's lingering goal). These results are kept as the historical record;
+> the first trustworthy affect baseline is the R1.5 state at `5548bbd`, and no
+> effect-size claim should rest on the numbers below.
+
 Plans `experiments/r1-affect-modes.json` (learning off, commit `aaac2bd`) and
 `experiments/r1-affect-modes-supervised.json` (learning supervised, commit
 `cc5f408`), both with a clean tree. The vertical-slice fixture world, world

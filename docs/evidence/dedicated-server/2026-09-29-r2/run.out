@@ -1,0 +1,22 @@
+person: connecting to 127.0.0.1:25565 (from configuration), Minecraft 1.16.1, as PersonAda
+Episode ep_r2_hunger (completed: decision_budget_reached)
+  person=ada world=person-dedicated-1 context=minecraft_normal learning=off
+  decisions=14 accepted=14 replaced=0 rejected=0
+  learned=0 fallback=14 successes=11 failures=3
+  emergencies=0 healthLost=0 ticks=959
+  [12159] SECURE_SHELTER via secure_shelter__repair_shelter (fallback) repair_shelter FAILED
+  [12178] SECURE_SHELTER via secure_shelter__repair_shelter (fallback) repair_shelter FAILED
+  [12198] SECURE_SHELTER via secure_shelter__repair_shelter (fallback) repair_shelter FAILED
+  [12218] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12238] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12258] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12278] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12278] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12298] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12318] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12338] ESTABLISH_TOOLS via seek_evidence__look (fallback) look SUCCESS
+  [12338] ESTABLISH_TOOLS via idle__wait_safely (fallback) wait_safely SUCCESS
+  [13078] ESTABLISH_STORAGE via establish_storage__craft_chest_return_home (fallback) craft_chest SUCCESS
+  [13098] ESTABLISH_STORAGE via establish_storage__craft_chest_return_home (fallback) return_home SUCCESS
+  tick budgets under pressure: look 50% of 40
+  resources: birch_log-2 chest+1 crafting_table-1

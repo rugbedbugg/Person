@@ -83,9 +83,10 @@ SENSITIVITY: Mapping[str, Mapping[str, float]] = {
 }
 
 
-def _clamp(dimension: str, value: float) -> float:
+def _clamp(dimension: str, value: float, digits: int | None = 4) -> float:
     low, high = RANGES[dimension]
-    return round(max(low, min(high, value)), 4)
+    bounded = max(low, min(high, value))
+    return bounded if digits is None else round(bounded, digits)
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,10 +98,12 @@ class AffectState:
     def get(self, dimension: str) -> float:
         return float(getattr(self, dimension))
 
-    def moved(self, deltas: Mapping[str, float]) -> AffectState:
+    def moved(self, deltas: Mapping[str, float], digits: int | None = 4) -> AffectState:
         return AffectState(
             **{
-                dimension: _clamp(dimension, self.get(dimension) + deltas.get(dimension, 0.0))
+                dimension: _clamp(
+                    dimension, self.get(dimension) + deltas.get(dimension, 0.0), digits
+                )
                 for dimension in DIMENSIONS
             }
         )
@@ -215,45 +218,113 @@ def appraise_search(conclusion: str) -> Appraisal:
     return Appraisal("search_unfound", {"goal_congruence": -0.5}, {"valence": -0.05})
 
 
+# ------------------------------------------------------------------ tonic
+#
+# ADR 0014. An ongoing condition shifts the level a dimension settles toward;
+# it never touches control, which is about whether Person's own actions work.
+# Coefficients and caps are implementation parameters.
+
+#: How far each fully present condition shifts valence and unease.
+TONIC_WEIGHTS: Mapping[str, Mapping[str, float]] = {
+    "hunger": {"valence": -0.35, "unease": 0.15},
+    "vulnerability": {"valence": -0.35, "unease": 0.35},
+    "breathlessness": {"valence": -0.3, "unease": 0.5},
+    "threat": {"valence": -0.1, "unease": 0.4},
+}
+#: The most all conditions together may shift each dimension.
+TONIC_CAPS: Mapping[str, tuple[float, float]] = {
+    "valence": (-0.6, 0.0),
+    "unease": (0.0, 0.7),
+}
+
+
+def tonic_offset(pressures: Mapping[str, float]) -> dict[str, float]:
+    """The shift of each dimension's settling level that `pressures` imply."""
+    offset: dict[str, float] = {}
+    for dimension, (low, high) in TONIC_CAPS.items():
+        total = sum(
+            TONIC_WEIGHTS[condition].get(dimension, 0.0) * max(0.0, min(1.0, level))
+            for condition, level in pressures.items()
+            if condition in TONIC_WEIGHTS
+        )
+        total = round(max(low, min(high, total)), 4)
+        if total:
+            offset[dimension] = total
+    return offset
+
+
 # ------------------------------------------------------------------ state
 
 
 def decay(state: AffectState, temperament: Temperament, elapsed: float) -> AffectState:
     """The state after `elapsed` experienced ticks with nothing happening."""
+    return settle(state, temperament, elapsed, {})
+
+
+def settle(
+    state: AffectState,
+    temperament: Temperament,
+    elapsed: float,
+    offset: Mapping[str, float],
+    digits: int | None = 4,
+) -> AffectState:
+    """The state after `elapsed` experienced ticks under a held tonic offset.
+
+    Each dimension relaxes toward its baseline shifted by the offset, with its
+    own half-life (ADR 0014). With no offset this is plain decay. Because the
+    relaxation is solved exactly over the whole interval, the result depends on
+    experienced time alone: splitting an interval into more observations under
+    the same offset gives the same state, provided the state is not rounded
+    between steps (`digits=None`), since rounding once per observation would
+    itself depend on how many observations there were.
+    """
     if elapsed <= 0:
         return state
     settled: dict[str, float] = {}
     for dimension in DIMENSIONS:
-        base = temperament.baseline.get(dimension)
+        target = temperament.baseline.get(dimension)
+        if dimension in offset:
+            target = _clamp(dimension, target + offset[dimension])
         half_life = HALF_LIVES[dimension] / max(temperament.recovery, 1e-6)
         settled[dimension] = _clamp(
-            dimension, base + (state.get(dimension) - base) * 0.5 ** (elapsed / half_life)
+            dimension,
+            target + (state.get(dimension) - target) * 0.5 ** (elapsed / half_life),
+            digits,
         )
     return AffectState(**settled)
 
 
 class AffectRecord:
-    """The last affect state Person recorded, rebuilt from its own appraisals."""
+    """The last affect state Person recorded, rebuilt from its own records.
+
+    Phasic appraisals set the state; tonic updates set the state and the
+    offset held from then on (ADR 0014).
+    """
 
     def __init__(self) -> None:
         self.state = AffectState()
         self.at = 0
+        self.offset: dict[str, float] = {}
 
     def reset(self) -> None:
         self.state = AffectState()
         self.at = 0
+        self.offset = {}
 
     def apply(self, event: EvidenceEvent) -> None:
-        if event.type == "affect_appraised":
+        if event.type in {"affect_appraised", "affect_tonic"}:
             self.state = AffectState.from_json(event.payload["after"])
             self.at = int(event.payload["experienced_tick"])
+        if event.type == "affect_tonic":
+            self.offset = {k: float(v) for k, v in event.payload["offset"].items()}
 
     def to_json(self) -> dict[str, Any]:
-        return {"state": self.state.to_json(), "at": self.at}
+        return {"state": self.state.to_json(), "at": self.at, "offset": dict(self.offset)}
 
     def load_json(self, body: Mapping[str, Any]) -> None:
         self.state = AffectState.from_json(body["state"])
         self.at = int(body["at"])
+        self.offset = {k: float(v) for k, v in body.get("offset", {}).items()}
 
 
 class Affect:
@@ -264,27 +335,65 @@ class Affect:
         record: AffectRecord,
         temperament: Temperament | None = None,
         mode: str = "active",
+        precise: bool = False,
     ) -> None:
         if mode not in AFFECT_MODES:
             raise ValueError(f"unknown affect mode {mode!r}; expected one of {AFFECT_MODES}")
         self.mode = mode
+        #: Keep the state unrounded between steps, so that it depends on
+        #: experienced time and not on the number of observations (ADR 0014).
+        #: Rounded, as before, when reproducing earlier appraisal exactly.
+        self._digits: int | None = None if precise else 4
         self.temperament = temperament or Temperament()
         # A restart resumes the recorded state: affect is part of continuity.
         # It decays from when it was recorded, in experienced time only.
         self.state = record.state
         self._at = record.at
+        #: The tonic offset in force until the next update (ADR 0014).
+        self.offset: dict[str, float] = dict(record.offset)
 
     def advance(self, now: int) -> None:
         """Let experienced time pass: activation settles toward baseline."""
         if self.mode == "off":
             return
-        self.state = decay(self.state, self.temperament, now - self._at)
+        self.state = settle(self.state, self.temperament, now - self._at, self.offset, self._digits)
         self._at = max(self._at, now)
 
-    def feel(self, appraisal: Appraisal, now: int) -> dict[str, Any] | None:
+    def apply_tonic(self, pressures: Mapping[str, float], now: int) -> dict[str, Any] | None:
+        """Let the conditions held so far act up to `now`, then hold new ones.
+
+        `pressures` are the ongoing conditions Person perceives now; the
+        offset they imply is held until the next update. Returns the
+        engineering record of the change, or None when nothing is pressing
+        and nothing was.
+        """
+        if self.mode == "off":
+            return None
+        start = self._at
+        before = self.state
+        held = dict(self.offset)
+        self.advance(now)
+        self.offset = tonic_offset(pressures)
+        if not held and not self.offset:
+            return None
+        return {
+            "pressures": {name: round(value, 4) for name, value in sorted(pressures.items())},
+            "offset": dict(self.offset),
+            "held": held,
+            "elapsed": max(0, now - start),
+            "before": before.to_json(),
+            "after": self.state.to_json(),
+            "experienced_tick": now,
+        }
+
+    def feel(
+        self, appraisal: Appraisal, now: int, extra: Mapping[str, Any] | None = None
+    ) -> dict[str, Any] | None:
         """Apply one appraisal. Returns the engineering record of the change.
 
-        With affect off nothing is applied and there is nothing to record.
+        `extra` adds to the record, never to the change: the causal event an
+        appraisal answers and its consequences (ADR 0014). With affect off
+        nothing is applied and there is nothing to record.
         """
         if self.mode == "off":
             return None
@@ -294,7 +403,7 @@ class Affect:
             for dimension, delta in appraisal.deltas.items()
         }
         before = self.state
-        self.state = before.moved(scaled)
+        self.state = before.moved(scaled, self._digits)
         return {
             "trigger": appraisal.trigger,
             "components": dict(appraisal.components),
@@ -305,6 +414,7 @@ class Affect:
             },
             "after": self.state.to_json(),
             "experienced_tick": now,
+            **(dict(extra) if extra else {}),
         }
 
     # ----------------------------------------------------------------- bias

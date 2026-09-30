@@ -1,0 +1,135 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "9149a367-3f13-476c-bd22-f6018fd67a6b",
+  "personId": "ada",
+  "sessionId": "8febc082-d278-45a6-bf80-2e166bf66d1e",
+  "worldId": "person-dedicated-1",
+  "tick": 11785,
+  "timestamp": "2026-09-29T16:32:04.380Z",
+  "type": "Observation",
+  "observationVersion": 8,
+  "trainingContext": "minecraft_normal",
+  "selfMotion": {
+    "continuity": "start",
+    "translation": {
+      "direction": "unknown",
+      "band": "unknown",
+      "distance": null
+    },
+    "rotation": "unknown",
+    "vertical": "unknown"
+  },
+  "vitals": {
+    "health": 20,
+    "food": 18,
+    "breath": 10,
+    "armor": 0,
+    "statusEffects": [],
+    "alive": true
+  },
+  "environment": {
+    "dimension": "overworld",
+    "dayPhase": "dusk",
+    "timeOfDay": 12000,
+    "weather": "clear",
+    "lightLevel": 4,
+    "biome": "forest"
+  },
+  "inventory": {
+    "items": [
+      {
+        "name": "crafting_table",
+        "count": 1
+      },
+      {
+        "name": "wooden_pickaxe",
+        "count": 1
+      },
+      {
+        "name": "rotten_flesh",
+        "count": 1
+      },
+      {
+        "name": "wooden_axe",
+        "count": 1
+      },
+      {
+        "name": "birch_log",
+        "count": 20
+      }
+    ],
+    "categories": {
+      "food": 0,
+      "raw_food": 0,
+      "cooked_food": 0,
+      "fuel": 20,
+      "wood": 20,
+      "stone": 0,
+      "coal": 0,
+      "tools": 2,
+      "weapons": 0,
+      "armor": 0,
+      "building_materials": 20
+    },
+    "freeSlots": 31
+  },
+  "permissions": {
+    "harvest": true,
+    "mine": true,
+    "build": true,
+    "huntPassive": true,
+    "depositOwned": true,
+    "withdrawOwned": true,
+    "withdrawExisting": true,
+    "craft": true,
+    "consume": true
+  },
+  "affordances": {
+    "diggableGround": false,
+    "shelterSite": true,
+    "storageSite": true
+  },
+  "nearby": {
+    "resources": [],
+    "hostiles": [],
+    "passiveAnimals": [],
+    "players": [],
+    "containers": [],
+    "workstations": [
+      {
+        "kind": "crafting_table",
+        "bearing": "left",
+        "elevation": "level",
+        "rangeBand": "far",
+        "distance": 26,
+        "detail": "peripheral",
+        "provenance": "owned",
+        "source": "placement_ledger"
+      }
+    ],
+    "hazards": []
+  },
+  "home": {
+    "activeHome": {
+      "homeId": "home_primary"
+    },
+    "shelterState": "partial",
+    "ownedStorage": [],
+    "bedKnown": false,
+    "foodReserve": 0,
+    "fuelReserve": 20
+  },
+  "navigation": {
+    "routeStatus": "idle",
+    "pathRisk": "low",
+    "stuckState": "free",
+    "returnPathKnown": true
+  },
+  "cognition": {
+    "activeGoal": null,
+    "activeRoutine": null,
+    "activeSkill": null,
+    "suspendedGoals": []
+  },
+  "previousOutcome": null
+}

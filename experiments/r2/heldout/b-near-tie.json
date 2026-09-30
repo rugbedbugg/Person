@@ -1,0 +1,49 @@
+{
+  "name": "r2-heldout-b-near-tie",
+  "description": "R2 held-out evaluation (ADR 0014): run once, after every R2 parameter was frozen at the commit that adds this plan. Do not tune on its results; any later parameter change consumes this held-out set.",
+  "split": "heldout",
+  "benchmarkClass": "B",
+  "world": "../../../fixtures/worlds/benchmarks/heldout/b-near-tie.json",
+  "config": "../../../examples/fixture.toml",
+  "seeds": [101, 102, 103, 104, 105],
+  "conditions": [
+    {
+      "id": "P0",
+      "affectMode": "off"
+    },
+    {
+      "id": "A15",
+      "affectMode": "active",
+      "interoception": "off"
+    },
+    {
+      "id": "R2rec",
+      "affectMode": "record_only",
+      "interoception": "on"
+    },
+    {
+      "id": "R2act",
+      "affectMode": "active",
+      "interoception": "on"
+    }
+  ],
+  "maxDecisions": 5000,
+  "learningMode": "off",
+  "horizons": [
+    {
+      "id": "short",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 6000
+    },
+    {
+      "id": "medium",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 24000
+    },
+    {
+      "id": "long",
+      "maxDecisions": 5000,
+      "maxExperiencedTicks": 72000
+    }
+  ]
+}

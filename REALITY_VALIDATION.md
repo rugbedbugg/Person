@@ -1020,6 +1020,17 @@ Everything in the matrix above was run once, in one world, by day, on easy,
 with natural spawning off. It says nothing about night, natural mobs, other
 terrain or long episodes, and it is not LAN validation.
 
+## R2 live spot-check, 2026-09-29 (dedicated server)
+
+After the R2 fixture acceptance, a small live check on the same local 1.16.1
+dedicated server, recorded apart from the LAN runs. Observation v8 passed
+live (breath in bubbles, no saturation). Hunger reached affect live, weakly:
+an operator-applied Hunger effect took food from 18 to 17, and a hunger onset
+and continuous hunger pressure followed. Health vulnerability, R2 harm, breath
+and threat exposure were **not** exercised live. The check also exposed a
+goal-provider inconsistency (`SECURE_FOOD` proposed while already complete at
+food 16 and 17). Evidence: `docs/evidence/dedicated-server/2026-09-29-r2/`.
+
 ## Affect experiments (fixture only)
 
 The first affect experiments (ADR 0013) ran on 2026-09-29 in the fixture

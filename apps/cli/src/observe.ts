@@ -207,11 +207,6 @@ const SUSPICIOUS: {
     note: "armor is always zero: worn armour is not being read",
   },
   {
-    path: "/vitals/saturation",
-    when: (value) => value === 0,
-    note: "saturation is zero, which is plausible when hungry and suspicious when full",
-  },
-  {
     path: "/navigation/lastSafePosition",
     when: (value) => value === null,
     note: "no safe position has been recorded yet",
@@ -339,7 +334,7 @@ export function renderObservation(observation: Observation): string {
     `Observation v${observation.observationVersion} (${observation.trainingContext})`,
   );
   lines.push(
-    `  vitals    health=${vitals.health} food=${vitals.food} saturation=${vitals.saturation} air=${vitals.air} armor=${vitals.armor} alive=${vitals.alive}`,
+    `  vitals    health=${vitals.health} food=${vitals.food} breath=${vitals.breath} armor=${vitals.armor} alive=${vitals.alive}`,
   );
   if (vitals.statusEffects.length)
     lines.push(

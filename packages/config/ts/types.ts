@@ -50,7 +50,10 @@ export interface PersonConfig {
     minimumSupport: number;
   };
   /** Cognition's alone (ADR 0013): the runtime never reads it. */
-  affect?: { mode: "off" | "record_only" | "active" };
+  affect?: {
+    mode: "off" | "record_only" | "active";
+    interoception?: "on" | "off";
+  };
   cognition: {
     command: string[];
     startTimeoutMs: number;

@@ -251,3 +251,51 @@ test("appraisal families group goal and project events by what happened", () => 
   assert.equal(family("project_abandoned_improve_home"), "project_abandoned");
   assert.equal(family("perceived_threat"), "perceived_threat");
 });
+
+const tonic = (
+  at: number,
+  before: Record<string, number>,
+  after: Record<string, number>,
+  offset: Record<string, number>,
+): JournalEvent => ({
+  type: "affect_tonic",
+  payload: { experienced_tick: at, before, after, offset, pressures: {} },
+});
+
+test("a held tonic offset is followed exactly between records", () => {
+  const zero = { valence: 0 };
+  const events = [tonic(0, zero, zero, { valence: -0.5 })];
+  const { metrics } = saturation(
+    events,
+    { ...BOUNDS, half_lives: { valence: 6000 } },
+    6000,
+  );
+  // One half-life toward -0.5 from 0 reaches -0.25.
+  assert.equal(metrics["affect_valence_final"], -0.25);
+  assert.equal(metrics["affect_valence_tonic_time_fraction"], 1);
+  assert.equal(metrics["affect_valence_tonic_offset_mean"], -0.5);
+  assert.equal(metrics["affect_valence_near_bound_fraction"], 0);
+  assert.equal(metrics["affect_tonic_updates"], 1);
+  assert.equal(metrics["affect_appraisals"], 0);
+});
+
+test("a condition strong enough reaches a bound late, and never settles while it holds", () => {
+  const zero = { valence: 0 };
+  const events = [
+    tonic(0, zero, zero, { valence: -1 }),
+    appraisal(1, "harm", { valence: 0 }, { valence: -0.05 }),
+  ];
+  const { metrics } = saturation(
+    events,
+    { ...BOUNDS, half_lives: { valence: 6000 } },
+    30001,
+  );
+  // From -0.05 toward -1, |valence| passes 0.9 after 6000 * log2(0.95 / 0.1).
+  const reach = 6000 * Math.log2(0.95 / 0.1);
+  assert.equal(
+    metrics["affect_valence_near_bound_fraction"],
+    Number(((30000 - reach) / 30001).toFixed(4)),
+  );
+  assert.equal(metrics["affect_valence_saturation_episodes"], 1);
+  assert.equal(metrics["affect_valence_ticks_to_settle_after_last_push"], -1);
+});
