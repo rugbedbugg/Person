@@ -1,0 +1,96 @@
+
+=== a-wide-margin (commit e26fc0a, clean True)
+  short  P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  short  R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  short  P0/R2act     0/5  the whole affect system
+  short  P0/A15       0/5  the whole affect system
+  short  A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  medium P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  medium R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  medium P0/R2act     0/5  the whole affect system
+  medium P0/A15       0/5  the whole affect system
+  medium A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  long   P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  long   R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  long   P0/R2act     0/5  the whole affect system
+  long   P0/A15       0/5  the whole affect system
+  long   A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  -- short
+    P0     decisions=105 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=10.0
+    A15    decisions=105 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=15.0 tonic=0.0 val_final=-0.1233 une_final=0.0 ctl_final=-0.1684 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=7210.0 une_settle=0.0 threat_appr=0.0 identical=0 several=5.0 health_lost=0.0 food_lost=10.0
+    R2rec  decisions=105 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=12.0 tonic=21.0 val_final=-0.3084 une_final=0.1371 ctl_final=-0.1679 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=1.0 val_tonic_mean=-0.2652 une_tonic_mean=0.1137 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+    R2act  decisions=105 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=12.0 tonic=21.0 val_final=-0.3084 une_final=0.1371 ctl_final=-0.1679 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=1.0 val_tonic_mean=-0.2652 une_tonic_mean=0.1137 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+  -- medium
+    P0     decisions=255 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=10.0
+    A15    decisions=255 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=15.0 tonic=0.0 val_final=-0.0154 une_final=0.0 ctl_final=-0.0595 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=7210.0 une_settle=0.0 threat_appr=0.0 identical=0 several=5.0 health_lost=0.0 food_lost=10.0
+    R2rec  decisions=255 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=12.0 tonic=51.0 val_final=-0.3448 une_final=0.15 ctl_final=-0.0594 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=1.0 val_tonic_mean=-0.3298 une_tonic_mean=0.1413 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+    R2act  decisions=255 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=12.0 tonic=51.0 val_final=-0.3448 une_final=0.15 ctl_final=-0.0594 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=1.0 val_tonic_mean=-0.3298 une_tonic_mean=0.1413 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+  -- long
+    P0     decisions=655 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=10.0
+    A15    decisions=655 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=15.0 tonic=0.0 val_final=-0.0001 une_final=0.0 ctl_final=-0.0037 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=7210.0 une_settle=0.0 threat_appr=0.0 identical=0 several=5.0 health_lost=0.0 food_lost=10.0
+    R2rec  decisions=655 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=12.0 tonic=131.0 val_final=-0.35 une_final=0.15 ctl_final=-0.0037 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=1.0 val_tonic_mean=-0.3433 une_tonic_mean=0.1471 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+    R2act  decisions=655 p_dec=55 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=12.0 tonic=131.0 val_final=-0.35 une_final=0.15 ctl_final=-0.0037 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=1.0 val_tonic_mean=-0.3433 une_tonic_mean=0.1471 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+
+=== b-near-tie (commit e26fc0a, clean True)
+  short  P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  short  R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  short  P0/R2act     0/5  the whole affect system
+  short  P0/A15       0/5  the whole affect system
+  short  A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  medium P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  medium R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  medium P0/R2act     0/5  the whole affect system
+  medium P0/A15       0/5  the whole affect system
+  medium A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  long   P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  long   R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  long   P0/R2act     0/5  the whole affect system
+  long   P0/A15       0/5  the whole affect system
+  long   A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  -- short
+    P0     decisions=190 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=10.0
+    A15    decisions=190 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=26.0 tonic=0.0 val_final=-0.3063 une_final=0.0 ctl_final=-0.2731 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=10889.0 une_settle=0.0 threat_appr=0.0 identical=0 several=6.0 health_lost=0.0 food_lost=10.0
+    R2rec  decisions=190 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=17.0 tonic=8.0 val_final=-0.483 une_final=0.0225 ctl_final=-0.3696 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.4249 val_tonic_mean=-0.0248 une_tonic_mean=0.0106 val_settle=-1.0 une_settle=0.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+    R2act  decisions=190 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=17.0 tonic=8.0 val_final=-0.483 une_final=0.0225 ctl_final=-0.3696 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.4249 val_tonic_mean=-0.0248 une_tonic_mean=0.0106 val_settle=-1.0 une_settle=0.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=10.0
+  -- medium
+    P0     decisions=340 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=20.0
+    A15    decisions=340 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=26.0 tonic=0.0 val_final=-0.0383 une_final=0.0 ctl_final=-0.0966 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=10889.0 une_settle=0.0 threat_appr=0.0 identical=0 several=6.0 health_lost=0.0 food_lost=20.0
+    R2rec  decisions=340 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=18.0 tonic=38.0 val_final=-0.37 une_final=0.15 ctl_final=-0.1307 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.8621 val_tonic_mean=-0.2484 une_tonic_mean=0.1065 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=20.0
+    R2act  decisions=340 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=18.0 tonic=38.0 val_final=-0.37 une_final=0.15 ctl_final=-0.1307 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.8621 val_tonic_mean=-0.2484 une_tonic_mean=0.1065 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=20.0
+  -- long
+    P0     decisions=740 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=20.0
+    A15    decisions=740 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=26.0 tonic=0.0 val_final=-0.0001 une_final=0.0 ctl_final=-0.006 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=10889.0 une_settle=0.0 threat_appr=0.0 identical=0 several=6.0 health_lost=0.0 food_lost=20.0
+    R2rec  decisions=740 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=18.0 tonic=118.0 val_final=-0.3501 une_final=0.15 ctl_final=-0.0082 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.9545 val_tonic_mean=-0.3164 une_tonic_mean=0.1356 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=20.0
+    R2act  decisions=740 p_dec=155 p_opp=45 p_chg=0 p_chg_wo=0 e_multi=0 e_opp=0 e_chg=0 phasic=18.0 tonic=118.0 val_final=-0.3501 une_final=0.15 ctl_final=-0.0082 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.9545 val_tonic_mean=-0.3164 une_tonic_mean=0.1356 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=2.0 health_lost=0.0 food_lost=20.0
+
+=== c-exploration (commit e26fc0a, clean True)
+  short  P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  short  R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  short  P0/R2act     0/5  the whole affect system
+  short  P0/A15       0/5  the whole affect system
+  short  A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  medium P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  medium R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  medium P0/R2act     0/5  the whole affect system
+  medium P0/A15       0/5  the whole affect system
+  medium A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  long   P0/R2rec     0/5  negative control: affect that reaches no decision must chang
+  long   R2rec/R2act  0/5  the causal effect of letting the same affect reach decisions
+  long   P0/R2act     0/5  the whole affect system
+  long   P0/A15       0/5  the whole affect system
+  long   A15/R2act    0/5  the interoceptive contribution to behaviour: R1.5 appraisal 
+  -- short
+    P0     decisions=282 p_dec=254 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=15 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=7.0
+    A15    decisions=282 p_dec=254 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=15 e_opp=0 e_chg=0 phasic=45.0 tonic=0.0 val_final=0.3705 une_final=0.002 ctl_final=0.6054 val_near=0.0847 une_near=0.0 ctl_near=0.1367 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=12113.8 une_settle=0.0 threat_appr=0.0 identical=0 several=7.2 health_lost=0.0 food_lost=7.0
+    R2rec  decisions=282 p_dec=254 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=15 e_opp=0 e_chg=0 phasic=36.8 tonic=10.4 val_final=0.429 une_final=0.0037 ctl_final=0.6284 val_near=0.0057 une_near=0.0 ctl_near=0.1128 val_tonic_t=0.165 val_tonic_mean=-0.011 une_tonic_mean=0.0047 val_settle=11045.8 une_settle=0.0 threat_appr=0.0 identical=0 several=5.8 health_lost=0.0 food_lost=7.0
+    R2act  decisions=282 p_dec=254 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=15 e_opp=0 e_chg=0 phasic=36.8 tonic=10.4 val_final=0.429 une_final=0.0037 ctl_final=0.6284 val_near=0.0057 une_near=0.0 ctl_near=0.1128 val_tonic_t=0.165 val_tonic_mean=-0.011 une_tonic_mean=0.0047 val_settle=11045.8 une_settle=0.0 threat_appr=0.0 identical=0 several=5.8 health_lost=0.0 food_lost=7.0
+  -- medium
+    P0     decisions=620 p_dec=472 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=22.0
+    A15    decisions=620 p_dec=472 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=61.4 tonic=0.0 val_final=-0.1971 une_final=0.0 ctl_final=-0.0613 val_near=0.1178 une_near=0.0 ctl_near=0.0377 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=3996.0 une_settle=0.0 threat_appr=0.0 identical=0 several=8.2 health_lost=0.0 food_lost=22.0
+    R2rec  decisions=620 p_dec=472 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=46.6 tonic=78.0 val_final=-0.4387 une_final=0.15 ctl_final=-0.0681 val_near=0.1097 une_near=0.0 ctl_near=0.032 val_tonic_t=0.8015 val_tonic_mean=-0.2198 une_tonic_mean=0.0942 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=5.8 health_lost=0.0 food_lost=22.0
+    R2act  decisions=620 p_dec=472 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=46.6 tonic=78.0 val_final=-0.4387 une_final=0.15 ctl_final=-0.0681 val_near=0.1097 une_near=0.0 ctl_near=0.032 val_tonic_t=0.8015 val_tonic_mean=-0.2198 une_tonic_mean=0.0942 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=5.8 health_lost=0.0 food_lost=22.0
+  -- long
+    P0     decisions=1493 p_dec=1025 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=0.0 tonic=0.0 val_final=0.0 une_final=0.0 ctl_final=0.0 val_near=0.0 une_near=0.0 ctl_near=0.0 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=0.0 une_settle=0.0 threat_appr=0.0 identical=0 several=0.0 health_lost=0.0 food_lost=22.0
+    A15    decisions=1493 p_dec=1025 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=93.0 tonic=0.0 val_final=-0.2 une_final=0.0 ctl_final=-0.1952 val_near=0.1732 une_near=0.0 ctl_near=0.1281 val_tonic_t=0.0 val_tonic_mean=0.0 une_tonic_mean=0.0 val_settle=3996.0 une_settle=0.0 threat_appr=0.0 identical=0 several=8.2 health_lost=0.0 food_lost=22.0
+    R2rec  decisions=1493 p_dec=1025 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=62.4 tonic=252.6 val_final=-0.4798 une_final=0.15 ctl_final=-0.1955 val_near=0.1705 une_near=0.0 ctl_near=0.1274 val_tonic_t=0.9347 val_tonic_mean=-0.3072 une_tonic_mean=0.1316 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=5.8 health_lost=0.0 food_lost=22.0
+    R2act  decisions=1493 p_dec=1025 p_opp=0 p_chg=0 p_chg_wo=0 e_multi=30 e_opp=0 e_chg=0 phasic=62.4 tonic=252.6 val_final=-0.4798 une_final=0.15 ctl_final=-0.1955 val_near=0.1705 une_near=0.0 ctl_near=0.1274 val_tonic_t=0.9347 val_tonic_mean=-0.3072 une_tonic_mean=0.1316 val_settle=-1.0 une_settle=-1.0 threat_appr=0.0 identical=0 several=5.8 health_lost=0.0 food_lost=22.0

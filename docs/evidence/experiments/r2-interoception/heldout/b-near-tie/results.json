@@ -1,0 +1,5887 @@
+{
+  "plan": {
+    "name": "r2-heldout-b-near-tie",
+    "description": "R2 held-out evaluation (ADR 0014): run once, after every R2 parameter was frozen at the commit that adds this plan. Do not tune on its results; any later parameter change consumes this held-out set.",
+    "split": "heldout",
+    "benchmarkClass": "B",
+    "world": "../../../fixtures/worlds/benchmarks/heldout/b-near-tie.json",
+    "config": "../../../examples/fixture.toml",
+    "seeds": [
+      101,
+      102,
+      103,
+      104,
+      105
+    ],
+    "conditions": [
+      {
+        "id": "P0",
+        "affectMode": "off"
+      },
+      {
+        "id": "A15",
+        "affectMode": "active",
+        "interoception": "off"
+      },
+      {
+        "id": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on"
+      },
+      {
+        "id": "R2act",
+        "affectMode": "active",
+        "interoception": "on"
+      }
+    ],
+    "maxDecisions": 5000,
+    "learningMode": "off",
+    "horizons": [
+      {
+        "id": "short",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 6000
+      },
+      {
+        "id": "medium",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 24000
+      },
+      {
+        "id": "long",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 72000
+      }
+    ]
+  },
+  "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+  "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+  "treeClean": true,
+  "affectBounds": {
+    "bias_limit": 25,
+    "half_lives": {
+      "control": 12000,
+      "unease": 1200,
+      "valence": 6000
+    },
+    "ranges": {
+      "control": [
+        -1,
+        1
+      ],
+      "unease": [
+        0,
+        1
+      ],
+      "valence": [
+        -1,
+        1
+      ]
+    },
+    "swings": {
+      "fixed": {
+        "fixed": 0,
+        "outgoing": 25,
+        "protective": 12.5
+      },
+      "outgoing": {
+        "fixed": 25,
+        "outgoing": 0,
+        "protective": 37.5
+      },
+      "protective": {
+        "fixed": 25,
+        "outgoing": 50,
+        "protective": 0
+      }
+    },
+    "tolerance_range": [
+      0.5,
+      1.25
+    ]
+  },
+  "comparisons": [
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "R2rec"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "R2rec",
+        "R2act"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "R2act"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "A15"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "A15",
+        "R2act"
+      ],
+      "purpose": "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            38,
+            38
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "R2rec"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "R2rec",
+        "R2act"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "R2act"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "A15"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "A15",
+        "R2act"
+      ],
+      "purpose": "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            68,
+            68
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "R2rec"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "R2rec",
+        "R2act"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "R2act"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "A15"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "A15",
+        "R2act"
+      ],
+      "purpose": "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
+      "divergences": [
+        {
+          "seed": 101,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 102,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 103,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 104,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        },
+        {
+          "seed": 105,
+          "firstDifference": -1,
+          "lengths": [
+            148,
+            148
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    }
+  ],
+  "runs": [
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-short-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "93c1c409212a641c78d3b8ab0ed2befa45e4fc265629990ce9ed7d52e7d9434e",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/short/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-short-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "7ed2afdf2802df57417b7c1f09c01cb0bcde4cecef53ba5ec422825dedd9e13f",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/short/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-short-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "8286b1f37efdd8c1f730b7882626db073ad8afbb53fe9b599d5eb4afce21fc7f",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/short/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-short-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "8d5880bccfd28b1bc457696521c5e8a21a92622d0334240ef9c4dfd470bbc148",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/short/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-short-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "162d2ddb050add882de60de0f871e162d81f49360fc273da02f01b7f183b69ee",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/short/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-medium-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "db44ae2d55b3e9e74a34cab1729978557f5938ed41b07d1d23c2d8ec8855a943",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/medium/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-medium-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "e680e4cf7447e0966ba8f503eee273bd802fb199b9848e015db031d7d9366474",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/medium/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-medium-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "e656c004c5112b030fe90ea0f68da3f50518c912be819225609201a84b0aac35",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/medium/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-medium-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "8674b9794ef9a99fe1b4c1c0107ad14f9a42467262f8d00f4f1bbae99f742aa5",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/medium/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-medium-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "003159f52f272e5ce0ecc531d34125db629059941522abeaa8a8a1a52470c0cd",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/medium/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-long-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "8c9d63377f27cac4fc69fc1a6d942a725cd81d9df64e3af9ee87f882c514cbec",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/long/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-long-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "20df4bdd2a8291c5d2fdcf93ddb40b37c0d85bc531f77c12b66ffa5f29be6a59",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/long/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-long-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "21d1a0e5c4d984133925340d26b4fb67a869cd90d694a8e780f9470ef1fe11d9",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/long/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-long-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "373e7946a1bb2f4e48b677b04170aeb473114fe574e165b891c26e6e110ddeca",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/long/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-p0-long-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "140d7efc0ba6363a93b3800118d79815ae610807028ebe2ff9f99e647c10107b",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/P0/long/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 101,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-short-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "9d38c6e9254b548ee4a158a99754a5573b395d91a08ff65b02409a3d431a9903",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/short/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 102,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-short-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "ebcd91af04459aacc9c79c746180e9c1782284c29c1dec5f92e288951a572655",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/short/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 103,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-short-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "70bdd562695847f422417b9b99dca7d76d261536a33077192642bcf49f4b7fcc",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/short/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 104,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-short-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "4df94715040756abb7057790e4c12d7188102decce525433110ae77f20559904",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/short/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 105,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-short-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "95e743da2d7842d403a9ef34078f5a6c6c2d38c935513b8aa589de3d9c944516",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/short/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 101,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-medium-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "525355d125eff3fed09bdb255d4f04f4cd5f6476c53d574261586001421c75f4",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/medium/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 102,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-medium-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "9df989549d8d8ddb1fc606d9f05f5235981faa1317e5bf382b62cfec6c2b61cb",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/medium/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 103,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-medium-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "598e794f6da02f66a6279bccf5cc3f21297834a7db0df24e6b051ba2f61750ad",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/medium/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 104,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-medium-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "48bc82de576055ef0fbbc50792b8ee3c2e238d2ab6f6b97828130a8e32500b87",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/medium/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 105,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-medium-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "cb28a79472136f46b8e9e7977b8b8da0f5649ec3ae80c114ed2347c0c93e8479",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/medium/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 101,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-long-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "0206500d4c58d6ba4262f90c1203b1bcdbdff60323fbddfdddcf791fc2570c49",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/long/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 102,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-long-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "c4abebc4e7fe9f9aa95498fa11688ed6ae2c3c8f5e2e644a730ea66dd58a2cae",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/long/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 103,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-long-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "12b85cf34aa1a28c66518c0a2af6511bb658dca159ef2e5e0a976807f971d873",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/long/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 104,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-long-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "9b01a6a4dfc379b88e5f03fa889fb6c18ebfe1c3c63ba036df3990a0862c907c",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/long/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 105,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-a15-long-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "51343c8d87f1ba6a9f5a396cc49070924f47ea01f562ef250c263b0b79514cb4",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/A15/long/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.25,
+          "goal_complete": 0.25,
+          "project_abandoned": -0.08,
+          "project_completed": 0.05,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "project_abandoned": 0,
+          "project_completed": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.48,
+          "action_succeeded": 0.2,
+          "goal_blocked": -0.5,
+          "goal_complete": 0.5,
+          "project_abandoned": -0.12,
+          "project_completed": 0.15,
+          "project_progressed": 0.05,
+          "search_unfound": -0.15
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "goal_blocked_establish_tools": 1,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_complete_establish_storage": 2,
+          "goal_complete_secure_food": 2,
+          "goal_complete_secure_shelter": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_completed_improve_home": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+goal_blocked_maintain_reserves+goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "action_failed+goal_blocked_secure_food": 1,
+          "action_failed+goal_complete_secure_food": 1,
+          "action_succeeded+goal_blocked_establish_tools": 1,
+          "action_succeeded+goal_complete_establish_storage+goal_complete_establish_storage+project_completed_improve_home": 1,
+          "goal_complete_secure_shelter+project_progressed_improve_home": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-short-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "14a6e859a833c99cb91d0cb8a796b277db0ee9a02fb37fce2dea0c1238237f67",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/short/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-short-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "628b9a27db80ab4fc26ac1e5270085de87792d8404cf9cbc06f4d5f1b2830e5b",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/short/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-short-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "1e2c501ea0b1aa43ce7876ef43c194b33d80cdf008f34ef31b7e4eed9e6d1ea8",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/short/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-short-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "0c42866cc77c7b630b00a1a6c3e0f6e7617d59c7ea7940231d27694b8a42ec38",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/short/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-short-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "783a058b35b63614100bc223e1174e2d12a33452fc9552a3a1f73528d3c1f32c",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/short/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-medium-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "a568e98fb9ada56acc652ab5719d770d63ee76573a5e3ee6e12b045b9a4a7715",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/medium/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-medium-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "53f79e53a310453c6b14ac0a39dabaefd2a3a119ec017a8ae3d1f648380e4bca",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/medium/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-medium-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "d75eec160da4a399c26fcf44cb2d967b8c3e6bec693e78f6c9d7d4630478610c",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/medium/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-medium-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "94b7e0876df11b7714f4333906c0d80b11220d6755e3e60ac74713f9026c6042",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/medium/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-medium-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "e5a6628b6decb853872c2a4aeb1e3a80a9dc68d2fc64046cc3d2ae6b31e52e4c",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/medium/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-long-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "8d6311d8d225a5b97eda69f11b76d165389eb6eef075a0aae35fbf70e8c308a2",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/long/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-long-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "13336038981c8651ae2c98bb3123cf3299781cd8be2398a97a85f016530c122b",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/long/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-long-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "dce5829dca38a94d66e31b9403b56d5deaf98024b0345469dc3493f557e27dda",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/long/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-long-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "a1844c0c2c441f91e6abcd82f06a420154c09d568dca949854bcd2e952c961eb",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/long/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2rec-long-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "dd07d14c33fae1aee9b13ca99ac402baec3e6754b05aa64f535bf39cf171758d",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2rec/long/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-short-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "72e535789472c35426b5b4fbf07c781ca809b08737eec1fd6630db9ce559042d",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/short/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-short-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "f6e4018c09b9996dfee721f4188861e402309da5f6eb2835b77ca7e0d12fcc23",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/short/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-short-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "472b8157965660d36232af2066a8cfb19de6032494a5fea20990c3423d9e1c18",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/short/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-short-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "ad89a347261ae272117db253e91ccd49885fbe1aae5002e531bb24f14b87d92a",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/short/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-short-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "09f97e8692b5eefffe12cc3aeafe55732332ff22a23d932382e5744fdb07a376",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/short/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 10,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 32
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-medium-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "0920a637fe18a2852ac4a4e4bafeb7e90157d12e80e78845e2845f840ac62389",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/medium/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-medium-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "db0c9ea7841bff269fabd4645d328f4de5c6506ba59efa6754486b0dd9ed2106",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/medium/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-medium-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "3f5065bb7833c2921f80d87108db7366fec90667c795b46f636c3c1655b33805",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/medium/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-medium-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "06f70b0fc6d98b7aa15df26a00bdd7aa5254db852e4614488dbcad1af393a293",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/medium/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-medium-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "8af23efc983f11ceaaee23a387eae59db7d72965a8ef63f43ced263d780f118d",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/medium/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 40,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 62
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 101,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-long-s101",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "acb007baa66f63ec468604e588d2e605126082ac098e3a3b4de0b97c0f488acc",
+        "worldSha256": "7a9d65893efdeee27d6a01748a5437df10ae00046617c33c537cb78b35a30fcb",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/long/seed-101/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 102,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-long-s102",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "60b43382c20f8b8292d40542ed6b88c4bc0d3bca5d875862eeb363e0e9d40dd8",
+        "worldSha256": "803b0ac34f975372374db3d638b95720e77559aec2a5f5fe0a02e7bead9313a4",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/long/seed-102/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 103,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-long-s103",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "c8b2344605a08f9a7da9b51861ecf62b53e0a8fd9fcbadbdd1f234357096eaf3",
+        "worldSha256": "574106198776e790b329ba8dd5cd17f60e068e46099b9cceac9100918a87652c",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/long/seed-103/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 104,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-long-s104",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "19da8874ce312cc6e26c29fa5b90b3787651d9a326a0437e20d030ac504a8d47",
+        "worldSha256": "e41e8cb121fba16c59a220947e5695bdc15eb0f3e0e3af642ddf5a00e8e8e22f",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/long/seed-104/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-heldout-b-near-tie",
+        "planSha256": "0fcf22f545265bbf0ed7f1bd0d67216b88490ca9d520a0260382fee8afc39663",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 105,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "heldout",
+        "episodeId": "r2-heldout-b-near-tie-r2act-long-s105",
+        "commit": "e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9",
+        "treeClean": true,
+        "configSha256": "34e7cfb80ee1b7ae9c1b475e42573c9f854a2ebaab087a0969f14569730611bd",
+        "worldSha256": "0596a59cc8af554956a5f36000d84fb2ea0ba9cd82be984dfbcd65ce49541aaf",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-heldout-b-near-tie/R2act/long/seed-105/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 2,
+          "ESTABLISH_TOOLS": 9,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 15,
+          "SECURE_SHELTER": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "craft_chest": 1,
+          "deposit_owned_storage": 4,
+          "look": 18,
+          "place_owned_chest": 1,
+          "wait_safely": 120,
+          "withdraw_owned_storage": 3
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "SUCCESS": 142
+        },
+        "control_input_by_trigger": {
+          "action_failed": -0.58,
+          "action_succeeded": 0.3,
+          "consequences": 0.02,
+          "hunger_onset": 0,
+          "hunger_starving": 0,
+          "search_unfound": -0.15
+        },
+        "unease_input_by_trigger": {
+          "action_failed": 0,
+          "action_succeeded": 0,
+          "consequences": 0,
+          "hunger_onset": 0,
+          "hunger_starving": 0.05,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_failed": -0.68,
+          "action_succeeded": 0.45,
+          "consequences": 0.08,
+          "hunger_onset": -0.03,
+          "hunger_starving": -0.08,
+          "search_unfound": -0.45
+        },
+        "appraisal_triggers": {
+          "action_failed": 6,
+          "action_succeeded": 4,
+          "consequences": 3,
+          "hunger_onset": 1,
+          "hunger_starving": 1,
+          "search_unfound": 3
+        },
+        "appraisals_at_one_moment": {
+          "action_failed+action_failed+consequences": 1,
+          "consequences+hunger_onset": 1
+        }
+      }
+    }
+  ]
+}
