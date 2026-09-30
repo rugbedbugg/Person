@@ -18,6 +18,11 @@ import {
   validateCommand,
 } from "../commands.ts";
 import { runExperiment, summariseExperiment } from "../experiment.ts";
+import {
+  preflight,
+  renderPreflight,
+  writeWorldManifest,
+} from "../preflight.ts";
 
 const USAGE = `Person: a persistent artificial inhabitant for Minecraft.
 
@@ -33,6 +38,9 @@ Usage:
   person compare  <reference-observation.json> <actual-observation.json> [--json]
   person experiment --plan <plan.json> [--out <directory>] [--jobs <n>]
                     [--heldout] [--json]
+  person preflight --config <file> --server-dir <dir> --backup <dir>
+                   [--found] [--json]
+  person world-manifest --server-dir <dir> --purpose <text>
 
 Every command that connects also accepts:
   --operator-intervention[=reason]   mark this run as contaminated by a human
@@ -63,6 +71,12 @@ Notes:
   changes nothing measured. A held-out plan runs only with --heldout: it
   evaluates a finished model once and is not for designing one.
 
+  "preflight" checks, before founding (--found) or embodying a canonical or
+  validation Person, that the revision, configuration, continuity root,
+  evidence path, backup destination, server and world are exactly what they
+  must be (ADR 0018). It is read-only, connects to nothing, and fails closed.
+  "world-manifest" records a newly created world's identity, once.
+
   Learning is off unless you ask for it. "person run" uses the mode in the
   configuration file, which examples ship as "off"; "person learn" is the only
   way to put a learner in control, and even then the Node safety kernel keeps
@@ -84,6 +98,8 @@ export interface ParsedCommand {
     | "compare"
     | "skill-test"
     | "experiment"
+    | "preflight"
+    | "world-manifest"
     | "help";
   configPath?: string;
   target?: string;
@@ -102,6 +118,10 @@ export interface ParsedCommand {
   follow: boolean;
   intervalMs: number;
   positional: string[];
+  serverDirectory?: string;
+  backupDirectory?: string;
+  purpose?: string;
+  found: boolean;
 }
 
 export class UsageError extends Error {}
@@ -118,6 +138,7 @@ export function parseArguments(argv: string[]): ParsedCommand {
     follow: false,
     intervalMs: 1000,
     positional: [],
+    found: false,
   };
   if (argv.length === 0 || argv[0] === "--help" || argv[0] === "-h")
     return parsed;
@@ -132,6 +153,8 @@ export function parseArguments(argv: string[]): ParsedCommand {
     "compare",
     "skill-test",
     "experiment",
+    "preflight",
+    "world-manifest",
   ] as const;
   if ((COMMANDS as readonly string[]).includes(command as string))
     parsed.command = command as (typeof COMMANDS)[number];
@@ -172,7 +195,19 @@ export function parseArguments(argv: string[]): ParsedCommand {
       if (!Number.isInteger(value) || value < 1 || value > 64)
         throw new UsageError("--jobs must be a whole number from 1 to 64");
       parsed.jobs = value;
-    } else if (argument === "--heldout") parsed.heldout = true;
+    } else if (
+      argument === "--server-dir" ||
+      argument === "--backup" ||
+      argument === "--purpose"
+    ) {
+      const value = rest[++index];
+      if (!value || value.startsWith("--"))
+        throw new UsageError(`${argument} needs a value`);
+      if (argument === "--server-dir") parsed.serverDirectory = value;
+      else if (argument === "--backup") parsed.backupDirectory = value;
+      else parsed.purpose = value;
+    } else if (argument === "--found") parsed.found = true;
+    else if (argument === "--heldout") parsed.heldout = true;
     else if (argument === "--operator-setup") parsed.operatorSetup = true;
     else if (argument === "--out") {
       const value = rest[++index];
@@ -256,6 +291,22 @@ export function parseArguments(argv: string[]): ParsedCommand {
     throw new UsageError(
       "person compare needs a reference observation and an actual observation",
     );
+  if (
+    parsed.command === "preflight" &&
+    (!parsed.configPath || !parsed.serverDirectory || !parsed.backupDirectory)
+  )
+    throw new UsageError(
+      "person preflight needs --config <file>, --server-dir <dir> and --backup <dir>",
+    );
+  if (
+    parsed.command === "world-manifest" &&
+    (!parsed.serverDirectory || !parsed.purpose)
+  )
+    throw new UsageError(
+      "person world-manifest needs --server-dir <dir> and --purpose <text>",
+    );
+  if (parsed.found && parsed.command !== "preflight")
+    throw new UsageError("--found only applies to person preflight");
   parsed.positional = positional;
   if (
     (parsed.command === "run" || parsed.command === "learn") &&
@@ -331,6 +382,29 @@ export async function main(argv: string[]): Promise<number> {
           comparison.divergentSeeds > 0,
       );
       return leaked ? 1 : 0;
+    }
+    if (parsed.command === "preflight") {
+      const result = await preflight({
+        configPath: parsed.configPath as string,
+        operation: parsed.found ? "found" : "embody",
+        serverDirectory: parsed.serverDirectory as string,
+        backupDirectory: parsed.backupDirectory as string,
+        repository: process.cwd(),
+      });
+      process.stdout.write(
+        parsed.json
+          ? `${JSON.stringify(result, null, 2)}\n`
+          : renderPreflight(result),
+      );
+      return result.ok ? 0 : 1;
+    }
+    if (parsed.command === "world-manifest") {
+      const manifest = writeWorldManifest(
+        parsed.serverDirectory as string,
+        parsed.purpose as string,
+      );
+      process.stdout.write(`${JSON.stringify(manifest, null, 2)}\n`);
+      return 0;
     }
     if (parsed.command === "skill-test") {
       const result = await skillTestCommand({

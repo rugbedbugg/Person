@@ -320,17 +320,21 @@ stay until their own systems are designed.
 
 ## 8. CLI / Debug / Validation Capabilities
 
-| Command                                                | Purpose                                                       | Live-Safe                                      |
-| ------------------------------------------------------ | ------------------------------------------------------------- | ---------------------------------------------- |
-| `person run`                                           | Autonomous episode                                            | ✅ (learning off by default)                   |
-| `person learn --mode shadow\|supervised`               | Put learner in control                                        | ⚠️ safety kernel still decides                 |
-| `person validate <config>`                             | Config schema + cognition cross-check                         | ✅ no connection                               |
-| `person inspect skills\|evidence\|config\|predictions` | Debug introspection                                           | ✅ no connection                               |
-| `person observe`                                       | Connect, capture one observation, validate schema, disconnect | ✅ runs no skill, writes no evidence           |
-| `person compare <ref> <actual>`                        | Diff observations, flag suspicious defaults                   | ✅ no connection                               |
-| `person status`                                        | Read runtime telemetry (never connects)                       | ✅ read-only                                   |
-| `person skill-test --skill X`                          | Single-skill validation through shared dispatch               | ⚠️ changes world, marks operator contamination |
-| `person experiment --plan <file>`                      | Seeded fixture runs per condition, metrics and comparisons    | ✅ fixture only, never connects                |
+| Command                                                           | Purpose                                                       | Live-Safe                                      |
+| ----------------------------------------------------------------- | ------------------------------------------------------------- | ---------------------------------------------- |
+| `person run`                                                      | Autonomous episode                                            | ✅ (learning off by default)                   |
+| `person learn --mode shadow\|supervised`                          | Put learner in control                                        | ⚠️ safety kernel still decides                 |
+| `person validate <config>`                                        | Config schema + cognition cross-check                         | ✅ no connection                               |
+| `person inspect skills\|evidence\|config\|predictions`            | Debug introspection                                           | ✅ no connection                               |
+| `person observe`                                                  | Connect, capture one observation, validate schema, disconnect | ✅ runs no skill, writes no evidence           |
+| `person compare <ref> <actual>`                                   | Diff observations, flag suspicious defaults                   | ✅ no connection                               |
+| `person status`                                                   | Read runtime telemetry (never connects)                       | ✅ read-only                                   |
+| `person skill-test --skill X`                                     | Single-skill validation through shared dispatch               | ⚠️ changes world, marks operator contamination |
+| `person experiment --plan <file>`                                 | Seeded fixture runs per condition, metrics and comparisons    | ✅ fixture only, never connects                |
+| `person preflight --config X --server-dir D --backup B [--found]` | Fail-closed check before a founding or embodiment (ADR 0018)  | ✅ read-only, never connects                   |
+| `person world-manifest --server-dir D --purpose P`                | Records a generated world's identity, once (ADR 0018)         | ✅ writes only the manifest                    |
+| `person-cognition --inspect-root DIR`                             | A root's state, life status and lock holder (ADR 0018)        | ✅ read-only, takes no lock                    |
+| `scripts/evidence/backup-root.py ROOT DEST`                       | Verified backup of a root not in use (ADR 0018)               | ✅ reads the root only                         |
 
 **Aliases:** `shroud` = `person`, `shroud-train` = `person learn`
 
@@ -947,9 +951,9 @@ runtime would allow a direct route home), not a distance.
 
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
-| Node (all)   | 371     | 371     |
-| Python (all) | 442     | 442     |
-| **Total**    | **813** | **813** |
+| Node (all)   | 401     | 401     |
+| Python (all) | 455     | 455     |
+| **Total**    | **856** | **856** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -969,12 +973,12 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `person/adapter-lifetime` on 2026-09-30: Node 371 pass / 0 fail,
-Python 442 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on `person/preflight` on 2026-09-30: Node 401 pass / 0 fail,
+Python 455 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;
-276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31.
+276 / 318 after PR #15; 276 / 319 after PR #16; 283 / 332 after PR #17; 298 / 345 after PR #18; 299 / 345 after PR #19; 309 / 365 after PR #20; 328 / 373 after PR #21; 349 / 418 after PR #29; 351 / 430 after PR #30; 354 / 442 after PR #31; 371 / 442 after PR #33; 371 / 452 after PR #34.
 
 ---
 

@@ -84,8 +84,16 @@ Ada better. It is to make her beginning trustworthy.
 
 - **E1 (PR #33):** Mineflayer respawn, dead joins and client generations.
   CONFORMANCE-TESTED.
-- **E2a:** the `validation-NNN` namespace, founded only explicitly, and
-  `person-cognition --inspect-root`. TESTED.
+- **E2a (PR #34):** the `validation-NNN` namespace, founded only explicitly,
+  and `person-cognition --inspect-root`. TESTED.
+- **E2b:** `person preflight` (every check in rule 4, read-only, failing
+  closed, including a check that could not be carried out) and `person
+world-manifest` (written once, inside a generated world, from its pinned
+  properties). `scripts/evidence/backup-root.py` makes a verified backup of a
+  root no process holds. The procedure, the intervention limits and the
+  history policy are `docs/FOUNDING_RUNBOOK.md`. The configuration schema
+  accepts `Validation-NNN` designations. TESTED against synthetic servers and
+  roots; never run against the live server.
 
 ## Consequences
 

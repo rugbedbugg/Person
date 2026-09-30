@@ -91,8 +91,8 @@
         "name": { "type": "string", "minLength": 1, "maxLength": 64 },
         "designation": {
           "type": "string",
-          "pattern": "^Person-[0-9]{3}$",
-          "description": "The canonical serial, e.g. Person-000; only for a canonical Person."
+          "pattern": "^(Person|Validation)-[0-9]{3}$",
+          "description": "The serial: Person-000 for a canonical Person, Validation-000 for a validation identity (ADR 0018)."
         }
       }
     },
