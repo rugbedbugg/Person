@@ -99,13 +99,28 @@ was written for D.
 
 ## Files
 
-`r2-heldout-d-setback-journals.tar.gz` holds every run directory of the
-attempt (journals, reports, configurations, worlds, run records) without the
-cognition snapshots, which are derivable from the journals and totalled 25 GB.
-SHA-256 `eb1b7d87fdef2f5959ace3d732d89d92e0a49dddde9c7dbb7a71cf3f3e46c79e`.
-The snapshots were deleted from `runs/` on 2026-09-29 to reclaim disk; the
-evidence store replays the journal when no snapshot exists, so none of the
-evidence depended on them.
+The raw journals are stored as a GitHub release asset, not in Git history.
+
+| Field                | Value                                                                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| File                 | `r2-heldout-d-setback-journals.tar.gz`                                                                                                                             |
+| Size                 | 24,411,056 bytes                                                                                                                                                   |
+| SHA-256              | `eb1b7d87fdef2f5959ace3d732d89d92e0a49dddde9c7dbb7a71cf3f3e46c79e`                                                                                                 |
+| Originating revision | `e26fc0a2bb8e070df6f306281d4f2a7bcd72b1a9`                                                                                                                         |
+| Location             | release `evidence-r2-heldout-d-invalid`: https://github.com/rugbedbugg/Person/releases/download/evidence-r2-heldout-d-invalid/r2-heldout-d-setback-journals.tar.gz |
+| Verified             | 2026-09-30: downloaded from the release, SHA-256 and size match                                                                                                    |
+
+**Contents:** every run directory of the attempt: journals, episode and
+learning reports, configurations, worlds and run records, 354 entries. The
+cognition snapshots are left out; they are derivable from the journals and
+totalled 25 GB. Files contain absolute local paths from the machine that ran
+them.
+
+**Why it is invalid:** the run froze in the zero-time livelock described
+above, which had nothing to do with affect. It is kept as the record of that
+failure and never used as evidence. The snapshots were deleted from `runs/`
+on 2026-09-29 to reclaim disk; the evidence store replays the journal when no
+snapshot exists, so none of the evidence depended on them.
 
 ## Replacement
 
