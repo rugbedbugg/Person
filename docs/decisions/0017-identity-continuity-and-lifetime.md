@@ -1,13 +1,15 @@
 # ADR 0017: Identity, continuity and operational lifetime
 
-**Status:** Proposed
+**Status:** Accepted (2026-09-30)
 **Date:** 2026-09-30
 **Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Operator decision:** start the Person-000 identity and continuity phase
-(2026-09-30). Scope and design reviewed before implementation; this ADR goes
-to the operator before it is Accepted, and before the canonical Person-000
-continuity root is created.
+(2026-09-30). Scope and design reviewed before implementation. After I3 the
+operator reviewed identity, world availability and death as one lifetime
+model and accepted this ADR (2026-09-30), approving the legacy-root death
+behaviour as implemented. Acceptance does not found Person-000: the canonical
+root is created only by a separate, explicit operator authorization.
 
 ---
 
@@ -123,7 +125,7 @@ spot-checks. They were never one continuous individual.
 - **I1 (PR #29):** founding, root binding, session continuity, the coarse gap
   and the self-knowledge projection. TESTED IN FIXTURE with synthetic
   identities.
-- **I2:** operational state as an explicit state machine, WORLD_AVAILABLE and
+- **I2 (PR #30):** operational state as an explicit state machine, WORLD_AVAILABLE and
   WORLD_UNAVAILABLE, reported by the runtime's `WorldAvailability` and
   journalled as `world_availability_changed` only on a change. Losing the
   world ends an episode as interrupted, never failed, after the configured
@@ -133,7 +135,7 @@ spot-checks. They were never one continuous individual.
   nothing is invented for it. Absence is not experienced and no transition is
   felt across it. Legacy roots acquire no lifecycle events. Cognition sees only
   whether the world is available. TESTED IN FIXTURE with synthetic identities.
-- **I3:** life status as its own axis, with alive, awaiting a respawn
+- **I3 (PR #31):** life status as its own axis, with alive, awaiting a respawn
   (engineering-facing) and terminated, rebuilt by `LifeRecord`. The trusted
   runtime alone reports a death (`LifeEvent`) and decides by configuration
   whether it is terminal; cognition cannot die or end itself.
@@ -152,7 +154,9 @@ spot-checks. They were never one continuous individual.
     in the `person_died` evidence rather than in memory, because ADR 0010
     (Accepted) keeps affect out of memory by construction.
   - A death on a legacy root is recorded too: it is real new history, not
-    silent. Legacy roots still acquire no session or world events.
+    silent, and without it permadeath could not be enforced on that root.
+    Legacy roots still acquire no session or world events. The operator
+    approved this at acceptance.
   - TESTED IN FIXTURE with synthetic identities.
 - **Separate by design:** identity and continuity (I1), cognitive lifecycle
   (sessions), embodiment connection (the runtime's), operational state (I2)
@@ -168,8 +172,8 @@ spot-checks. They were never one continuous individual.
 
 ### Negative
 
-- The evidence schema gains event types (version 11); every journal written
-  from now on starts with a founding event.
+- The evidence schema gains event types (versions 11 to 13); every journal
+  written from now on starts with a founding event.
 - Founding a canonical Person is an extra, deliberate operator step.
 
 ## Alternatives considered
@@ -180,3 +184,23 @@ spot-checks. They were never one continuous individual.
 | Give legacy journals a retrospective founding event | Their first timestamp does not prove when anything was founded                             |
 | Expose the raw external gap to cognition            | A clock-access decision this ADR does not make                                             |
 | Let identity own home, projects and preferences     | A second source of truth for records other subsystems own                                  |
+
+## Revisit conditions
+
+- A second Person, or a deliberate fork, needs recorded ancestry (rule 5)
+  and the multi-Person ADR.
+- Adopting any legacy `"ada"` lineage into a canonical Person needs an
+  explicit binding with provenance (rule 6).
+- SLEEPING, or any clock access beyond the coarse gap category.
+- A decision that consumes the self-knowledge projection.
+- The Minecraft adapter observing deaths and respawning its body: death
+  semantics are TESTED IN FIXTURE only until then.
+
+## Relevant commits and docs
+
+- PR #29 (I1), PR #30 (I2), PR #31 (I3)
+- `packages/persistence/python/person_persistence/identity.py`
+- `apps/cognition/python/person_cognition/continuity.py`
+- `docs/PROTOCOL.md` (`WorldAvailability`, `LifeEvent`)
+- `TRACEABILITY.md`, "Identity and continuity", "Operational state", "Life
+  status"

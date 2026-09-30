@@ -73,7 +73,7 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0014](0014-interoceptive-affect.md)                       | Interoceptive affect, phasic and tonic                                 | Accepted                           | 2026-09-29 |
 | [0015](0015-one-contact-range-and-bounded-progress.md)     | One contact range and bounded simulated progress under runtime control | Accepted                           | 2026-09-30 |
 | [0016](0016-fixture-hostiles-obey-walls.md)                | Fixture hostiles obey walls                                            | Accepted                           | 2026-09-30 |
-| [0017](0017-identity-continuity-and-lifetime.md)           | Identity, continuity and operational lifetime                          | Proposed                           | 2026-09-30 |
+| [0017](0017-identity-continuity-and-lifetime.md)           | Identity, continuity and operational lifetime                          | Accepted                           | 2026-09-30 |
 
 ADRs 0001 to 0006 were written during the Phase 0 canonical architecture
 reconciliation (`docs/PERSON_SPEC.md`, frozen 2026-09-22) and changed no

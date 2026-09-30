@@ -37,7 +37,10 @@ was generated from a seed declared in advance and frozen before any run. After
 ADR 0016 (hostiles obey walls) the confirmatory V2 suite (A2, B2, C2, D2) ran
 once and closed R2 (`docs/evidence/experiments/R2-CLOSURE.md`): support for
 interoceptive affect as state, and no held-out evidence that it changes
-behaviour in the channels exercised.
+behaviour in the channels exercised. The identity and continuity phase (ADR
+0017, Accepted; #29 to #31) followed: founding and root binding, session
+continuity, world availability and death. It is closed; the canonical
+Person-000 root has not been created.
 
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
@@ -123,7 +126,7 @@ Two implementations, same skill code:
 - **Projects (ADR 0009):** persistent cognitive commitments (`improve_home`, `secure_food_supply`) taken up only when pressing needs are calm, pursued one milestone at a time at a priority below urgent needs, interrupted by those needs and resumed after, abandoned when repeatedly blocked, and re-examined after a restart (`person_cognition/projects.py`)
 - **Spatial sense (ADR 0008):** path integration of the coarse `selfMotion` percept into an estimate that drifts, cognitive places recognised with a confidence, routes between them, and episodes placed where Person believes they happened (`person_cognition/spatial/`)
 - **Memory (ADR 0007):** episodic memory encoded from cognition-facing experience, a small unpersisted working memory, and recall by typed cue only, at most 3 memories at a time (`person_cognition/memory/`)
-- **Identity and continuity (ADR 0017, Proposed; increment I1):**
+- **Identity and continuity (ADR 0017, Accepted; increments I1 to I3):**
   - **Founding:** a new continuity root begins with `person_founded`, written once and first.
   - **Binding:** a founded root opens only as its own Person; snapshots carry the Person and founding fingerprint and are refused on a mismatch; one process holds a root at a time (lock).
   - **Canonical Persons:** a canonical Person (`person-NNN`) is founded only by the operator's `person-cognition --found`, never by startup.
@@ -143,7 +146,7 @@ Two implementations, same skill code:
   - **After a crash before a respawn:** the next run respawns the body before Person perceives anything.
   - **What reaches Person:** no cause, place or inventory.
   - **Status:** TESTED IN FIXTURE, with synthetic identities only; the canonical Person-000 root does not exist yet.
-- **Experienced time (ADR 0006, partly implemented):** Person's own clock counts only ticks between observations it received, is journalled on `episode_ended`, and resumes after a restart; memory accessibility, affect decay, project cooldowns and experiment patience run on it. External time, the five operational states and death semantics are not implemented
+- **Experienced time (ADR 0006, partly implemented):** Person's own clock counts only ticks between observations it received, is journalled on `episode_ended`, and resumes after a restart; memory accessibility, affect decay, project cooldowns and experiment patience run on it. External time as a coarse gap, world availability, suspension and death semantics are implemented under ADR 0017; SLEEPING is not implemented
 
 ### Evidence & Persistence (`packages/persistence/`)
 
@@ -425,7 +428,7 @@ could rest on.
 4. Server-side placement/crafting/smelting/container timing untested
 5. Real mob behavior / flee adequacy unknown (both live worlds were Peaceful)
 6. Tick budgets still not revised on live measurement
-7. Death/respawn not designed
+7. Death/respawn designed and TESTED IN FIXTURE (ADR 0017); the Mineflayer adapter reports a death (health 0) but cannot yet respawn its body
 
 ---
 
@@ -915,7 +918,7 @@ runtime would allow a direct route home), not a distance.
 | A zero-time success repeated at one tick is not guarded; zero-time failures stop the fixture clock until the stall detector ends the episode | ADR 0015                   |
 | Breath appraisal is exercised only by tests: no fixture world lowers air                                                                     | ADR 0014                   |
 | The experiment harness measures from per-decision deltas; the body is not sampled continuously                                               | ADR 0013                   |
-| Death ends episode — no respawn/recovery loop                                                                                                | IMPLEMENTATION_REPORT.md   |
+| Respawn is fixture-only: the Mineflayer adapter has no `respawn`, so a live death ends the episode awaiting a respawn                        | ADR 0017                   |
 | Evidence written by cognition — last outcome missing if cognition dies mid-episode                                                           | IMPLEMENTATION_REPORT.md   |
 | Inventory reconciliation on resume not reimplemented                                                                                         | IMPLEMENTATION_REPORT.md   |
 | `loot_permitted_container` withdraws all types up to amount                                                                                  | IMPLEMENTATION_REPORT.md   |
