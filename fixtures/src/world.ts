@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 import { distance, positionKey, type Position } from "#config";
 import type { ItemStack } from "#protocol";
 import {
@@ -23,6 +23,7 @@ import {
   isFuel,
   recipesFor,
   preferredWood,
+  lineBlocked,
 } from "#node-runtime";
 import {
   BLOCKS,
@@ -380,21 +381,108 @@ export class FixtureWorld implements Embodiment {
       if (!entity.hostile) continue;
       const gap = distance(entity.position, this.#position);
       if (gap > 24) continue;
-      if (gap > 1.5 && this.#tick % 6 === 0) {
-        entity.position = {
-          x:
-            entity.position.x + Math.sign(this.#position.x - entity.position.x),
-          y: this.#position.y,
-          z:
-            entity.position.z + Math.sign(this.#position.z - entity.position.z),
-        };
-      }
+      if (gap > 1.5 && this.#tick % 6 === 0) this.#approach(entity);
       const reach = entity.ranged ? 12 : 2.5;
-      if (gap <= reach && this.#tick - (this.#lastAttackTick ?? -1000) >= 20) {
+      const ready =
+        gap <= reach && this.#tick - (this.#lastAttackTick ?? -1000) >= 20;
+      const clear = ready && this.#lineOfAttack(entity.position);
+      if (ready && !clear) this.#diagnose("attack_blocked", entity, {});
+      if (clear) {
         this.#lastAttackTick = this.#tick;
         this.#damage(2);
       }
     }
+  }
+
+  /**
+   * One step toward Person, only into open space.
+   *
+   * The step is diagonal when both axes differ; if that is blocked it tries
+   * the x step alone, then the z step alone, and otherwise waits. A hostile
+   * needs its feet and head blocks clear. No pathfinding: one that cannot get
+   * closer stays where it is (ADR 0016).
+   */
+  #approach(entity: FixtureEntityState): void {
+    const sx = Math.sign(this.#position.x - entity.position.x);
+    const sz = Math.sign(this.#position.z - entity.position.z);
+    const direct = {
+      x: entity.position.x + sx,
+      y: this.#position.y,
+      z: entity.position.z + sz,
+    };
+    if (!this.#open(direct))
+      this.#diagnose("move_blocked", entity, { into: direct });
+    const steps: [number, number][] = [
+      [sx, sz],
+      [sx, 0],
+      [0, sz],
+    ];
+    for (const [dx, dz] of steps) {
+      if (dx === 0 && dz === 0) continue;
+      const next = {
+        x: entity.position.x + dx,
+        y: this.#position.y,
+        z: entity.position.z + dz,
+      };
+      if (this.#open(next)) {
+        entity.position = next;
+        return;
+      }
+    }
+  }
+
+  /**
+   * Operator-side diagnostics of the hostile physics ADR 0016 changed: each
+   * time a step into a solid block or an attack without a clear line is
+   * refused, a JSON line goes to the file `PERSON_FIXTURE_PHYSICS_LOG` names.
+   * Off unless that variable is set. It never reaches Person, the journal, or
+   * any observation; it exists to attribute a changed trajectory to the
+   * physics change.
+   */
+  #diagnose(
+    kind: "move_blocked" | "attack_blocked",
+    entity: FixtureEntityState,
+    detail: Record<string, unknown>,
+  ): void {
+    const file = process.env["PERSON_FIXTURE_PHYSICS_LOG"];
+    if (!file) return;
+    appendFileSync(
+      file,
+      `${JSON.stringify({
+        tick: this.#tick,
+        kind,
+        hostile: entity.name,
+        at: entity.position,
+        person: this.#position,
+        ...detail,
+      })}\n`,
+    );
+  }
+
+  /** Room for a body: the feet block and the one above are not solid. */
+  #open(position: Position): boolean {
+    const feet = {
+      x: Math.floor(position.x),
+      y: Math.floor(position.y),
+      z: Math.floor(position.z),
+    };
+    const head = { ...feet, y: feet.y + 1 };
+    return !this.blockAt(feet)?.solid && !this.blockAt(head)?.solid;
+  }
+
+  /**
+   * Whether a hostile at `from` can hurt Person: a clear line from its eye to
+   * Person's upper body. The same geometry Person's vision uses for
+   * occlusion, and nothing of what Person perceives (ADR 0016).
+   */
+  #lineOfAttack(from: Position): boolean {
+    const eye = { x: from.x + 0.5, y: from.y + 1.6, z: from.z + 0.5 };
+    const body = {
+      x: Math.floor(this.#position.x),
+      y: Math.floor(this.#position.y) + 1,
+      z: Math.floor(this.#position.z),
+    };
+    return !lineBlocked(eye, body, (position) => this.blockAt(position));
   }
 
   /** Every health loss is recorded, so a neutral mob can become a threat. */

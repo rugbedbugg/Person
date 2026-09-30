@@ -222,15 +222,54 @@ test(
           selections.length > 0,
           "the restarted process should select routines",
         );
-        const informed = selections.filter((event) =>
-          ((event.payload["candidates"] ?? []) as { attempts: number }[]).some(
-            (candidate) => candidate.attempts > 0,
-          ),
+        // Everything the first process learned is back in the second, with
+        // its attempts: the restored statistics carry every routine the first
+        // episode recorded.
+        const learning = (episode: string) =>
+          JSON.parse(
+            readFileSync(
+              path.join(
+                evidenceDirectory,
+                "reports",
+                `learning-${episode}.json`,
+              ),
+              "utf8",
+            ),
+          ) as {
+            routine_statistics: {
+              context_id: string;
+              routine_id: string;
+              attempts: number;
+            }[];
+          };
+        const learned = learning("ep_first").routine_statistics;
+        assert.ok(learned.length > 0, "the first episode learned something");
+        const kept = new Map(
+          learning("ep_second").routine_statistics.map((row) => [
+            `${row.context_id}|${row.routine_id}`,
+            row.attempts,
+          ]),
         );
-        assert.ok(
-          informed.length > 0,
-          "at least one decision after the restart must be informed by earlier evidence",
-        );
+        for (const row of learned)
+          assert.ok(
+            (kept.get(`${row.context_id}|${row.routine_id}`) ?? 0) >=
+              row.attempts,
+            `${row.routine_id} in ${row.context_id} was forgotten across the restart`,
+          );
+
+        // And where a situation recurs, the choice is made from that evidence.
+        // Whether one recurs depends on how far the first episode got (since
+        // ADR 0016 it gets further, and the second meets only new contexts).
+        const seen = new Set(learned.map((row) => row.context_id));
+        for (const event of selections.filter((e) =>
+          seen.has(String(e.payload["context_id"])),
+        ))
+          assert.ok(
+            (
+              (event.payload["candidates"] ?? []) as { attempts: number }[]
+            ).some((candidate) => candidate.attempts > 0),
+            "a recurring situation must be decided from earlier evidence",
+          );
 
         const snapshots = readdirSync(
           path.join(evidenceDirectory, "snapshots"),

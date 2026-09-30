@@ -118,3 +118,63 @@ occurred are reported as mechanism diagnostics, not as the replication unit.
 - After V2: stop before any interpretive write-up that claims more than the
   predeclared classifications.
 - The V2 held-out suite is run once and never rerun.
+
+## Amendments
+
+### 1. Candidate `29d29e5` superseded before any held-out run (2026-09-30)
+
+The final freeze at `29d29e5` was superseded by the operator's decision,
+before any of A2 to D2 was run and before any held-out result was inspected.
+
+- **Why:** a known fixture defect. Hostiles walked through solid blocks and
+  attacked through them, so D2's health, threat and recovery results would
+  partly have measured the artifact.
+- **Fixed by ADR 0016:** hostiles obey walls, for movement and for every
+  attack, and no kernel, skill, cognition or R2 parameter changed.
+- **References:** the R1.5 references gain the fixture-realism baseline, with
+  its bridge pinned.
+- **Revalidated:** A2, B2 and C2 statically, with records identical to the
+  frozen ones; D2 by its manifest and regeneration. None was redrawn.
+- **Next:** the development rerun is repeated at the new candidate revision,
+  then the final readiness review.
+
+### 2. D2's questions are opportunity-gated (2026-09-30, before any held-out run)
+
+ADR 0016 corrected the fixture's hostile physics before V2 consumed anything.
+Under honest physics, development D no longer guarantees that Person
+experiences its scripted encounter: shelter can legitimately prevent a
+hostile's movement, its line of attack, and Person's seeing it. In
+development D at `9dcfc69`, no condition recorded a threat or lost health.
+
+D2 therefore stays frozen and unchanged: nothing is redrawn, repositioned or
+retimed. It is run once with the rest of V2. But its threat, bodily setback
+and recovery questions are evaluated only when the matching opportunity
+actually occurs. **An absent opportunity is reported as UNTESTED for that
+question, not as evidence that R2 had no effect,** and D2 is not declared
+invalid because its encounter never reached Person. This makes no prediction
+about D2's outcome.
+
+The gates are measured per seed on the R2rec run. It records bodily
+pressures and harm, and by the negative control it makes P0's decisions, so
+the gates do not depend on which condition acts. D2's encounter window is
+world ticks 3000 to 3800 (the skeleton's spawn and despawn), plus 600 ticks
+for its after-effects.
+
+| Question                  | Opportunity gate                                                                                        | If the gate holds, evaluate                                                                             |
+| ------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Threat                    | at least one exposure: a run of consecutive `affect_tonic` records whose pressures include `threat` > 0 | per exposure, exactly one `threat_onset`, zero or more `threat_escalation`, tonic threat while it lasts |
+| Bodily setback            | at least one `harm` appraisal inside the encounter window                                               | the setback's appraisal and its effect on affect                                                        |
+| Recovery from the setback | the setback gate holds                                                                                  | settling after the setback                                                                              |
+
+- **Attribution limit:** the journal cannot attribute harm to the hostile
+  uniquely, and hostile positions are not added to Person's evidence to do
+  so. Harm inside the window is the gate, and the report says so. Harm from
+  starvation is implausible there (D2 starts at food 15), but it is not
+  excluded by construction.
+- **What else D2 reports:** its other channels, such as affect under hunger,
+  are labelled by what they measure, and never presented as setback or
+  recovery evidence because they came from class D.
+- **D3, future work:** a setback class that reliably presents an experienced
+  adverse event under honest physics, with no wall crossing and no hidden
+  information. It is not designed or tuned before V2. A benchmark procedure
+  suffices unless it needs a new durable rule.

@@ -1,4 +1,5 @@
 import type { Position } from "#config";
+import { lineBlocked } from "../embodiment/geometry.ts";
 
 /**
  * First-person vision.
@@ -116,12 +117,6 @@ export const centreOf = (
   z: number;
 } => ({ x: position.x + 0.5, y: position.y + 0.5, z: position.z + 0.5 });
 
-const sameBlock = (
-  a: { x: number; y: number; z: number },
-  b: Position,
-): boolean =>
-  Math.floor(a.x) === b.x && Math.floor(a.y) === b.y && Math.floor(a.z) === b.z;
-
 /**
  * Horizontal and vertical offsets from the view axis, in degrees.
  *
@@ -191,36 +186,7 @@ export function occluded(
   target: Position,
   blockAt: (position: Position) => { solid: boolean } | null,
 ): boolean {
-  const centre = centreOf(target);
-  const dx = centre.x - pose.eye.x;
-  const dy = centre.y - pose.eye.y;
-  const dz = centre.z - pose.eye.z;
-  const span = Math.hypot(dx, dy, dz);
-  if (span <= VISION.occlusionStep) return false;
-
-  const steps = Math.floor(span / VISION.occlusionStep);
-  for (let step = 1; step < steps; step++) {
-    const along = (step * VISION.occlusionStep) / span;
-    const sample = {
-      x: pose.eye.x + dx * along,
-      y: pose.eye.y + dy * along,
-      z: pose.eye.z + dz * along,
-    };
-    if (sameBlock(sample, target)) continue;
-    const block = {
-      x: Math.floor(sample.x),
-      y: Math.floor(sample.y),
-      z: Math.floor(sample.z),
-    };
-    if (
-      block.x === Math.floor(pose.eye.x) &&
-      block.y === Math.floor(pose.eye.y) &&
-      block.z === Math.floor(pose.eye.z)
-    )
-      continue;
-    if (blockAt(block)?.solid === true) return true;
-  }
-  return false;
+  return lineBlocked(pose.eye, target, blockAt, VISION.occlusionStep);
 }
 
 /** True when the target is in range, in view, and not occluded. */

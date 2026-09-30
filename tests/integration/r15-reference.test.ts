@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   loadPlan,
@@ -12,14 +12,21 @@ import { REPOSITORY, temporaryDirectory } from "../support/harness.ts";
 /**
  * With interoception off, R2 reproduces R1.5 appraisal exactly (ADR 0014).
  *
- * Two sets of references. `r15-affect-corrected/` is the canonical baseline,
- * recorded after goals already satisfied stopped being queued (ADR 0015
- * branch): the same scenarios run now, with the switch off, must make the same
- * decisions, record the same appraisals and apply the same priority
- * adjustments. `r15-affect/` is the historical record at `5548bbd`, immutable;
- * the bridge to it is pinned exactly: the same decisions and goal choices,
- * and the historical appraisals minus only the phantom SECURE_FOOD
- * completions. TESTED IN FIXTURE.
+ * Three generations of reference, each immutable once recorded:
+ *
+ * - `r15-affect/`, historical, at `5548bbd`, with phantom SECURE_FOOD
+ *   completions;
+ * - `r15-affect-corrected/`, after goals already satisfied stopped being
+ *   queued (ADR 0015), under the old hostile physics;
+ * - `r15-affect-fixture-realism/`, after hostiles stopped walking and attacking
+ *   through walls (ADR 0016): the current baseline, which the same scenarios
+ *   run now must reproduce exactly.
+ *
+ * Each step is pinned. Corrected to fixture-realism: B and C identical; D
+ * identical up to its first divergence, with a hostile-physics event (from the
+ * fixture's operator-side diagnostics) between the last identical decision and
+ * the first different one. Historical to corrected: the same decisions and
+ * goal choices, and only the phantom completions removed. TESTED IN FIXTURE.
  */
 
 interface Reference {
@@ -30,12 +37,18 @@ interface Reference {
     maxExperiencedTicks: number;
     maxDecisions: number;
   };
+  recordedAt?: string;
+  note?: string;
   trace: unknown[];
   affect: unknown[];
   priorities: unknown[];
 }
 
 const directory = path.join(
+  REPOSITORY,
+  "fixtures/regression/r15-affect-fixture-realism",
+);
+const corrected = path.join(
   REPOSITORY,
   "fixtures/regression/r15-affect-corrected",
 );
@@ -46,6 +59,11 @@ const PHANTOMS_REMOVED: Record<string, number> = {
   "b-near-tie.json": 10,
   "c-exploration.json": 13,
   "d-setback.json": 13,
+};
+
+/** Measured when the fixture-realism references were recorded (ADR 0016). */
+const PHYSICS_SPLIT: Record<string, unknown> = {
+  "d-setback.json": { decision: 40, tick: 4014, physics: 4009 },
 };
 
 const triggers = (records: unknown[]): string[] =>
@@ -81,6 +99,8 @@ for (const name of readdirSync(directory)
       };
       writeFileSync(planFile, JSON.stringify(plan));
       const out = temporaryDirectory("person-r15-run-");
+      const physicsLog = path.join(out, "physics.jsonl");
+      process.env["PERSON_FIXTURE_PHYSICS_LOG"] = physicsLog;
       const loaded = loadPlan(planFile);
       const run = await runOne({
         plan: loaded,
@@ -90,7 +110,7 @@ for (const name of readdirSync(directory)
         horizon: loaded.horizons![0]!,
         outputDirectory: out,
         repository: REPOSITORY,
-      });
+      }).finally(() => delete process.env["PERSON_FIXTURE_PHYSICS_LOG"]);
       const journal = path.join(
         out,
         "R15",
@@ -135,15 +155,59 @@ for (const name of readdirSync(directory)
       );
       assert.equal(events.filter((e) => e.type === "affect_tonic").length, 0);
 
-      // The bridge to the historical reference, recorded before the fix.
+      // Corrected to fixture-realism: the hostile-physics change (ADR 0016).
+      const before = JSON.parse(
+        readFileSync(path.join(corrected, name), "utf8"),
+      ) as Reference;
+      const physics = existsSync(physicsLog)
+        ? readFileSync(physicsLog, "utf8")
+            .split("\n")
+            .filter((line) => line.trim())
+            .map((line) => JSON.parse(line) as { tick: number })
+        : [];
+      const split = before.trace.findIndex(
+        (entry, index) =>
+          JSON.stringify(entry) !== JSON.stringify(reference.trace[index]),
+      );
+      if (split < 0) {
+        assert.deepEqual(reference, {
+          ...before,
+          recordedAt: reference.recordedAt,
+          note: reference.note,
+        });
+      } else {
+        const tickOf = (entry: unknown) => (entry as { tick: number }).tick;
+        const lastSame = split > 0 ? tickOf(before.trace[split - 1]) : -1;
+        const firstDifferent = tickOf(reference.trace[split]);
+        assert.ok(
+          physics.length > 0,
+          "a changed trajectory needs a physics event",
+        );
+        const first = physics[0]!.tick;
+        assert.ok(
+          first > lastSame && first <= firstDifferent,
+          `first physics event at ${first}, decisions identical to ${lastSame}, different from ${firstDifferent}`,
+        );
+        assert.deepEqual(
+          PHYSICS_SPLIT[name],
+          { decision: split, tick: firstDifferent, physics: first },
+          "the split is where it was measured",
+        );
+      }
+
+      // Historical to corrected: the phantom-goal fix (ADR 0015).
       const old = JSON.parse(
         readFileSync(path.join(historical, name), "utf8"),
       ) as Reference;
-      assert.deepEqual(run.trace, old.trace, "historical decisions unchanged");
+      assert.deepEqual(
+        before.trace,
+        old.trace,
+        "historical decisions unchanged",
+      );
       // Real completions of SECURE_FOOD share the trigger, so the old
       // sequence is walked in order: every record the fix dropped must be a
       // phantom completion, and exactly as many as measured.
-      const kept = triggers(reference.affect);
+      const kept = triggers(before.affect);
       const dropped: string[] = [];
       let k = 0;
       for (const trigger of triggers(old.affect)) {
@@ -166,7 +230,7 @@ for (const name of readdirSync(directory)
           return [r.goal_id, r.base_priority];
         });
       assert.deepEqual(
-        choice(reference.priorities),
+        choice(before.priorities),
         choice(old.priorities),
         "the same goals chosen from the same base priorities",
       );
