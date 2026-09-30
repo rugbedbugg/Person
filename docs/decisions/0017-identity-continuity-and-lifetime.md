@@ -158,6 +158,17 @@ spot-checks. They were never one continuous individual.
     Legacy roots still acquire no session or world events. The operator
     approved this at acceptance.
   - TESTED IN FIXTURE with synthetic identities.
+- **Mineflayer lifetime parity (first-Ada readiness, E1):** the adapter
+  respawns through `bot.respawn()` and reports the body back only once the
+  server has spawned it and the world is as ready as at a first connection;
+  a refused, lost, timed-out or out-of-bounds respawn is not reported, and the
+  Person stays awaiting one. A player who left dead rejoins at the death
+  screen, where mineflayer never emits `spawn`, so connecting completes with a
+  dead body that the runtime then handles. Every connection and explicit
+  disconnect starts a new client generation, and a retired client's events
+  change nothing. Losing the world while dead goes through reconnection, and
+  the death is recorded once. CONFORMANCE-TESTED over the double; never run
+  against Minecraft.
 - **Separate by design:** identity and continuity (I1), cognitive lifecycle
   (sessions), embodiment connection (the runtime's), operational state (I2)
   and death (I3).
@@ -193,8 +204,8 @@ spot-checks. They were never one continuous individual.
   explicit binding with provenance (rule 6).
 - SLEEPING, or any clock access beyond the coarse gap category.
 - A decision that consumes the self-knowledge projection.
-- The Minecraft adapter observing deaths and respawning its body: death
-  semantics are TESTED IN FIXTURE only until then.
+- The first live run of the Mineflayer respawn and reconnection: until
+  then they are CONFORMANCE-TESTED only.
 
 ## Relevant commits and docs
 

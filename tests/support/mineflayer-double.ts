@@ -72,6 +72,19 @@ export interface DoubleOptions {
   emulateSocket?: boolean;
   /** How long the server takes to close after the client ends. */
   socketCloseDelayMs?: number;
+  /**
+   * Join as a player who left the world dead: mineflayer then sees health 0,
+   * emits `death` and never `spawn` (lib/plugins/health.js).
+   */
+  joinDead?: boolean;
+  /** Where the server puts Person back after a respawn. Default: the start. */
+  respawnAt?: Position;
+  /** A server that ignores the respawn request. */
+  respawnNever?: boolean;
+  /** Ticks to withhold chunk data after a respawn, as after a first spawn. */
+  respawnChunkDelayTicks?: number;
+  /** The connection closes when a respawn is requested. */
+  dropOnRespawn?: boolean;
 }
 
 /** minecraft-protocol/src/client.js: `const closeTimeout = 30 * 1000`. */
@@ -142,6 +155,14 @@ export class MineflayerDouble extends EventEmitter {
     slots: ({ name: string } | null)[];
   };
   heldItem: { name: string } | null = null;
+  /** mineflayer's `bot.isAlive`, kept by its health plugin. */
+  isAlive = true;
+  readonly #start: Position;
+  readonly #joinDead: boolean;
+  readonly #respawnAt: Position | undefined;
+  readonly #respawnNever: boolean;
+  readonly #respawnChunkDelayTicks: number;
+  readonly #dropOnRespawn: boolean;
   pathfinder: Record<string, unknown>;
   readonly calls: string[] = [];
   #blocks = new Map<string, string>();
@@ -164,6 +185,12 @@ export class MineflayerDouble extends EventEmitter {
   constructor(options: DoubleOptions = {}) {
     super();
     const start = options.position ?? { x: 0, y: 64, z: 0 };
+    this.#start = start;
+    this.#joinDead = options.joinDead ?? false;
+    this.#respawnAt = options.respawnAt;
+    this.#respawnNever = options.respawnNever ?? false;
+    this.#respawnChunkDelayTicks = options.respawnChunkDelayTicks ?? 0;
+    this.#dropOnRespawn = options.dropOnRespawn ?? false;
     this.biome = makeBiome(options.biome ?? "forest");
     this.entity = {
       id: 1,
@@ -291,6 +318,39 @@ export class MineflayerDouble extends EventEmitter {
   spawn(): void {
     queueMicrotask(() => {
       this.emit("login");
+      if (this.#joinDead) {
+        this.health = 0;
+        this.emit("health");
+        this.isAlive = false;
+        this.emit("death");
+        return;
+      }
+      this.emit("spawn");
+    });
+  }
+
+  /**
+   * mineflayer's `bot.respawn`: ignored while alive; otherwise the server
+   * sends `respawn`, puts the player back with full vitals, and the health
+   * update brings `spawn`.
+   */
+  respawn(): void {
+    this.calls.push("respawn");
+    if (this.#dropOnRespawn) {
+      queueMicrotask(() => this.emit("end", "socketClosed"));
+      return;
+    }
+    if (this.isAlive || this.#respawnNever) return;
+    queueMicrotask(() => {
+      this.emit("respawn");
+      const at = this.#respawnAt ?? this.#start;
+      this.entity.position = new Vec3(at.x + 0.5, at.y, at.z + 0.5);
+      this.#chunksReadyAt = Date.now() + this.#respawnChunkDelayTicks * 50;
+      this.health = 20;
+      this.food = 20;
+      this.foodSaturation = 5;
+      this.emit("health");
+      this.isAlive = true;
       this.emit("spawn");
     });
   }
@@ -589,7 +649,33 @@ export class MineflayerDouble extends EventEmitter {
   damage(amount: number): void {
     this.health = Math.max(0, this.health - amount);
     this.emit("health");
+    if (this.health <= 0 && this.isAlive) {
+      this.isAlive = false;
+      this.emit("death");
+    }
   }
+}
+
+/**
+ * A `createBot` that hands out a fresh double per connection, as a real
+ * reconnection does: one options entry per client, the last one repeated.
+ */
+export function reconnectingFactory(...options: DoubleOptions[]): {
+  createBot: () => MineflayerDouble;
+  bots: MineflayerDouble[];
+} {
+  const bots: MineflayerDouble[] = [];
+  return {
+    bots,
+    createBot: () => {
+      const bot = new MineflayerDouble(
+        options[Math.min(bots.length, options.length - 1)] ?? {},
+      );
+      bots.push(bot);
+      bot.spawn();
+      return bot;
+    },
+  };
 }
 
 /** A `createBot` replacement that hands back the double and spawns it. */

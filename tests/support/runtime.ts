@@ -1,5 +1,9 @@
 import path from "node:path";
-import { PersonRuntime, type EpisodeReport } from "#node-runtime";
+import {
+  PersonRuntime,
+  type Embodiment,
+  type EpisodeReport,
+} from "#node-runtime";
 import { FixtureWorld } from "#fixture-world";
 import {
   REPOSITORY,
@@ -14,7 +18,6 @@ export interface RuntimeRunOptions extends HarnessOptions {
   learningMode?: "off" | "shadow" | "supervised";
   evidenceDirectory?: string;
   world?: HarnessOptions["world"];
-  worldObject?: FixtureWorld;
   episodeId?: string;
   personId?: string;
   operatorIntervention?: { reason?: string };
@@ -24,10 +27,15 @@ export interface RuntimeRunOptions extends HarnessOptions {
   death?: "respawn" | "permadeath";
 }
 
-/** Runs a complete episode with a real cognition subprocess over stdio. */
-export async function runEpisode(options: RuntimeRunOptions): Promise<{
+/**
+ * Runs a complete episode with a real cognition subprocess over stdio, in the
+ * fixture world unless another body is given.
+ */
+export async function runEpisode<W extends Embodiment = FixtureWorld>(
+  options: RuntimeRunOptions & { worldObject?: W },
+): Promise<{
   report: EpisodeReport;
-  world: FixtureWorld;
+  world: W;
   evidenceDirectory: string;
   outputDirectory: string;
 }> {
@@ -55,9 +63,9 @@ export async function runEpisode(options: RuntimeRunOptions): Promise<{
   };
   const world =
     options.worldObject ??
-    (options.worldFile
+    ((options.worldFile
       ? FixtureWorld.fromFile(path.join(REPOSITORY, options.worldFile))
-      : new FixtureWorld(options.world ?? {}));
+      : new FixtureWorld(options.world ?? {})) as unknown as W);
   const runtime = new PersonRuntime({
     config: runtimeConfig,
     embodiment: world,
