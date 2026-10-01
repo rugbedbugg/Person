@@ -47,6 +47,10 @@ class Goal:
     base_priority: float | None = None
     #: What affect added or took away. `priority` = base + this.
     affect_bias: float = 0.0
+    #: How the planner may pursue it (ADR 0021/0022): `ordinary`, or
+    #: `recovery` for a temporary remedy goal from a deliberation or a habit,
+    #: which may also use the planner's recovery operators (`wait_safely`).
+    planning_profile: str = "ordinary"
 
     def as_message(self) -> dict[str, Any]:
         return {

@@ -71,7 +71,7 @@ export interface PersonConfig {
     mode?: "off" | "record_only" | "active";
     backend?: "scripted";
     scriptedAnswers?: string;
-    habits?: "off" | "record_only";
+    habits?: "off" | "record_only" | "active";
   };
   cognition: {
     command: string[];

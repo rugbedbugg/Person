@@ -74,7 +74,8 @@
             "maintenance",
             "self_generated",
             "operator",
-            "deliberation"
+            "deliberation",
+            "habit"
           ]
         },
         "createdAtTick": {

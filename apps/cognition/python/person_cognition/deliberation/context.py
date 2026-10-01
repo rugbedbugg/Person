@@ -30,6 +30,8 @@ REASONS: tuple[str, ...] = (
     "project_reconsideration",
     "unexpected_outcome",
     "reflection",
+    # ADR 0022, C5: a habit Person relied on failed, so think again.
+    "habit_breakdown",
 )
 
 #: Hard caps on every collection. Implementation parameters.

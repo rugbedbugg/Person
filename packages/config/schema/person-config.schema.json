@@ -108,9 +108,17 @@
         },
         "scriptedAnswers": { "type": "string", "minLength": 1 },
         "habits": {
-          "enum": ["off", "record_only"],
-          "description": "ADR 0022: habit learning. off (the default); record_only (C4): candidates, evidence and promotion computed as a shadow stream that nothing that acts ever reads. active comes with C5."
+          "enum": ["off", "record_only", "active"],
+          "description": "ADR 0022: habit learning. off (the default); record_only (C4): candidates, evidence and promotion computed as a shadow stream that nothing that acts ever reads; active (C5): an active stream, from which a promoted habit answers its familiar problem without a model call. active requires mode active."
         }
+      },
+      "if": {
+        "properties": { "habits": { "const": "active" } },
+        "required": ["habits"]
+      },
+      "then": {
+        "properties": { "mode": { "const": "active" } },
+        "required": ["mode"]
       }
     },
     "affect": {
