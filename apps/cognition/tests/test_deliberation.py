@@ -420,7 +420,7 @@ def test_nothing_in_the_decision_loop_calls_for_deliberation() -> None:
 # ------------------------------------------------------------ config, metric
 
 
-def test_deliberation_mode_is_off_by_default_and_active_does_not_exist_yet() -> None:
+def test_deliberation_mode_is_off_by_default_and_only_the_known_modes_exist() -> None:
     from person_config import load_cognition_settings
 
     settings = load_cognition_settings(str(REPOSITORY / "examples/fixture.toml"))
@@ -428,7 +428,9 @@ def test_deliberation_mode_is_off_by_default_and_active_does_not_exist_yet() -> 
     base = json.loads(json.dumps(_example_document()))
     base["deliberation"] = {"mode": "record_only"}
     validate_config_document(base)
-    base["deliberation"] = {"mode": "active"}
+    base["deliberation"] = {"mode": "active"}  # ADR 0021
+    validate_config_document(base)
+    base["deliberation"] = {"mode": "always"}
     with pytest.raises(ConfigError):
         validate_config_document(base)
 
@@ -469,7 +471,7 @@ def test_the_deliberator_itself_refuses_to_run_when_off(
     assert off.deliberate(context, experienced_tick=0) is None
     assert model.calls == [] and recorded == []
     with pytest.raises(ValueError):
-        Deliberator(mode="active", model=model, record=lambda t, p: None)
+        Deliberator(mode="bogus", model=model, record=lambda t, p: None)
 
 
 def test_a_belief_person_holds_is_shown_with_its_uncertainty_and_can_support(

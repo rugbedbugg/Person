@@ -1,3 +1,4 @@
+import { writeFileSync } from "node:fs";
 import path from "node:path";
 import {
   PersonRuntime,
@@ -25,6 +26,14 @@ export interface RuntimeRunOptions extends HarnessOptions {
   reconnectAttempts?: number;
   /** ADR 0017, I3: what a death means. */
   death?: "respawn" | "permadeath";
+  /**
+   * ADR 0021: deliberation for cognition. Cognition reads it from its own
+   * configuration file, written next to the run and passed with --config.
+   */
+  deliberation?: {
+    mode: "off" | "record_only" | "active";
+    answers?: unknown[];
+  };
 }
 
 /**
@@ -61,13 +70,34 @@ export async function runEpisode<W extends Embodiment = FixtureWorld>(
     cognition: { ...config.cognition, command: options.cognitionCommand },
     ...(options.death ? { lifecycle: { death: options.death } } : {}),
   };
+  let cognitionCommand = options.cognitionCommand;
+  if (options.deliberation) {
+    const answers = path.join(outputDirectory, "deliberation-answers.json");
+    writeFileSync(answers, JSON.stringify(options.deliberation.answers ?? []));
+    const file = path.join(outputDirectory, "cognition-config.json");
+    writeFileSync(
+      file,
+      JSON.stringify({
+        ...runtimeConfig,
+        deliberation: {
+          mode: options.deliberation.mode,
+          backend: "scripted",
+          scriptedAnswers: answers,
+        },
+      }),
+    );
+    cognitionCommand = [...options.cognitionCommand, "--config", file];
+  }
   const world =
     options.worldObject ??
     ((options.worldFile
       ? FixtureWorld.fromFile(path.join(REPOSITORY, options.worldFile))
       : new FixtureWorld(options.world ?? {})) as unknown as W);
   const runtime = new PersonRuntime({
-    config: runtimeConfig,
+    config: {
+      ...runtimeConfig,
+      cognition: { ...runtimeConfig.cognition, command: cognitionCommand },
+    },
     embodiment: world,
     cwd: REPOSITORY,
     ...(options.episodeId ? { episodeId: options.episodeId } : {}),
