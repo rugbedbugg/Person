@@ -22,175 +22,22 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync, writeFileSync } from "node:fs";
-import path from "node:path";
-import type { Position } from "#config";
-import { FixtureWorld } from "#fixture-world";
-import { shelterPlan } from "../../apps/node-runtime/src/skills/shelter-plan.ts";
 import { temporaryDirectory } from "../support/harness.ts";
+import {
+  COGNITION,
+  DAY,
+  EPISODES,
+  HOME,
+  PERSON,
+  WITHDRAW,
+  journal,
+  of,
+  quietWorld,
+  seedLedger,
+  type Event,
+} from "../support/quiet-grove.ts";
 import { runEpisode } from "../support/runtime.ts";
 
-const COGNITION = ["uv", "run", "person-cognition"];
-const PERSON = "test-person-000";
-const HOME = { x: -12, y: 64, z: 0 };
-const CHEST = { x: 1, y: 64, z: 1 };
-const DAY = 24000;
-const EPISODES = [0, DAY, 2 * DAY, 3 * DAY, 4 * DAY];
-const RESET = [
-  "oak_log",
-  "oak_planks",
-  "stick",
-  "crafting_table",
-  "wooden_pickaxe",
-  "wooden_axe",
-  "stone_pickaxe",
-  "stone_axe",
-];
-
-const trunks = [-2, -1, 0, 1, 2]
-  .flatMap((x) => [-2, -1, 0, 1, 2].map((z) => [x, z] as const))
-  .filter(([x, z]) => Math.max(Math.abs(x), Math.abs(z)) === 2)
-  .flatMap(([x, z]) =>
-    [64, 65, 66, 67, 68].map((y) => ({
-      name: "oak_log",
-      position: { x, y, z } as Position,
-    })),
-  );
-
-function quietWorld(): FixtureWorld {
-  const world = new FixtureWorld({
-    name: "quiet-grove-chest",
-    seed: 7,
-    startTick: 0,
-    timeOfDay: 1000,
-    biome: "forest",
-    groundLevel: 63,
-    spawn: { x: 0, y: 64, z: 0 },
-    spawnYaw: 0,
-    vitals: { health: 20, food: 20, saturation: 20, air: 300, armor: 0 },
-    inventory: [
-      { name: "bread", count: 200 },
-      { name: "cobblestone", count: 64 },
-    ],
-    blocks: [
-      ...shelterPlan(HOME).map((position) => ({ name: "dirt", position })),
-      ...trunks,
-    ],
-    clusters: [],
-    entities: [],
-    containers: [
-      {
-        position: CHEST,
-        kind: "chest",
-        contents: [{ name: "bread", count: 64 }],
-      },
-    ],
-    events: EPISODES.flatMap((at, n) => [
-      { atTick: at, type: "unrest" as const },
-      ...(n === 4
-        ? [{ atTick: at, type: "withdrawal_stops_helping" as const }]
-        : []),
-      ...(at === 0
-        ? []
-        : [
-            { atTick: at, type: "remove_items" as const, items: RESET },
-            {
-              atTick: at,
-              type: "set_vitals" as const,
-              vitals: { health: 20, food: 20, saturation: 20 },
-            },
-          ]),
-    ]),
-    hiddenRules: [{ kind: "barren_until_withdrawn", blocks: ["oak_log"] }],
-  });
-  world.registerOwnedStorage(CHEST, "storage_1");
-  return world;
-}
-
-function seedLedger(outputDirectory: string): void {
-  writeFileSync(
-    path.join(outputDirectory, `world-test-world-${PERSON}.json`),
-    JSON.stringify({
-      version: 1,
-      worldId: "test-world",
-      personId: PERSON,
-      home: {
-        homeId: "home_primary",
-        position: HOME,
-        shelterState: "complete",
-        bedKnown: false,
-      },
-      storage: [
-        {
-          storageId: "storage_1",
-          worldId: "test-world",
-          dimension: "overworld",
-          position: CHEST,
-          createdByPerson: PERSON,
-          creationEvent: "seeded",
-          homeId: "home_primary",
-          lastVerified: "2026-10-01T00:00:00.000Z",
-        },
-      ],
-      placedBlocks: [
-        ...shelterPlan(HOME).map((p) => `${p.x},${p.y},${p.z}`),
-        `${CHEST.x},${CHEST.y},${CHEST.z}`,
-      ],
-      furnacePosition: null,
-      craftingTablePosition: null,
-    }),
-  );
-}
-
-/** "Gathering keeps failing; fetch from storage first." */
-const WITHDRAW = {
-  assessment: {
-    summary: "Gathering keeps yielding nothing.",
-    premises: ["$situation", "$goal:ESTABLISH_TOOLS", "$recent:gather_wood"],
-  },
-  uncertainties: [],
-  strategies: [
-    {
-      id: "s1",
-      goal_type: "MAINTAIN_RESERVES",
-      project_kind: null,
-      desired: [{ fact: "withdrawn", direction: "achieve" }],
-      expected: [
-        {
-          fact: "withdrawn",
-          direction: "achieve",
-          support: ["$cap:withdrawn"],
-        },
-      ],
-      capability_refs: ["$cap:withdrawn"],
-      premises: ["$situation", "$goal:ESTABLISH_TOOLS", "$recent:gather_wood"],
-    },
-  ],
-  preferred: "s1",
-  evidence_needed: [],
-  confidence: 0.5,
-};
-
-type Event = {
-  type: string;
-  tick: number;
-  payload: Record<string, unknown>;
-};
-
-function journal(evidence: string): Event[] {
-  const directory = path.join(evidence, "journal");
-  return readdirSync(directory)
-    .filter((name) => name.endsWith(".jsonl"))
-    .sort()
-    .flatMap((name) =>
-      readFileSync(path.join(directory, name), "utf8").split("\n"),
-    )
-    .filter((line) => line.trim())
-    .map((line) => JSON.parse(line) as Event);
-}
-
-const of = (events: Event[], type: string): Event[] =>
-  events.filter((event) => event.type === type);
 const inDay = (n: number) => (event: Event) =>
   event.tick >= EPISODES[n]! && event.tick < (EPISODES[n + 1] ?? Infinity);
 

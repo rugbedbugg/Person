@@ -37,6 +37,8 @@ export interface RuntimeRunOptions extends HarnessOptions {
     answers?: unknown[];
     /** ADR 0022: habit learning, off, record_only (C4) or active (C5). */
     habits?: "off" | "record_only" | "active";
+    /** ADR 0023: affective arbitration. */
+    affectArbitration?: "off" | "record_only";
   };
 }
 
@@ -90,6 +92,9 @@ export async function runEpisode<W extends Embodiment = FixtureWorld>(
           scriptedAnswers: answers,
           ...(options.deliberation.habits
             ? { habits: options.deliberation.habits }
+            : {}),
+          ...(options.deliberation.affectArbitration
+            ? { affectArbitration: options.deliberation.affectArbitration }
             : {}),
         },
       }),
