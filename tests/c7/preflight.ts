@@ -8,7 +8,8 @@
  * control (a scripted provider stating the intended grounded remedy) must be
  * admitted, adopted and resolve it by the frozen criterion. A scenario that
  * fails either is engineering-invalid. The report also counts the intended
- * remedy templates, for the catalogue diversity rule.
+ * remedy templates, for the catalogue diversity rule. As in the evaluation,
+ * a scenario gets one provider answer; later requests are unavailable.
  */
 import { writeFileSync } from "node:fs";
 import { of, run, type Scenario } from "./scenario.ts";
@@ -40,7 +41,9 @@ async function negative(scenario: Scenario): Promise<Control> {
 
 async function oracle(scenario: Scenario): Promise<Control> {
   const answer = scenario.evaluator.oracle;
-  const outcome = await run(scenario, [answer, answer, answer, answer]);
+  // One provider call per C7B scenario, as the frozen budget allows: any
+  // later request finds System 2 unavailable.
+  const outcome = await run(scenario, [answer, null, null, null]);
   const adopted = of(outcome.events, "deliberation_adopted").find(
     (event) =>
       event.payload["goal_type"] ===
