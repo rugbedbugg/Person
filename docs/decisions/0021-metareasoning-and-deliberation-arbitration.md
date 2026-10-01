@@ -42,13 +42,13 @@ Emergencies never wait for deliberation and never pass through it (ADR 0019).
 Person-owned detectors, each over signals cognition already has, each with
 a key, so recurrences of the same problem are recognised as one:
 
-| Trigger                     | Signal (initial parameters)                                                                    | Key               |
-| --------------------------- | ---------------------------------------------------------------------------------------------- | ----------------- |
-| `emergency_recurrence`      | the same emergency trigger 3 times within 2,400 experienced ticks, the reflex having succeeded | emergency trigger |
-| `repeated_failure`          | the same goal failed 3 times in a row (`consecutive_failures`)                                 | goal type         |
-| `no_viable_plan`            | the planner found no plan for the active goal 3 decisions running                              | goal type         |
-| `repeated_prediction_error` | a severe prediction error for the same skill and fact 3 times within 2,400 ticks               | skill and fact    |
-| `project_reconsideration`   | a project one block short of abandonment                                                       | project kind      |
+| Trigger                     | Signal (initial parameters)                                                                           | Key                |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------ |
+| `emergency_recurrence`      | the same emergency trigger 3 times within 2,400 experienced ticks, the reflex having succeeded        | emergency trigger  |
+| `repeated_failure`          | the same goal failed 3 times in a row (`consecutive_failures`)                                        | goal type          |
+| `no_viable_plan`            | the planner found no plan for the active goal 3 decisions running                                     | goal type          |
+| `repeated_prediction_error` | 3 failed invocations of the same skill, with the same set of severe failing facts, within 2,400 ticks | skill and fact set |
+| `project_reconsideration`   | a project one block short of abandonment                                                              | project kind       |
 
 `novel_context`, `belief_conflict`, `high_uncertainty`, `unexpected_outcome`
 and `reflection` stay in the vocabulary but have no detector in C3. Each
@@ -225,6 +225,42 @@ plannable. TESTED IN FIXTURE with scripted models.
   home. Before E4, decide whether that anchor stays purely trusted motor
   infrastructure, is renamed, or whether cognition's `home_known` semantics
   change, so it never silently stands for "Ada has chosen a home".
+
+### Amendments with C4.1 (reviewer, 2026-10-01)
+
+- **A prediction-error signal is one failed invocation.** Its key is the
+  skill and the canonical sorted set of its severe, evaluable failing facts
+  (`gather_wood:building_materials+fuel+wood`). One root failure can no longer
+  fan out into one trigger per expected fact, and failures of the same skill
+  with materially different fact sets stay different problems in v1.
+- **Ended adopted goals leave the goal stack.** A goal nobody proposes any
+  more was suspended and stayed a candidate, so an adopted goal that ended
+  failed, expired, or satisfied by a fact never visible in state was selected
+  for ever. The loop now concludes a satisfied one and abandons the rest.
+- **Action facts.** A goal whose conditions are all action facts (`rested`,
+  `stored_surplus`, `withdrawn`, `looted`) is satisfied only when the adopted
+  goal's own routine succeeds and its steps declare every such fact.
+- **`wait_safely` is planner-eligible for an adopted goal, not a
+  capability.** When the planner plans a goal a deliberation adopted (and
+  checks its feasibility), it may use `wait_safely`, so a deliberated goal of
+  `rested` has a plan; its `safe` precondition still decides where. Ordinary
+  planning, including Person's idle goal, never plans it: idling stays the
+  loop's own unscored fallback. Neither it nor `return_home` nor
+  `eat_to_target` is offered to the model: System 2 says what and why, the
+  planner how. If models are later found proposing goals they cannot know are
+  attainable, that is a bounded attainability projection, not skill names.
+- **One source retry.** A goal is blocked by the very failures that raise
+  `repeated_failure` (and by a fruitless plan or search for `no_viable_plan`),
+  and nothing reopened it, so a remedy could never be tested. At adoption
+  Person keeps the source goal's id, type, creation tick and block reason.
+  When the adopted goal ends satisfied, and the same goal instance is still
+  blocked for that same reason (`repeated_routine_failure`,
+  `no_feasible_plan`, `not_found_in_bounded_search`), it is reopened once, with
+  one more failure allowed before it blocks again, and
+  `deliberation_source_retry` (evidence schema v17) records it. Never for
+  `emergency_recurrence`, `repeated_prediction_error` or a habit breakdown;
+  never twice from one deliberation. This is a bounded resolution retry, not a
+  way for a model to unblock goals.
 
 ## Consequences
 

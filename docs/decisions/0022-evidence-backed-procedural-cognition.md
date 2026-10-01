@@ -201,11 +201,56 @@ invocation with no model request, a stable success) and an invalidation
 "record_only"` turns it on beside an active C3; nothing invokes a habit.
   Evidence schema v16. TESTED with scripted models: state-machine tests for
   every rule, and an end-to-end runtime run in which shadow learning changes
-  no decision and records one stable success. Not yet shown end to end: a
-  three-episode formation through the runtime, which needs a synthetic
-  recurring problem; the reducer-level form of the mode-switch invariant
-  (the active book never reads shadow events) is tested, its behavioural form
+  no decision and records one stable success.
+- **C4.1 (shadow formation through the runtime):** with the amendment below,
+  `tests/integration/habit-formation.test.ts` runs three independent episodes
+  of one fixture problem through the real runtime and cognition: each a
+  `repeated_failure:ESTABLISH_TOOLS` trigger, one deliberation, an adopted
+  `MAINTAIN_RESERVES`/`rested` goal satisfied by its own `wait_safely`
+  routine, exactly one source retry that gathers wood and crafts tools, and a
+  stable success; one template, one exact context signature, one
+  `habit_promotion_shadow` naming the three founding deliberations, and no
+  active-stream event at all. Evidence schema v17. TESTED IN FIXTURE with
+  scripted models. The behavioural form of the mode-switch invariant still
   needs C5's active mode.
+
+### Amendment with C4.1 (reviewer, 2026-10-01)
+
+- **Silence is not resolution.** For `repeated_failure` and
+  `no_viable_plan`, the failing goal is blocked by the failures that raised
+  the trigger, so a window without recurrence proved only that Person had
+  stopped trying. For these classes success now needs both positive
+  resolution evidence (the source goal, granted its one retry by ADR 0021's
+  amendment, runs a routine that succeeds after the remedy is satisfied) and
+  no same-key recurrence for the rest of the 1,200-tick window. A retry that
+  fails again is the recurrence (failure). No retry by the end of the window
+  is `inconclusive`, reason `no_retry`, never success, including when a
+  legitimate higher priority kept the goal from being retried. Emergency and
+  prediction-error scopes are unchanged.
+- **The prediction-error scope** is the skill and the canonical set of its
+  severe failing facts (ADR 0021's amendment); recurrence is one new failed
+  invocation with that same set.
+- **Limitation: correlational, not causal.** Promotion rests on repeated
+  contextual outcome evidence, not causal identification, so a correlated but
+  non-causal response could in principle proceduralize. C4 and C5 claim no
+  causal learning; causal hypotheses stay with ADR 0012. No anti-superstition
+  mechanism is added now.
+- **Limitation: exact scope.** `repeated_failure:ESTABLISH_TOOLS` and
+  `repeated_failure:ESTABLISH_STORAGE` are different problems even when one
+  hidden condition caused both. Root-cause equivalence belongs to hypothesis
+  learning, not habit formation.
+- **The canonical fixture problem** (test machinery only): the hidden rule
+  `barren_until_rested`. After an `unrest` event the listed blocks break but
+  drop nothing until the body has waited a configured number of ticks, counted
+  a tick at a time and only after the `unrest`; a `rest_stops_helping` regime
+  change, for C5's breakdown test, makes waiting useless. Between episodes
+  `remove_items` (from the body and every chest) and `set_vitals` reset the
+  problem and hold the signature steady. The world creates the problem and
+  never supplies the remedy. Person's idle routine is also a rest, so the
+  test's rest requirement exceeds one idle wait and the adopted rest is the
+  one that completes the cure; the test asserts that no wood was gathered in
+  an episode before the remedy was adopted. Habit learning still only learns
+  "pursuing rest has resolved this here".
 
 ## Consequences
 
