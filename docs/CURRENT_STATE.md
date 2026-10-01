@@ -954,8 +954,8 @@ runtime would allow a direct route home), not a distance.
 | Suite        | Tests   | Pass    |
 | ------------ | ------- | ------- |
 | Node (all)   | 424     | 424     |
-| Python (all) | 544     | 544     |
-| **Total**    | **968** | **968** |
+| Python (all) | 546     | 546     |
+| **Total**    | **970** | **970** |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -976,7 +976,7 @@ not recounted since:**
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
 Verified on `cognition/metareasoning` on 2026-10-01: Node 424 pass / 0 fail,
-Python 544 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Python 546 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;

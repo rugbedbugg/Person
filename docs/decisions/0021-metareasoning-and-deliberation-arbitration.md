@@ -202,6 +202,30 @@ in this architecture:** the runtime's home record always exists (configured
 `world.home`), so `home_known` is always true and `return_home` always
 plannable. TESTED IN FIXTURE with scripted models.
 
+### Amendments before merge (reviewer, 2026-10-01)
+
+- **`project_reconsideration` has no detector** in C3; its vocabulary is
+  reserved. "One block short of abandonment" had not shown that System 2 is
+  warranted, and it overlaps `repeated_failure` and `no_viable_plan`; it was
+  most of the early long-run requests.
+- **One hourly slot is reserved for `emergency_recurrence`:** at most 4
+  deliberations per experienced hour, of which at most 3 for any other
+  trigger, so ordinary failures cannot spend the hour before a recurring
+  hazard appears. A budget contains cost; it must not hide an over-eager
+  detector.
+- **A detector that fires resets:** the same problem needs three new signals
+  to fire again.
+- **Diagnostic:** a 2,000-decision scripted pool run (47,704 experienced
+  ticks, about 0.66 experienced hour) fired three triggers in all, each a
+  distinct key once: the suffocation recurrence (adopted, satisfied) and two
+  no-plan problems after search gave up. No suppression was needed; nothing
+  stormed.
+- **E4 readiness item:** Ada begins with a trusted, operator-configured home
+  anchor that makes `return_home` plannable before she has chosen or built a
+  home. Before E4, decide whether that anchor stays purely trusted motor
+  infrastructure, is renamed, or whether cognition's `home_known` semantics
+  change, so it never silently stands for "Ada has chosen a home".
+
 ## Consequences
 
 ### Positive

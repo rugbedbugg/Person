@@ -104,7 +104,7 @@ from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
 from .memory.episodes import EpisodeDraft
 from .prediction import PendingPrediction, build_payload
-from .projects import BLOCKS_TO_ABANDON, BY_KIND, ProjectBook, ProjectManager
+from .projects import BY_KIND, ProjectBook, ProjectManager
 from .reducers import CognitiveReducers
 from .reporting import LearningSummary
 from .routines import (
@@ -451,16 +451,9 @@ class CognitionLoop:
         if not self._metareasoning() or self.identity is None:
             self.arbiter.pending.clear()
             return
-        for project in self.project_book.projects():
-            if project.status in ("ACTIVE", "SUSPENDED"):
-                self.arbiter.raise_trigger(
-                    self.arbiter.detectors.project(
-                        project.kind,
-                        project.project_id,
-                        max((count for _, count in project.blocks), default=0),
-                        BLOCKS_TO_ABANDON - 1,
-                    )
-                )
+        # `project_reconsideration` keeps its vocabulary but has no detector
+        # yet: "one block short of abandonment" has not shown that System 2 is
+        # warranted, and it overlaps repeated_failure and no_viable_plan.
 
         def record(event_type: str, payload: dict[str, Any]) -> None:
             self._record(event_type, tick, payload)

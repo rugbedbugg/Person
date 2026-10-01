@@ -175,7 +175,7 @@ class Arbiter:
             elif self.in_flight is not None:
                 reason = "in_flight"
             else:
-                reason = self.record.suppression(key, now, session)
+                reason = self.record.suppression(key, now, session, trigger.kind)
             if reason is not None:
                 record(
                     "deliberation_suppressed",

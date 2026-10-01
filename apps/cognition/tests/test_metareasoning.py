@@ -87,11 +87,14 @@ def test_a_stuck_project_is_one_problem_not_one_per_decision() -> None:
 # ------------------------------------------------------------- suppression
 
 
-def requested(key: str, at: int, session: str = "s", deliberation_id: str = "d") -> Any:
+def requested(
+    key: str, at: int, session: str = "s", deliberation_id: str = "d", kind: str = "x"
+) -> Any:
     return event(
         "deliberation_requested",
         deliberation_id=deliberation_id,
         trigger_key_full=key,
+        trigger_kind=kind,
         experienced_tick=at,
         session_id=session,
     )
@@ -407,3 +410,25 @@ def test_the_provider_call_runs_off_the_main_thread_and_touches_nothing_there() 
     step(20)
     assert called_on and called_on[0] != threading.main_thread().name
     assert step.kinds()[-2:] == ["deliberation_completed", "deliberation_adopted"]
+
+
+def test_one_hourly_slot_stays_free_for_a_recurring_emergency() -> None:
+    record = ArbitrationRecord()
+    for n in range(3):
+        record.apply(requested(f"k{n}", n, deliberation_id=f"d{n}", kind="repeated_failure"))
+        record.apply(resolved(f"k{n}", n, "rejected", deliberation_id=f"d{n}"))
+    assert record.suppression("k9", 10, "s", "no_viable_plan") == "hourly_budget_reserved"
+    assert record.suppression("e", 10, "s", "emergency_recurrence") is None
+    record.apply(requested("e", 10, deliberation_id="de", kind="emergency_recurrence"))
+    record.apply(resolved("e", 10, "rejected", deliberation_id="de"))
+    assert record.suppression("e2", 20, "s", "emergency_recurrence") == "hourly_budget"
+
+
+def test_a_detector_that_fires_needs_three_new_signals_to_fire_again() -> None:
+    detectors = Detectors()
+    for at in (0, 10, 20):
+        fired = detectors.emergency("suffocation", at)
+    assert fired is not None
+    assert detectors.emergency("suffocation", 30) is None, "no storm of repeated firings"
+    assert detectors.emergency("suffocation", 40) is None
+    assert detectors.emergency("suffocation", 50) is not None

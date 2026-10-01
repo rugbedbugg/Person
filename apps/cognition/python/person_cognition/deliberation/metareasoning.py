@@ -25,6 +25,10 @@ GOAL_LIFETIME = 2_400
 GOAL_FAILURES = 3
 COOLDOWNS: tuple[int, ...] = (6_000, 12_000, 24_000, 48_000, 72_000)
 PER_HOUR = 4
+#: Of those, the most that are not `emergency_recurrence`: one hourly slot
+#: stays free, so ordinary failures cannot spend it all before a recurring
+#: hazard appears.
+PER_HOUR_ORDINARY = 3
 PER_SESSION = 16
 EXPERIENCED_HOUR = 72_000
 
@@ -89,6 +93,8 @@ class Detectors:
         count = self._recent(times, now)
         if count < TRIGGER_COUNT:
             return None
+        # Fired once: the next trigger for this problem needs three new signals.
+        times.clear()
         return Trigger(
             "emergency_recurrence",
             trigger,
@@ -116,6 +122,7 @@ class Detectors:
         self._unplanned[goal_type] = count
         if count < TRIGGER_COUNT:
             return None
+        self._unplanned.pop(goal_type, None)
         return Trigger(
             "no_viable_plan",
             goal_type,
@@ -142,6 +149,7 @@ class Detectors:
             times.append(now)
             count = self._recent(times, now)
             if count >= TRIGGER_COUNT and fired is None:
+                times.clear()
                 fired = Trigger(
                     "repeated_prediction_error",
                     key,
@@ -168,7 +176,8 @@ class Detectors:
 class ArbitrationRecord:
     """Cooldowns, budgets and adopted goals, rebuilt from the journal alone."""
 
-    requested_at: list[int] = field(default_factory=list)
+    #: Experienced tick and trigger kind of every request.
+    requested_at: list[tuple[int, str]] = field(default_factory=list)
     per_session: dict[str, int] = field(default_factory=dict)
     in_flight: dict[str, str] = field(default_factory=dict)
     resolved_at: dict[str, int] = field(default_factory=dict)
@@ -188,7 +197,9 @@ class ArbitrationRecord:
         payload = event.payload
         key = payload.get("trigger_key_full")
         if event.type == "deliberation_requested" and key:
-            self.requested_at.append(int(payload["experienced_tick"]))
+            self.requested_at.append(
+                (int(payload["experienced_tick"]), str(payload.get("trigger_kind")))
+            )
             session = str(payload.get("session_id"))
             self.per_session[session] = self.per_session.get(session, 0) + 1
             self.in_flight[str(payload["deliberation_id"])] = str(key)
@@ -208,7 +219,7 @@ class ArbitrationRecord:
 
     def to_json(self) -> dict[str, Any]:
         return {
-            "requested_at": list(self.requested_at),
+            "requested_at": [list(item) for item in self.requested_at],
             "per_session": dict(self.per_session),
             "in_flight": dict(self.in_flight),
             "resolved_at": dict(self.resolved_at),
@@ -218,14 +229,14 @@ class ArbitrationRecord:
 
     def load_json(self, body: Mapping[str, Any]) -> None:
         self.reset()
-        self.requested_at.extend(int(t) for t in body["requested_at"])
+        self.requested_at.extend((int(t), str(k)) for t, k in body["requested_at"])
         self.per_session.update({str(k): int(v) for k, v in body["per_session"].items()})
         self.in_flight.update({str(k): str(v) for k, v in body["in_flight"].items()})
         self.resolved_at.update({str(k): int(v) for k, v in body["resolved_at"].items()})
         self.backoff.update({str(k): int(v) for k, v in body["backoff"].items()})
         self.adopted.update({str(k): dict(v) for k, v in body["adopted"].items()})
 
-    def suppression(self, key: str, now: int, session: str) -> str | None:
+    def suppression(self, key: str, now: int, session: str, kind: str = "") -> str | None:
         """Why a new request for `key` may not be made now, or `None`.
 
         Whether one is in flight is the live process's to say: a request a
@@ -234,8 +245,12 @@ class ArbitrationRecord:
         """
         if self.per_session.get(session, 0) >= PER_SESSION:
             return "session_budget"
-        if sum(1 for tick in self.requested_at if now - tick < EXPERIENCED_HOUR) >= PER_HOUR:
+        recent = [k for tick, k in self.requested_at if now - tick < EXPERIENCED_HOUR]
+        if len(recent) >= PER_HOUR:
             return "hourly_budget"
+        ordinary = sum(1 for k in recent if k != "emergency_recurrence")
+        if kind != "emergency_recurrence" and ordinary >= PER_HOUR_ORDINARY:
+            return "hourly_budget_reserved"
         resolved = self.resolved_at.get(key)
         if resolved is not None:
             cooldown = COOLDOWNS[self.backoff.get(key, 0)]
