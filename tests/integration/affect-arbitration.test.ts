@@ -1,5 +1,6 @@
 /**
- * C6a (ADR 0023): affective arbitration in record-only changes nothing.
+ * C6 (ADR 0023): affective arbitration in record-only changes nothing (C6a);
+ * active, it brings deliberation one signal earlier and says so (C6b).
  *
  * The same quiet-grove episode, through the real runtime and cognition with
  * scripted answers, once with affective arbitration off and once
@@ -23,7 +24,7 @@ import {
 } from "../support/quiet-grove.ts";
 import { runEpisode } from "../support/runtime.ts";
 
-async function live(affectArbitration: "off" | "record_only") {
+async function live(affectArbitration: "off" | "record_only" | "active") {
   const outputDirectory = temporaryDirectory("person-affect-run-");
   const evidenceDirectory = temporaryDirectory("person-affect-");
   seedLedger(outputDirectory);
@@ -121,5 +122,45 @@ test(
           ),
           `appraised ${String(event.payload["trigger"])}`,
         );
+  },
+);
+
+test(
+  "C6b: high unease brings deliberation one failure earlier, and the journal says it would not otherwise have happened yet",
+  { timeout: 600_000 },
+  async () => {
+    const off = await live("off");
+    const active = await live("active");
+
+    const [baseline] = of(off.events, "deliberation_requested");
+    const [advanced] = of(active.events, "deliberation_requested");
+    assert.ok(baseline && advanced);
+    assert.equal(
+      (baseline.payload["signal"] as Record<string, unknown>)["count"],
+      3,
+    );
+    assert.equal(
+      (advanced.payload["signal"] as Record<string, unknown>)["count"],
+      2,
+      "one signal earlier",
+    );
+    assert.ok(advanced.tick < baseline.tick);
+    assert.equal(advanced.payload["baseline_would_fire"], false);
+    assert.equal(advanced.payload["affect_changed_outcome"], true);
+    assert.equal(
+      advanced.payload["trigger_key_full"],
+      "repeated_failure:ESTABLISH_TOOLS",
+    );
+
+    // The earlier remedy still has to earn its success the ordinary way.
+    const resolved = of(active.events, "habit_evidence").map((event) => [
+      event.payload["verdict"],
+      event.payload["reason"],
+    ]);
+    assert.deepEqual(resolved, [["success", "stable"]]);
+
+    // What the model saw carried no affect.
+    for (const event of of(active.events, "deliberation_requested"))
+      assert.ok(!JSON.stringify(event.payload).includes("unease"));
   },
 );
