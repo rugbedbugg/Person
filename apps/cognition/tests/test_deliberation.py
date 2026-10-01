@@ -511,3 +511,54 @@ def test_a_template_answer_names_a_recent_outcome_by_its_skill() -> None:
     assert answer["premises"] == ["r1", "$recent:mine_stone"], (
         "a placeholder with nothing to stand for is left for the gate to see"
     )
+
+
+# ---------------------------------- request-local recall (ADR 0020, as amended)
+
+
+def berries_remembered(process: Any) -> str:
+    from test_memory import encoded
+
+    held = {held.episode.memory_id for held in process.loop.memory.working.items()}
+    memory_id = encoded(process.loop.memory_store, "plant_food", at=50, salience=0.6)
+    assert memory_id not in held
+    return memory_id
+
+
+def test_a_request_recalls_for_itself_and_working_memory_is_untouched(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    from person_cognition.deliberation.metareasoning import Trigger
+
+    process = lived(tmp_path, view)
+    memory_id = berries_remembered(process)
+    before = [h.episode.memory_id for h in process.loop.memory.working.items()]
+    events = len(journal(tmp_path))
+    trigger = Trigger("repeated_prediction_error", "gather_plant_food:plant_food", {})
+    context, _ = process.loop._trigger_context(trigger)
+    assert context.retrieval is not None
+    assert memory_id in context.retrieval.memory_ids
+    assert context.retrieval.cue_subjects == ("plant_food",)
+    assert any("plant_food" in m["subjects"] for m in context.document["memories"])
+    assert [h.episode.memory_id for h in process.loop.memory.working.items()] == before
+    assert len(journal(tmp_path)) == events, "preparing the context records nothing"
+    plain = process.loop.deliberation_context(trigger.kind)
+    assert not any("plant_food" in m["subjects"] for m in plain.document["memories"]), (
+        "passive context construction recalls nothing"
+    )
+
+
+def test_record_only_and_active_requests_recall_the_same_slice(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    from person_cognition.deliberation.metareasoning import Trigger
+
+    process = lived(tmp_path, view)
+    berries_remembered(process)
+    trigger = Trigger("repeated_prediction_error", "gather_plant_food:plant_food", {})
+    slices = []
+    for mode in ("record_only", "active"):
+        process.loop.deliberation_mode = mode
+        context, _ = process.loop._trigger_context(trigger)
+        slices.append((context.retrieval, context.document["memories"]))
+    assert slices[0] == slices[1]

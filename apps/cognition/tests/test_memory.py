@@ -204,8 +204,11 @@ def test_no_method_reachable_from_cognition_returns_the_store() -> None:
         if not name.startswith("_") and callable(value)
     }
     # `lose_continuity` (ADR 0017, I2) returns nothing and exposes no record.
+    # `retrieve` (ADR 0020 as amended for C7) is `recall` for one act of
+    # deliberation: the same cue, ranking and limit, never into working memory.
     assert public == {
         "recall",
+        "retrieve",
         "experience",
         "payload",
         "encoded",
@@ -596,3 +599,30 @@ def test_provenance_is_a_closed_vocabulary() -> None:
     for later in ("inferred", "taught", "operator", "external"):
         with pytest.raises(MemoryRecordError):
             Provenance(later)
+
+
+# ------------------------------------- deliberative retrieval (ADR 0020, C7)
+
+
+def test_a_deliberative_retrieval_is_recall_without_holding() -> None:
+    store = MemoryStore()
+    for index in range(10):
+        encoded(store, "wood", at=index)
+    memory = memory_at(store, 20)
+    cue = Cue.about("wood", purpose="goal")
+    retrieved = memory.retrieve(cue)
+    assert 0 < len(retrieved) <= RECALL_LIMIT, "the same limit, no wider surface"
+    assert len(memory.working) == 0, "nothing entered working memory"
+    assert [i.episode.memory_id for i in retrieved] == [
+        i.episode.memory_id for i in memory.recall(cue)
+    ], "the same ranking as ordinary recall"
+
+
+def test_a_forgotten_or_live_isolated_memory_cannot_be_retrieved_by_wanting_it() -> None:
+    store = MemoryStore()
+    encoded(store, "wood", at=0, salience=0.0)
+    cue = Cue.about("wood", purpose="goal")
+    assert memory_at(store, 24_000 * 5).retrieve(cue) == (), "forgotten stays forgotten"
+    fixture = MemoryStore()
+    encoded(fixture, "wood", at=0, context="fixture")
+    assert memory_at(fixture, 10, context="live").retrieve(cue) == ()
