@@ -69,6 +69,7 @@ from .deliberation import (
     build_context,
 )
 from .deliberation.arbiter import Arbiter
+from .deliberation.habits import HabitTracker, context_signature
 from .deliberation.metareasoning import ArbitrationRecord, Trigger
 from .deliberation.model import TemplateModel
 from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
@@ -258,6 +259,11 @@ class CognitionLoop:
             self.life,
             self.arbitration,
         )
+        # ADR 0022: habit learning; C4 keeps it to the shadow stream.
+        self.arbiter.habits_mode = settings.deliberation_habits if settings else "off"
+        if self.arbiter.habits_mode == "record_only":
+            self.arbiter.tracker = HabitTracker(self.reducers.habits_shadow)
+        self.arbiter.signature_for = self._habit_signature
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
         #: Person's belief about where it is relative to home (C8).
@@ -480,6 +486,30 @@ class CognitionLoop:
             context_for=self._trigger_context,
             decision=self.decision_counter,
             failures=lambda goal_id: self.consecutive_failures.get(goal_id, 0),
+        )
+
+    def _recorder(self, tick: int) -> Callable[[str, dict[str, Any]], None]:
+        def record(event_type: str, payload: dict[str, Any]) -> None:
+            self._record(event_type, tick, payload)
+
+        return record
+
+    def _habit_signature(self, trigger: Trigger, desired: list[str]) -> dict[str, Any]:
+        """The context a habit would be keyed by, from what Person perceives."""
+        here = self.spatial.here()
+        source = self.goals.entries.get(trigger.source_goal_id or "")
+        source_type = (
+            trigger.key
+            if trigger.kind in ("repeated_failure", "no_viable_plan")
+            else source.goal_type
+            if source is not None
+            else None
+        )
+        return context_signature(
+            observation=self._last_observation,
+            place={"place_id": here.place_id, "confidence": here.confidence} if here else None,
+            desired_facts=desired,
+            source_goal_type=source_type,
         )
 
     def _trigger_context(self, trigger: Trigger) -> tuple[DeliberationContext, frozenset[str]]:
@@ -855,6 +885,10 @@ class CognitionLoop:
             # is missing; it is a reason to think only once search has given
             # up on this goal (ADR 0021).
             exhausted = not plans and goal.goal_id in self.unfound
+            if exhausted:
+                self.arbiter.raw_signal(
+                    f"no_viable_plan:{goal.goal_type}", self.memory.now, self._recorder(tick)
+                )
             self.arbiter.raise_trigger(
                 self.arbiter.detectors.planned(
                     goal.goal_type, goal.goal_id, not exhausted, goal.priority
@@ -1283,6 +1317,11 @@ class CognitionLoop:
             # The emergency is handled by the kernel now; whether its
             # recurrence deserves thought is asked at a later decision.
             self.arbiter.emergency_now = True
+            self.arbiter.raw_signal(
+                f"emergency_recurrence:{message['trigger']}",
+                self.memory.now,
+                self._recorder(message["tick"]),
+            )
             self.arbiter.raise_trigger(
                 self.arbiter.detectors.emergency(message["trigger"], self.memory.now)
             )
@@ -1923,6 +1962,14 @@ class CognitionLoop:
         payload = build_payload(pending, state)
         if self._metareasoning():
             erred = self.goals.entries.get(str(payload.get("goal_id")))
+            if str(payload.get("severity")) in ("major", "inverted"):
+                for entry in payload.get("observed", []):
+                    if entry.get("fact") in EVALUABLE_FACTS:
+                        self.arbiter.raw_signal(
+                            f"repeated_prediction_error:{payload.get('executed_skill')}:{entry.get('fact')}",
+                            self.memory.now,
+                            self._recorder(tick),
+                        )
             self.arbiter.raise_trigger(
                 self.arbiter.detectors.prediction(
                     payload.get("executed_skill"),
@@ -1961,6 +2008,11 @@ class CognitionLoop:
             self.consecutive_failures[active.goal_id] = failures
             failed_goal = self.goals.entries.get(active.goal_id)
             if self._metareasoning() and failed_goal is not None:
+                self.arbiter.raw_signal(
+                    f"repeated_failure:{failed_goal.goal_type}",
+                    self.memory.now,
+                    self._recorder(tick),
+                )
                 self.arbiter.raise_trigger(
                     self.arbiter.detectors.goal_failed(
                         failed_goal.goal_type, failed_goal.goal_id, failures, failed_goal.priority

@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v15"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v16"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -36,6 +36,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v13",
     "person-evidence-v14",
     "person-evidence-v15",
+    "person-evidence-v16",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -134,6 +135,19 @@ EVENT_TYPES: tuple[str, ...] = (
     "deliberation_discarded",
     "deliberation_shadow_disposition",
     "deliberation_goal_ended",
+    # ADR 0022: habits. Record-only's shadow stream, which nothing that acts
+    # ever reads, and the active stream C5 invokes habits from.
+    "habit_candidate_shadow",
+    "habit_evidence_shadow",
+    "habit_promotion_shadow",
+    "habit_conflict_shadow",
+    "habit_candidate_formed",
+    "habit_evidence",
+    "habit_promoted",
+    "habit_conflict",
+    "habit_invoked",
+    "habit_not_applicable",
+    "habit_demoted",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -187,6 +201,23 @@ V15_EVENT_TYPES: frozenset[str] = frozenset(
     }
 )
 
+#: Event types introduced with the sixteenth: habits (ADR 0022).
+V16_EVENT_TYPES: frozenset[str] = frozenset(
+    {
+        "habit_candidate_shadow",
+        "habit_evidence_shadow",
+        "habit_promotion_shadow",
+        "habit_conflict_shadow",
+        "habit_candidate_formed",
+        "habit_evidence",
+        "habit_promoted",
+        "habit_conflict",
+        "habit_invoked",
+        "habit_not_applicable",
+        "habit_demoted",
+    }
+)
+
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
 INTRODUCED_IN: dict[str, str] = {
@@ -204,6 +235,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V13_EVENT_TYPES, "person-evidence-v13"),
     **dict.fromkeys(V14_EVENT_TYPES, "person-evidence-v14"),
     **dict.fromkeys(V15_EVENT_TYPES, "person-evidence-v15"),
+    **dict.fromkeys(V16_EVENT_TYPES, "person-evidence-v16"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (

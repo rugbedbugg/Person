@@ -106,7 +106,11 @@
           "enum": ["scripted"],
           "description": "Which model answers. scripted: answers written in advance in scriptedAnswers, for offline tests and fixture runs; it makes no network call. Provider backends are chosen in C7."
         },
-        "scriptedAnswers": { "type": "string", "minLength": 1 }
+        "scriptedAnswers": { "type": "string", "minLength": 1 },
+        "habits": {
+          "enum": ["off", "record_only"],
+          "description": "ADR 0022: habit learning. off (the default); record_only (C4): candidates, evidence and promotion computed as a shadow stream that nothing that acts ever reads. active comes with C5."
+        }
       }
     },
     "affect": {
