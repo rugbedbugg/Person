@@ -101,6 +101,9 @@ export class FixtureWorld implements Embodiment {
   #unrested = false;
   #waited = 0;
   #resting = false;
+  /** `barren_until_withdrawn`: taken from an owned container since the last `unrest`. */
+  #withdrewSince = false;
+  #withdrawalHelps = true;
   #restHelps = true;
   #guard: PhysicalGuard | null = null;
   #lastSafePosition: Position | null = null;
@@ -404,6 +407,9 @@ export class FixtureWorld implements Embodiment {
       } else if (event.type === "unrest") {
         this.#unrested = true;
         this.#waited = 0;
+        this.#withdrewSince = false;
+      } else if (event.type === "withdrawal_stops_helping") {
+        this.#withdrawalHelps = false;
       } else if (event.type === "rest_stops_helping") {
         this.#restHelps = false;
       } else if (event.type === "remove_items") {
@@ -981,7 +987,10 @@ export class FixtureWorld implements Embodiment {
           rule.weather === this.#weather) ||
           (rule.kind === "barren_until_rested" &&
             this.#unrested &&
-            (!this.#restHelps || this.#waited < (rule.restTicks ?? 100)))),
+            (!this.#restHelps || this.#waited < (rule.restTicks ?? 100))) ||
+          (rule.kind === "barren_until_withdrawn" &&
+            this.#unrested &&
+            (!this.#withdrawalHelps || !this.#withdrewSince))),
     );
     const drops = barren ? [] : definition.drops.map((drop) => ({ ...drop }));
     for (const drop of drops) this.#give(drop.name, drop.count);
@@ -1202,6 +1211,8 @@ export class FixtureWorld implements Embodiment {
       this.#give(item.name, available);
       moved.push({ name: item.name, count: available });
     }
+    if (moved.length > 0 && this.#owned.has(positionKey(position)))
+      this.#withdrewSince = true;
     this.#advance(10);
     return moved;
   }
