@@ -29,7 +29,14 @@ from person_persistence import (
     SelfKnowledge,
     new_event,
 )
-from person_planner import RECOVERY_SKILLS, evidence_needed, plan_for, symbolic_state
+from person_planner import (
+    EVIDENCE_FACTS,
+    RECOVERY_SKILLS,
+    evidence_needed,
+    plan_for,
+    relevant_skills,
+    symbolic_state,
+)
 from person_policy import (
     DeterministicPolicyProvider,
     EvidencePolicyProvider,
@@ -625,12 +632,16 @@ class CognitionLoop:
         if problem.kind in ("repeated_failure", "no_viable_plan"):
             goal = self.goals.entries.get(problem.source_goal_id or "")
             if goal is not None:
-                facts += list(
-                    evidence_needed(
-                        self._last_state, goal.completion_condition, registry=self.registry
-                    )
-                )
-                facts += [condition.fact for condition in goal.completion_condition]
+                # The resources any relevant way of achieving this goal
+                # depends on, whether or not a plan exists right now: what
+                # Person knows about the problem, not just what it lacks.
+                specs = [self.registry.get(skill) for skill in self.registry.ids]
+                facts += [
+                    condition.fact
+                    for spec in relevant_skills(goal.completion_condition, specs)
+                    for condition in spec.preconditions
+                    if condition.fact in EVIDENCE_FACTS
+                ]
         elif problem.kind == "repeated_prediction_error":
             facts += problem.key.split(":", 1)[1].split("+") if ":" in problem.key else []
         elif problem.kind == "emergency_recurrence":
