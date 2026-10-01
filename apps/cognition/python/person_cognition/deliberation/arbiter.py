@@ -40,13 +40,16 @@ from .habits import (
 )
 from .metareasoning import (
     ACTION_FACTS,
+    AFFECTIVE_KINDS,
     GOAL_FAILURES,
     GOAL_LIFETIME,
     STALE_AFTER,
+    TRIGGER_COUNT,
     ArbitrationRecord,
     Detectors,
     Trigger,
     admit_goal,
+    affective_threshold,
     band,
     condition_for,
     full_key,
@@ -167,6 +170,13 @@ class Arbiter:
     #: The problem each habit last answered, for the breakdown that follows a
     #: definite failure of its own episode.
     invoked_for: dict[str, Trigger] = field(default_factory=dict)
+    #: ADR 0023 (C6): `off`, `record_only` (shadow evidence only) or `active`.
+    affect_arbitration: str = "off"
+    #: Person's affect bands when it dispatched its latest skill: the state
+    #: before any outcome that skill's signals carry was appraised.
+    affect_snapshot: dict[str, str] | None = None
+    #: The pre-signal bands each pending affective trigger is judged by.
+    affect_at_signal: dict[str, dict[str, str]] = field(default_factory=dict)
     #: The session and life epoch of the current step, for habit episodes.
     tracker_session: str = ""
     tracker_life_epoch: int = 0
@@ -196,7 +206,15 @@ class Arbiter:
 
     def raise_trigger(self, trigger: Trigger | None) -> None:
         if trigger is not None:
-            self.pending[full_key(trigger)] = trigger
+            key = full_key(trigger)
+            self.pending[key] = trigger
+            if (
+                self.affect_arbitration != "off"
+                and trigger.kind in AFFECTIVE_KINDS
+                and self.affect_snapshot is not None
+            ):
+                # Never the state this very signal's appraisal produced.
+                self.affect_at_signal[key] = dict(self.affect_snapshot)
 
     # ------------------------------------------------------------ each step
 
@@ -264,6 +282,7 @@ class Arbiter:
                 alive
                 and world_available
                 and trigger.kind != "habit_breakdown"
+                and not self._early(trigger)
                 and self._habit(
                     trigger, bases[key], record, state, now, goals, projects, registry, goal_types
                 )
@@ -276,6 +295,27 @@ class Arbiter:
             basis = bases.get(key)
             if basis is None and self.basis_for is not None:
                 basis = self.basis_for(trigger)
+            bands = self.affect_at_signal.pop(key, None)
+            counterfactual: dict[str, Any] = {}
+            if self.affect_arbitration != "off" and trigger.kind in AFFECTIVE_KINDS:
+                early = self._early(trigger)
+                if early and (
+                    not alive
+                    or not world_available
+                    or self.adopted is not None
+                    or self._matching_habit(trigger, basis) is not None
+                ):
+                    # Not at the arbitration point: a candidate the baseline
+                    # would not act on leaves no trace (ADR 0023).
+                    continue
+                if alive and world_available and self.adopted is None:
+                    counterfactual = self._arbitrate(trigger, key, bands, record, now)
+                    if not counterfactual["fires"]:
+                        continue
+                if self.affect_arbitration != "active":
+                    counterfactual = {}
+                else:
+                    counterfactual.pop("fires", None)
             reason = None
             if not alive or not world_available:
                 reason = "ineligible"
@@ -296,6 +336,11 @@ class Arbiter:
                         "trigger_key_full": key,
                         "reason": reason,
                         "experienced_tick": now,
+                        # Affect may have wanted this earlier and C3 said no:
+                        # that is evidence too (ADR 0023).
+                        **{
+                            k: v for k, v in counterfactual.items() if k != "affect_changed_outcome"
+                        },
                     },
                 )
                 continue
@@ -320,6 +365,7 @@ class Arbiter:
                     "trigger_refs": sorted(trigger_refs),
                     "budget_kind": origin(trigger).kind,
                     **snapshot,
+                    **counterfactual,
                 },
             )
             if request is None:
@@ -507,7 +553,75 @@ class Arbiter:
             **habit,
         )
 
+    # ------------------------------------------- affective arbitration (C6)
+
+    @staticmethod
+    def _early(trigger: Trigger) -> bool:
+        """A candidate one signal before the ADR 0021 baseline."""
+        return (
+            trigger.kind in AFFECTIVE_KINDS
+            and int(trigger.signal.get("count", TRIGGER_COUNT)) < TRIGGER_COUNT
+        )
+
+    def _arbitrate(
+        self,
+        trigger: Trigger,
+        key: str,
+        bands: dict[str, str] | None,
+        record: Record,
+        now: int,
+    ) -> dict[str, Any]:
+        """ADR 0023 at the arbitration point: record the detector-level facts,
+        and say whether this signal fires under the mode in force."""
+        count = int(trigger.signal.get("count", TRIGGER_COUNT))
+        bands = bands or {"unease_band": "unknown", "control_band": "unknown"}
+        shadow = affective_threshold(bands)
+        baseline_crossed = count >= TRIGGER_COUNT
+        shadow_crossed = count >= shadow
+        advanced = shadow_crossed and not baseline_crossed
+        record(
+            "affective_arbitration_shadow",
+            {
+                "trigger_kind": trigger.kind,
+                "trigger_key": trigger.key,
+                "trigger_key_full": key,
+                "signal_count": count,
+                "baseline_threshold": TRIGGER_COUNT,
+                "shadow_threshold": shadow,
+                **bands,
+                "baseline_threshold_crossed": baseline_crossed,
+                "shadow_threshold_crossed": shadow_crossed,
+                "affect_advanced_threshold": advanced,
+                "mode": self.affect_arbitration,
+                "experienced_tick": now,
+            },
+        )
+        fires = shadow_crossed if self.affect_arbitration == "active" else baseline_crossed
+        return {
+            "fires": fires,
+            "baseline_would_fire": baseline_crossed,
+            "affect_advanced_threshold": advanced,
+            "affect_changed_outcome": advanced,
+        }
+
     # ------------------------------------------------------- habits (C5)
+
+    def _matching_habit(self, trigger: Trigger, basis: dict[str, Any] | None) -> Template | None:
+        """The promoted habit with this scope and this exact signature, if any."""
+        book = self.active_book
+        if book is None or self.habits_mode != "active" or basis is None:
+            return None
+        for t in book.templates.values():
+            if (t.trigger_kind, t.semantic_key) != (trigger.kind, trigger.key):
+                continue
+            if t.state != "promoted":
+                continue
+            observed = signature_sha(
+                context_signature(**basis, desired_facts=[str(f) for f, _ in t.desired])
+            )
+            if observed == t.signature_sha:
+                return t
+        return None
 
     def _habit(
         self,

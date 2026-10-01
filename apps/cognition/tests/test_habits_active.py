@@ -35,21 +35,23 @@ def promoted_template(
     *,
     desired: list[list[str]] = DESIRED,
     goal_type: str = "RECOVER_HOME",
+    trigger_kind: str = "emergency_recurrence",
+    semantic_key: str = "suffocation",
 ) -> str:
     """Journal a habit's formation into the active book, as three lived
     deliberated successes would have."""
     signature = context_signature(**BASIS, desired_facts=[f for f, _ in desired])
     tid = template_id(
-        trigger_kind="emergency_recurrence",
-        semantic_key="suffocation",
+        trigger_kind=trigger_kind,
+        semantic_key=semantic_key,
         signature=signature,
         goal_type=goal_type,
         desired=desired,
     )
     body = {
         "template_id": tid,
-        "trigger_kind": "emergency_recurrence",
-        "semantic_key": "suffocation",
+        "trigger_kind": trigger_kind,
+        "semantic_key": semantic_key,
         "signature_sha": signature_sha(signature),
         "goal_type": goal_type,
         "desired": desired,

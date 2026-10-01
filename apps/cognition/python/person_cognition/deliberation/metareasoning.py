@@ -41,6 +41,43 @@ PROJECT_BAND = 300.0
 #: satisfied by its routine's success, the only evidence there is.
 ACTION_FACTS: frozenset[str] = frozenset({"rested", "stored_surplus", "withdrawn", "looted"})
 
+#: ADR 0023 (C6): the trigger kinds affect may advance, by exactly one signal,
+#: and the bands it is read in. Declared engineering priors.
+AFFECTIVE_KINDS: frozenset[str] = frozenset(
+    {"repeated_failure", "repeated_prediction_error", "no_viable_plan"}
+)
+AFFECT_ADVANCE = 1
+UNEASE_HIGH = 0.5
+UNEASE_LOW = 0.2
+CONTROL_LOW = -0.25
+CONTROL_HIGH = 0.25
+
+
+def affect_bands(unease: float, control: float) -> dict[str, str]:
+    """Coarse bands of Person's ADR 0010 affect: the arbitration rule never
+    sees the values themselves."""
+    return {
+        "unease_band": "high"
+        if unease >= UNEASE_HIGH
+        else "low"
+        if unease < UNEASE_LOW
+        else "normal",
+        "control_band": "low"
+        if control <= CONTROL_LOW
+        else "high"
+        if control >= CONTROL_HIGH
+        else "normal",
+    }
+
+
+def affective_threshold(bands: Mapping[str, str]) -> int:
+    """Only earlier, never later: high unease or low control lowers the
+    evidence Person needs by one signal; nothing raises it."""
+    if bands.get("unease_band") == "high" or bands.get("control_band") == "low":
+        return TRIGGER_COUNT - AFFECT_ADVANCE
+    return TRIGGER_COUNT
+
+
 #: Prediction-error severities that count as severe.
 SEVERE: frozenset[str] = frozenset({"major", "inverted"})
 
@@ -95,9 +132,17 @@ def band(trigger: Trigger) -> tuple[float, str]:
 
 
 class Detectors:
-    """Signals cognition already has, turned into keyed triggers."""
+    """Signals cognition already has, turned into keyed triggers.
+
+    With affective arbitration on (ADR 0023), the affective kinds also offer a
+    candidate one signal before the baseline, without resetting: whether it
+    fires is decided later, from Person's affect, at the arbitration point.
+    Off, they behave exactly as ADR 0021.
+    """
 
     def __init__(self) -> None:
+        #: ADR 0023: offer candidates one signal early.
+        self.early = False
         self._emergencies: dict[str, deque[int]] = defaultdict(deque)
         self._errors: dict[str, deque[int]] = defaultdict(deque)
         self._unplanned: dict[str, int] = {}
@@ -108,6 +153,9 @@ class Detectors:
         while times and now - times[0] > RECURRENCE_WINDOW:
             times.popleft()
         return len(times)
+
+    def _floor(self) -> int:
+        return TRIGGER_COUNT - AFFECT_ADVANCE if self.early else TRIGGER_COUNT
 
     def emergency(self, trigger: str, now: int) -> Trigger | None:
         times = self._emergencies[trigger]
@@ -126,12 +174,12 @@ class Detectors:
     def goal_failed(
         self, goal_type: str, goal_id: str, failures: int, priority: float
     ) -> Trigger | None:
-        if failures < TRIGGER_COUNT:
+        if failures < self._floor():
             return None
         return Trigger(
             "repeated_failure",
             goal_type,
-            {"consecutive_failures": failures},
+            {"consecutive_failures": failures, "count": failures},
             source_goal_id=goal_id,
             source_priority=priority,
         )
@@ -142,13 +190,14 @@ class Detectors:
             return None
         count = self._unplanned.get(goal_type, 0) + 1
         self._unplanned[goal_type] = count
-        if count < TRIGGER_COUNT:
+        if count < self._floor():
             return None
-        self._unplanned.pop(goal_type, None)
+        if count >= TRIGGER_COUNT:
+            self._unplanned.pop(goal_type, None)
         return Trigger(
             "no_viable_plan",
             goal_type,
-            {"decisions_without_plan": count},
+            {"decisions_without_plan": count, "count": count},
             source_goal_id=goal_id,
             source_priority=priority,
         )
@@ -170,13 +219,14 @@ class Detectors:
         times = self._errors[key]
         times.append(now)
         count = self._recent(times, now)
-        if count < TRIGGER_COUNT:
+        if count < self._floor():
             return None
-        times.clear()
+        if count >= TRIGGER_COUNT:
+            times.clear()
         return Trigger(
             "repeated_prediction_error",
             key,
-            {"severe_invocations": count, "window": RECURRENCE_WINDOW},
+            {"severe_invocations": count, "window": RECURRENCE_WINDOW, "count": count},
             source_goal_id=goal_id,
             source_priority=priority,
         )
