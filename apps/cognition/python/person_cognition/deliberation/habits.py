@@ -30,6 +30,12 @@ RESPONSE_TEMPLATE_SCHEMA = "response_template_v1"
 STABILIZATION_WINDOW = 1_200
 PROMOTION_STREAK = 3
 
+#: Trigger classes whose source goal is blocked by the very failures that
+#: raised them, so silence afterwards proves nothing. Their success also needs
+#: positive resolution evidence: the source goal, retried, succeeding at least
+#: once inside the window (ADR 0021/0022 amendment, C4.1).
+NEEDS_RESOLUTION: frozenset[str] = frozenset({"repeated_failure", "no_viable_plan"})
+
 #: Inventory categories a response's desired facts make relevant. A fact
 #: with no declared mapping adds no inventory to the signature.
 INVENTORY_FOR_FACT: Mapping[str, tuple[str, ...]] = {
@@ -269,6 +275,14 @@ class Episode:
     world_epoch: int
     session: str
     stabilizing_since: int | None = None
+    #: The goal whose trouble raised the trigger, when its class needs one.
+    source_goal_id: str | None = None
+    #: That source goal succeeded at something after the remedy was satisfied.
+    resolved: bool = False
+
+    @property
+    def needs_resolution(self) -> bool:
+        return str(self.template["trigger_kind"]) in NEEDS_RESOLUTION
 
 
 class HabitTracker:
@@ -295,6 +309,13 @@ class HabitTracker:
         verdict = "inconclusive" if why == "session_ended" else "failure"
         self._conclude(episode, verdict, f"goal_{why}", now, record)
 
+    def source_progress(self, goal_id: str, now: int) -> None:
+        """A routine of `goal_id` succeeded: for an episode stabilizing after
+        that goal's trouble, positive evidence the trouble was resolved."""
+        for episode in self.episodes.values():
+            if episode.source_goal_id == goal_id and episode.stabilizing_since is not None:
+                episode.resolved = True
+
     def raw_signal(self, semantic_key_full: str, now: int, record: Any) -> None:
         """Any new qualifying raw signal of the same problem after the goal
         was satisfied, inside the window: it did not resolve it."""
@@ -317,7 +338,12 @@ class HabitTracker:
                 episode.stabilizing_since is not None
                 and now - episode.stabilizing_since >= STABILIZATION_WINDOW
             ):
-                self._conclude(episode, "success", "stable", now, record)
+                if episode.needs_resolution and not episode.resolved:
+                    # Quiet because the goal was never tried again is not
+                    # resolution: it may only have been given up on.
+                    self._conclude(episode, "inconclusive", "no_retry", now, record)
+                else:
+                    self._conclude(episode, "success", "stable", now, record)
 
     def _conclude(self, episode: Episode, verdict: str, reason: str, now: int, record: Any) -> None:
         del self.episodes[episode.deliberation_id]

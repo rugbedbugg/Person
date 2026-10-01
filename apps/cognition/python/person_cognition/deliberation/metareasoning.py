@@ -36,6 +36,11 @@ EXPERIENCED_HOUR = 72_000
 RECOVERY_BAND = 700.0
 PROJECT_BAND = 300.0
 
+#: Facts no observation carries: true only because the action that makes them
+#: true just succeeded (`rested` after waiting). A goal made only of these is
+#: satisfied by its routine's success, the only evidence there is.
+ACTION_FACTS: frozenset[str] = frozenset({"rested", "stored_surplus", "withdrawn", "looted"})
+
 #: Prediction-error severities that count as severe.
 SEVERE: frozenset[str] = frozenset({"major", "inverted"})
 
@@ -140,24 +145,24 @@ class Detectors:
         goal_id: str | None,
         priority: float | None,
     ) -> Trigger | None:
-        if severity not in SEVERE or not skill:
+        if severity not in SEVERE or not skill or not facts:
             return None
-        fired = None
-        for fact in facts:
-            key = f"{skill}:{fact}"
-            times = self._errors[key]
-            times.append(now)
-            count = self._recent(times, now)
-            if count >= TRIGGER_COUNT and fired is None:
-                times.clear()
-                fired = Trigger(
-                    "repeated_prediction_error",
-                    key,
-                    {"severe_errors": count, "window": RECURRENCE_WINDOW},
-                    source_goal_id=goal_id,
-                    source_priority=priority,
-                )
-        return fired
+        # One failed invocation is one signal, however many of its expected
+        # facts failed with it; the problem is the skill and that set of facts.
+        key = prediction_key(skill, facts)
+        times = self._errors[key]
+        times.append(now)
+        count = self._recent(times, now)
+        if count < TRIGGER_COUNT:
+            return None
+        times.clear()
+        return Trigger(
+            "repeated_prediction_error",
+            key,
+            {"severe_invocations": count, "window": RECURRENCE_WINDOW},
+            source_goal_id=goal_id,
+            source_priority=priority,
+        )
 
     def project(self, kind: str, project_id: str, blocks: int, near: int) -> Trigger | None:
         """Once per project and block count: a stuck project is one problem."""
@@ -257,6 +262,11 @@ class ArbitrationRecord:
             if now - resolved < cooldown:
                 return "cooldown"
         return None
+
+
+def prediction_key(skill: str, facts: Sequence[str]) -> str:
+    """A prediction-error problem: the skill and its sorted set of failed facts."""
+    return f"{skill}:{'+'.join(sorted(set(facts)))}"
 
 
 def full_key(trigger: Trigger) -> str:
