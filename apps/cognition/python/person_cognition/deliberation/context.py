@@ -16,7 +16,7 @@ from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from typing import Any
 
-CONTEXT_SCHEMA = "person-deliberation-context-v1"
+CONTEXT_SCHEMA = "person-deliberation-context-v2"
 
 #: Why deliberation may be requested. C3 decides when; C1 only records why.
 REASONS: tuple[str, ...] = (
@@ -124,7 +124,21 @@ def build_context(
     recent: Sequence[Mapping[str, Any]],
     capabilities: Sequence[Capability],
     vocabulary: Mapping[str, Sequence[str]],
+    home_relation: str = "unknown",
+    place_labels: Mapping[str, str] | None = None,
 ) -> DeliberationContext:
+    """The bounded context a model may see.
+
+    `home_relation` is Person's own belief about where home is (C8), never
+    the runtime's anchor; `place_labels` holds Person's own labels for the
+    places this context already cites, and nothing else (v2, ADR 0024)."""
+    labels = dict(place_labels or {})
+
+    def place_ref(place_id: Any) -> dict[str, Any] | None:
+        if place_id is None:
+            return None
+        return {"id": str(place_id), "label": labels.get(str(place_id))}
+
     if reason not in REASONS:
         raise ValueError(f"unknown deliberation reason {reason!r}")
     refs: dict[str, tuple[str, dict[str, Any]]] = {}
@@ -171,9 +185,11 @@ def build_context(
             {
                 "fact": "place",
                 "value": str(place["place_id"]),
+                "label": labels.get(str(place["place_id"])),
                 "certain": float(place["confidence"]) >= 0.5,
             }
         )
+    situation.append({"fact": "home_relation", "value": home_relation})
     if world_available is not None:
         situation.append({"fact": "world_available", "value": bool(world_available)})
 
@@ -182,7 +198,7 @@ def build_context(
             "kind": str(item["kind"]),
             "subjects": _capped(item.get("subjects", ()), CAPS["list_items"]),
             "details": dict(item.get("details") or {}),
-            "place": item.get("place"),
+            "place": place_ref(item.get("place")),
             "source": item.get("source", "perceived"),
         }
         for item in list(working_memory)[-CAPS["memories"] :]

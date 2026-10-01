@@ -453,6 +453,15 @@ class CognitionLoop:
             observation=self._last_observation,
             place=({"place_id": here.place_id, "confidence": here.confidence} if here else None),
             working_memory=working,
+            home_relation=self.spatial.home_relation()[0],
+            # Person's own labels, for exactly the places this context cites.
+            place_labels={
+                str(place_id): label
+                for place_id in {here.place_id if here else None}
+                | {str(item["place"]) for item in working if item["place"] is not None}
+                if place_id is not None
+                and (label := self.spatial.label_of(str(place_id))) is not None
+            },
             beliefs=beliefs,
             hypotheses=hypotheses,
             goals=goals,
