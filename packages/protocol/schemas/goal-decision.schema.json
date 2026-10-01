@@ -73,7 +73,8 @@
             "emergency",
             "maintenance",
             "self_generated",
-            "operator"
+            "operator",
+            "deliberation"
           ]
         },
         "createdAtTick": {

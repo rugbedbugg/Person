@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v14"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v15"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -35,6 +35,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v12",
     "person-evidence-v13",
     "person-evidence-v14",
+    "person-evidence-v15",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -125,6 +126,14 @@ EVENT_TYPES: tuple[str, ...] = (
     "deliberation_requested",
     "deliberation_completed",
     "deliberation_unavailable",
+    # ADR 0021, C3: why a trigger did not become a request, and how each
+    # request ended: adopted as one temporary goal, discarded, or (record-only)
+    # what would have happened; and how an adopted goal ended.
+    "deliberation_suppressed",
+    "deliberation_adopted",
+    "deliberation_discarded",
+    "deliberation_shadow_disposition",
+    "deliberation_goal_ended",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -167,6 +176,17 @@ V14_EVENT_TYPES: frozenset[str] = frozenset(
     {"deliberation_requested", "deliberation_completed", "deliberation_unavailable"}
 )
 
+#: Event types introduced with the fifteenth: metareasoning (ADR 0021).
+V15_EVENT_TYPES: frozenset[str] = frozenset(
+    {
+        "deliberation_suppressed",
+        "deliberation_adopted",
+        "deliberation_discarded",
+        "deliberation_shadow_disposition",
+        "deliberation_goal_ended",
+    }
+)
+
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
 INTRODUCED_IN: dict[str, str] = {
@@ -183,6 +203,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V12_EVENT_TYPES, "person-evidence-v12"),
     **dict.fromkeys(V13_EVENT_TYPES, "person-evidence-v13"),
     **dict.fromkeys(V14_EVENT_TYPES, "person-evidence-v14"),
+    **dict.fromkeys(V15_EVENT_TYPES, "person-evidence-v15"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
