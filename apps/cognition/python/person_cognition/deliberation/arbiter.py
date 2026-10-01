@@ -18,6 +18,7 @@ behaviour.
 from __future__ import annotations
 
 import threading
+import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from functools import partial
@@ -28,7 +29,15 @@ from person_skills import Condition
 
 from .context import DeliberationContext
 from .deliberator import CallResult, Deliberator, Request
-from .habits import Episode, HabitTracker, signature_sha, template_id
+from .habits import (
+    Episode,
+    HabitBook,
+    HabitTracker,
+    Template,
+    context_signature,
+    signature_sha,
+    template_id,
+)
 from .metareasoning import (
     ACTION_FACTS,
     GOAL_FAILURES,
@@ -39,7 +48,9 @@ from .metareasoning import (
     Trigger,
     admit_goal,
     band,
+    condition_for,
     full_key,
+    origin,
 )
 
 Record = Callable[[str, dict[str, Any]], Any]
@@ -93,6 +104,9 @@ class InFlight:
     trigger: Trigger
     snapshot: dict[str, Any]
     trigger_refs: frozenset[str]
+    #: What Person perceived when the trigger fired: a habit's context
+    #: signature is of the moment the problem arose, not of the answer.
+    basis: dict[str, Any] | None = None
 
 
 #: Trigger classes that name a source goal whose blocking a remedy may lift.
@@ -123,6 +137,10 @@ class Adopted:
     source_goal_type: str | None = None
     source_created_at: int | None = None
     source_block_reason: str | None = None
+    #: `deliberation`, or `habit` for a promoted habit's remedy (C5); then
+    #: `deliberation_id` holds the habit invocation's id.
+    via: str = "deliberation"
+    template_id: str | None = None
 
 
 @dataclass
@@ -140,8 +158,18 @@ class Arbiter:
     #: ADR 0022: `off`, or `record_only` (C4: shadow evidence only).
     habits_mode: str = "off"
     tracker: HabitTracker | None = None
-    #: Builds a context signature for a trigger and desired facts (the loop's).
-    signature_for: Callable[[Trigger, list[str]], dict[str, Any]] | None = None
+    #: What a context signature is built from when a trigger fires: the
+    #: observation, the recognised place and the source goal type (the loop's).
+    basis_for: Callable[[Trigger], dict[str, Any]] | None = None
+    #: C5: the active book promoted habits are invoked from (habits `active`).
+    active_book: HabitBook | None = None
+    new_invocation_id: Callable[[], str] = lambda: f"hinv_{uuid.uuid4().hex[:16]}"
+    #: The problem each habit last answered, for the breakdown that follows a
+    #: definite failure of its own episode.
+    invoked_for: dict[str, Trigger] = field(default_factory=dict)
+    #: The session and life epoch of the current step, for habit episodes.
+    tracker_session: str = ""
+    tracker_life_epoch: int = 0
     #: Adopted goals ended since the loop last looked, with why: the loop
     #: closes them in its goal stack, or a suspended goal nobody proposes any
     #: more would stay a candidate for ever, and grants a satisfied one's
@@ -193,6 +221,8 @@ class Arbiter:
         failures: Callable[[str], int],
     ) -> None:
         """Consume an answer, keep the adopted goal honest, maybe ask again."""
+        self.tracker_session = session
+        self.tracker_life_epoch = life_epoch
         if mode == "off" or deliberator is None:
             self.pending.clear()
             self.emergency_now = False
@@ -223,17 +253,40 @@ class Arbiter:
                 session=session,
                 record=record,
             )
+        # A learned habit answers first, for every problem pending, before any
+        # model is asked about any of them (ADR 0022, C5).
+        bases: dict[str, dict[str, Any] | None] = {}
+        for key, trigger in list(self.pending.items()):
+            if self.emergency_now:
+                break
+            bases[key] = self.basis_for(trigger) if self.basis_for is not None else None
+            if (
+                alive
+                and world_available
+                and trigger.kind != "habit_breakdown"
+                and self._habit(
+                    trigger, bases[key], record, state, now, goals, projects, registry, goal_types
+                )
+            ):
+                del self.pending[key]  # answered: no model, whatever its budgets
         for key, trigger in list(self.pending.items()):
             if self.emergency_now:
                 break  # an emergency is never interrupted to think; try next step
             del self.pending[key]
+            basis = bases.get(key)
+            if basis is None and self.basis_for is not None:
+                basis = self.basis_for(trigger)
             reason = None
             if not alive or not world_available:
                 reason = "ineligible"
             elif self.in_flight is not None:
                 reason = "in_flight"
+            elif self.adopted is not None:
+                # One temporary remedy at a time (ADR 0021): while one is being
+                # pursued, a problem it may well be resolving is not new.
+                reason = "remedy_in_progress"
             else:
-                reason = self.record.suppression(key, now, session, trigger.kind)
+                reason = self.record.suppression(key, now, session, origin(trigger).kind)
             if reason is not None:
                 record(
                     "deliberation_suppressed",
@@ -265,13 +318,14 @@ class Arbiter:
                     "source_goal_id": trigger.source_goal_id,
                     "source_project": trigger.source_project,
                     "trigger_refs": sorted(trigger_refs),
+                    "budget_kind": origin(trigger).kind,
                     **snapshot,
                 },
             )
             if request is None:
                 continue
             handle = self.runner(partial(deliberator.call, request))
-            self.in_flight = InFlight(request, handle, trigger, snapshot, trigger_refs)
+            self.in_flight = InFlight(request, handle, trigger, snapshot, trigger_refs, basis)
         self.emergency_now = False
 
     # --------------------------------------------------------- disposition
@@ -322,6 +376,10 @@ class Arbiter:
             return end("world_lost")
         if now - int(snapshot["requested_at"]) > STALE_AFTER:
             return end("stale", why="age")
+        if self.adopted is not None:
+            # Another remedy (a habit's, or an earlier answer's) is live: one
+            # at a time, and a live one is never silently replaced.
+            return end("superseded", why="remedy_in_progress")
         if trigger.source_goal_id is not None and trigger.source_goal_id not in goals.entries:
             return end("irrelevant", why="source_goal_gone")
         if trigger.source_project is not None and not any(
@@ -370,9 +428,10 @@ class Arbiter:
             return None
         goal_id = f"goal_deliberation_{flight.request.deliberation_id}"
         record("deliberation_adopted", {**base, "goal_id": goal_id, **goal, "plan_found": True})
-        if self.tracker is not None and self.signature_for is not None:
+        problem = origin(trigger)
+        if self.tracker is not None and flight.basis is not None:
             desired = [str(f) for f, _, _ in admitted["conditions"]]
-            signature = self.signature_for(trigger, desired)
+            signature = context_signature(**flight.basis, desired_facts=desired)
             directions = [
                 [str(entry.get("fact")), str(entry.get("direction"))]
                 for strategy in outcome.verdict.proposal.get("strategies", [])
@@ -384,36 +443,60 @@ class Arbiter:
                     deliberation_id=flight.request.deliberation_id,
                     template={
                         "template_id": template_id(
-                            trigger_kind=trigger.kind,
-                            semantic_key=trigger.key,
+                            trigger_kind=problem.kind,
+                            semantic_key=problem.key,
                             signature=signature,
                             goal_type=str(admitted["goal_type"]),
                             desired=directions,
                         ),
-                        "trigger_kind": trigger.kind,
-                        "semantic_key": trigger.key,
+                        "trigger_kind": problem.kind,
+                        "semantic_key": problem.key,
                         "signature_sha": signature_sha(signature),
                         "signature": signature,
                         "goal_type": str(admitted["goal_type"]),
                         "desired": sorted(directions),
                     },
-                    semantic_key_full=full_key(trigger),
+                    semantic_key_full=full_key(problem),
                     life_epoch=life_epoch,
                     world_epoch=self.world_epoch,
                     session=session,
                     source_goal_id=trigger.source_goal_id,
                 )
             )
-        blocked = goals.entries.get(trigger.source_goal_id) if trigger.source_goal_id else None
-        self.adopted = Adopted(
-            deliberation_id=flight.request.deliberation_id,
+        self.adopted = self._adoption(
+            flight.request.deliberation_id,
+            goal_id,
+            str(admitted["goal_type"]),
+            tuple((str(f), str(op), float(v)) for f, op, v in admitted["conditions"]),
+            priority,
+            now,
+            problem,
+            goals,
+        )
+        return None
+
+    @staticmethod
+    def _adoption(
+        adoption_id: str,
+        goal_id: str,
+        goal_type: str,
+        conditions: tuple[tuple[str, str, float], ...],
+        priority: float,
+        now: int,
+        problem: Trigger,
+        goals: Any,
+        **habit: Any,
+    ) -> Adopted:
+        blocked = goals.entries.get(problem.source_goal_id) if problem.source_goal_id else None
+        return Adopted(
+            deliberation_id=adoption_id,
             goal_id=goal_id,
-            goal_type=str(admitted["goal_type"]),
-            conditions=tuple((str(f), str(op), float(v)) for f, op, v in admitted["conditions"]),
+            goal_type=goal_type,
+            conditions=conditions,
             priority=priority,
             adopted_at=now,
-            trigger_kind=trigger.kind,
-            source_goal_id=trigger.source_goal_id if blocked is not None else None,
+            trigger_kind=problem.kind,
+            source_goal_id=problem.source_goal_id if blocked is not None else None,
             source_goal_type=blocked.goal_type if blocked is not None else None,
             source_created_at=blocked.created_at_tick if blocked is not None else None,
             source_block_reason=(
@@ -421,8 +504,161 @@ class Arbiter:
                 if blocked is not None and blocked.status == "BLOCKED"
                 else None
             ),
+            **habit,
         )
-        return None
+
+    # ------------------------------------------------------- habits (C5)
+
+    def _habit(
+        self,
+        trigger: Trigger,
+        basis: dict[str, Any] | None,
+        record: Record,
+        state: Mapping[str, float],
+        now: int,
+        goals: Any,
+        projects: Any,
+        registry: Any,
+        goal_types: tuple[str, ...],
+    ) -> bool:
+        """Answer a firing trigger from a promoted habit, if one applies.
+
+        Before any model suppression: a learned habit runs whatever the
+        provider's cooldown, quota or availability. True when the habit
+        answered, or was found contradicted and demoted (its breakdown then
+        brings the problem back to System 2).
+        """
+        book = self.active_book
+        if book is None or self.habits_mode != "active" or self.tracker is None or basis is None:
+            return False
+        scoped = [
+            t
+            for t in book.templates.values()
+            if (t.trigger_kind, t.semantic_key) == (trigger.kind, trigger.key)
+            and t.state == "promoted"
+        ]
+        if not scoped:
+            return False
+        signatures = {
+            t.template_id: signature_sha(
+                context_signature(**basis, desired_facts=[str(f) for f, _ in t.desired])
+            )
+            for t in scoped
+        }
+        habit = next((t for t in scoped if signatures[t.template_id] == t.signature_sha), None)
+        if habit is None:
+            # The habit does not apply here: no penalty, System 2 stays open.
+            record(
+                "habit_not_applicable",
+                {
+                    "template_ids": sorted(signatures),
+                    "trigger_key_full": full_key(trigger),
+                    "observed": {tid: sha for tid, sha in sorted(signatures.items())},
+                    "experienced_tick": now,
+                },
+            )
+            return False
+        if self.adopted is not None:
+            return False  # one temporary goal at a time; the ordinary path decides
+        # The same relevance a deliberation's answer must pass.
+        if trigger.source_goal_id is not None and trigger.source_goal_id not in goals.entries:
+            return False
+        if trigger.source_project is not None and not any(
+            p.project_id == trigger.source_project and p.status in OPEN_PROJECTS
+            for p in projects.projects()
+        ):
+            return False
+        if habit.goal_type not in goal_types:
+            return False
+        triples = []
+        for fact, direction in habit.desired:
+            if fact not in state:
+                return False
+            triple = condition_for(str(fact), str(direction), state)
+            if triple is None:
+                return False
+            triples.append(triple)
+        conditions = tuple(_condition(f, op, v) for f, op, v in triples)
+        visible = [c for c in conditions if c.fact not in ACTION_FACTS]
+        self.invoked_for[habit.template_id] = trigger
+        if visible and len(visible) == len(conditions) and all(c.holds(state) for c in visible):
+            # The problem is here and what the habit aims at already holds:
+            # the habit's account of this problem is wrong.
+            self.tracker.demote(habit, "satisfied_at_invocation", now, record)
+            return True
+        plans = [
+            plan
+            for plan in plan_for(
+                state, conditions, registry=registry, limit=1, recovery=tuple(RECOVERY_SKILLS)
+            )
+            if plan.steps
+        ]
+        if not plans:
+            self.tracker.demote(habit, "infeasible_at_invocation", now, record)
+            return True
+        invocation = self.new_invocation_id()
+        goal_id = f"goal_habit_{invocation}"
+        priority, priority_source = band(trigger)
+        record(
+            "habit_invoked",
+            {
+                "template_id": habit.template_id,
+                "habit_invocation_id": invocation,
+                "trigger_kind": trigger.kind,
+                "trigger_key": trigger.key,
+                "trigger_key_full": full_key(trigger),
+                "goal_id": goal_id,
+                "goal_type": habit.goal_type,
+                "conditions": [list(t) for t in triples],
+                "priority": priority,
+                "priority_source": priority_source,
+                "experienced_tick": now,
+            },
+        )
+        self.tracker.open(
+            Episode(
+                deliberation_id=invocation,
+                template=habit.body(),
+                semantic_key_full=full_key(trigger),
+                life_epoch=self.tracker_life_epoch,
+                world_epoch=self.world_epoch,
+                session=self.tracker_session,
+                source_goal_id=trigger.source_goal_id,
+                via="habit",
+            )
+        )
+        self.adopted = self._adoption(
+            invocation,
+            goal_id,
+            habit.goal_type,
+            tuple(triples),
+            priority,
+            now,
+            trigger,
+            goals,
+            via="habit",
+            template_id=habit.template_id,
+        )
+        return True
+
+    def habit_broke(self, template: Template, reason: str, now: int) -> None:
+        """A habit was demoted: its problem goes back to System 2 at once,
+        bypassing the original trigger's threshold and cooldown, though not
+        the budgets, the in-flight limit or any emergency (ADR 0022, C5)."""
+        problem = self.invoked_for.pop(template.template_id, None)
+        breakdown = Trigger(
+            "habit_breakdown",
+            template.template_id,
+            {
+                "origin_kind": template.trigger_kind,
+                "origin_key": template.semantic_key,
+                "reason": reason,
+            },
+            source_goal_id=problem.source_goal_id if problem is not None else None,
+            source_priority=problem.source_priority if problem is not None else None,
+            source_project=problem.source_project if problem is not None else None,
+        )
+        self.pending[full_key(breakdown)] = breakdown
 
     # ------------------------------------------------------- adopted goals
 
@@ -448,18 +684,30 @@ class Arbiter:
         elif now - adopted.adopted_at > GOAL_LIFETIME:
             why = "expired"
         if why is not None:
+            if adopted.via == "habit":
+                record(
+                    "habit_goal_ended",
+                    {
+                        "template_id": adopted.template_id,
+                        "habit_invocation_id": adopted.deliberation_id,
+                        "goal_id": adopted.goal_id,
+                        "why": why,
+                        "experienced_tick": now,
+                    },
+                )
+            else:
+                record(
+                    "deliberation_goal_ended",
+                    {
+                        "deliberation_id": adopted.deliberation_id,
+                        "goal_id": adopted.goal_id,
+                        "why": why,
+                        "experienced_tick": now,
+                    },
+                )
+            self.ended.append((adopted, why))
             if self.tracker is not None:
                 self.tracker.goal_ended(adopted.deliberation_id, why, now, record)
-            record(
-                "deliberation_goal_ended",
-                {
-                    "deliberation_id": adopted.deliberation_id,
-                    "goal_id": adopted.goal_id,
-                    "why": why,
-                    "experienced_tick": now,
-                },
-            )
-            self.ended.append((adopted, why))
             self.adopted = None
 
     @staticmethod
@@ -497,12 +745,13 @@ class Arbiter:
             goal_type=adopted.goal_type,
             priority=adopted.priority,
             # The deliberation it came from is in its id and its evidence.
-            source="deliberation",
+            source=adopted.via,
             created_at_tick=tick,
             status="QUEUED",
             completion_condition=tuple(_condition(f, op, v) for f, op, v in adopted.conditions),
-            reason_codes=("deliberation",),
+            reason_codes=(adopted.via,),
             base_priority=adopted.priority,
+            planning_profile="recovery",
         )
 
     def end_carried_over(self, record: Record, now: int) -> None:

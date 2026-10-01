@@ -67,8 +67,25 @@ class Trigger:
     source_project: str | None = None
 
 
+def origin(trigger: Trigger) -> Trigger:
+    """The problem a trigger is about. A `habit_breakdown` (ADR 0022, C5) is
+    about the problem its habit answered: its band, its budget class and the
+    scope its fresh evidence counts toward are that problem's."""
+    if trigger.kind != "habit_breakdown":
+        return trigger
+    return Trigger(
+        str(trigger.signal["origin_kind"]),
+        str(trigger.signal["origin_key"]),
+        {},
+        source_goal_id=trigger.source_goal_id,
+        source_priority=trigger.source_priority,
+        source_project=trigger.source_project,
+    )
+
+
 def band(trigger: Trigger) -> tuple[float, str]:
     """The priority an adopted goal gets, and where it came from."""
+    trigger = origin(trigger)
     if trigger.kind == "emergency_recurrence":
         return RECOVERY_BAND, "recovery_band"
     if trigger.kind == "project_reconsideration":
@@ -202,8 +219,13 @@ class ArbitrationRecord:
         payload = event.payload
         key = payload.get("trigger_key_full")
         if event.type == "deliberation_requested" and key:
+            # A breakdown is budgeted as the problem it is about, so one
+            # descended from an emergency may use the reserved slot.
             self.requested_at.append(
-                (int(payload["experienced_tick"]), str(payload.get("trigger_kind")))
+                (
+                    int(payload["experienced_tick"]),
+                    str(payload.get("budget_kind") or payload.get("trigger_kind")),
+                )
             )
             session = str(payload.get("session_id"))
             self.per_session[session] = self.per_session.get(session, 0) + 1

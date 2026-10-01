@@ -118,3 +118,81 @@ test("only the part of a wait after the problem began is rest", async () => {
   await w.dig(log(-1).position);
   assert.equal(logs(w), 1);
 });
+
+// `barren_until_withdrawn` (C5): the cure is taking something from a
+// container Person owns; what is taken never matters.
+
+function chestWorld(events: unknown[], owned: boolean): FixtureWorld {
+  const w = new FixtureWorld({
+    name: "withdraw-rule",
+    seed: 3,
+    startTick: 0,
+    timeOfDay: 1000,
+    biome: "forest",
+    groundLevel: 63,
+    spawn: { x: 0, y: 64, z: 0 },
+    vitals: { health: 20, food: 20, saturation: 5, air: 300, armor: 0 },
+    inventory: [],
+    blocks: [-2, -1, 0, 1, 2].map(log),
+    clusters: [],
+    entities: [],
+    containers: [
+      {
+        position: { x: 1, y: 64, z: -1 },
+        kind: "chest",
+        contents: [{ name: "bread", count: 8 }],
+      },
+    ],
+    events,
+    hiddenRules: [{ kind: "barren_until_withdrawn", blocks: ["oak_log"] }],
+  } as ConstructorParameters<typeof FixtureWorld>[0]);
+  if (owned) w.registerOwnedStorage({ x: 1, y: 64, z: -1 }, "storage_1");
+  return w;
+}
+
+const bread = [{ name: "bread", count: 1 }];
+
+test("logs stay barren until Person withdraws from a chest it owns", async () => {
+  const w = chestWorld([{ atTick: 0, type: "unrest" }], true);
+  await w.connect();
+  w.pass(1);
+  await w.waitTicks(1000);
+  assert.deepEqual(await w.dig(log(-2).position), [], "rest is not this cure");
+  await w.withdraw({ x: 1, y: 64, z: -1 }, bread);
+  await w.dig(log(-1).position);
+  assert.equal(logs(w), 1);
+});
+
+test("taking from a chest Person does not own cures nothing", async () => {
+  const w = chestWorld([{ atTick: 0, type: "unrest" }], false);
+  await w.connect();
+  w.pass(1);
+  await w.withdraw({ x: 1, y: 64, z: -1 }, bread);
+  assert.deepEqual(await w.dig(log(-2).position), []);
+});
+
+test("a new unrest needs a new withdrawal, and the regime change makes it useless", async () => {
+  const w = chestWorld(
+    [
+      { atTick: 0, type: "unrest" },
+      { atTick: 100, type: "unrest" },
+      { atTick: 100, type: "withdrawal_stops_helping" },
+    ],
+    true,
+  );
+  await w.connect();
+  w.pass(1);
+  await w.withdraw({ x: 1, y: 64, z: -1 }, bread);
+  w.pass(120);
+  assert.deepEqual(
+    await w.dig(log(-2).position),
+    [],
+    "the earlier withdrawal is spent",
+  );
+  await w.withdraw({ x: 1, y: 64, z: -1 }, bread);
+  assert.deepEqual(
+    await w.dig(log(-1).position),
+    [],
+    "withdrawing no longer helps",
+  );
+});

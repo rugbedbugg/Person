@@ -35,8 +35,8 @@ export interface RuntimeRunOptions extends HarnessOptions {
   deliberation?: {
     mode: "off" | "record_only" | "active";
     answers?: unknown[];
-    /** ADR 0022: habit learning, off or record_only. */
-    habits?: "off" | "record_only";
+    /** ADR 0022: habit learning, off, record_only (C4) or active (C5). */
+    habits?: "off" | "record_only" | "active";
   };
 }
 

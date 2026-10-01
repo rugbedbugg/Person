@@ -283,7 +283,11 @@ def test_shadow_habit_learning_changes_nothing_the_arbiter_does() -> None:
         if track:
             book = HabitBook("shadow")
             step.arbiter.tracker = HabitTracker(book)
-            step.arbiter.signature_for = lambda trigger, desired: {"schema": "context_signature_v1"}
+            step.arbiter.basis_for = lambda trigger: {
+                "observation": None,
+                "place": None,
+                "source_goal_type": None,
+            }
             journalled = step.record
 
             def record(kind: str, payload: dict[str, Any]) -> None:
@@ -376,7 +380,11 @@ def test_through_the_arbiter_a_remedy_without_a_retry_is_never_a_success(
     step = Step("active", [ANSWER])
     book = HabitBook("shadow")
     step.arbiter.tracker = HabitTracker(book)
-    step.arbiter.signature_for = lambda trigger, desired: {"schema": "context_signature_v1"}
+    step.arbiter.basis_for = lambda trigger: {
+        "observation": None,
+        "place": None,
+        "source_goal_type": None,
+    }
     journalled = step.record
 
     def record(kind: str, payload: dict[str, Any]) -> None:

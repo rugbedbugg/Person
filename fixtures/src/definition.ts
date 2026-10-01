@@ -39,6 +39,7 @@ export interface FixtureEvent {
     | "weather"
     | "unrest"
     | "rest_stops_helping"
+    | "withdrawal_stops_helping"
     | "remove_items"
     | "set_vitals";
   name?: string;
@@ -54,6 +55,12 @@ export interface FixtureEvent {
 /**
  * A rule of this world that nothing in Person is told.
  *
+ * `barren_until_withdrawn` (test machinery for ADR 0022, C5): after an
+ * `unrest` event the listed blocks drop nothing until the body has taken
+ * something out of a container Person owns. What was taken does not matter
+ * and never helps by itself; the relation is the cure. A
+ * `withdrawal_stops_helping` regime change makes withdrawing useless.
+ *
  * `barren_until_rested` (test machinery for ADR 0022): after an `unrest`
  * event the listed blocks drop nothing until the body has waited `restTicks`
  * in all (default 100), unless a `rest_stops_helping` regime change has made waiting useless. The
@@ -66,7 +73,8 @@ export interface FixtureEvent {
  * break when dug but drop nothing.
  */
 export interface FixtureHiddenRule {
-  kind: "barren_while_weather" | "barren_until_rested";
+  kind:
+    "barren_while_weather" | "barren_until_rested" | "barren_until_withdrawn";
   weather?: "clear" | "rain" | "thunder";
   /** `barren_until_rested`: how long the body must have waited. */
   restTicks?: number;

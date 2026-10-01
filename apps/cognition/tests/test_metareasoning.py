@@ -31,7 +31,13 @@ from person_cognition.deliberation.metareasoning import (
 from person_persistence import new_event
 from person_skills import skill_registry
 
-GOAL_TYPES = ("RECOVER_HOME", "SECURE_FOOD", "INVESTIGATE", "SURVIVE_IMMEDIATE")
+GOAL_TYPES = (
+    "RECOVER_HOME",
+    "SECURE_FOOD",
+    "INVESTIGATE",
+    "SURVIVE_IMMEDIATE",
+    "MAINTAIN_RESERVES",
+)
 
 
 def event(kind: str, **payload: Any) -> Any:

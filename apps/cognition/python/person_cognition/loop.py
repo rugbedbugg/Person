@@ -69,8 +69,8 @@ from .deliberation import (
     build_context,
 )
 from .deliberation.arbiter import Arbiter
-from .deliberation.habits import HabitTracker, context_signature
-from .deliberation.metareasoning import ArbitrationRecord, Trigger, prediction_key
+from .deliberation.habits import HabitTracker
+from .deliberation.metareasoning import ArbitrationRecord, Trigger, origin, prediction_key
 from .deliberation.model import TemplateModel
 from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
 from .effect_learning import (
@@ -259,11 +259,18 @@ class CognitionLoop:
             self.life,
             self.arbitration,
         )
-        # ADR 0022: habit learning; C4 keeps it to the shadow stream.
+        # ADR 0022: habit learning. record_only writes the shadow stream and
+        # never acts (C4); active writes the active stream, whose promoted
+        # habits answer their problems without a model (C5).
         self.arbiter.habits_mode = settings.deliberation_habits if settings else "off"
         if self.arbiter.habits_mode == "record_only":
             self.arbiter.tracker = HabitTracker(self.reducers.habits_shadow)
-        self.arbiter.signature_for = self._habit_signature
+        elif self.arbiter.habits_mode == "active":
+            self.arbiter.tracker = HabitTracker(self.reducers.habits_active)
+            self.arbiter.active_book = self.reducers.habits_active
+        if self.arbiter.tracker is not None:
+            self.arbiter.tracker.on_breakdown = self.arbiter.habit_broke
+        self.arbiter.basis_for = self._habit_basis
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
         #: Person's belief about where it is relative to home (C8).
@@ -502,16 +509,32 @@ class CognitionLoop:
             self.unfound.pop(source, None)
             if prior == "repeated_routine_failure":
                 self.consecutive_failures[source] = 2
-            record(
-                "deliberation_source_retry",
-                {
-                    "deliberation_id": adopted.deliberation_id,
-                    "source_goal_id": source,
-                    "source_goal_type": adopted.source_goal_type,
-                    "prior_block_reason": prior,
-                    "experienced_tick": self.memory.now,
-                },
-            )
+            if adopted.via == "habit":
+                # The same bounded retry, granted by Person's recovery
+                # machinery, never by the habit or a model (C5).
+                record(
+                    "habit_source_retry",
+                    {
+                        "template_id": adopted.template_id,
+                        "habit_invocation_id": adopted.deliberation_id,
+                        "source_goal_id": source,
+                        "source_goal_type": adopted.source_goal_type,
+                        "source_goal_epoch": adopted.source_created_at,
+                        "prior_block_reason": prior,
+                        "experienced_tick": self.memory.now,
+                    },
+                )
+            else:
+                record(
+                    "deliberation_source_retry",
+                    {
+                        "deliberation_id": adopted.deliberation_id,
+                        "source_goal_id": source,
+                        "source_goal_type": adopted.source_goal_type,
+                        "prior_block_reason": prior,
+                        "experienced_tick": self.memory.now,
+                    },
+                )
         self.arbiter.ended.clear()
 
     def _recorder(self, tick: int) -> Callable[[str, dict[str, Any]], None]:
@@ -520,8 +543,10 @@ class CognitionLoop:
 
         return record
 
-    def _habit_signature(self, trigger: Trigger, desired: list[str]) -> dict[str, Any]:
-        """The context a habit would be keyed by, from what Person perceives."""
+    def _habit_basis(self, trigger: Trigger) -> dict[str, Any]:
+        """What a habit's context signature is built from, as Person perceives
+        it when the trigger fires."""
+        trigger = origin(trigger)
         here = self.spatial.here()
         source = self.goals.entries.get(trigger.source_goal_id or "")
         source_type = (
@@ -531,16 +556,17 @@ class CognitionLoop:
             if source is not None
             else None
         )
-        return context_signature(
-            observation=self._last_observation,
-            place={"place_id": here.place_id, "confidence": here.confidence} if here else None,
-            desired_facts=desired,
-            source_goal_type=source_type,
-        )
+        return {
+            "observation": self._last_observation,
+            "place": {"place_id": here.place_id, "confidence": here.confidence} if here else None,
+            "source_goal_type": source_type,
+        }
 
     def _trigger_context(self, trigger: Trigger) -> tuple[DeliberationContext, frozenset[str]]:
         """The context for a trigger, and the references that are its problem."""
         context = self.deliberation_context(trigger.kind)
+        # A habit breakdown cites the problem its habit answered.
+        trigger = origin(trigger)
         refs: set[str] = set()
         for ref, (section, item) in context.refs.items():
             if trigger.kind == "emergency_recurrence":
@@ -904,7 +930,7 @@ class CognitionLoop:
             registry=self.registry,
             limit=MAX_CANDIDATES,
             allowed_skills=(method,) if method else None,
-            recovery=tuple(RECOVERY_SKILLS) if goal.source == "deliberation" else (),
+            recovery=tuple(RECOVERY_SKILLS) if goal.planning_profile == "recovery" else (),
         )
         plans = [plan for plan in plans if plan.steps]
         if self._metareasoning() and goal.source != "maintenance":

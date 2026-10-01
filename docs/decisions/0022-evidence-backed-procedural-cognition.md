@@ -214,6 +214,20 @@ invocation with no model request, a stable success) and an invalidation
   scripted models. The behavioural form of the mode-switch invariant still
   needs C5's active mode.
 
+- **C5 (active habits):** `[deliberation] habits = "active"` (valid only
+  with `mode = "active"`) writes the active stream, and a promoted habit
+  answers its problem. TESTED IN FIXTURE with scripted models:
+  `tests/integration/habit-lifecycle.test.ts` runs five episodes, one day
+  apart, of one fixture problem through the real runtime and cognition.
+  Episodes 1 to 3 are deliberated, adopted, remedied and resolved, and
+  promote one habit. In episode 4 the habit answers with zero deliberation
+  requests, its source goal gets one retry, and the episode is a stable
+  success. In episode 5 the world changes: the habit is invoked, its retry
+  fails, it is demoted, and `habit_breakdown` asks System 2 again.
+  State-machine tests (`test_habits_active.py`) cover each rule below,
+  including the mode switch (G2) and a habit-derived recovery goal keeping
+  the recovery planning profile. Evidence schema v18.
+
 ### Amendment with C4.1 (reviewer, 2026-10-01)
 
 - **Silence is not resolution.** For `repeated_failure` and
@@ -284,3 +298,69 @@ invocation with no model request, a stable success) and an invalidation
 ## Relevant commits and docs
 
 - ADRs 0011, 0020 and 0021.
+
+### Amendment with C5 (reviewer, 2026-10-01)
+
+- **Invocation order.** A trigger reaches its threshold. If Person is alive,
+  the world is available and no emergency is being handled, Person looks for
+  a promoted habit with the same scope and the exact signature, captured when
+  the trigger fires. That lookup comes before any model suppression: a
+  provider's cooldown, quota or unavailability never stops a learned habit.
+  Every pending problem gets that first refusal before any model is asked
+  about any of them. The habit's goal must then pass the checks a
+  deliberation's answer passes: relevance, goal admission and the planner.
+  Then it becomes the one temporary goal, at the band C3 would assign, and
+  `habit_invoked` is recorded. The model is not called; the avoided
+  deliberation is a metric (`habit_metrics`), not an event.
+- **Contradiction at invocation.** If what the habit aims at already holds
+  while its problem is present, or the planner finds it infeasible, the habit
+  is demoted (`satisfied_at_invocation`, `infeasible_at_invocation`) and never
+  invoked.
+- **Outcome and demotion.** A habit's episode is judged like a deliberated
+  one, including the C4.1 positive-resolution rule, and its evidence is
+  marked `via: habit`. A definite failure (recurrence inside the window, the
+  goal failing or expiring, death) demotes it at once and zeroes its streak.
+  A prediction error demotes only when it is attributable to the habit, which
+  v1 does not attempt. The habit's own successes never count toward promotion
+  or re-promotion: after a demotion, three fresh deliberated successes are
+  needed again.
+- **Breakdown.** A demotion raises `habit_breakdown:<template_id>`. It
+  bypasses the original trigger's threshold and cooldown, but obeys the life,
+  world and emergency checks, the in-flight limit, the hourly and session
+  budgets, and backend availability. It is budgeted as its originating
+  problem, so a habit descended from `emergency_recurrence` may use the
+  reserved slot, and it gets its own key's cooldown once its request is
+  resolved. Its context cites the originating problem. Its answer's band, and
+  the scope its evidence counts toward, are the originating problem's.
+- **Planning profile.** Temporary remedy goals carry `planning_profile =
+recovery`, whether a deliberation or a habit produced them; ordinary goals
+  are `ordinary`. Only the recovery profile may use the planner's recovery
+  operators (`wait_safely`), which no model is ever offered. Ordinary
+  planning is unchanged.
+- **One remedy at a time.** While a temporary remedy is live, new requests
+  are suppressed (`remedy_in_progress`), and an answer that arrives anyway is
+  discarded (`superseded`). A live remedy is never silently replaced. C3 had
+  this overwrite latent; habits exposed it, because the prediction-error
+  trigger raised by the same failed gathers is no longer masked by an
+  in-flight request.
+- **Habit source retry.** A satisfied habit remedy grants its source goal
+  the same one bounded retry as a deliberation's. It is recorded as
+  `habit_source_retry` (template id, invocation id, source goal id, type and
+  creation tick, prior block reason). The authority is Person's recovery
+  machinery, never the habit. A habit's goal ending is `habit_goal_ended`.
+- **Mode switch (G2).** The active book reads only the active stream, so the
+  same active evidence rebuilds the same habits and the same next decision,
+  whether the shadow stream exists or not.
+- **The canonical active-lifecycle fixture changed** from C4.1's rest
+  construction to `barren_until_withdrawn`. After `unrest`, the trees drop
+  nothing until Person takes something from a chest it already owns, within
+  reach. What it takes never helps by itself. System 1 never withdraws idly,
+  and a `withdrawal_stops_helping` regime change makes the cure useless for
+  the breakdown episode. The reason is asynchrony. A deliberation's answer is
+  consumed at a later decision, so after the source goal blocks, Person
+  first idles (its idle routine is a 600-tick rest) and only then performs
+  the adopted remedy. A habit acts at once, without the idle. No single rest
+  threshold can then be causally clean in both deliberative and habitual
+  episodes. The merged C4.1 rest test stays as regression evidence for
+  shadow formation, the source retry and action-fact satisfaction, with its
+  documented idle caveat.

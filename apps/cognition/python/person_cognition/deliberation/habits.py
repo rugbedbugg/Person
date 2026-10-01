@@ -16,7 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -166,6 +166,12 @@ class Template:
     streak: int = 0
     state: str = "candidate"
     founding: list[str] = field(default_factory=list)
+    #: What the habit itself did once promoted (C5). Kept apart: a habit's own
+    #: successes never count toward its promotion or re-promotion.
+    invocations: int = 0
+    habit_successes: int = 0
+    habit_failures: int = 0
+    demotions: int = 0
 
     def scope(self) -> tuple[str, str, str]:
         return (self.trigger_kind, self.semantic_key, self.signature_sha)
@@ -184,6 +190,21 @@ class Template:
             "streak": self.streak,
             "state": self.state,
             "founding": self.founding,
+            "invocations": self.invocations,
+            "habit_successes": self.habit_successes,
+            "habit_failures": self.habit_failures,
+            "demotions": self.demotions,
+        }
+
+    def body(self) -> dict[str, Any]:
+        """What an episode carries about the template it is evidence for."""
+        return {
+            "template_id": self.template_id,
+            "trigger_kind": self.trigger_kind,
+            "semantic_key": self.semantic_key,
+            "signature_sha": self.signature_sha,
+            "goal_type": self.goal_type,
+            "desired": [list(item) for item in self.desired],
         }
 
 
@@ -206,6 +227,8 @@ class HabitBook:
             "evidence": "habit_evidence",
             "promotion": "habit_promoted",
             "conflict": "habit_conflict",
+            "invoked": "habit_invoked",
+            "demoted": "habit_demoted",
         },
     }
 
@@ -240,7 +263,16 @@ class HabitBook:
             if template is None:
                 return
             verdict = str(payload["verdict"])
-            if verdict == "success":
+            if payload.get("via") == "habit":
+                # The habit's own outcome: never evidence for (re)promotion.
+                if verdict == "success":
+                    template.habit_successes += 1
+                elif verdict == "failure":
+                    template.habit_failures += 1
+                    template.streak = 0
+                else:
+                    template.inconclusive += 1
+            elif verdict == "success":
                 template.successes += 1
                 template.streak += 1
                 template.founding.append(str(payload["deliberation_id"]))
@@ -253,6 +285,17 @@ class HabitBook:
             template = self.templates.get(str(payload["template_id"]))
             if template is not None:
                 template.state = "promoted"
+        elif event.type == self.events.get("invoked"):
+            template = self.templates.get(str(payload["template_id"]))
+            if template is not None:
+                template.invocations += 1
+        elif event.type == self.events.get("demoted"):
+            template = self.templates.get(str(payload["template_id"]))
+            if template is not None:
+                # Three fresh deliberated successes are needed again.
+                template.state = "demoted"
+                template.streak = 0
+                template.demotions += 1
 
     def to_json(self) -> dict[str, Any]:
         return {"templates": [t.to_json() for _, t in sorted(self.templates.items())]}
@@ -277,6 +320,9 @@ class Episode:
     stabilizing_since: int | None = None
     #: The goal whose trouble raised the trigger, when its class needs one.
     source_goal_id: str | None = None
+    #: `deliberation`, or `habit` when a promoted habit answered (C5); then
+    #: `deliberation_id` holds the habit invocation's id.
+    via: str = "deliberation"
     #: That source goal succeeded at something after the remedy was satisfied.
     resolved: bool = False
 
@@ -295,6 +341,9 @@ class HabitTracker:
     def __init__(self, book: HabitBook) -> None:
         self.book = book
         self.episodes: dict[str, Episode] = {}
+        #: Told when a habit's own episode definitely failed and it was
+        #: demoted, so the problem can go back to System 2 (C5).
+        self.on_breakdown: Callable[[Template, str, int], None] | None = None
 
     def open(self, episode: Episode) -> None:
         self.episodes[episode.deliberation_id] = episode
@@ -345,10 +394,42 @@ class HabitTracker:
                 else:
                     self._conclude(episode, "success", "stable", now, record)
 
+    def demote(self, template: Template, reason: str, now: int, record: Any, **detail: Any) -> None:
+        """A definite contradiction of a promoted habit: demote it at once."""
+        record(
+            self.book.events["demoted"],
+            {
+                "template_id": template.template_id,
+                "reason": reason,
+                "experienced_tick": now,
+                **detail,
+            },
+        )
+        if self.on_breakdown is not None:
+            self.on_breakdown(template, reason, now)
+
     def _conclude(self, episode: Episode, verdict: str, reason: str, now: int, record: Any) -> None:
         del self.episodes[episode.deliberation_id]
         events = self.book.events
         body = episode.template
+        if episode.via == "habit":
+            record(
+                events["evidence"],
+                {
+                    "template_id": body["template_id"],
+                    "habit_invocation_id": episode.deliberation_id,
+                    "via": "habit",
+                    "verdict": verdict,
+                    "reason": reason,
+                    "experienced_tick": now,
+                },
+            )
+            template = self.book.templates.get(body["template_id"])
+            if verdict == "failure" and template is not None and template.state == "promoted":
+                self.demote(
+                    template, reason, now, record, habit_invocation_id=episode.deliberation_id
+                )
+            return
         if body["template_id"] not in self.book.templates:
             record(events["candidate"], {"template": body, "experienced_tick": now})
         record(
@@ -364,7 +445,9 @@ class HabitTracker:
         template = self.book.templates.get(body["template_id"])
         if template is None:
             return  # the book learns from the journal; nothing to promote yet
-        if template.state == "candidate" and template.streak >= PROMOTION_STREAK:
+        # A demoted habit is promotable again only by fresh deliberated
+        # successes, which the streak alone counts.
+        if template.state in ("candidate", "demoted") and template.streak >= PROMOTION_STREAK:
             rival = self.book.promoted_for(template.scope())
             if rival is not None and rival.template_id != template.template_id:
                 record(
