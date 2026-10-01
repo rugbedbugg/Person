@@ -262,6 +262,23 @@ plannable. TESTED IN FIXTURE with scripted models.
   never twice from one deliberation. This is a bounded resolution retry, not a
   way for a model to unblock goals.
 
+### Amendments with C5 (reviewer, 2026-10-01)
+
+- **One temporary remedy at a time.** While an adopted goal (or a habit's
+  remedy, ADR 0022) is live, new requests are suppressed with reason
+  `remedy_in_progress`, and an answer that arrives anyway is discarded as
+  `superseded`. A live remedy is never replaced. Before this, a second
+  adoption silently overwrote the first.
+- **`habit_breakdown`** is a request reason and trigger kind, keyed by the
+  habit's template id. It is raised by a habit's demotion, bypasses the
+  originating trigger's threshold and cooldown, and is otherwise subject to
+  every rule here. It is budgeted, banded and scoped as its originating
+  problem: requests record `budget_kind`.
+- **Planning profile.** The recovery planning that C4.1 allowed for adopted
+  goals is a property of the goal, `planning_profile = recovery`, held by
+  every temporary remedy whether a deliberation or a habit produced it. It
+  is not a test of where the goal came from.
+
 ## Consequences
 
 ### Positive
