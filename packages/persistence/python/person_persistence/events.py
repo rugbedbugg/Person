@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v18"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v19"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -39,6 +39,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v16",
     "person-evidence-v17",
     "person-evidence-v18",
+    "person-evidence-v19",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -157,6 +158,8 @@ EVENT_TYPES: tuple[str, ...] = (
     # habit remedy grants its source goal.
     "habit_goal_ended",
     "habit_source_retry",
+    # ADR 0023, C6: the facts at the affective arbitration point.
+    "affective_arbitration_shadow",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -233,6 +236,9 @@ V17_EVENT_TYPES: frozenset[str] = frozenset({"deliberation_source_retry"})
 #: Event types introduced with the eighteenth: active habits (C5).
 V18_EVENT_TYPES: frozenset[str] = frozenset({"habit_goal_ended", "habit_source_retry"})
 
+#: Event types introduced with the nineteenth: affective metareasoning (C6).
+V19_EVENT_TYPES: frozenset[str] = frozenset({"affective_arbitration_shadow"})
+
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
 INTRODUCED_IN: dict[str, str] = {
@@ -253,6 +259,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V16_EVENT_TYPES, "person-evidence-v16"),
     **dict.fromkeys(V17_EVENT_TYPES, "person-evidence-v17"),
     **dict.fromkeys(V18_EVENT_TYPES, "person-evidence-v18"),
+    **dict.fromkeys(V19_EVENT_TYPES, "person-evidence-v19"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (

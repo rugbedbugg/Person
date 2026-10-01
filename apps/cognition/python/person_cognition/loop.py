@@ -70,7 +70,13 @@ from .deliberation import (
 )
 from .deliberation.arbiter import Arbiter
 from .deliberation.habits import HabitTracker
-from .deliberation.metareasoning import ArbitrationRecord, Trigger, origin, prediction_key
+from .deliberation.metareasoning import (
+    ArbitrationRecord,
+    Trigger,
+    affect_bands,
+    origin,
+    prediction_key,
+)
 from .deliberation.model import TemplateModel
 from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
 from .effect_learning import (
@@ -270,6 +276,11 @@ class CognitionLoop:
             self.arbiter.active_book = self.reducers.habits_active
         if self.arbiter.tracker is not None:
             self.arbiter.tracker.on_breakdown = self.arbiter.habit_broke
+        # ADR 0023: affect may advance System-2 escalation by one signal.
+        self.arbiter.affect_arbitration = (
+            settings.deliberation_affect_arbitration if settings else "off"
+        )
+        self.arbiter.detectors.early = self.arbiter.affect_arbitration != "off"
         self.arbiter.basis_for = self._habit_basis
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -1118,6 +1129,10 @@ class CognitionLoop:
             if step.skill_id == self.investigations.method(goal.goal_id)
             else None,
         )
+        # ADR 0023: the affect this skill's outcome will be judged against is
+        # the affect before that outcome is appraised.
+        state = self.affect.state
+        self.arbiter.affect_snapshot = affect_bands(state.unease, state.control)
         self._send(
             {
                 **self._envelope("SkillInvocation", tick),

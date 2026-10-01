@@ -70,6 +70,8 @@ class CognitionSettings:
     deliberation_script: Path | None = None
     #: ADR 0022: off (default) or record_only.
     deliberation_habits: str = "off"
+    #: ADR 0023: affective metareasoning, off, record_only or active.
+    deliberation_affect_arbitration: str = "off"
 
     def cross_check(self, *, learning_mode: str, evidence_directory: str) -> None:
         """Fail closed when the runtime disagrees with the file we read."""
@@ -123,6 +125,9 @@ def load_cognition_settings(filename: str | Path) -> CognitionSettings:
         deliberation_mode=document.get("deliberation", {}).get("mode", "off"),
         deliberation_backend=document.get("deliberation", {}).get("backend"),
         deliberation_habits=document.get("deliberation", {}).get("habits", "off"),
+        deliberation_affect_arbitration=document.get("deliberation", {}).get(
+            "affectArbitration", "off"
+        ),
         deliberation_script=(
             (base / document["deliberation"]["scriptedAnswers"]).resolve()
             if document.get("deliberation", {}).get("scriptedAnswers")

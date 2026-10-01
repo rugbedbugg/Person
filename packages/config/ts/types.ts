@@ -72,6 +72,7 @@ export interface PersonConfig {
     backend?: "scripted";
     scriptedAnswers?: string;
     habits?: "off" | "record_only" | "active";
+    affectArbitration?: "off" | "record_only";
   };
   cognition: {
     command: string[];
