@@ -2,6 +2,7 @@
 
 from .evidence import EVIDENCE_FACTS, evidence_needed
 from .search import (
+    RECOVERY_SKILLS,
     Plan,
     PlanStep,
     parameter_variants,
@@ -20,6 +21,7 @@ __all__ = [
     "Plan",
     "PlanStep",
     "parameter_variants",
+    "RECOVERY_SKILLS",
     "plan_for",
     "relevant_skills",
     "satisfied",

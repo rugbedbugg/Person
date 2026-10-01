@@ -201,3 +201,24 @@ def test_an_expensive_route_to_a_cheap_goal_is_ranked_last(state: dict[str, floa
     plans = plan_for(state, [Condition("at_home", ">=", 1)], limit=4)
     assert plans[0].skill_ids == ("return_home",)
     assert all(plan.cost >= plans[0].cost for plan in plans[1:])
+
+
+def test_rest_is_plannable_only_when_a_caller_asks_and_only_where_it_is_safe(
+    state: dict[str, float],
+) -> None:
+    """`wait_safely` is the kernel's, and the one way to bring about `rested`.
+    A deliberated goal may plan it (ADR 0021, C4.1); ordinary planning,
+    including the idle goal, never does, and its `safe` precondition still
+    decides where."""
+    rest = [Condition("rested", ">=", 1)]
+    safe = {**state, "safe": 1.0, "rested": 0.0}
+    assert all("wait_safely" not in p.skill_ids for p in plan_for(safe, rest))
+    plans = plan_for(safe, rest, limit=3, recovery=("wait_safely",))
+    assert plans and plans[0].skill_ids == ("wait_safely",)
+    unsafe = {**safe, "safe": 0.0}
+    assert all(
+        "wait_safely" not in p.skill_ids for p in plan_for(unsafe, rest, recovery=("wait_safely",))
+    )
+    assert all("flee" not in p.skill_ids for p in plan_for(safe, rest, recovery=("flee",))), (
+        "only declared recovery skills can be opted into"
+    )

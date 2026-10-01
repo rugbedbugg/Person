@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import threading
 from dataclasses import dataclass, field
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -25,6 +26,7 @@ from person_cognition.deliberation.metareasoning import (
     Trigger,
     admit_goal,
     band,
+    prediction_key,
 )
 from person_persistence import new_event
 from person_skills import skill_registry
@@ -75,6 +77,25 @@ def test_failures_plans_and_prediction_errors_need_three() -> None:
         assert detectors.prediction("gather_wood", ["wood"], "major", at, "g", 1.0) is None
     assert detectors.prediction("gather_wood", ["wood"], "minor", 20, "g", 1.0) is None
     assert detectors.prediction("gather_wood", ["wood"], "inverted", 30, "g", 1.0) is not None
+
+
+def test_one_failed_invocation_is_one_signal_keyed_by_its_failing_facts() -> None:
+    detectors = Detectors()
+    facts = ["wood", "fuel", "building_materials", "wood"]
+    for at in (0, 10):
+        assert detectors.prediction("gather_wood", facts, "major", at, "g", 1.0) is None, (
+            "three failing facts in one invocation are one signal, not three"
+        )
+    assert detectors.prediction("gather_wood", ["fuel"], "major", 20, "g", 1.0) is None, (
+        "a different set of failing facts is a different problem"
+    )
+    fired = detectors.prediction("gather_wood", list(reversed(facts)), "major", 30, "g", 1.0)
+    assert fired is not None
+    assert (
+        fired.key
+        == "gather_wood:building_materials+fuel+wood"
+        == prediction_key("gather_wood", facts)
+    )
 
 
 def test_a_stuck_project_is_one_problem_not_one_per_decision() -> None:
@@ -244,7 +265,7 @@ def context(trigger: Trigger) -> tuple[Any, frozenset[str]]:
         vocabulary={
             "goal_types": GOAL_TYPES,
             "project_kinds": (),
-            "facts": ("at_home",),
+            "facts": ("at_home", "rested"),
             "directions": ("achieve",),
         },
     )
@@ -277,6 +298,7 @@ class Step:
         self.model = ScriptedModel(answers)
         self.records: list[tuple[str, dict[str, Any]]] = []
         self.state = {"at_home": 0.0, "home_known": 1.0}
+        self.goals = Goals()
 
     def record(self, kind: str, payload: dict[str, Any]) -> None:
         self.records.append((kind, payload))
@@ -293,7 +315,7 @@ class Step:
             life_epoch=life,
             alive=True,
             world_available=True,
-            goals=Goals(),
+            goals=self.goals,
             projects=Projects(),
             registry=skill_registry(),
             goal_types=GOAL_TYPES,
@@ -304,6 +326,47 @@ class Step:
 
     def kinds(self) -> list[str]:
         return [kind for kind, _ in self.records]
+
+
+REST = {
+    **ANSWER,
+    "strategies": [
+        {
+            **ANSWER["strategies"][0],
+            "desired": [{"fact": "rested", "direction": "achieve"}],
+            "expected": [],
+            "capability_refs": [],
+        }
+    ],
+}
+
+
+def test_a_goal_of_action_facts_is_satisfied_by_its_routine_and_handed_back() -> None:
+    step = Step("active", [REST])
+    step.state.update(safe=1.0, rested=0.0)
+    emergency(step)
+    step(10)
+    step(20)
+    assert step.kinds()[-1] == "deliberation_adopted"
+    adopted = step.arbiter.adopted
+    assert adopted is not None
+    step(30)
+    assert step.arbiter.adopted is adopted, "an action fact is never observed in state"
+    rested = frozenset({"rested"})
+    step.arbiter.routine_finished("some_other_goal", "SUCCESS", rested, 31)
+    step.arbiter.routine_finished(adopted.goal_id, "FAILED", rested, 32)
+    step.arbiter.routine_finished(adopted.goal_id, "SUCCESS", frozenset({"looked"}), 33)
+    step(40)
+    assert step.arbiter.adopted is adopted, (
+        "only its own routine succeeding, and declaring the fact, satisfies it"
+    )
+    step.arbiter.routine_finished(adopted.goal_id, "SUCCESS", rested, 41)
+    step(50)
+    assert step.arbiter.adopted is None
+    assert step.records[-1][1]["why"] == "satisfied"
+    assert step.arbiter.ended == [(adopted, "satisfied")], (
+        "the loop closes it in its goal stack, or nobody would"
+    )
 
 
 def emergency(step: Step) -> None:
@@ -432,3 +495,57 @@ def test_a_detector_that_fires_needs_three_new_signals_to_fire_again() -> None:
     assert detectors.emergency("suffocation", 30) is None, "no storm of repeated firings"
     assert detectors.emergency("suffocation", 40) is None
     assert detectors.emergency("suffocation", 50) is not None
+
+
+# ----------------------------------------------- source retry (C4.1)
+
+
+def adopted_for(trigger_kind: str = "repeated_failure", **changes: Any) -> Any:
+    from person_cognition.deliberation.arbiter import Adopted
+
+    fields: dict[str, Any] = {
+        "deliberation_id": "dlb_1",
+        "goal_id": "goal_deliberation_dlb_1",
+        "goal_type": "MAINTAIN_RESERVES",
+        "conditions": (("rested", ">=", 1.0),),
+        "priority": 300.0,
+        "adopted_at": 10,
+        "trigger_kind": trigger_kind,
+        "source_goal_id": "goal_establish_tools",
+        "source_goal_type": "ESTABLISH_TOOLS",
+        "source_created_at": 0,
+        "source_block_reason": "repeated_routine_failure",
+    }
+    fields.update(changes)
+    return Adopted(**fields)
+
+
+def source(**changes: Any) -> Goals:
+    goal = SimpleNamespace(
+        created_at_tick=0, status="BLOCKED", suspension_reason="repeated_routine_failure"
+    )
+    for key, value in changes.items():
+        setattr(goal, key, value)
+    return Goals(entries={"goal_establish_tools": goal})
+
+
+def test_a_satisfied_remedy_may_lift_only_the_block_it_was_for() -> None:
+    retry = Arbiter.source_retry
+    assert retry(adopted_for(), source()) == "repeated_routine_failure"
+    assert (
+        retry(
+            adopted_for("no_viable_plan", source_block_reason="no_feasible_plan"),
+            source(suspension_reason="no_feasible_plan"),
+        )
+        == "no_feasible_plan"
+    )
+    for refused in (
+        retry(adopted_for("emergency_recurrence"), source()),
+        retry(adopted_for("repeated_prediction_error"), source()),
+        retry(adopted_for(source_block_reason=None), source()),
+        retry(adopted_for(), Goals()),
+        retry(adopted_for(), source(status="QUEUED", suspension_reason=None)),
+        retry(adopted_for(), source(suspension_reason="no_candidate_routine")),
+        retry(adopted_for(), source(created_at_tick=500)),
+    ):
+        assert refused is None

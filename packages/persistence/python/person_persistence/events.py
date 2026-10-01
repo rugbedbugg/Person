@@ -14,7 +14,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v16"
+EVIDENCE_SCHEMA_VERSION = "person-evidence-v17"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -37,6 +37,7 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v14",
     "person-evidence-v15",
     "person-evidence-v16",
+    "person-evidence-v17",
 )
 
 EVENT_TYPES: tuple[str, ...] = (
@@ -135,6 +136,9 @@ EVENT_TYPES: tuple[str, ...] = (
     "deliberation_discarded",
     "deliberation_shadow_disposition",
     "deliberation_goal_ended",
+    # ADR 0021/0022 amendment (C4.1): the one retry a satisfied remedy grants
+    # the goal whose blocking raised its trigger.
+    "deliberation_source_retry",
     # ADR 0022: habits. Record-only's shadow stream, which nothing that acts
     # ever reads, and the active stream C5 invokes habits from.
     "habit_candidate_shadow",
@@ -218,6 +222,9 @@ V16_EVENT_TYPES: frozenset[str] = frozenset(
     }
 )
 
+#: Event types introduced with the seventeenth: the source retry (C4.1).
+V17_EVENT_TYPES: frozenset[str] = frozenset({"deliberation_source_retry"})
+
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
 INTRODUCED_IN: dict[str, str] = {
@@ -236,6 +243,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V14_EVENT_TYPES, "person-evidence-v14"),
     **dict.fromkeys(V15_EVENT_TYPES, "person-evidence-v15"),
     **dict.fromkeys(V16_EVENT_TYPES, "person-evidence-v16"),
+    **dict.fromkeys(V17_EVENT_TYPES, "person-evidence-v17"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (

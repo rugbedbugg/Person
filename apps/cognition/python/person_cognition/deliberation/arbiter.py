@@ -23,13 +23,14 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import Any, cast
 
-from person_planner import plan_for
+from person_planner import RECOVERY_SKILLS, plan_for
 from person_skills import Condition
 
 from .context import DeliberationContext
 from .deliberator import CallResult, Deliberator, Request
 from .habits import Episode, HabitTracker, signature_sha, template_id
 from .metareasoning import (
+    ACTION_FACTS,
     GOAL_FAILURES,
     GOAL_LIFETIME,
     STALE_AFTER,
@@ -94,6 +95,15 @@ class InFlight:
     trigger_refs: frozenset[str]
 
 
+#: Trigger classes that name a source goal whose blocking a remedy may lift.
+RETRY_TRIGGERS: frozenset[str] = frozenset({"repeated_failure", "no_viable_plan"})
+#: The blocks a satisfied remedy may lift once: Person gave up on the goal
+#: because of the trouble the remedy was for.
+RETRYABLE_BLOCKS: frozenset[str] = frozenset(
+    {"repeated_routine_failure", "no_feasible_plan", "not_found_in_bounded_search"}
+)
+
+
 @dataclass
 class Adopted:
     deliberation_id: str
@@ -102,6 +112,17 @@ class Adopted:
     conditions: tuple[tuple[str, str, float], ...]
     priority: float
     adopted_at: int
+    #: Its own routine succeeded and declared every action fact it asks for:
+    #: for a goal of action facts, that is satisfaction.
+    routine_succeeded: bool = False
+    #: The goal whose trouble raised the trigger, as it was at adoption: its
+    #: id, type, creation tick (which instance) and why it was blocked, if it
+    #: was. A satisfied remedy may grant that goal one retry (C4.1).
+    trigger_kind: str = ""
+    source_goal_id: str | None = None
+    source_goal_type: str | None = None
+    source_created_at: int | None = None
+    source_block_reason: str | None = None
 
 
 @dataclass
@@ -121,6 +142,24 @@ class Arbiter:
     tracker: HabitTracker | None = None
     #: Builds a context signature for a trigger and desired facts (the loop's).
     signature_for: Callable[[Trigger, list[str]], dict[str, Any]] | None = None
+    #: Adopted goals ended since the loop last looked, with why: the loop
+    #: closes them in its goal stack, or a suspended goal nobody proposes any
+    #: more would stay a candidate for ever, and grants a satisfied one's
+    #: source goal its retry.
+    ended: list[tuple[Adopted, str]] = field(default_factory=list)
+
+    def routine_finished(
+        self, goal_id: str, status: str, effects: frozenset[str], now: int
+    ) -> None:
+        """The loop says how a routine for a goal ended, and what its steps
+        declared they bring about."""
+        adopted = self.adopted
+        if adopted is not None and adopted.goal_id == goal_id and status == "SUCCESS":
+            asked = {f for f, _, _ in adopted.conditions if f in ACTION_FACTS}
+            if asked <= effects:
+                adopted.routine_succeeded = True
+        if self.tracker is not None and status == "SUCCESS":
+            self.tracker.source_progress(goal_id, now)
 
     def raw_signal(self, key: str, now: int, record: Record) -> None:
         """One qualifying raw signal of a problem, whether or not it triggers."""
@@ -302,7 +341,11 @@ class Arbiter:
         if all(condition.holds(state) for condition in conditions):
             return end("superseded")
         plans = [
-            plan for plan in plan_for(state, conditions, registry=registry, limit=1) if plan.steps
+            plan
+            for plan in plan_for(
+                state, conditions, registry=registry, limit=1, recovery=tuple(RECOVERY_SKILLS)
+            )
+            if plan.steps
         ]
         if not plans:
             return end("infeasible")
@@ -358,8 +401,10 @@ class Arbiter:
                     life_epoch=life_epoch,
                     world_epoch=self.world_epoch,
                     session=session,
+                    source_goal_id=trigger.source_goal_id,
                 )
             )
+        blocked = goals.entries.get(trigger.source_goal_id) if trigger.source_goal_id else None
         self.adopted = Adopted(
             deliberation_id=flight.request.deliberation_id,
             goal_id=goal_id,
@@ -367,6 +412,15 @@ class Arbiter:
             conditions=tuple((str(f), str(op), float(v)) for f, op, v in admitted["conditions"]),
             priority=priority,
             adopted_at=now,
+            trigger_kind=trigger.kind,
+            source_goal_id=trigger.source_goal_id if blocked is not None else None,
+            source_goal_type=blocked.goal_type if blocked is not None else None,
+            source_created_at=blocked.created_at_tick if blocked is not None else None,
+            source_block_reason=(
+                blocked.suspension_reason
+                if blocked is not None and blocked.status == "BLOCKED"
+                else None
+            ),
         )
         return None
 
@@ -384,7 +438,10 @@ class Arbiter:
             return
         why = None
         conditions = [_condition(f, op, v) for f, op, v in adopted.conditions]
-        if all(condition.holds(state) for condition in conditions):
+        only_actions = all(f in ACTION_FACTS for f, _, _ in adopted.conditions)
+        if (only_actions and adopted.routine_succeeded) or (
+            not only_actions and all(condition.holds(state) for condition in conditions)
+        ):
             why = "satisfied"
         elif failures(adopted.goal_id) >= GOAL_FAILURES:
             why = "failed"
@@ -402,7 +459,31 @@ class Arbiter:
                     "experienced_tick": now,
                 },
             )
+            self.ended.append((adopted, why))
             self.adopted = None
+
+    @staticmethod
+    def source_retry(adopted: Adopted, goals: Any) -> str | None:
+        """The block a satisfied remedy may lift once, or None (C4.1).
+
+        Only for triggers raised by a goal's own trouble, only for the same
+        goal instance, and only while it is still blocked for the reason it
+        was blocked when the remedy was adopted. Never a general unblocking.
+        """
+        if adopted.trigger_kind not in RETRY_TRIGGERS or adopted.source_goal_id is None:
+            return None
+        reason = adopted.source_block_reason
+        if reason not in RETRYABLE_BLOCKS:
+            return None
+        source = goals.entries.get(adopted.source_goal_id)
+        if (
+            source is None
+            or source.created_at_tick != adopted.source_created_at
+            or source.status != "BLOCKED"
+            or source.suspension_reason != reason
+        ):
+            return None
+        return reason
 
     def adopted_goal(self, tick: int) -> Any:
         """The adopted goal as a candidate, if one is live. Affect never biases it."""

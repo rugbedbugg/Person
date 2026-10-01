@@ -153,8 +153,9 @@ class TemplateModel:
     or a proposal in which a placeholder string stands for a context
     reference: `$cap:<fact>` (a capability declaring that effect),
     `$mem:<kind>` (a memory of that kind), `$recent:emergency` (an emergency
-    outcome), `$goal:<type>` and `$situation`. A placeholder with nothing to
-    stand for is left as it is, so the gate sees exactly what was written.
+    outcome) or `$recent:<skill>` (an outcome of that skill), `$goal:<type>`
+    and `$situation`. A placeholder with nothing to stand for is left as it
+    is, so the gate sees exactly what was written.
     """
 
     provider = "scripted"
@@ -186,7 +187,7 @@ class TemplateModel:
             if kind == "mem":
                 return bool(item.get("kind") == what)
             if kind == "recent":
-                return bool(item.get(what))
+                return bool(item.get(what)) or item.get("skill") == what
             if kind == "goal":
                 return bool(item.get("goal_type") == what)
             return True

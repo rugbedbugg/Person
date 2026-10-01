@@ -29,7 +29,7 @@ from person_persistence import (
     SelfKnowledge,
     new_event,
 )
-from person_planner import evidence_needed, plan_for, symbolic_state
+from person_planner import RECOVERY_SKILLS, evidence_needed, plan_for, symbolic_state
 from person_policy import (
     DeterministicPolicyProvider,
     EvidencePolicyProvider,
@@ -70,7 +70,7 @@ from .deliberation import (
 )
 from .deliberation.arbiter import Arbiter
 from .deliberation.habits import HabitTracker, context_signature
-from .deliberation.metareasoning import ArbitrationRecord, Trigger
+from .deliberation.metareasoning import ArbitrationRecord, Trigger, prediction_key
 from .deliberation.model import TemplateModel
 from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
 from .effect_learning import (
@@ -487,6 +487,32 @@ class CognitionLoop:
             decision=self.decision_counter,
             failures=lambda goal_id: self.consecutive_failures.get(goal_id, 0),
         )
+        for adopted, why in self.arbiter.ended:
+            if why != "satisfied":
+                self.goals.abandon(adopted.goal_id, tick, reason=f"deliberation_{why}")
+                continue
+            self.goals.conclude(adopted.goal_id, tick, reason="deliberation_satisfied")
+            prior = self.arbiter.source_retry(adopted, self.goals)
+            if prior is None or adopted.source_goal_id is None:
+                continue
+            # One retry, granted once: the remedy is satisfied, so the goal
+            # Person gave up on is tried again. A failure blocks it again.
+            source = adopted.source_goal_id
+            self.goals.reopen(source, tick)
+            self.unfound.pop(source, None)
+            if prior == "repeated_routine_failure":
+                self.consecutive_failures[source] = 2
+            record(
+                "deliberation_source_retry",
+                {
+                    "deliberation_id": adopted.deliberation_id,
+                    "source_goal_id": source,
+                    "source_goal_type": adopted.source_goal_type,
+                    "prior_block_reason": prior,
+                    "experienced_tick": self.memory.now,
+                },
+            )
+        self.arbiter.ended.clear()
 
     def _recorder(self, tick: int) -> Callable[[str, dict[str, Any]], None]:
         def record(event_type: str, payload: dict[str, Any]) -> None:
@@ -878,6 +904,7 @@ class CognitionLoop:
             registry=self.registry,
             limit=MAX_CANDIDATES,
             allowed_skills=(method,) if method else None,
+            recovery=tuple(RECOVERY_SKILLS) if goal.source == "deliberation" else (),
         )
         plans = [plan for plan in plans if plan.steps]
         if self._metareasoning() and goal.source != "maintenance":
@@ -1962,14 +1989,18 @@ class CognitionLoop:
         payload = build_payload(pending, state)
         if self._metareasoning():
             erred = self.goals.entries.get(str(payload.get("goal_id")))
-            if str(payload.get("severity")) in ("major", "inverted"):
-                for entry in payload.get("observed", []):
-                    if entry.get("fact") in EVALUABLE_FACTS:
-                        self.arbiter.raw_signal(
-                            f"repeated_prediction_error:{payload.get('executed_skill')}:{entry.get('fact')}",
-                            self.memory.now,
-                            self._recorder(tick),
-                        )
+            failed_facts = [
+                str(entry.get("fact"))
+                for entry in payload.get("observed", [])
+                if entry.get("fact") in EVALUABLE_FACTS
+            ]
+            if str(payload.get("severity")) in ("major", "inverted") and failed_facts:
+                self.arbiter.raw_signal(
+                    "repeated_prediction_error:"
+                    + prediction_key(str(payload.get("executed_skill")), failed_facts),
+                    self.memory.now,
+                    self._recorder(tick),
+                )
             self.arbiter.raise_trigger(
                 self.arbiter.detectors.prediction(
                     payload.get("executed_skill"),
@@ -1998,6 +2029,16 @@ class CognitionLoop:
         self._pending_choice = None
         if active is None or active.routine.routine_id in UNSCORED_ROUTINES:
             return
+        self.arbiter.routine_finished(
+            active.goal_id,
+            status,
+            frozenset(
+                effect.fact
+                for step in active.steps
+                for effect in self.registry.get(step.skill_id).expected_effects
+            ),
+            self.memory.now,
+        )
         if status == "SUCCESS":
             self.consecutive_failures.pop(active.goal_id, None)
         elif status != "INTERRUPTED":
