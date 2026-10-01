@@ -1,9 +1,13 @@
-"""One deliberation, recorded (ADR 0020, C1).
+"""One deliberation, recorded (ADR 0020 C1; split for asynchrony in ADR 0021).
 
-Mode `off` invokes and records nothing. Mode `record_only` builds nothing
-itself: it is handed a context, pins the effective input by hash, calls the
-model, gates the answer and records what happened. It returns the verdict to
-its caller and changes nothing else; in C1 nothing acts on it.
+Mode `off` invokes and records nothing. Otherwise a deliberation has three
+steps, and only the middle one may run off the main thread:
+
+1. `request` (main thread): pin the effective input by hash and record the
+   request;
+2. `call` (worker): the provider call and nothing else, touching no cognitive
+   state and no journal;
+3. `finish` (main thread): gate the answer and record what happened.
 
 The journal gets the request, the gated proposal or the rejections, and the
 unavailability. The raw provider text goes only to an operator audit artifact
@@ -30,7 +34,7 @@ from .model import (
 )
 from .proposal import INSTRUCTION_TEMPLATE, PROPOSAL_SCHEMA, Verdict, gate
 
-MODES: tuple[str, ...] = ("off", "record_only")
+MODES: tuple[str, ...] = ("off", "record_only", "active")
 #: Wall-clock bound on one call. Implementation parameter.
 TIMEOUT_S = 120.0
 
@@ -43,6 +47,24 @@ class Outcome:
     #: `completed` or `unavailable`.
     status: str
     verdict: Verdict | None
+    #: Why an answer was not usable, when it was a sterility failure or a
+    #: degraded or unavailable response; `None` for an ordinary gated answer.
+    failure: str | None = None
+
+
+@dataclass(frozen=True, slots=True)
+class Request:
+    """A recorded request: everything the worker and `finish` need."""
+
+    deliberation_id: str
+    context: DeliberationContext
+    context_text: str
+    pinned: dict[str, str]
+    started: float
+
+
+#: What the worker hands back: a response, or the exception the call raised.
+CallResult = ModelResponse | BaseException
 
 
 class Deliberator:
@@ -63,7 +85,13 @@ class Deliberator:
         self._audit = audit_directory
         self._new_id = new_id
 
-    def deliberate(self, context: DeliberationContext, *, experienced_tick: int) -> Outcome | None:
+    def request(
+        self,
+        context: DeliberationContext,
+        *,
+        experienced_tick: int,
+        extra: dict[str, Any] | None = None,
+    ) -> Request | None:
         if self.mode == "off" or self.model is None:
             return None
         deliberation_id = self._new_id()
@@ -85,100 +113,118 @@ class Deliberator:
                 "provider": self.model.provider,
                 "model": self.model.model,
                 **pinned,
+                **(extra or {}),
             },
         )
-        started = time.monotonic()
+        return Request(deliberation_id, context, context_text, pinned, time.monotonic())
+
+    def call(self, request: Request) -> CallResult:
+        """The provider call alone. Safe to run on a worker thread."""
+        assert self.model is not None
         try:
-            response = self.model.deliberate(
-                INSTRUCTION_TEMPLATE, context_text, timeout_s=TIMEOUT_S
+            return self.model.deliberate(
+                INSTRUCTION_TEMPLATE, request.context_text, timeout_s=TIMEOUT_S
             )
-        except (SterilityFailure, ProviderDegraded) as failure:
-            sterility = isinstance(failure, SterilityFailure)
-            # An answer from a backend that was not sterile is not an answer.
-            # Only the category and the hash are recorded; the raw output is
-            # quarantined by the adapter, never here.
+        except BaseException as error:  # handed back, judged on the main thread
+            return error
+
+    def finish(self, request: Request, result: CallResult) -> Outcome:
+        """Gate and record one answer, on the main thread."""
+        assert self.model is not None
+        deliberation_id = request.deliberation_id
+        latency = int((time.monotonic() - request.started) * 1000)
+        if isinstance(result, SterilityFailure | ProviderDegraded):
+            # An answer from a backend that was not sterile, or that carried
+            # an event nobody recognises, is not an answer. Only the category
+            # and, for a sterility failure, the hash are recorded; the raw
+            # output is quarantined by the adapter, never here.
+            sterility = isinstance(result, SterilityFailure)
+            label = "sterility_failure" if sterility else "degraded"
             self._record(
                 "deliberation_completed",
                 {
                     "deliberation_id": deliberation_id,
                     "output_sha256": (
-                        failure.output_sha256 if isinstance(failure, SterilityFailure) else None
+                        result.output_sha256 if isinstance(result, SterilityFailure) else None
                     ),
-                    "latency_ms": int((time.monotonic() - started) * 1000),
-                    "provider": failure.provider,
+                    "latency_ms": latency,
+                    "provider": result.provider,
                     "model": self.model.model,
                     "backend_version": "unverified",
                     "verdict": "rejected",
-                    "rejections": [
-                        f"{'sterility_failure' if sterility else 'degraded'}:{failure.category}"
-                    ],
+                    "rejections": [f"{label}:{result.category}"],
                     "proposal": None,
                     "stated_confidence": None,
                 },
             )
-            return Outcome(deliberation_id, "completed", None)
-        except Exception:  # an adapter that raises is a backend that failed
-            response = ModelResponse(
+            return Outcome(deliberation_id, "completed", None, failure=label)
+        if isinstance(result, KeyboardInterrupt | SystemExit):
+            raise result
+        if isinstance(result, BaseException):
+            # An adapter that raises is a backend that failed.
+            result = ModelResponse(
                 status="unavailable",
                 provider=self.model.provider,
                 model=self.model.model,
                 backend_version="unknown",
-                latency_ms=int((time.monotonic() - started) * 1000),
+                latency_ms=latency,
                 reason="backend",
             )
-        if response.status == "unavailable":
-            self._audit_artifact(deliberation_id, pinned, context_text, response, None)
+        if result.status == "unavailable":
+            self._audit_artifact(request, result, None)
             self._record(
                 "deliberation_unavailable",
                 {
                     "deliberation_id": deliberation_id,
-                    "reason": response.reason,
-                    "latency_ms": response.latency_ms,
-                    **response.identity(),
+                    "reason": result.reason,
+                    "latency_ms": result.latency_ms,
+                    **result.identity(),
                 },
             )
-            return Outcome(deliberation_id, "unavailable", None)
-        text = response.text or ""
-        verdict = gate(text, context)
+            return Outcome(deliberation_id, "unavailable", None, failure="unavailable")
+        text = result.text or ""
+        verdict = gate(text, request.context)
         output_sha256 = sha256_text(text)
-        self._audit_artifact(deliberation_id, pinned, context_text, response, output_sha256)
+        self._audit_artifact(request, result, output_sha256)
         self._record(
             "deliberation_completed",
             {
                 "deliberation_id": deliberation_id,
                 "output_sha256": output_sha256,
-                "latency_ms": response.latency_ms,
-                **response.identity(),
+                "latency_ms": result.latency_ms,
+                **result.identity(),
                 "verdict": "admitted" if verdict.admitted else "rejected",
                 "rejections": list(verdict.rejections),
                 "proposal": verdict.proposal,
                 "stated_confidence": verdict.confidence,
-                "input_tokens": response.input_tokens,
-                "output_tokens": response.output_tokens,
+                "input_tokens": result.input_tokens,
+                "output_tokens": result.output_tokens,
                 # Person's own share of the input, so a harness's overhead is
                 # never read as what Person needed to think.
-                "person_context_chars": len(context_text),
+                "person_context_chars": len(request.context_text),
             },
         )
         return Outcome(deliberation_id, "completed", verdict)
 
+    def deliberate(self, context: DeliberationContext, *, experienced_tick: int) -> Outcome | None:
+        """All three steps in one, synchronously (C1 and offline evaluation)."""
+        request = self.request(context, experienced_tick=experienced_tick)
+        if request is None:
+            return None
+        return self.finish(request, self.call(request))
+
     def _audit_artifact(
-        self,
-        deliberation_id: str,
-        pinned: dict[str, str],
-        context_text: str,
-        response: ModelResponse,
-        output_sha256: str | None,
+        self, request: Request, response: ModelResponse, output_sha256: str | None
     ) -> None:
         """The exact input and raw answer, for operators and C7 audits only."""
         if self._audit is None:
             return
         self._audit.mkdir(parents=True, exist_ok=True, mode=0o700)
         artifact = {
-            "deliberation_id": deliberation_id,
-            **pinned,
+            "deliberation_id": request.deliberation_id,
+            **request.pinned,
             "instruction": INSTRUCTION_TEMPLATE,
-            "context": context_text,
+            "context": request.context_text,
             "response": {
                 "status": response.status,
                 **response.identity(),
@@ -188,6 +234,6 @@ class Deliberator:
                 "output_sha256": output_sha256,
             },
         }
-        (self._audit / f"{deliberation_id}.json").write_text(
+        (self._audit / f"{request.deliberation_id}.json").write_text(
             canonical_json(artifact) + "\n", encoding="utf-8"
         )

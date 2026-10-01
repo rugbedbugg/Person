@@ -13,6 +13,7 @@ import hashlib
 import json
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Protocol, runtime_checkable
 
 #: Why a provider produced no response. A malformed response is a response.
@@ -141,4 +142,83 @@ class ScriptedModel:
             backend_version="scripted",
             latency_ms=0,
             text=text,
+        )
+
+
+class TemplateModel:
+    """A scripted backend whose answers name context items by what they are.
+
+    For offline tests and fixture runs, configured as `backend = "scripted"`:
+    it makes no network call. Each answer in the file is `null` (no answer)
+    or a proposal in which a placeholder string stands for a context
+    reference: `$cap:<fact>` (a capability declaring that effect),
+    `$mem:<kind>` (a memory of that kind), `$recent:emergency` (an emergency
+    outcome), `$goal:<type>` and `$situation`. A placeholder with nothing to
+    stand for is left as it is, so the gate sees exactly what was written.
+    """
+
+    provider = "scripted"
+    model = "template-v1"
+
+    def __init__(self, answers: list[Any]) -> None:
+        self._answers = list(answers)
+
+    @classmethod
+    def from_file(cls, path: Any) -> TemplateModel:
+        return cls(json.loads(Path(path).read_text(encoding="utf-8")))
+
+    @staticmethod
+    def _resolve(placeholder: str, context: dict[str, Any]) -> str:
+        kind, _, what = placeholder[1:].partition(":")
+        sections = {
+            "cap": "capabilities",
+            "mem": "memories",
+            "recent": "recent",
+            "goal": "goals",
+            "situation": "situation",
+        }
+        if kind not in sections:
+            return placeholder
+
+        def matches(item: dict[str, Any]) -> bool:
+            if kind == "cap":
+                return what in item.get("effects", ())
+            if kind == "mem":
+                return bool(item.get("kind") == what)
+            if kind == "recent":
+                return bool(item.get(what))
+            if kind == "goal":
+                return bool(item.get("goal_type") == what)
+            return True
+
+        found = [item["ref"] for item in context.get(sections[kind], []) if matches(item)]
+        return str(found[-1]) if found else placeholder
+
+    def _expand(self, value: Any, context: dict[str, Any]) -> Any:
+        if isinstance(value, str) and value.startswith("$"):
+            return self._resolve(value, context)
+        if isinstance(value, list):
+            return [self._expand(item, context) for item in value]
+        if isinstance(value, dict):
+            return {key: self._expand(item, context) for key, item in value.items()}
+        return value
+
+    def deliberate(self, instruction: str, context: str, *, timeout_s: float) -> ModelResponse:
+        answer = self._answers.pop(0) if self._answers else None
+        if answer is None:
+            return ModelResponse(
+                status="unavailable",
+                provider=self.provider,
+                model=self.model,
+                backend_version="scripted",
+                latency_ms=0,
+                reason="timeout",
+            )
+        return ModelResponse(
+            status="answered",
+            provider=self.provider,
+            model=self.model,
+            backend_version="scripted",
+            latency_ms=0,
+            text=json.dumps(self._expand(answer, json.loads(context))),
         )

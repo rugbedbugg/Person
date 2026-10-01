@@ -17,7 +17,7 @@ from dataclasses import dataclass, field, replace
 from pathlib import Path
 from typing import Any
 
-from person_config import CognitionSettings
+from person_config import CognitionSettings, ConfigError
 from person_persistence import (
     ContinuityRecord,
     EvidenceEvent,
@@ -68,8 +68,18 @@ from .deliberation import (
     Outcome,
     build_context,
 )
+from .deliberation.arbiter import Arbiter
+from .deliberation.metareasoning import ArbitrationRecord, Trigger
+from .deliberation.model import TemplateModel
 from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
-from .effect_learning import EffectBeliefs, Trial, admitted_to, classify, reliability_term
+from .effect_learning import (
+    EVALUABLE_FACTS,
+    EffectBeliefs,
+    Trial,
+    admitted_to,
+    classify,
+    reliability_term,
+)
 from .goals import GOAL_TYPES, Goal, GoalStack, SurvivalGoalProvider, homeostasis
 from .hypotheses import (
     CausalHypothesis,
@@ -94,7 +104,7 @@ from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
 from .memory.episodes import EpisodeDraft
 from .prediction import PendingPrediction, build_payload
-from .projects import BY_KIND, ProjectBook, ProjectManager
+from .projects import BLOCKS_TO_ABANDON, BY_KIND, ProjectBook, ProjectManager
 from .reducers import CognitiveReducers
 from .reporting import LearningSummary
 from .routines import (
@@ -183,6 +193,10 @@ class CognitionLoop:
         #: Alive, awaiting a respawn, or terminated (ADR 0017, I3): its own
         #: axis, rebuilt from the journal alone.
         self.life = LifeRecord()
+        #: ADR 0021: cooldowns, budgets and adopted goals, rebuilt from the
+        #: journal; and what C3 holds between decisions.
+        self.arbitration = ArbitrationRecord()
+        self.arbiter = Arbiter(record=self.arbitration)
         #: The last observation Person received, for what it knew at a death.
         self._last_observation: dict[str, Any] | None = None
         self.self_knowledge: SelfKnowledge | None = None
@@ -223,6 +237,10 @@ class CognitionLoop:
         #: Nothing in this loop calls `request_deliberation` itself.
         self.deliberation_mode = settings.deliberation_mode if settings else "off"
         self.cognitive_model: CognitiveModel | None = None
+        if settings and settings.deliberation_backend == "scripted":
+            if settings.deliberation_script is None:
+                raise ConfigError("deliberation backend 'scripted' needs scriptedAnswers")
+            self.cognitive_model = TemplateModel.from_file(settings.deliberation_script)
         self.deliberation_audit: Path | None = (
             settings.output_directory / "deliberation-audit" if settings else None
         )
@@ -238,6 +256,7 @@ class CognitionLoop:
             self.hypothesis_book,
             self.continuity,
             self.life,
+            self.arbitration,
         )
         self.memory = Memory(self.memory_store, training_context="fixture")
         self.spatial = Spatial(self.spatial_map)
@@ -424,6 +443,73 @@ class CognitionLoop:
             },
         )
 
+    def _metareasoning(self) -> bool:
+        return self.deliberation_mode != "off" and self.cognitive_model is not None
+
+    def _metareason(self, state: dict[str, float], tick: int) -> None:
+        """One C3 step (ADR 0021): consume, keep, maybe ask. Never waits."""
+        if not self._metareasoning() or self.identity is None:
+            self.arbiter.pending.clear()
+            return
+        for project in self.project_book.projects():
+            if project.status in ("ACTIVE", "SUSPENDED"):
+                self.arbiter.raise_trigger(
+                    self.arbiter.detectors.project(
+                        project.kind,
+                        project.project_id,
+                        max((count for _, count in project.blocks), default=0),
+                        BLOCKS_TO_ABANDON - 1,
+                    )
+                )
+
+        def record(event_type: str, payload: dict[str, Any]) -> None:
+            self._record(event_type, tick, payload)
+
+        self.arbiter.step(
+            mode=self.deliberation_mode,
+            deliberator=Deliberator(
+                mode=self.deliberation_mode,
+                model=self.cognitive_model,
+                record=record,
+                audit_directory=self.deliberation_audit,
+            ),
+            record=record,
+            state=state,
+            now=self.memory.now,
+            session=self.identity.session_id,
+            life_epoch=self.life.deaths + self.life.respawns,
+            alive=self.life.status == "alive",
+            world_available=self.operational.world != "unavailable",
+            goals=self.goals,
+            projects=self.project_book,
+            registry=self.registry,
+            goal_types=GOAL_TYPES,
+            context_for=self._trigger_context,
+            decision=self.decision_counter,
+            failures=lambda goal_id: self.consecutive_failures.get(goal_id, 0),
+        )
+
+    def _trigger_context(self, trigger: Trigger) -> tuple[DeliberationContext, frozenset[str]]:
+        """The context for a trigger, and the references that are its problem."""
+        context = self.deliberation_context(trigger.kind)
+        refs: set[str] = set()
+        for ref, (section, item) in context.refs.items():
+            if trigger.kind == "emergency_recurrence":
+                if section == "memories" and item.get("details", {}).get("trigger") == trigger.key:
+                    refs.add(ref)
+                if section == "recent" and item.get("emergency"):
+                    refs.add(ref)
+            elif trigger.kind in ("repeated_failure", "no_viable_plan"):
+                if section == "goals" and item.get("goal_type") == trigger.key:
+                    refs.add(ref)
+            elif trigger.kind == "repeated_prediction_error":
+                if section == "recent" and item.get("skill") == trigger.key.split(":")[0]:
+                    refs.add(ref)
+            elif trigger.kind == "project_reconsideration":
+                if section == "projects" and item.get("kind") == trigger.key:
+                    refs.add(ref)
+        return context, frozenset(refs)
+
     def request_deliberation(self, reason: str, refs: tuple[str, ...] = ()) -> Outcome | None:
         """Deliberate now and record it, reaching nothing (ADR 0020, C1).
 
@@ -564,6 +650,11 @@ class CognitionLoop:
             self._record(
                 "session_started", message["tick"], session, timestamp=message["timestamp"]
             )
+        # A goal a deliberation led to never outlives its session (ADR 0021).
+        self.arbiter.end_carried_over(
+            lambda event_type, payload: self._record(event_type, message["tick"], payload),
+            self.memory.now,
+        )
         self.policy_revision = max(self.policy_revision, self.store.policy_revision)
         for note in report.notes:
             self._log(f"evidence restore: {note}")
@@ -662,6 +753,7 @@ class CognitionLoop:
         self._reopen_unfound(state, tick)
         self._deliberate_projects(message, state, tick)
         self._deliberate_investigations(message, state, tick)
+        self._metareason(state, tick)
         proposals = self.goal_provider.propose(message, state, tick, home=self.home)
         project_goal = self.projects.goal(state, tick)
         if project_goal is not None:
@@ -673,6 +765,11 @@ class CognitionLoop:
         # Affect adjusts the candidates that already exist, within a tight
         # bound, and records how much; it adds none and removes none.
         proposals = [self._biased(proposal) for proposal in proposals]
+        # A goal a deliberation led to comes after affect: its priority is the
+        # one Person assigned it (ADR 0021), and affect adjusts none of it.
+        adopted = self.arbiter.adopted_goal(tick)
+        if adopted is not None:
+            proposals.append(adopted)
         goal = self.goals.update(proposals, state, tick)
         changes = self.projects.track(self.goals, state, self.memory.now)
         self._record_changes(changes, tick)
@@ -760,6 +857,16 @@ class CognitionLoop:
             allowed_skills=(method,) if method else None,
         )
         plans = [plan for plan in plans if plan.steps]
+        if self._metareasoning() and goal.source != "maintenance":
+            # No plan is ordinary while information search can still find what
+            # is missing; it is a reason to think only once search has given
+            # up on this goal (ADR 0021).
+            exhausted = not plans and goal.goal_id in self.unfound
+            self.arbiter.raise_trigger(
+                self.arbiter.detectors.planned(
+                    goal.goal_type, goal.goal_id, not exhausted, goal.priority
+                )
+            )
         if not plans:
             return self._seek(observation, state, context_id, goal, tick)
         if self.search is not None:
@@ -1179,6 +1286,13 @@ class CognitionLoop:
             message["decisionId"],
         )
         self.summary.note_emergency(message["trigger"])
+        if self._metareasoning():
+            # The emergency is handled by the kernel now; whether its
+            # recurrence deserves thought is asked at a later decision.
+            self.arbiter.emergency_now = True
+            self.arbiter.raise_trigger(
+                self.arbiter.detectors.emergency(message["trigger"], self.memory.now)
+            )
         self._remember(
             [remembering.endangered(message, event.event_id if event else None)],
             message["tick"],
@@ -1814,6 +1928,24 @@ class CognitionLoop:
             return
         self.pending_prediction = None
         payload = build_payload(pending, state)
+        if self._metareasoning():
+            erred = self.goals.entries.get(str(payload.get("goal_id")))
+            self.arbiter.raise_trigger(
+                self.arbiter.detectors.prediction(
+                    payload.get("executed_skill"),
+                    # Only facts Person can actually evaluate (ADR 0011): an
+                    # unobservable expectation is not a surprise.
+                    [
+                        str(entry.get("fact"))
+                        for entry in payload.get("observed", [])
+                        if entry.get("fact") in EVALUABLE_FACTS
+                    ],
+                    str(payload.get("severity")),
+                    self.memory.now,
+                    erred.goal_id if erred else None,
+                    erred.priority if erred else None,
+                )
+            )
         self.prediction_errors.append(payload)
         self.summary.note_prediction(payload)
         record = self._record("prediction_error", tick, payload, pending.decision_id)
@@ -1834,6 +1966,13 @@ class CognitionLoop:
             # burn the episode without producing usable evidence.
             failures = self.consecutive_failures.get(active.goal_id, 0) + 1
             self.consecutive_failures[active.goal_id] = failures
+            failed_goal = self.goals.entries.get(active.goal_id)
+            if self._metareasoning() and failed_goal is not None:
+                self.arbiter.raise_trigger(
+                    self.arbiter.detectors.goal_failed(
+                        failed_goal.goal_type, failed_goal.goal_id, failures, failed_goal.priority
+                    )
+                )
             if failures >= 3:
                 self.goals.block(active.goal_id, "repeated_routine_failure", tick)
         self._record(
@@ -1877,6 +2016,7 @@ class CognitionLoop:
         if state == self.operational.world:
             return
         self.operational = OperationalView(world=state)
+        self.arbiter.world_epoch += 1
         if state == "unavailable":
             self._drop_body_continuity()
         if self._lifecycle:

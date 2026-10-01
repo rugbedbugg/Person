@@ -99,9 +99,14 @@
     "deliberation": {
       "type": "object",
       "additionalProperties": false,
-      "description": "ADR 0020: general deliberation by a replaceable model. Read by cognition only. off (the default): nothing is invoked or recorded. record_only: invoked and recorded, reaching no behaviour. active does not exist until adoption and arbitration are decided.",
+      "description": "ADR 0020/0021: general deliberation by a replaceable model. Read by cognition only. off (the default): nothing is invoked or recorded. record_only: triggers, requests and gates run and are recorded, reaching no behaviour. active: an admitted, planner-feasible proposal may add one temporary goal at a priority Person assigns (ADR 0021).",
       "properties": {
-        "mode": { "enum": ["off", "record_only"] }
+        "mode": { "enum": ["off", "record_only", "active"] },
+        "backend": {
+          "enum": ["scripted"],
+          "description": "Which model answers. scripted: answers written in advance in scriptedAnswers, for offline tests and fixture runs; it makes no network call. Provider backends are chosen in C7."
+        },
+        "scriptedAnswers": { "type": "string", "minLength": 1 }
       }
     },
     "affect": {

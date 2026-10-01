@@ -19,6 +19,7 @@ from person_persistence import ContinuityRecord, EvidenceEvent, LifeRecord
 from person_policy import RoutineStatistics
 
 from .affect import AffectRecord
+from .deliberation.metareasoning import ArbitrationRecord
 from .effect_learning import EffectBeliefs
 from .hypotheses import HypothesisBook
 from .memory import MemoryStore
@@ -38,6 +39,7 @@ class CognitiveReducers:
         hypotheses: HypothesisBook,
         continuity: ContinuityRecord | None = None,
         life: LifeRecord | None = None,
+        arbitration: ArbitrationRecord | None = None,
     ) -> None:
         self.statistics = statistics
         self.memory = memory
@@ -48,6 +50,7 @@ class CognitiveReducers:
         self.hypotheses = hypotheses
         self.continuity = continuity if continuity is not None else ContinuityRecord()
         self.life = life if life is not None else LifeRecord()
+        self.arbitration = arbitration if arbitration is not None else ArbitrationRecord()
 
     def reset(self) -> None:
         self.statistics.reset()
@@ -59,6 +62,7 @@ class CognitiveReducers:
         self.hypotheses.reset()
         self.continuity.reset()
         self.life.reset()
+        self.arbitration.reset()
 
     def apply(self, event: EvidenceEvent) -> None:
         self.statistics.apply(event)
@@ -70,6 +74,7 @@ class CognitiveReducers:
         self.hypotheses.apply(event)
         self.continuity.apply(event)
         self.life.apply(event)
+        self.arbitration.apply(event)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -82,6 +87,7 @@ class CognitiveReducers:
             "hypotheses": self.hypotheses.to_json(),
             "continuity": self.continuity.to_json(),
             "life": self.life.to_json(),
+            "arbitration": self.arbitration.to_json(),
         }
 
     def load_json(self, body: Mapping[str, Any]) -> None:
@@ -96,3 +102,4 @@ class CognitiveReducers:
         self.hypotheses.load_json(body["hypotheses"])
         self.continuity.load_json(body["continuity"])
         self.life.load_json(body["life"])
+        self.arbitration.load_json(body["arbitration"])

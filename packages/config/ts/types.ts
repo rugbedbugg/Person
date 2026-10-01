@@ -67,7 +67,11 @@ export interface PersonConfig {
     interoception?: "on" | "off";
   };
   /** ADR 0020: read by cognition only; the runtime ignores it. */
-  deliberation?: { mode?: "off" | "record_only" };
+  deliberation?: {
+    mode?: "off" | "record_only" | "active";
+    backend?: "scripted";
+    scriptedAnswers?: string;
+  };
   cognition: {
     command: string[];
     startTimeoutMs: number;

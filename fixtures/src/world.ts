@@ -96,6 +96,7 @@ export class FixtureWorld implements Embodiment {
   #armor: number;
   #weather: "clear" | "rain" | "thunder" = "clear";
   #connected = false;
+  #ascending = false;
   #guard: PhysicalGuard | null = null;
   #lastSafePosition: Position | null = null;
   /** Facing, in radians, using the same convention as the Minecraft body. */
@@ -368,6 +369,7 @@ export class FixtureWorld implements Embodiment {
       this.#runEvents();
       this.#stepEntities();
       this.#stepVitals();
+      this.#stepBuoyancy();
     }
     if (ticks === 0) {
       this.#runEvents();
@@ -533,6 +535,23 @@ export class FixtureWorld implements Embodiment {
       this.#air = Math.min(300, this.#air + 10);
     if (this.#health > 0 && this.#threatFree())
       this.#lastSafePosition = { ...this.#position };
+  }
+
+  /**
+   * A body in deep water that is not swimming up sinks, a cell every ten
+   * ticks, as a Mineflayer body does once jump is released (ADR 0021's
+   * canonical case: air restored, and lost again). Only a body already in
+   * water is affected.
+   */
+  #stepBuoyancy(): void {
+    if (this.#ascending || this.#tick % 10 !== 0) return;
+    const feet = definitionOf(this.#nameAt(this.#position));
+    if (feet.kind !== "water") return;
+    const below = { ...this.#position, y: this.#position.y - 1 };
+    const under = definitionOf(this.#nameAt(below));
+    if (under.solid || under.kind !== "water") return;
+    this.#invalidate();
+    this.#position = below;
   }
 
   #threatFree(): boolean {
@@ -733,7 +752,10 @@ export class FixtureWorld implements Embodiment {
     const frontier: { key: string; estimate: number }[] = [
       { key: startKey, estimate: distance(start, target) },
     ];
-    const swimming = this.#submerged();
+    // A body in water swims, head under or at the surface; on land it walks.
+    const swimming =
+      this.#submerged() ||
+      definitionOf(this.#nameAt(this.#position)).kind === "water";
     const passable = (position: Position): boolean =>
       this.#walkable(position) || (swimming && this.#swimmable(position));
     const steps: [number, number][] = [
@@ -860,15 +882,20 @@ export class FixtureWorld implements Embodiment {
   async ascend(options: { maxTicks: number }): Promise<void> {
     this.#requireConnection();
     let spent = 0;
-    while (this.#submerged() && spent < options.maxTicks) {
-      const up = { ...this.#position, y: this.#position.y + 1 };
-      if (!this.#swimmable(up) && !this.#walkable(up)) return;
-      this.#position = up;
-      this.#advance(4);
-      spent += 4;
-      if (this.#health <= 0)
-        throw new EmbodimentError("death", "Died while swimming");
-      if (!this.#connected) throw new DisconnectedError();
+    this.#ascending = true;
+    try {
+      while (this.#submerged() && spent < options.maxTicks) {
+        const up = { ...this.#position, y: this.#position.y + 1 };
+        if (!this.#swimmable(up) && !this.#walkable(up)) return;
+        this.#position = up;
+        this.#advance(4);
+        spent += 4;
+        if (this.#health <= 0)
+          throw new EmbodimentError("death", "Died while swimming");
+        if (!this.#connected) throw new DisconnectedError();
+      }
+    } finally {
+      this.#ascending = false;
     }
   }
 
