@@ -495,3 +495,19 @@ def test_a_belief_person_holds_is_shown_with_its_uncertainty_and_can_support(
     assert gate(json.dumps(proposal), context).admitted
     proposal["strategies"][0]["expected"][0]["fact"] = "stone"
     assert "unsupported_expectation" in gate(json.dumps(proposal), context).rejections
+
+
+def test_a_template_answer_names_a_recent_outcome_by_its_skill() -> None:
+    from person_cognition.deliberation.model import TemplateModel
+
+    context = {
+        "recent": [
+            {"ref": "r1", "skill": "gather_wood", "emergency": False},
+            {"ref": "r2", "skill": "look", "emergency": False},
+        ]
+    }
+    model = TemplateModel([{"premises": ["$recent:gather_wood", "$recent:mine_stone"]}])
+    answer = json.loads(model.deliberate("", json.dumps(context), timeout_s=1).text or "")
+    assert answer["premises"] == ["r1", "$recent:mine_stone"], (
+        "a placeholder with nothing to stand for is left for the gate to see"
+    )

@@ -97,6 +97,11 @@ export class FixtureWorld implements Embodiment {
   #weather: "clear" | "rain" | "thunder" = "clear";
   #connected = false;
   #ascending = false;
+  /** `barren_until_rested`: unrested since the last `unrest`, and for how long it has waited. */
+  #unrested = false;
+  #waited = 0;
+  #resting = false;
+  #restHelps = true;
   #guard: PhysicalGuard | null = null;
   #lastSafePosition: Position | null = null;
   /** Facing, in radians, using the same convention as the Minecraft body. */
@@ -366,6 +371,9 @@ export class FixtureWorld implements Embodiment {
     this.#invalidate();
     for (let step = 0; step < Math.max(0, ticks); step++) {
       this.#tick += 1;
+      // Rest is counted a tick at a time, so an `unrest` arriving during a
+      // wait discounts the part of the wait before it.
+      if (this.#resting) this.#waited += 1;
       this.#runEvents();
       this.#stepEntities();
       this.#stepVitals();
@@ -393,6 +401,25 @@ export class FixtureWorld implements Embodiment {
         this.#setBlock(event.position, "air");
       } else if (event.type === "weather" && event.weather) {
         this.#weather = event.weather;
+      } else if (event.type === "unrest") {
+        this.#unrested = true;
+        this.#waited = 0;
+      } else if (event.type === "rest_stops_helping") {
+        this.#restHelps = false;
+      } else if (event.type === "remove_items") {
+        // Gone from the world: held and stored alike, so a reset problem
+        // cannot be solved from a chest.
+        for (const item of event.items ?? []) {
+          this.#inventory.delete(item);
+          for (const container of this.#containers.values())
+            container.contents.delete(item);
+        }
+      } else if (event.type === "set_vitals" && event.vitals) {
+        if (event.vitals.health !== undefined)
+          this.#health = event.vitals.health;
+        if (event.vitals.food !== undefined) this.#food = event.vitals.food;
+        if (event.vitals.saturation !== undefined)
+          this.#saturation = event.vitals.saturation;
       }
     }
   }
@@ -949,9 +976,12 @@ export class FixtureWorld implements Embodiment {
     this.#containers.delete(positionKey(position));
     const barren = (this.definition.hiddenRules ?? []).some(
       (rule) =>
-        rule.kind === "barren_while_weather" &&
-        rule.weather === this.#weather &&
-        rule.blocks.includes(name),
+        rule.blocks.includes(name) &&
+        ((rule.kind === "barren_while_weather" &&
+          rule.weather === this.#weather) ||
+          (rule.kind === "barren_until_rested" &&
+            this.#unrested &&
+            (!this.#restHelps || this.#waited < (rule.restTicks ?? 100)))),
     );
     const drops = barren ? [] : definition.drops.map((drop) => ({ ...drop }));
     for (const drop of drops) this.#give(drop.name, drop.count);
@@ -1178,7 +1208,12 @@ export class FixtureWorld implements Embodiment {
 
   async waitTicks(ticks: number): Promise<void> {
     this.#requireConnection();
-    this.#advance(ticks);
+    this.#resting = true;
+    try {
+      this.#advance(ticks);
+    } finally {
+      this.#resting = false;
+    }
   }
 
   registerOwnedStorage(position: Position, storageId: string): void {

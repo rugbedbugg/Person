@@ -32,15 +32,32 @@ export interface FixtureContainer {
 
 export interface FixtureEvent {
   atTick: number;
-  type: "spawn_hostile" | "despawn_hostile" | "break_shelter_block" | "weather";
+  type:
+    | "spawn_hostile"
+    | "despawn_hostile"
+    | "break_shelter_block"
+    | "weather"
+    | "unrest"
+    | "rest_stops_helping"
+    | "remove_items"
+    | "set_vitals";
   name?: string;
   offset?: Position;
   position?: Position;
   weather?: "clear" | "rain" | "thunder";
+  /** `remove_items`: what the world takes away, recreating a problem. */
+  items?: string[];
+  /** `set_vitals`: holds a test's context steady between episodes. */
+  vitals?: { health?: number; food?: number; saturation?: number };
 }
 
 /**
  * A rule of this world that nothing in Person is told.
+ *
+ * `barren_until_rested` (test machinery for ADR 0022): after an `unrest`
+ * event the listed blocks drop nothing until the body has waited `restTicks`
+ * in all (default 100), unless a `rest_stops_helping` regime change has made waiting useless. The
+ * world creates the problem; it never supplies the solution.
  *
  * Hidden mechanics exist so discovery can be tested honestly: a relation
  * Person could only learn by experiencing its consequences, and one no
@@ -49,8 +66,10 @@ export interface FixtureEvent {
  * break when dug but drop nothing.
  */
 export interface FixtureHiddenRule {
-  kind: "barren_while_weather";
-  weather: "clear" | "rain" | "thunder";
+  kind: "barren_while_weather" | "barren_until_rested";
+  weather?: "clear" | "rain" | "thunder";
+  /** `barren_until_rested`: how long the body must have waited. */
+  restTicks?: number;
   blocks: string[];
 }
 

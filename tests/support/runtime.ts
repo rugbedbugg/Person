@@ -16,6 +16,8 @@ import {
 export interface RuntimeRunOptions extends HarnessOptions {
   cognitionCommand: string[];
   maxDecisions?: number;
+  /** Experienced ticks before the run stops; the harness default otherwise. */
+  maxTicks?: number;
   learningMode?: "off" | "shadow" | "supervised";
   evidenceDirectory?: string;
   world?: HarnessOptions["world"];
@@ -61,6 +63,7 @@ export async function runEpisode<W extends Embodiment = FixtureWorld>(
     runtime: {
       ...config.runtime,
       maxDecisions: options.maxDecisions ?? 12,
+      ...(options.maxTicks ? { maxTicks: options.maxTicks } : {}),
       reconnectAttempts: options.reconnectAttempts ?? 0,
       reconnectIntervalMs: 0,
     },

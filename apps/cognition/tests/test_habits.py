@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from typing import Any
 
 import pytest
@@ -313,3 +314,97 @@ def test_shadow_habit_learning_changes_nothing_the_arbiter_does() -> None:
         "habit_candidate_shadow",
         "habit_evidence_shadow",
     ]
+
+
+# ------------------------------------------------- positive resolution (C4.1)
+
+
+def failure_episode(n: int) -> Episode:
+    base = episode(n, key="repeated_failure:ESTABLISH_TOOLS")
+    base.source_goal_id = "goal_establish_tools"
+    return base
+
+
+def test_silence_after_a_blocked_goal_is_not_resolution() -> None:
+    journal = Journal()
+    tracker = HabitTracker(journal.shadow)
+    tracker.open(failure_episode(1))
+    tracker.source_progress("goal_establish_tools", 50)  # before the remedy: not evidence
+    tracker.goal_ended("dlb_1", "satisfied", 100, journal)
+    tracker.source_progress("goal_other", 150)
+    tracker.step(
+        now=100 + STABILIZATION_WINDOW, life_epoch=0, world_epoch=0, session="s", record=journal
+    )
+    assert journal.verdicts() == [("inconclusive", "no_retry")]
+    assert journal.shadow.templates["hab_a"].streak == 0
+
+
+def test_a_retried_source_that_succeeds_and_stays_quiet_is_a_success() -> None:
+    journal = Journal()
+    tracker = HabitTracker(journal.shadow)
+    tracker.open(failure_episode(1))
+    tracker.goal_ended("dlb_1", "satisfied", 100, journal)
+    tracker.source_progress("goal_establish_tools", 200)
+    tracker.step(
+        now=100 + STABILIZATION_WINDOW, life_epoch=0, world_epoch=0, session="s", record=journal
+    )
+    assert journal.verdicts() == [("success", "stable")]
+
+
+def test_a_retry_that_fails_again_is_the_recurrence() -> None:
+    journal = Journal()
+    tracker = HabitTracker(journal.shadow)
+    tracker.open(failure_episode(1))
+    tracker.goal_ended("dlb_1", "satisfied", 100, journal)
+    tracker.raw_signal("repeated_failure:ESTABLISH_TOOLS", 200, journal)
+    assert journal.verdicts() == [("failure", "recurred")]
+
+
+def test_other_trigger_classes_need_no_retry() -> None:
+    journal = Journal()
+    tracker = HabitTracker(journal.shadow)
+    stable(tracker, journal, 1, 0)
+    assert journal.verdicts() == [("success", "stable")]
+
+
+@pytest.mark.parametrize(("retried", "verdict"), [(False, "no_retry"), (True, "stable")])
+def test_through_the_arbiter_a_remedy_without_a_retry_is_never_a_success(
+    retried: bool, verdict: str
+) -> None:
+    from person_cognition.deliberation.metareasoning import Trigger
+
+    step = Step("active", [ANSWER])
+    book = HabitBook("shadow")
+    step.arbiter.tracker = HabitTracker(book)
+    step.arbiter.signature_for = lambda trigger, desired: {"schema": "context_signature_v1"}
+    journalled = step.record
+
+    def record(kind: str, payload: dict[str, Any]) -> None:
+        journalled(kind, payload)
+        book.apply(event(kind, **payload))
+
+    step.record = record  # type: ignore[method-assign]
+    step.goals.entries["goal_tools"] = SimpleNamespace(
+        goal_id="goal_tools",
+        goal_type="ESTABLISH_TOOLS",
+        status="BLOCKED",
+        suspension_reason="repeated_routine_failure",
+        created_at_tick=0,
+        priority=300.0,
+    )
+    step.arbiter.raise_trigger(
+        Trigger("repeated_failure", "ESTABLISH_TOOLS", {}, source_goal_id="goal_tools")
+    )
+    step(10)
+    step(20)
+    step.state["at_home"] = 1.0
+    step(30)
+    if retried:
+        step.arbiter.routine_finished("goal_tools", "SUCCESS", frozenset(), 40)
+    step(30 + STABILIZATION_WINDOW)
+    assert [
+        (payload["verdict"], payload["reason"])
+        for kind, payload in step.records
+        if kind == "habit_evidence_shadow"
+    ] == [("success" if retried else "inconclusive", verdict)]
+    assert "habit_promotion_shadow" not in [kind for kind, _ in step.records]
