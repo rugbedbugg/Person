@@ -105,6 +105,7 @@ async function live(
   mode: "off" | "record_only" | "active",
   answers: unknown[],
   maxDecisions = 500,
+  habits: "off" | "record_only" = "off",
 ) {
   const evidenceDirectory = temporaryDirectory("person-meta-");
   const world = pool();
@@ -115,7 +116,7 @@ async function live(
     personId: "test-person-000",
     maxDecisions,
     home: HOME,
-    deliberation: { mode, answers },
+    deliberation: { mode, answers, habits },
   });
   return { report, world, events: journal(evidenceDirectory) };
 }
@@ -239,5 +240,41 @@ test(
       "RECOVER_HOME",
     );
     assert.equal(of(off.events, "deliberation_requested").length, 0);
+  },
+);
+
+test(
+  "shadow habit learning changes nothing Person does, and records its evidence apart",
+  { timeout: 300000 },
+  async () => {
+    // Plumbing, not the canonical habit case (ADR 0022): the same adopted
+    // recovery, with habit learning off and in record-only.
+    const off = await live("active", [RECOVER], 500, "off");
+    const shadow = await live("active", [RECOVER], 500, "record_only");
+    const skills = (report: typeof off.report) =>
+      report.decisions.map((d) => [
+        d.requestedSkill ?? null,
+        d.executedSkill ?? null,
+        d.status ?? null,
+      ]);
+    assert.deepEqual(skills(shadow.report), skills(off.report));
+    assert.deepEqual(
+      shadow.world.snapshot().position,
+      off.world.snapshot().position,
+    );
+    const evidence = of(shadow.events, "habit_evidence_shadow");
+    assert.equal(evidence.length, 1);
+    assert.equal(
+      evidence[0]!.payload["verdict"],
+      "success",
+      "satisfied, and quiet for the window",
+    );
+    assert.ok(
+      !shadow.events.some(
+        (e) => e.type.startsWith("habit_") && !e.type.endsWith("_shadow"),
+      ),
+      "nothing in the active stream",
+    );
+    assert.ok(!off.events.some((e) => e.type.startsWith("habit_")));
   },
 );

@@ -28,6 +28,7 @@ from person_skills import Condition
 
 from .context import DeliberationContext
 from .deliberator import CallResult, Deliberator, Request
+from .habits import Episode, HabitTracker, signature_sha, template_id
 from .metareasoning import (
     GOAL_FAILURES,
     GOAL_LIFETIME,
@@ -115,6 +116,16 @@ class Arbiter:
     adopted: Adopted | None = None
     emergency_now: bool = False
     world_epoch: int = 0
+    #: ADR 0022: `off`, or `record_only` (C4: shadow evidence only).
+    habits_mode: str = "off"
+    tracker: HabitTracker | None = None
+    #: Builds a context signature for a trigger and desired facts (the loop's).
+    signature_for: Callable[[Trigger, list[str]], dict[str, Any]] | None = None
+
+    def raw_signal(self, key: str, now: int, record: Record) -> None:
+        """One qualifying raw signal of a problem, whether or not it triggers."""
+        if self.tracker is not None:
+            self.tracker.raw_signal(key, now, record)
 
     def raise_trigger(self, trigger: Trigger | None) -> None:
         if trigger is not None:
@@ -165,6 +176,14 @@ class Arbiter:
                 goal_types,
             )
         self._keep_adopted(record, state, now, failures)
+        if self.tracker is not None:
+            self.tracker.step(
+                now=now,
+                life_epoch=life_epoch,
+                world_epoch=self.world_epoch,
+                session=session,
+                record=record,
+            )
         for key, trigger in list(self.pending.items()):
             if self.emergency_now:
                 break  # an emergency is never interrupted to think; try next step
@@ -308,6 +327,39 @@ class Arbiter:
             return None
         goal_id = f"goal_deliberation_{flight.request.deliberation_id}"
         record("deliberation_adopted", {**base, "goal_id": goal_id, **goal, "plan_found": True})
+        if self.tracker is not None and self.signature_for is not None:
+            desired = [str(f) for f, _, _ in admitted["conditions"]]
+            signature = self.signature_for(trigger, desired)
+            directions = [
+                [str(entry.get("fact")), str(entry.get("direction"))]
+                for strategy in outcome.verdict.proposal.get("strategies", [])
+                if strategy.get("id") == outcome.verdict.proposal.get("preferred")
+                for entry in strategy.get("desired", [])
+            ]
+            self.tracker.open(
+                Episode(
+                    deliberation_id=flight.request.deliberation_id,
+                    template={
+                        "template_id": template_id(
+                            trigger_kind=trigger.kind,
+                            semantic_key=trigger.key,
+                            signature=signature,
+                            goal_type=str(admitted["goal_type"]),
+                            desired=directions,
+                        ),
+                        "trigger_kind": trigger.kind,
+                        "semantic_key": trigger.key,
+                        "signature_sha": signature_sha(signature),
+                        "signature": signature,
+                        "goal_type": str(admitted["goal_type"]),
+                        "desired": sorted(directions),
+                    },
+                    semantic_key_full=full_key(trigger),
+                    life_epoch=life_epoch,
+                    world_epoch=self.world_epoch,
+                    session=session,
+                )
+            )
         self.adopted = Adopted(
             deliberation_id=flight.request.deliberation_id,
             goal_id=goal_id,
@@ -339,6 +391,8 @@ class Arbiter:
         elif now - adopted.adopted_at > GOAL_LIFETIME:
             why = "expired"
         if why is not None:
+            if self.tracker is not None:
+                self.tracker.goal_ended(adopted.deliberation_id, why, now, record)
             record(
                 "deliberation_goal_ended",
                 {

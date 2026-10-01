@@ -33,6 +33,8 @@ export interface RuntimeRunOptions extends HarnessOptions {
   deliberation?: {
     mode: "off" | "record_only" | "active";
     answers?: unknown[];
+    /** ADR 0022: habit learning, off or record_only. */
+    habits?: "off" | "record_only";
   };
 }
 
@@ -83,6 +85,9 @@ export async function runEpisode<W extends Embodiment = FixtureWorld>(
           mode: options.deliberation.mode,
           backend: "scripted",
           scriptedAnswers: answers,
+          ...(options.deliberation.habits
+            ? { habits: options.deliberation.habits }
+            : {}),
         },
       }),
     );

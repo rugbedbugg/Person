@@ -68,6 +68,8 @@ class CognitionSettings:
     #: Which model answers; only `scripted` exists before C7 chooses one.
     deliberation_backend: str | None = None
     deliberation_script: Path | None = None
+    #: ADR 0022: off (default) or record_only.
+    deliberation_habits: str = "off"
 
     def cross_check(self, *, learning_mode: str, evidence_directory: str) -> None:
         """Fail closed when the runtime disagrees with the file we read."""
@@ -120,6 +122,7 @@ def load_cognition_settings(filename: str | Path) -> CognitionSettings:
         training_context=runtime.get("trainingContext", "fixture"),
         deliberation_mode=document.get("deliberation", {}).get("mode", "off"),
         deliberation_backend=document.get("deliberation", {}).get("backend"),
+        deliberation_habits=document.get("deliberation", {}).get("habits", "off"),
         deliberation_script=(
             (base / document["deliberation"]["scriptedAnswers"]).resolve()
             if document.get("deliberation", {}).get("scriptedAnswers")

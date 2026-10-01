@@ -78,6 +78,7 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0019](0019-air-deprivation-emergency-response.md)         | Air-deprivation emergency response                                         | Accepted                           | 2026-09-30 |
 | [0020](0020-hybrid-cognition-and-deliberation.md)          | Hybrid cognition: Person-owned structure, replaceable deliberation         | Accepted                           | 2026-09-30 |
 | [0021](0021-metareasoning-and-deliberation-arbitration.md) | Metareasoning: when Person deliberates, and what a deliberation may change | Accepted                           | 2026-10-01 |
+| [0022](0022-evidence-backed-procedural-cognition.md)       | Evidence-backed procedural cognition: the habit lifecycle                  | Accepted                           | 2026-10-01 |
 
 ADRs 0001 to 0006 were written during the Phase 0 canonical architecture
 reconciliation (`docs/PERSON_SPEC.md`, frozen 2026-09-22) and changed no
