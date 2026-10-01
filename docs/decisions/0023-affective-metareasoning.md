@@ -151,8 +151,20 @@ earlier deliberation is judged by whether it resolved anything.
   quiet-grove episode, with Person hurt early so unease is high, off and
   record-only. Record-only records affect wanting deliberation on the second
   failure, while requests, goals, skills and final state are identical, and
-  no deliberation ever reaches appraisal. `affectArbitration = "active"` is
-  rejected until C6b.
+  no deliberation ever reaches appraisal.
+- **C6b (active):** `affectArbitration = "active"`, valid only with active
+  deliberation and active affect. The effective threshold applies. A request
+  records `baseline_would_fire` and `affect_changed_outcome`; a suppression
+  records `baseline_would_fire` and `affect_advanced_threshold`. Once an
+  affect-advanced request is made, its evidence is spent, and the detector
+  counts afresh. TESTED IN FIXTURE with scripted models: A (normal affect
+  deliberates on the third signal), B (high unease, and separately low
+  control, on the second), budgets overruling affect kept as evidence, D, E
+  and H in active mode. The second runtime test runs the hurt-early
+  quiet-grove episode, off and active. Active asks on the second failure,
+  earlier than off, which asks on the third; it records that the baseline
+  would not yet have fired. The earlier remedy still resolves the episode
+  (stable success), and no request carries affect.
 
 ## Consequences
 
