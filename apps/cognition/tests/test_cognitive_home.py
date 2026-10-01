@@ -233,3 +233,99 @@ def test_an_estimate_is_never_set_from_outside_the_sense() -> None:
     # The test above corrupts the estimate deliberately, as a probe. The loop
     # itself never assigns it; an architecture test enforces that.
     assert Estimate().uncertainty == 0.0
+
+
+# ------------------------------------------ deliberation projection (ADR 0024)
+
+
+def situation_of(context: Any) -> dict[str, dict[str, Any]]:
+    return {item["fact"]: item for item in context.document["situation"]}
+
+
+def test_a_labelled_home_is_projected_coarsely_to_deliberation(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    """1: Person labelled its home: the place it is at carries the label, and
+    the relation is coarse; no coordinate or distance appears."""
+    harness = Harness(tmp_path)
+    harness.hello()
+    home_via(harness, view, "build_basic_shelter")
+    harness.observe(at(view, 120))
+    context = harness.loop.deliberation_context("reflection")
+    facts = situation_of(context)
+    assert facts["home_relation"]["value"] == "at_home"
+    assert facts["place"]["label"] == "home"
+    remembered = [m["place"] for m in context.document["memories"] if m["place"]]
+    assert remembered and all(p["label"] == "home" for p in remembered)
+    text = json.dumps(context.document)
+    for forbidden in ('"forward"', '"left"', '"x"', '"distance"', "homeId", "home_a"):
+        assert forbidden not in text, forbidden
+
+
+def test_a_runtime_home_anchor_is_never_a_cognitive_home(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    """2: the runtime has an active home anchor, but Person never formed a
+    home: the relation is unknown and no place is labelled home."""
+    assert view["home"]["activeHome"]["homeId"], "the runtime anchor is present"
+    harness = Harness(tmp_path)
+    harness.hello()
+    harness.observe(at(view, 100))
+    context = harness.loop.deliberation_context("reflection")
+    assert situation_of(context)["home_relation"]["value"] == "unknown"
+    assert '"home"' not in json.dumps(
+        [m["place"] for m in context.document["memories"]]
+        + [situation_of(context).get("place", {}).get("label")]
+    )
+
+
+def test_labels_reach_only_places_the_context_already_cites() -> None:
+    """3: no enrichment from hidden place state; a labelled place nobody
+    cites stays out of the context."""
+    from person_cognition.deliberation import build_context
+
+    context = build_context(
+        reason="reflection",
+        self_knowledge=None,
+        world_available=True,
+        observation=None,
+        place={"place_id": "place_2", "confidence": 0.9},
+        working_memory=[{"kind": "perceived", "subjects": ["wood"], "place": "place_3"}],
+        beliefs=[],
+        hypotheses=[],
+        goals=[],
+        projects=[],
+        recent=[],
+        capabilities=[],
+        vocabulary={"goal_types": (), "project_kinds": (), "facts": (), "directions": ()},
+        home_relation="far",
+        place_labels={"place_3": "home"},
+    )
+    assert context.document["memories"][0]["place"] == {"id": "place_3", "label": "home"}
+    assert situation_of(context)["place"]["label"] is None
+    assert "place_9" not in json.dumps(context.document)
+
+
+def test_the_projection_is_a_function_of_rebuilt_cognitive_state(
+    tmp_path: Path, view: dict[str, Any]
+) -> None:
+    """4: a restarted Person rebuilds the same home projection from its
+    journal alone, only less certain where it is after waking (C8). With no
+    coordinates in any observation, moving the world (the +1000 X runtime
+    test) cannot change it."""
+    first = Harness(tmp_path)
+    first.hello()
+    home_via(first, view, "build_basic_shelter")
+    first.observe(at(view, 120))
+    before = first.loop.deliberation_context("reflection")
+    second = Harness(tmp_path)
+    second.hello()
+    second.observe(at(view, 5, {**STILL, "continuity": "start"}))
+    after = second.loop.deliberation_context("reflection")
+    assert situation_of(after)["home_relation"] == situation_of(before)["home_relation"]
+    was, now = situation_of(before)["place"], situation_of(after)["place"]
+    assert (was["value"], was["label"]) == (now["value"], now["label"]) == ("place_1", "home")
+    assert was["certain"] and not now["certain"], "honest doubt after waking"
+    assert [m["place"] for m in after.document["memories"]] == [
+        m["place"] for m in before.document["memories"]
+    ]

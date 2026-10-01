@@ -263,7 +263,7 @@ def test_a_deliberation_is_one_request_and_one_answer_under_one_id(
     assert requested.payload["context_sha256"] == sha256_text(context_text)
     assert requested.payload["instruction_sha256"] == sha256_text(INSTRUCTION_TEMPLATE)
     assert instruction == INSTRUCTION_TEMPLATE
-    assert requested.payload["context_schema"] == "person-deliberation-context-v1"
+    assert requested.payload["context_schema"] == "person-deliberation-context-v2"
     assert requested.payload["proposal_schema"] == "person-deliberation-proposal-v1"
     assert (
         completed.payload["provider"] == "scripted" and completed.payload["verdict"] == "admitted"
