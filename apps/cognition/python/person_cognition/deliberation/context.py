@@ -90,12 +90,32 @@ def _capped(items: Iterable[Any], cap: int) -> list[Any]:
 
 
 @dataclass(frozen=True, slots=True)
+class Retrieval:
+    """What one act of deliberation recalled for itself: the cue Person
+    derived from the problem, and the memories it made available."""
+
+    cue_subjects: tuple[str, ...]
+    cue_kinds: tuple[str, ...]
+    memory_ids: tuple[str, ...]
+
+    def to_json(self) -> dict[str, Any]:
+        return {
+            "cue_subjects": list(self.cue_subjects),
+            "cue_kinds": list(self.cue_kinds),
+            "result_refs": list(self.memory_ids),
+            "result_count": len(self.memory_ids),
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class DeliberationContext:
     """One context, as the model will see it, with its citable references."""
 
     document: dict[str, Any]
     #: Reference -> (section, item), for the grounding gate.
     refs: Mapping[str, tuple[str, dict[str, Any]]]
+    #: The request-local recall this context carries, if a request made one.
+    retrieval: Retrieval | None = None
 
     def reason(self) -> str:
         return str(self.document["request"]["reason"])

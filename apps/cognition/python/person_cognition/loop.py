@@ -66,6 +66,7 @@ from .deliberation import (
     DeliberationContext,
     Deliberator,
     Outcome,
+    Retrieval,
     build_context,
 )
 from .deliberation.arbiter import Arbiter
@@ -109,7 +110,8 @@ from .hypotheses.generation import CONTEXT_TRIALS
 from .interoception import Interoception, combined
 from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
-from .memory.episodes import EpisodeDraft
+from .memory.episodes import SUBJECTS, EpisodeDraft
+from .memory.recall import MAX_CUE_SUBJECTS
 from .prediction import PendingPrediction, build_payload
 from .projects import BY_KIND, ProjectBook, ProjectManager
 from .reducers import CognitiveReducers
@@ -363,11 +365,18 @@ class CognitionLoop:
 
     # ------------------------------------------------------------ deliberation
 
-    def deliberation_context(self, reason: str, refs: tuple[str, ...] = ()) -> DeliberationContext:
+    def deliberation_context(
+        self,
+        reason: str,
+        refs: tuple[str, ...] = (),
+        recalled: tuple[Recalled, ...] = (),
+    ) -> DeliberationContext:
         """The bounded context a model would be shown now (ADR 0020).
 
         Reads projections only: it recalls nothing, records nothing and
-        changes nothing, so building it has no effect on Person.
+        changes nothing, so building it has no effect on Person. A request
+        may pass in `recalled`, its own request-local recall, which joins
+        working memory in this context and nowhere else.
         """
         known = self.self_knowledge
         here = self.spatial.here()
@@ -380,6 +389,18 @@ class CognitionLoop:
                 "source": held.episode.provenance.source,
             }
             for held in self.memory.working.items()
+        ]
+        held_ids = {held.episode.memory_id for held in self.memory.working.items()}
+        working += [
+            {
+                "kind": item.episode.kind,
+                "subjects": list(item.episode.subjects),
+                "details": dict(item.episode.details),
+                "place": item.episode.place_id,
+                "source": item.episode.provenance.source,
+            }
+            for item in recalled
+            if item.episode.memory_id not in held_ids
         ]
         beliefs = [
             {
@@ -582,9 +603,64 @@ class CognitionLoop:
             "source_goal_type": source_type,
         }
 
+    #: The memory kinds a deliberative recall may consult: the episodic
+    #: evidence problem solving uses, and harm for emergencies.
+    DELIBERATIVE_KINDS: tuple[str, ...] = ("perceived", "searched", "acted")
+    EMERGENCY_KINDS: tuple[str, ...] = ("perceived", "searched", "acted", "endangered", "hurt")
+
+    def _deliberative_cue(self, trigger: Trigger) -> tuple[frozenset[str], tuple[str, ...]]:
+        """What Person recalls when it thinks about this problem: derived from
+        the problem alone, never chosen by a model."""
+        habit_facts: list[str] = []
+        if trigger.kind == "habit_breakdown":
+            template = (
+                self.reducers.habits_active.templates.get(trigger.key)
+                if self.reducers.habits_active
+                else None
+            )
+            habit_facts = [str(fact) for fact, _ in template.desired] if template else []
+        problem = origin(trigger)
+        facts: list[str] = list(habit_facts)
+        kinds = self.DELIBERATIVE_KINDS
+        if problem.kind in ("repeated_failure", "no_viable_plan"):
+            goal = self.goals.entries.get(problem.source_goal_id or "")
+            if goal is not None:
+                facts += list(
+                    evidence_needed(
+                        self._last_state, goal.completion_condition, registry=self.registry
+                    )
+                )
+                facts += [condition.fact for condition in goal.completion_condition]
+        elif problem.kind == "repeated_prediction_error":
+            facts += problem.key.split(":", 1)[1].split("+") if ":" in problem.key else []
+        elif problem.kind == "emergency_recurrence":
+            # As the endangerment was encoded (memory encoding, ADR 0007).
+            hostile = "hostile" in problem.key or "threat" in problem.key
+            return frozenset({"danger", "hostile"} if hostile else {"danger"}), self.EMERGENCY_KINDS
+        subjects = sorted(remembering.evidence_subjects(tuple(facts)) & SUBJECTS)
+        return frozenset(subjects[:MAX_CUE_SUBJECTS]), kinds
+
     def _trigger_context(self, trigger: Trigger) -> tuple[DeliberationContext, frozenset[str]]:
-        """The context for a trigger, and the references that are its problem."""
-        context = self.deliberation_context(trigger.kind)
+        """The context for a trigger, and the references that are its problem.
+
+        Preparing a request recalls once, for this thought only: one bounded,
+        deterministic cue derived from the problem, through the ordinary
+        ranking and limit, never into working memory (ADR 0020, as amended).
+        """
+        subjects, kinds = self._deliberative_cue(trigger)
+        recalled = (
+            self.memory.retrieve(Cue.about(*subjects, purpose="goal", kinds=kinds))
+            if subjects
+            else ()
+        )
+        context = replace(
+            self.deliberation_context(trigger.kind, recalled=recalled),
+            retrieval=Retrieval(
+                cue_subjects=tuple(sorted(subjects)),
+                cue_kinds=tuple(sorted(kinds)),
+                memory_ids=tuple(item.episode.memory_id for item in recalled),
+            ),
+        )
         # A habit breakdown cites the problem its habit answered.
         trigger = origin(trigger)
         refs: set[str] = set()

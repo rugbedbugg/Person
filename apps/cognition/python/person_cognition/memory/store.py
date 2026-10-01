@@ -228,6 +228,17 @@ class Memory:
 
     # ---------------------------------------------------------------- recall
 
+    def retrieve(self, cue: Cue) -> tuple[Recalled, ...]:
+        """The same bounded, ranked recall, made available to one act of
+        deliberation only: nothing enters working memory, and nothing about
+        ordinary recall changes (ADR 0020 as amended for C7)."""
+        if not isinstance(cue, Cue):
+            raise TypeError("retrieve takes a Cue; there is no free-form query")
+        recalled, _ = rank(
+            self._store.episodes_in(self.training_context), cue, self._now, self.rules
+        )
+        return tuple(recalled)
+
     def recall(self, cue: Cue) -> tuple[Recalled, ...]:
         """At most `RECALL_LIMIT` memories relevant to the cue, labelled as memory."""
         if not isinstance(cue, Cue):

@@ -364,6 +364,11 @@ class Arbiter:
                     "source_project": trigger.source_project,
                     "trigger_refs": sorted(trigger_refs),
                     "budget_kind": origin(trigger).kind,
+                    # What this thought recalled for itself (never into
+                    # working memory): ADR 0020 as amended for C7.
+                    "memory_retrieval": (
+                        context.retrieval.to_json() if context.retrieval is not None else None
+                    ),
                     **snapshot,
                     **counterfactual,
                 },

@@ -4,7 +4,15 @@ C1: the context, the proposal and its gate, the model interface, and the
 record. Nothing here changes what Person does.
 """
 
-from .context import CAPS, CONTEXT_SCHEMA, REASONS, Capability, DeliberationContext, build_context
+from .context import (
+    CAPS,
+    CONTEXT_SCHEMA,
+    REASONS,
+    Capability,
+    DeliberationContext,
+    Retrieval,
+    build_context,
+)
 from .deliberator import MODES, Deliberator, Outcome
 from .model import (
     UNAVAILABLE_REASONS,
@@ -27,6 +35,7 @@ __all__ = [
     "REASONS",
     "UNAVAILABLE_REASONS",
     "Capability",
+    "Retrieval",
     "CognitiveModel",
     "DeliberationContext",
     "Deliberator",
