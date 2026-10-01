@@ -202,7 +202,7 @@ def test_restart_reconstructs_the_same_affect_bands() -> None:
     assert affective_threshold(after) == 2
 
 
-def test_record_only_needs_a_deliberation_path_and_active_affect() -> None:
+def test_arbitration_needs_a_deliberation_path_and_active_affect() -> None:
     from person_config import ConfigError, validate_config_document
     from test_deliberation import _example_document
 
@@ -211,10 +211,12 @@ def test_record_only_needs_a_deliberation_path_and_active_affect() -> None:
     for mode in ("record_only", "active"):
         base["deliberation"] = {"mode": mode, "affectArbitration": "record_only"}
         validate_config_document(base)
+    base["deliberation"] = {"mode": "active", "affectArbitration": "active"}
+    validate_config_document(base)
     for bad in (
         {"mode": "off", "affectArbitration": "record_only"},
         {"affectArbitration": "record_only"},
-        {"mode": "active", "affectArbitration": "active"},  # C6b
+        {"mode": "record_only", "affectArbitration": "active"},
     ):
         base["deliberation"] = bad
         with pytest.raises(ConfigError):
@@ -224,3 +226,122 @@ def test_record_only_needs_a_deliberation_path_and_active_affect() -> None:
         base["affect"] = {"mode": affect}
         with pytest.raises(ConfigError):
             validate_config_document(base)
+
+
+# --------------------------------------------------------------- active (C6b)
+
+
+def requested(step: Step) -> list[dict[str, Any]]:
+    return [p for k, p in step.records if k == "deliberation_requested"]
+
+
+def test_normal_affect_deliberates_on_the_baseline_signal() -> None:
+    """A: normal affect, three failures: deliberation on the third, and the
+    journal says affect changed nothing."""
+    step = arbitrating(Step("active", [ANSWER]), "active")
+    step.arbiter.affect_snapshot = CALM
+    step.arbiter.raise_trigger(failure(2))
+    step(10)
+    assert requested(step) == []
+    step.arbiter.raise_trigger(failure(3))
+    step(20)
+    [request] = requested(step)
+    assert request["baseline_would_fire"] is True
+    assert request["affect_changed_outcome"] is False
+
+
+@pytest.mark.parametrize("bands", [HIGH_UNEASE, LOW_CONTROL])
+def test_high_unease_or_low_control_deliberates_one_signal_earlier(
+    bands: dict[str, str],
+) -> None:
+    """B: two failures are enough, and the journal records that the
+    baseline would not yet have asked."""
+    step = arbitrating(Step("active", [ANSWER]), "active")
+    step.arbiter.affect_snapshot = bands
+    step.arbiter.raise_trigger(failure(2))
+    step(10)
+    [request] = requested(step)
+    assert request["baseline_would_fire"] is False
+    assert request["affect_changed_outcome"] is True
+    assert request["signal"]["count"] == 2
+
+
+def test_when_the_budgets_overrule_affect_that_is_kept_too() -> None:
+    step = arbitrating(Step("active", [ANSWER]), "active")
+    step.arbiter.affect_snapshot = HIGH_UNEASE
+    for n in range(4):
+        step.record(
+            "deliberation_requested",
+            {
+                "deliberation_id": f"dlb_{n}",
+                "trigger_key_full": f"repeated_failure:G{n}",
+                "trigger_kind": "repeated_failure",
+                "session_id": "s",
+                "experienced_tick": 1,
+            },
+        )
+    step.arbiter.raise_trigger(failure(2))
+    step(10)
+    suppressed = step.records[-1]
+    assert suppressed[0] == "deliberation_suppressed"
+    assert suppressed[1]["affect_advanced_threshold"] is True
+    assert suppressed[1]["baseline_would_fire"] is False
+    assert "affect_changed_outcome" not in suppressed[1], "no request, no outcome"
+
+
+def test_an_advanced_request_spends_its_evidence() -> None:
+    step = arbitrating(Step("active", [ANSWER]), "active")
+    step.arbiter.affect_snapshot = HIGH_UNEASE
+    detectors = step.arbiter.detectors
+    assert detectors.planned("SECURE_FOOD", "g", False, 1.0) is None
+    early = detectors.planned("SECURE_FOOD", "g", False, 1.0)
+    step.arbiter.raise_trigger(early)
+    step(10)
+    assert requested(step)[0]["affect_changed_outcome"] is True
+    assert detectors.planned("SECURE_FOOD", "g", False, 1.0) is None, "counting starts over"
+
+
+def test_active_affect_never_bypasses_an_applicable_habit() -> None:
+    """D, active: high unease and an applicable habit: the habit answers at
+    its own count; no affect event, no model."""
+    step = arbitrating(Active([ANSWER]), "active")
+    step.arbiter.affect_snapshot = HIGH_UNEASE
+    promoted_template(step.book, trigger_kind="repeated_failure", semantic_key="SECURE_FOOD")
+    step.arbiter.raise_trigger(failure(2))
+    step(10)
+    assert step.kinds() == []
+    step.arbiter.raise_trigger(failure(3))
+    step(20)
+    assert step.kinds() == ["habit_invoked"]
+
+
+def test_active_affect_leaves_emergencies_alone() -> None:
+    """E: high unease and two suffocations: no strategic deliberation; the
+    third fires exactly as ADR 0021."""
+    step = arbitrating(Step("active", [ANSWER]), "active")
+    step.arbiter.affect_snapshot = HIGH_UNEASE
+    detectors = step.arbiter.detectors
+    for at in (1, 2):
+        step.arbiter.raise_trigger(detectors.emergency("suffocation", at))
+    step(10)
+    assert requested(step) == []
+    step.arbiter.raise_trigger(detectors.emergency("suffocation", 3))
+    step(20)
+    [request] = requested(step)
+    assert "affect_changed_outcome" not in request
+
+
+def test_active_judges_each_signal_by_the_affect_before_it() -> None:
+    """H, active: a failure dispatched calm is not advanced by its own
+    appraisal; the next signal may be."""
+    step = arbitrating(Step("active", [ANSWER]), "active")
+    step.arbiter.affect_snapshot = CALM
+    step.arbiter.raise_trigger(failure(2))
+    step.arbiter.affect_snapshot = LOW_CONTROL
+    step(10)
+    assert requested(step) == []
+    step.arbiter.raise_trigger(
+        Trigger("no_viable_plan", "SECURE_FOOD", {"decisions_without_plan": 2, "count": 2})
+    )
+    step(20)
+    assert requested(step)[0]["affect_changed_outcome"] is True

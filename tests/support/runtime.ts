@@ -38,7 +38,7 @@ export interface RuntimeRunOptions extends HarnessOptions {
     /** ADR 0022: habit learning, off, record_only (C4) or active (C5). */
     habits?: "off" | "record_only" | "active";
     /** ADR 0023: affective arbitration. */
-    affectArbitration?: "off" | "record_only";
+    affectArbitration?: "off" | "record_only" | "active";
   };
 }
 

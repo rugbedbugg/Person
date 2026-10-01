@@ -370,6 +370,8 @@ class Arbiter:
             )
             if request is None:
                 continue
+            if counterfactual.get("affect_changed_outcome"):
+                self.detectors.consumed(trigger)
             handle = self.runner(partial(deliberator.call, request))
             self.in_flight = InFlight(request, handle, trigger, snapshot, trigger_refs, basis)
         self.emergency_now = False

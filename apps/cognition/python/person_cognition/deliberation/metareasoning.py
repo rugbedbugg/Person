@@ -154,6 +154,14 @@ class Detectors:
             times.popleft()
         return len(times)
 
+    def consumed(self, trigger: Trigger) -> None:
+        """An affect-advanced trigger became a request: its evidence is spent,
+        so the baseline signal that follows does not raise it again."""
+        if trigger.kind == "no_viable_plan":
+            self._unplanned.pop(trigger.key, None)
+        elif trigger.kind == "repeated_prediction_error":
+            self._errors.pop(trigger.key, None)
+
     def _floor(self) -> int:
         return TRIGGER_COUNT - AFFECT_ADVANCE if self.early else TRIGGER_COUNT
 

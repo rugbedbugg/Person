@@ -112,8 +112,8 @@
           "description": "ADR 0022: habit learning. off (the default); record_only (C4): candidates, evidence and promotion computed as a shadow stream that nothing that acts ever reads; active (C5): an active stream, from which a promoted habit answers its familiar problem without a model call. active requires mode active."
         },
         "affectArbitration": {
-          "enum": ["off", "record_only"],
-          "description": "ADR 0023: affective metareasoning. off (the default); record_only (C6a): Person's pre-signal unease and control bands are evaluated where System-2 escalation is decided and recorded as affective_arbitration_shadow, reaching no behaviour. record_only requires mode record_only or active, and affect active. active comes with C6b."
+          "enum": ["off", "record_only", "active"],
+          "description": "ADR 0023: affective metareasoning. off (the default); record_only (C6a): Person's pre-signal unease and control bands are evaluated where System-2 escalation is decided and recorded as affective_arbitration_shadow, reaching no behaviour; active (C6b): high unease or low control lowers the evidence for a non-emergency escalation by exactly one signal. record_only requires mode record_only or active; active requires mode active. Either requires affect active."
         }
       },
       "allOf": [
@@ -121,6 +121,16 @@
           "if": {
             "properties": { "habits": { "const": "active" } },
             "required": ["habits"]
+          },
+          "then": {
+            "properties": { "mode": { "const": "active" } },
+            "required": ["mode"]
+          }
+        },
+        {
+          "if": {
+            "properties": { "affectArbitration": { "const": "active" } },
+            "required": ["affectArbitration"]
           },
           "then": {
             "properties": { "mode": { "const": "active" } },
@@ -340,7 +350,7 @@
           "deliberation": {
             "type": "object",
             "properties": {
-              "affectArbitration": { "const": "record_only" }
+              "affectArbitration": { "enum": ["record_only", "active"] }
             },
             "required": ["affectArbitration"]
           }
