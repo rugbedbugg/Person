@@ -1,8 +1,8 @@
 # ADR 0029: Architectural rules live in the specification, ADRs and tests
 
-**Status:** Proposed (2026-10-03; awaiting maintainer review)
+**Status:** Accepted (2026-10-06)
 **Date:** 2026-10-03
-**Authors:** to be confirmed by the operator
+**Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 
 ---

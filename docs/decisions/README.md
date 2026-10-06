@@ -81,11 +81,11 @@ Use `ADR-TEMPLATE.md`. Each ADR must include:
 | [0022](0022-evidence-backed-procedural-cognition.md)       | Evidence-backed procedural cognition: the habit lifecycle                   | Accepted                           | 2026-10-01 |
 | [0023](0023-affective-metareasoning.md)                    | Affective metareasoning                                                     | Accepted                           | 2026-10-01 |
 | [0024](0024-cognitive-backend-evaluation.md)               | Cognitive backend evaluation and initial-provider selection                 | Accepted                           | 2026-10-01 |
-| [0025](0025-person-core-and-environment-profiles.md)       | Person's core, environment profiles and experience contexts                 | Proposed                           | 2026-10-03 |
-| [0026](0026-epistemic-state-and-the-decision-boundary.md)  | Epistemic state: percepts, beliefs, self-state and the decision boundary    | Proposed                           | 2026-10-03 |
-| [0027](0027-canonical-events-and-epistemic-evidence.md)    | Canonical events are not epistemic evidence                                 | Proposed                           | 2026-10-03 |
-| [0028](0028-predictive-models-are-plural.md)               | Predictive models are plural; the singleton world-model provider is retired | Proposed                           | 2026-10-03 |
-| [0029](0029-architecture-lives-in-docs-and-tests.md)       | Architectural rules live in the specification, ADRs and tests               | Proposed                           | 2026-10-03 |
+| [0025](0025-person-core-and-environment-profiles.md)       | Person's core, environment profiles and experience contexts                 | Accepted                           | 2026-10-03 |
+| [0026](0026-epistemic-state-and-the-decision-boundary.md)  | Epistemic state: percepts, beliefs, self-state and the decision boundary    | Accepted                           | 2026-10-03 |
+| [0027](0027-canonical-events-and-epistemic-evidence.md)    | Canonical events are not epistemic evidence                                 | Accepted                           | 2026-10-03 |
+| [0028](0028-predictive-models-are-plural.md)               | Predictive models are plural; the singleton world-model provider is retired | Accepted                           | 2026-10-03 |
+| [0029](0029-architecture-lives-in-docs-and-tests.md)       | Architectural rules live in the specification, ADRs and tests               | Accepted                           | 2026-10-03 |
 
 ADRs 0001 to 0006 were written during the Phase 0 canonical architecture
 reconciliation (`docs/PERSON_SPEC.md`, frozen 2026-09-22) and changed no

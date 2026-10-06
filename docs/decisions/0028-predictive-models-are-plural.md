@@ -1,8 +1,8 @@
 # ADR 0028: Predictive models are plural; the singleton world-model provider is retired
 
-**Status:** Proposed (2026-10-03; awaiting maintainer review)
+**Status:** Accepted (2026-10-06)
 **Date:** 2026-10-03
-**Authors:** to be confirmed by the operator
+**Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Supersedes:** the `WorldModelProvider` reservation in
 `person_cognition/future_providers.py` and `PERSON_SPEC` section 58's single

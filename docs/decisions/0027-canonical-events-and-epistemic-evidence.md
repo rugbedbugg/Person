@@ -1,8 +1,8 @@
 # ADR 0027: Canonical events are not epistemic evidence
 
-**Status:** Proposed (2026-10-03; awaiting maintainer review)
+**Status:** Accepted (2026-10-06)
 **Date:** 2026-10-03
-**Authors:** to be confirmed by the operator
+**Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Refines:** ADR 0003 (the journal is engineering truth), ADR 0018 (canonical
 history)

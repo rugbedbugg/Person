@@ -1,8 +1,8 @@
 # ADR 0025: Person's core, environment profiles and experience contexts
 
-**Status:** Proposed (2026-10-03; awaiting maintainer review)
+**Status:** Accepted (2026-10-06)
 **Date:** 2026-10-03
-**Authors:** to be confirmed by the operator
+**Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Supersedes, in part:** the pre-ADR "training-context separation" decision
 (`docs/decisions/README.md`, key historical decisions) and protocol
