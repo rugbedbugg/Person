@@ -1,0 +1,92 @@
+{
+  "kind": "minecraft",
+  "title": "Minecraft Java Edition 1.16.1",
+  "description": "Person's first controlled developmental environment. Everything Minecraft-specific that crosses a Person-core boundary is declared here or in the files this manifest names: the observation payload, the configuration it owns, its skill library and vocabulary, its emergency vocabulary and its embodiments (ADR 0025).",
+  "embodiments": {
+    "fixture": {
+      "description": "The deterministic fixture world: a second implementation of the Minecraft body, not another environment.",
+      "implementation": "fixtures/src"
+    },
+    "mineflayer": {
+      "description": "A Minecraft Java 1.16.1 server, reached through Mineflayer.",
+      "implementation": "adapters/minecraft/src"
+    }
+  },
+  "observationPayload": {
+    "schema": "schemas/observation-payload.schema.json"
+  },
+  "config": {
+    "schema": "schemas/config.schema.json"
+  },
+  "skills": {
+    "directory": "skills"
+  },
+  "emergency": {
+    "triggers": [
+      "imminent_lethal_damage",
+      "lava_exposure",
+      "suffocation",
+      "hostile_swarm",
+      "immediate_threat",
+      "critical_health",
+      "critical_hunger",
+      "dangerous_path",
+      "protected_area_entry",
+      "invalid_destructive_interaction",
+      "forbidden_target",
+      "unauthorized_deposit"
+    ],
+    "actions": [
+      "flee",
+      "dig_in",
+      "restore_air",
+      "eat_to_target",
+      "return_home",
+      "cancel_skill",
+      "reject_proposal"
+    ]
+  },
+  "cognition": {
+    "python": "person_minecraft.profile:profile"
+  },
+  "memory": {
+    "subjects": [
+      "wood",
+      "stone",
+      "coal",
+      "plant_food",
+      "animal",
+      "hostile",
+      "player",
+      "container",
+      "hazard",
+      "food",
+      "shelter",
+      "crafting",
+      "storage"
+    ],
+    "salience": {
+      "hostile": 0.3,
+      "hazard": 0.2,
+      "coal": 0.1,
+      "container": 0.1
+    }
+  },
+  "spatial": {
+    "signatureSubjects": [
+      "wood",
+      "stone",
+      "coal",
+      "plant_food",
+      "animal",
+      "container",
+      "hazard"
+    ]
+  },
+  "causal": {
+    "variables": {
+      "weather": ["clear", "rain", "thunder"],
+      "day_phase": ["dawn", "day", "dusk", "night"]
+    }
+  }
+}

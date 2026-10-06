@@ -44,66 +44,20 @@ from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, replace
 from typing import Any
 
-from person_persistence import EvidenceEvent
-from person_skills import SkillRegistry
+from person_persistence import CanonicalEvent
+from person_skills import SkillRegistry, skill_registry
 
 from .prediction import compare
 
-#: Facts a trial can teach reliability about: inventory, which Person holds and
-#: feels, body state, and threat it perceives. Implementation parameter, and
-#: the reason every other fact is excluded is in the module docstring.
-EVALUABLE_FACTS: frozenset[str] = frozenset(
-    {
-        "wood",
-        "planks",
-        "stone",
-        "coal",
-        "fuel",
-        "raw_food",
-        "cooked_food",
-        "plant_food",
-        "edible_food",
-        "building_materials",
-        "chest_item",
-        "wooden_pickaxe",
-        "stone_pickaxe",
-        "wooden_axe",
-        "stone_axe",
-        "tool_tier",
-        "food_level",
-        "health_level",
-        "inventory_space",
-        "safe",
-    }
-)
-
-#: Failure reasons that mean a prerequisite was missing or a target could not
-#: be found before anything physical was attempted.
-NOT_ATTEMPTED_REASONS: frozenset[str] = frozenset(
-    {
-        "missing_materials",
-        "missing_tool",
-        "no_placement_site",
-        "obstructed_site",
-        "empty_container",
-        "inventory_full",
-        "container_full",
-        "no_diggable_ground",
-        "no_safe_route",
-        "nothing_to_deposit",
-        "no_permitted_target",
-        "no_permitted_container",
-        "no_owned_storage",
-        "no_furnace",
-        "protected_area",
-        "unreachable_resource",
-        "unreachable_home",
-        "unreachable_target",
-        "no_route",
-        "invalid_parameter",
-        "invalid_direction",
-    }
-)
+#: Facts a trial can teach reliability about (inventory, which Person holds
+#: and feels, body state, and threat it perceives), and failure reasons that
+#: mean a prerequisite was missing or a target could not be found before
+#: anything physical was attempted. Both are the environment's vocabulary
+#: (`skills/vocabulary.json`, `factClasses.evaluable` and
+#: `failures.notAttempted`, ADR 0025); these defaults are the installed
+#: environment's, and the loop passes its own registry's explicitly.
+EVALUABLE_FACTS: frozenset[str] = skill_registry().vocabulary.evaluable_facts
+NOT_ATTEMPTED_REASONS: frozenset[str] = skill_registry().vocabulary.not_attempted
 
 #: Statuses that are never a genuine attempt of the requested skill.
 NOT_ATTEMPTED_STATUSES: frozenset[str] = frozenset(
@@ -152,6 +106,7 @@ def attempt_reason(
     requested_status: str | None,
     emergency: bool,
     reason_codes: Iterable[str],
+    not_attempted: frozenset[str] = NOT_ATTEMPTED_REASONS,
 ) -> str | None:
     """Why this was not a genuine attempt of the requested skill, or None if it was."""
     if emergency or executed != requested:
@@ -160,7 +115,7 @@ def attempt_reason(
         return "no_outcome"
     if requested_status in NOT_ATTEMPTED_STATUSES or status in NOT_ATTEMPTED_STATUSES:
         return f"not_attempted_{(status or '').lower()}"
-    blocking = set(reason_codes) & NOT_ATTEMPTED_REASONS
+    blocking = set(reason_codes) & not_attempted
     if blocking:
         return f"not_attempted_{sorted(blocking)[0]}"
     return None
@@ -177,6 +132,9 @@ def classify(
     expected_effects: Iterable[Mapping[str, Any]],
     state_before: Mapping[str, float],
     state_after: Mapping[str, float] | None,
+    evaluable: frozenset[str] = EVALUABLE_FACTS,
+    not_attempted: frozenset[str] = NOT_ATTEMPTED_REASONS,
+    tracked: frozenset[str] | None = None,
 ) -> list[Trial]:
     """What one settled prediction says about each declared effect."""
     effects = list(expected_effects)
@@ -190,6 +148,7 @@ def classify(
         requested_status=requested_status,
         emergency=emergency,
         reason_codes=reason_codes,
+        not_attempted=not_attempted,
     )
     if why_not is not None:
         return [Trial(skill, str(effect["fact"]), "inconclusive", why_not) for effect in effects]
@@ -198,10 +157,10 @@ def classify(
             Trial(skill, str(effect["fact"]), "inconclusive", "no_observation_after")
             for effect in effects
         ]
-    errors, _, _ = compare(effects, state_before, state_after)
+    errors, _, _ = compare(effects, state_before, state_after, tracked=tracked)
     trials: list[Trial] = []
     for entry in errors:
-        if entry.fact not in EVALUABLE_FACTS:
+        if entry.fact not in evaluable:
             trials.append(Trial(skill, entry.fact, "inconclusive", "not_evaluable_by_person"))
         elif entry.severity in {"none", "minor"}:
             trials.append(Trial(skill, entry.fact, "supports", "effect_observed"))
@@ -288,22 +247,21 @@ class EffectBeliefs:
         for table in self.tables.values():
             table.clear()
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         if event.type != "effect_evidence":
             return
         table = self.tables.get(str(event.payload["admitted_to"]))
         verdict = str(event.payload["verdict"])
         if table is None or verdict not in WEIGHTS:
             return
-        key = (event.training_context, str(event.payload["skill"]), str(event.payload["fact"]))
+        key = (event.context_key, str(event.payload["skill"]), str(event.payload["fact"]))
         belief = table.get(key) or EffectBelief(skill=key[1], fact=key[2])
         table[key] = belief.updated(verdict, event.event_id)
 
     def to_json(self) -> dict[str, Any]:
         return {
             name: [
-                {"training_context": key[0], **belief.to_json()}
-                for key, belief in sorted(table.items())
+                {"experience": key[0], **belief.to_json()} for key, belief in sorted(table.items())
             ]
             for name, table in self.tables.items()
         }
@@ -313,14 +271,10 @@ class EffectBeliefs:
         for name, records in body.items():
             for record in records:
                 belief = EffectBelief.from_json(record)
-                self.tables[name][(str(record["training_context"]), belief.skill, belief.fact)] = (
-                    belief
-                )
+                self.tables[name][(str(record["experience"]), belief.skill, belief.fact)] = belief
 
-    def belief(
-        self, table: str, training_context: str, skill: str, fact: str
-    ) -> EffectBelief | None:
-        return self.tables[table].get((training_context, skill, fact))
+    def belief(self, table: str, experience: str, skill: str, fact: str) -> EffectBelief | None:
+        return self.tables[table].get((experience, skill, fact))
 
 
 def admitted_to(learning_mode: str) -> str:
@@ -331,7 +285,7 @@ def admitted_to(learning_mode: str) -> str:
 def reliability_term(
     beliefs: EffectBeliefs,
     registry: SkillRegistry,
-    training_context: str,
+    experience: str,
 ) -> Callable[[tuple[str, ...]], float]:
     """A scorer for routines from the active beliefs: bounded and generic.
 
@@ -347,9 +301,9 @@ def reliability_term(
             return 0.0
         terms: list[float] = []
         for effect in registry.get(skill).expected_effects:
-            if effect.fact not in EVALUABLE_FACTS:
+            if effect.fact not in registry.vocabulary.evaluable_facts:
                 continue
-            belief = beliefs.belief("active", training_context, skill, effect.fact)
+            belief = beliefs.belief("active", experience, skill, effect.fact)
             if belief is None or belief.estimate is None:
                 terms.append(0.0)
             else:

@@ -2,7 +2,9 @@
 
 [![CI](https://github.com/rugbedbugg/Person/actions/workflows/ci.yml/badge.svg)](https://github.com/rugbedbugg/Person/actions/workflows/ci.yml)
 
-A persistent autonomous artificial inhabitant for Minecraft Java Edition 1.16.1.
+A persistent developmental agent architecture for constructing and revising
+beliefs through embodied experience. Minecraft Java Edition 1.16.1 is its
+first controlled environment.
 
 Person is not a chatbot attached to Minecraft, not a language model driving
 Mineflayer, and not a reinforcement-learning bot. It is a bounded embodied agent
@@ -27,6 +29,14 @@ autobiographical memory, consolidation, a knowledge store, or redstone.
 `docs/CURRENT_STATE.md` is the factual snapshot, `docs/ARCHITECTURE.md` shows
 where each part attaches, and `docs/PERSON_SPEC.md` says what Person is
 intended to become.
+
+Person's core is environment-neutral (ADR 0025). Everything Minecraft owns,
+from the observation payload and its configuration sections to its skill
+library and vocabulary, lives in the Minecraft environment profile,
+`environments/minecraft/`. Cognition decides from a `DecisionState` of
+percepts, scoped beliefs, a composed self-state, recalled memories and initial
+knowledge, never from a raw observation (ADR 0026); the journal is canonical
+history, and only admitted records are evidence (ADR 0027).
 
 ## Installation
 
@@ -107,17 +117,22 @@ the final say over every physical action.
 
 ## Configuration
 
-TOML, validated against `packages/config/schema/person-config.schema.json` by
-both runtimes. See `examples/fixture.toml` and `examples/minecraft-lan.toml`.
+TOML, validated by both runtimes against Person's core schema
+(`packages/config/schema/person-config.schema.json`) together with the
+environment's own (`environments/minecraft/schemas/config.schema.json`). See
+`examples/fixture.toml` and `examples/minecraft-lan.toml`.
 
 ```toml
-configVersion = 2
+configVersion = 3
 personId = "ada"
 worldId = "fixture-world-01"
 
+[environment]
+kind = "minecraft"
+# difficulty = "peaceful"     # peaceful | normal; required for mineflayer only
+
 [runtime]
-embodiment = "fixture"        # or "minecraft"
-trainingContext = "fixture"   # fixture | minecraft_peaceful | minecraft_normal | replay
+embodiment = "fixture"        # fixture | mineflayer
 outputDirectory = "../runs"
 rngSeed = 20260915
 

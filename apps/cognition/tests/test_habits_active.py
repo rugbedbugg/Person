@@ -14,7 +14,6 @@ from person_cognition.deliberation.habits import (
     STABILIZATION_WINDOW,
     HabitBook,
     HabitTracker,
-    context_signature,
     signature_sha,
     template_id,
 )
@@ -24,6 +23,7 @@ from person_cognition.deliberation.metareasoning import (
     RECOVERY_BAND,
     Trigger,
 )
+from person_minecraft.situation import context_signature
 from test_metareasoning import ANSWER, Step, emergency, event
 
 BASIS: dict[str, Any] = {"observation": None, "place": None, "source_goal_type": None}
@@ -83,6 +83,7 @@ class Active(Step):
         self.arbiter.active_book = self.book
         self.arbiter.tracker = HabitTracker(self.book)
         self.arbiter.tracker.on_breakdown = self.arbiter.habit_broke
+        self.arbiter.signature = context_signature
         self.arbiter.basis_for = lambda trigger: dict(basis or BASIS)
         self.arbiter.new_invocation_id = lambda: "hinv_1"
 

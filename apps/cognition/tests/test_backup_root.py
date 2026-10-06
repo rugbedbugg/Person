@@ -9,7 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from test_identity_continuity import Process
 from test_root_inspection import found_validation, tree
 
@@ -52,8 +52,8 @@ def test_a_backup_is_a_verified_byte_copy_and_leaves_the_root_untouched(tmp_path
         expected, name = line.split("  ", 1)
         assert backup_root.digest(root / name) == expected == backup_root.digest(target / name)
     assert not (target / ".lock").exists()
-    copied = [e.type for e in EvidenceJournal(target / "journal").read()]
-    assert copied == [e.type for e in EvidenceJournal(root / "journal").read()]
+    copied = [e.type for e in EventJournal(target / "journal").read()]
+    assert copied == [e.type for e in EventJournal(root / "journal").read()]
 
 
 def test_a_backup_is_refused_while_the_root_is_being_lived(tmp_path: Path) -> None:

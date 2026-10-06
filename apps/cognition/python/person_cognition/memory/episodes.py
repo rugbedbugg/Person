@@ -13,39 +13,41 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
+from person_epistemics import LIVED, Source
+from person_protocol import discovered
+
 #: The kinds of episode the foundation encodes.
 KINDS: frozenset[str] = frozenset({"perceived", "acted", "endangered", "hurt", "searched", "died"})
 
-#: What an episode can be about. Closed, so a cue cannot smuggle in a query.
-SUBJECTS: frozenset[str] = frozenset(
-    {
-        # Things perceived.
-        "wood",
-        "stone",
-        "coal",
-        "plant_food",
-        "animal",
-        "hostile",
-        "player",
-        "container",
-        "hazard",
-        # What Person was doing, or what was happening to it.
-        "food",
-        "shelter",
-        "crafting",
-        "storage",
-        "danger",
-        "self",
-    }
+#: Subjects every environment has: Person itself, and danger to it.
+CORE_SUBJECTS: frozenset[str] = frozenset({"danger", "self"})
+
+#: What an episode can be about. Closed, so a cue cannot smuggle in a query:
+#: the core subjects, and those each installed environment declares in its
+#: manifest (`memory.subjects`, ADR 0025). Data, not code: the memory package
+#: imports no environment.
+SUBJECTS: frozenset[str] = CORE_SUBJECTS.union(
+    *(manifest.document.get("memory", {}).get("subjects", ()) for manifest in discovered().values())
 )
 
-#: Where a memory came from. The first four are what the foundation encodes.
-SOURCES: frozenset[str] = frozenset(
-    {"perceived", "proprioceptive", "action_outcome", "own_decision"}
-)
+#: Where a memory came from, and the provenance class each source is
+#: (ADR 0027). Every one of them is lived: an episode is something Person
+#: lived through, once, and nothing else.
+SOURCE_CLASSES: Mapping[str, Source] = {
+    "perceived": Source.REAL_OBSERVATION,
+    "proprioceptive": Source.REAL_OBSERVATION,
+    "action_outcome": Source.INTERVENTION_OUTCOME,
+    "own_decision": Source.INTERVENTION_OUTCOME,
+}
+SOURCES: frozenset[str] = frozenset(SOURCE_CLASSES)
+assert all(source in LIVED for source in SOURCE_CLASSES.values())
 
 #: Sources reserved for later phases (`PERSON_SPEC` section 22.2). Named so the
 #: distinctions exist before anything produces them; nothing encodes them yet.
+#: None of them is lived, so none can ever become an episode: told, read or
+#: inferred material would enter memory, when it does, as a different kind of
+#: record. Recall, replay, counterfactuals and model rollouts are not here at
+#: all: they are never sources of an episode.
 FUTURE_SOURCES: frozenset[str] = frozenset({"inferred", "taught", "operator", "external"})
 
 
@@ -68,6 +70,10 @@ class Provenance:
     def __post_init__(self) -> None:
         if self.source not in SOURCES:
             raise MemoryRecordError(f"unknown memory source {self.source!r}")
+
+    @property
+    def source_class(self) -> Source:
+        return SOURCE_CLASSES[self.source]
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -120,7 +126,9 @@ class Episode:
     #: The world tick at encoding, kept for provenance only.
     world_tick: int
     episode_id: str
-    training_context: str
+    #: The experience stream it was lived in (`ExperienceKey.key`): a fixture
+    #: memory and a Mineflayer one never mix, nor a lived one and a replay.
+    experience: str
     salience: float
     details: Mapping[str, Any] = field(default_factory=dict)
     provenance: Provenance = field(default_factory=lambda: Provenance("perceived"))
@@ -140,7 +148,7 @@ class Episode:
             "experienced_tick": self.experienced_tick,
             "world_tick": self.world_tick,
             "episode_id": self.episode_id,
-            "training_context": self.training_context,
+            "experience": self.experience,
             "salience": self.salience,
             "details": dict(self.details),
             "provenance": self.provenance.to_json(),
@@ -157,7 +165,7 @@ class Episode:
             experienced_tick=int(body["experienced_tick"]),
             world_tick=int(body["world_tick"]),
             episode_id=str(body["episode_id"]),
-            training_context=str(body["training_context"]),
+            experience=str(body["experience"]),
             salience=float(body["salience"]),
             details=dict(body["details"]),
             provenance=Provenance.from_json(body["provenance"]),

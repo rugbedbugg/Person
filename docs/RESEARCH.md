@@ -47,17 +47,17 @@ Future work on prediction error, causal belief, memory consolidation and
 transfer needs data that is easy to discard by accident. It is preserved here
 on purpose:
 
-| Preserved                                            | Why it matters later                                                                                  |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `observationVersion` on every observation            | Semantic changes stay distinguishable across time                                                     |
-| `expectedEffects` next to `effects` in every outcome | Prediction and outcome can be compared without re-running the episode                                 |
-| `requestedSkill` separate from `executedSkill`       | Interventions are distinguishable from intentions, which is what separates correlation from causation |
-| `trainingContext` on every statistic and event       | Fixture, peaceful and normal evidence never merge                                                     |
-| `contextId` on every decision and outcome            | Situations can be grouped without re-deriving them from raw observations                              |
-| `rngSeed` on fixture episodes                        | Deterministic replay of the exact episode                                                             |
-| `previous_event_id` chaining                         | An unbroken, orderable history, verifiable after the fact                                             |
-| Raw counts rather than scores                        | A new scoring function re-reads history instead of invalidating it                                    |
-| `evidence_refs` on every statistic                   | A future belief can point back at the episodes that produced it                                       |
+| Preserved                                              | Why it matters later                                                                                  |
+| ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| `observationVersion` on every observation              | Semantic changes stay distinguishable across time                                                     |
+| `expectedEffects` next to `effects` in every outcome   | Prediction and outcome can be compared without re-running the episode                                 |
+| `requestedSkill` separate from `executedSkill`         | Interventions are distinguishable from intentions, which is what separates correlation from causation |
+| experience key on every statistic and event (ADR 0025) | Fixture, peaceful and normal evidence never merge                                                     |
+| `contextId` on every decision and outcome              | Situations can be grouped without re-deriving them from raw observations                              |
+| `rngSeed` on fixture episodes                          | Deterministic replay of the exact episode                                                             |
+| `previous_event_id` chaining                           | An unbroken, orderable history, verifiable after the fact                                             |
+| Raw counts rather than scores                          | A new scoring function re-reads history instead of invalidating it                                    |
+| `evidence_refs` on every statistic                     | A future belief can point back at the episodes that produced it                                       |
 
 Some of that later work now exists, TESTED IN FIXTURE only: prediction error
 feeds learned effect beliefs (ADR 0011), and causal hypotheses are tested by
@@ -74,13 +74,17 @@ for those are already made:
 
 - cognition and execution are separate processes with an asymmetric contract,
   so no later cognitive system inherits physical authority by accident;
-- providers for the systems not yet built (world model, language, social,
-  exploration) exist as minimal interfaces that raise rather than returning
-  empty results, and each leaves when its system is built;
+- providers for the systems not yet built (language, social, exploration)
+  exist as minimal interfaces that raise rather than returning empty results,
+  and each leaves when its system is built; the world-model placeholder left
+  when prediction became plural (ADR 0028);
 - evidence is append-only, so consolidation can build beliefs from episodes
   without rewriting the episodes;
-- statistics are keyed by training context, so transfer between environments is
-  measurable rather than assumed.
+- statistics are keyed by experience stream (environment, body, variant, and
+  lived or replay), so transfer between environments is measurable rather
+  than assumed (ADR 0025);
+- Person's core is environment-neutral and its beliefs are scoped, so an
+  environment-specific belief cannot silently become a general one (ADR 0026).
 
 ## Open questions this milestone does not touch
 

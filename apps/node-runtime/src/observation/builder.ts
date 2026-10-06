@@ -1,11 +1,13 @@
-import { distance, positionKey, type Position } from "#config";
 import {
   envelope,
-  type Observation,
+  type Experience,
   type PreviousOutcome,
   type SessionIdentity,
-  type TrainingContext,
 } from "#protocol";
+import type {
+  MinecraftObservation,
+  MinecraftObservationPayload,
+} from "#minecraft";
 import type { WorldSnapshot } from "../embodiment/types.ts";
 import type { PermissionGate } from "../safety/permissions.ts";
 import type { SafetyKernel } from "../safety/safety-kernel.ts";
@@ -16,6 +18,7 @@ import { relativeTo } from "./relative.ts";
 import { shelterPlan } from "../skills/shelter-plan.ts";
 import { poseOf, selfMotion, type SelfMotion } from "./self-motion.ts";
 import type { PlacementLedger } from "../runtime/placement-ledger.ts";
+import { distance, positionKey, type Position } from "#minecraft";
 
 /**
  * Raised whenever what an observation means changes, so evidence recorded
@@ -26,8 +29,11 @@ import type { PlacementLedger } from "../runtime/placement-ledger.ts";
  * 6: `home.homeDistance` removed. A drift-free distance to home at any range
  * is not a sense; Person's relation to home is its own belief (C8).
  * 7: `navigation.pathRisk` judged from perceived hostiles only.
+ * 8: breath in bubbles; saturation withheld (ADR 0014).
+ * 9: an environment-neutral envelope around the Minecraft payload, which
+ * moved under `payload`; `trainingContext` became `experience` (ADR 0025).
  */
-export const OBSERVATION_VERSION = 8;
+export const OBSERVATION_VERSION = 9;
 
 /** The bubbles a player sees: ten when full, one per thirty ticks of air. */
 export function breathBubbles(air: number): number {
@@ -47,7 +53,8 @@ export interface ObservationInputs {
   permissions: PermissionGate;
   kernel: SafetyKernel;
   ledger: PlacementLedger;
-  trainingContext: TrainingContext;
+  /** Which experience stream the observation belongs to (ADR 0025). */
+  experience: Experience;
   cognition: CognitionState;
   previousOutcome: PreviousOutcome | null;
   blockAt: (
@@ -61,9 +68,9 @@ export interface ObservationInputs {
   selfMotion?: SelfMotion;
 }
 
-const dayPhase = (
-  timeOfDay: number,
-): Observation["environment"]["dayPhase"] => {
+type Payload = MinecraftObservationPayload;
+
+const dayPhase = (timeOfDay: number): Payload["environment"]["dayPhase"] => {
   if (timeOfDay >= 23000 || timeOfDay < 1000) return "dawn";
   if (timeOfDay < 11000) return "day";
   if (timeOfDay < 13000) return "dusk";
@@ -72,7 +79,7 @@ const dayPhase = (
 
 function shelterState(
   inputs: ObservationInputs,
-): Observation["home"]["shelterState"] {
+): Payload["home"]["shelterState"] {
   const home = inputs.ledger.home.position;
   const plan = shelterPlan(home);
   const present = plan.filter(
@@ -84,7 +91,7 @@ function shelterState(
   return "none";
 }
 
-function affordances(inputs: ObservationInputs): Observation["affordances"] {
+function affordances(inputs: ObservationInputs): Payload["affordances"] {
   const { snapshot, permissions, ledger } = inputs;
   const here = snapshot.position;
   // The body already worked this out for the safety kernel; asking it again
@@ -133,7 +140,9 @@ function affordances(inputs: ObservationInputs): Observation["affordances"] {
  * entity handle crosses the boundary. What cognition may do is reported as
  * permissions, so the answer always comes from the side that enforces it.
  */
-export function buildObservation(inputs: ObservationInputs): Observation {
+export function buildObservation(
+  inputs: ObservationInputs,
+): MinecraftObservation {
   const { snapshot, permissions, ledger } = inputs;
   const home = ledger.home.position;
   // Where Person is looking, and what that lets it see. Privileged: the pose
@@ -180,7 +189,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
   // channel in `nearby` that reports a thing Person is not currently looking
   // at, it reports only Person's own work, and it is runtime bookkeeping, not
   // Person's memory: recollection reaches cognition by its own bounded path.
-  const workstations: Observation["nearby"]["workstations"] = [];
+  const workstations: Payload["nearby"]["workstations"] = [];
   if (ledger.craftingTablePosition)
     workstations.push({
       kind: "crafting_table",
@@ -275,12 +284,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       ? "nearby"
       : "none";
 
-  return {
-    ...envelope(inputs.identity, "Observation", snapshot.tick),
-    type: "Observation",
-    observationVersion: OBSERVATION_VERSION,
-    trainingContext: inputs.trainingContext,
-    selfMotion: inputs.selfMotion ?? selfMotion(null, poseOf(snapshot)),
+  const payload: Payload = {
     vitals: {
       health: snapshot.health,
       food: snapshot.food,
@@ -304,7 +308,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       categories: inventoryCategories,
       freeSlots: snapshot.freeSlots,
     },
-    permissions: permissions.summary() as Observation["permissions"],
+    permissions: permissions.summary() as Payload["permissions"],
     affordances: affordances(inputs),
     nearby: {
       resources: sighted(
@@ -360,7 +364,7 @@ export function buildObservation(inputs: ObservationInputs): Observation {
       ).map((hazard) => ({
         kind: (["lava", "fire", "water", "cactus"].includes(hazard.kind)
           ? hazard.kind
-          : "other") as Observation["nearby"]["hazards"][number]["kind"],
+          : "other") as Payload["nearby"]["hazards"][number]["kind"],
         ...located(
           hazard.position,
           distance(snapshot.position, hazard.position),
@@ -396,7 +400,19 @@ export function buildObservation(inputs: ObservationInputs): Observation {
         home,
       ),
     },
+  };
+
+  // The core envelope: environment-neutral, with Person's own sense of motion
+  // and what the runtime echoes of cognition. Everything Minecraft says is in
+  // the payload, which only the Minecraft profile reads (ADR 0025).
+  return {
+    ...envelope(inputs.identity, "Observation", snapshot.tick),
+    type: "Observation",
+    observationVersion: OBSERVATION_VERSION,
+    experience: inputs.experience,
+    selfMotion: inputs.selfMotion ?? selfMotion(null, poseOf(snapshot)),
     cognition: inputs.cognition,
     previousOutcome: inputs.previousOutcome,
+    payload,
   };
 }

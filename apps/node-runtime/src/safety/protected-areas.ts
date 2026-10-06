@@ -2,9 +2,9 @@ import {
   blockLine,
   contains,
   type Box,
-  type PersonConfig,
+  type MinecraftConfig,
   type Position,
-} from "#config";
+} from "#minecraft";
 
 /**
  * Protected areas override every other permission.
@@ -19,7 +19,7 @@ export class ProtectedAreas {
   readonly protectedBoxes: readonly Box[];
   readonly resourceAreas: readonly Box[];
 
-  constructor(config: PersonConfig) {
+  constructor(config: MinecraftConfig) {
     this.exploration = config.world.exploration;
     this.protectedBoxes = config.world.protectedAreas;
     this.resourceAreas = config.world.resourceAreas;

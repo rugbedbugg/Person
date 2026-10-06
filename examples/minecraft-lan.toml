@@ -1,12 +1,17 @@
 # Local LAN configuration for Minecraft Java Edition 1.16.1.
 # Open a disposable single-player world to LAN and put the displayed port below.
-configVersion = 2
+configVersion = 3
 personId = "ada"
 worldId = "lan-test-world"
 
+[environment]
+# Person core is environment-neutral; this profile owns the rest (ADR 0025).
+kind = "minecraft"
+# Server difficulty the Mineflayer body expects; it partitions learning evidence.
+difficulty = "peaceful"
+
 [runtime]
-embodiment = "minecraft"
-trainingContext = "minecraft_peaceful"
+embodiment = "mineflayer"       # or "fixture": two bodies of one environment
 outputDirectory = "../runs"
 rngSeed = 20260915
 maxDecisions = 200

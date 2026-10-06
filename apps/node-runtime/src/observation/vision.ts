@@ -1,5 +1,5 @@
-import type { Position } from "#config";
 import { lineBlocked } from "../embodiment/geometry.ts";
+import { type Position } from "#minecraft";
 
 /**
  * First-person vision.

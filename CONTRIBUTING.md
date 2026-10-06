@@ -164,9 +164,9 @@ This executes, in order:
 
 **Validation Evidence Treatment:**
 
-- Fixture/conformance evidence: Stored in `runs/evidence/` (training-context keyed)
-- Live validation evidence: Stored in `runs/evidence/` with `trainingContext: "minecraft_peaceful"` or `"minecraft_normal"`
-- **Never merge** across training contexts — enforced by code
+- Fixture/conformance evidence: Stored in `runs/evidence/` (experience-key keyed, `lived:minecraft/fixture`)
+- Live validation evidence: Stored in `runs/evidence/` under `lived:minecraft/mineflayer/peaceful` or `lived:minecraft/mineflayer/normal`
+- **Never merge** across experience streams — enforced by code (ADR 0025)
 - Skill validation reports: `runs/validation/skill-tests/` (separate from learning evidence)
 - Operator-intervention runs: Marked `contaminated` in evidence + status
 

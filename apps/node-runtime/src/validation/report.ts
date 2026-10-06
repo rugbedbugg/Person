@@ -1,9 +1,7 @@
 import { mkdirSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { Position } from "#config";
 import type {
   CostLimits,
-  Observation,
   SkillInvocation,
   SkillOutcome,
   SkillParameters,
@@ -11,8 +9,10 @@ import type {
 } from "#protocol";
 import type { EffectComparison } from "./effects.ts";
 import type { LearningFingerprint } from "./learning-state.ts";
+import { type Position, type MinecraftObservation } from "#minecraft";
 
-export const SKILL_VALIDATION_REPORT_VERSION = 1;
+/** Version 2 (ADR 0025): `trainingContext` became `experience`. */
+export const SKILL_VALIDATION_REPORT_VERSION = 2;
 
 /**
  * The record of one operator-run single-skill validation.
@@ -36,7 +36,8 @@ export interface SkillValidationReport {
   sessionId: string;
   embodiment: string;
   minecraftVersion: string | null;
-  trainingContext: string;
+  /** The experience stream (ADR 0025), e.g. `lived:minecraft/mineflayer/peaceful`. */
+  experience: string;
   protocolVersion: string;
   skillLibraryRevision: string;
 
@@ -72,9 +73,9 @@ export interface SkillValidationReport {
     elapsedMs: number;
   };
 
-  preObservation: Observation | null;
+  preObservation: MinecraftObservation | null;
   preObservationValid: boolean;
-  postObservation: Observation | null;
+  postObservation: MinecraftObservation | null;
   postObservationValid: boolean;
   postObservationReason: string | null;
 

@@ -50,42 +50,15 @@ Two distinctions matter more than anything else in those documents:
 
 ## 3. Architectural Invariants (Non-Negotiable)
 
-These invariants are established by the repository's implementation and commit history. Audit them before documenting or changing anything.
-
-| Invariant                                                                        | Evidence                                                                                |
-| -------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Python proposes intentions; Node decides what is physically permitted            | `apps/node-runtime/src/skills/dispatch.ts`, `apps/node-runtime/src/safety/validator.ts` |
-| Cognition must not receive unrestricted Mineflayer access                        | `adapters/minecraft/` is the only Mineflayer importer; architecture tests assert this   |
-| Physical actions pass through the Node safety/authorization boundary             | `SafetyKernel.assess` pure function; validator returns ACCEPT/REJECT/PREEMPT/REPLACE    |
-| Requested skill and actual executed skill remain distinguishable                 | `SkillOutcome` carries both `requestedSkill` and `executedSkill`                        |
-| Validation execution does not silently train the policy                          | `tests/validation/skill-test.test.ts`: fingerprint before/after, asserts unchanged      |
-| Live Minecraft validation must not be claimed unless Minecraft was actually used | `REALITY_VALIDATION.md` explicitly distinguishes fixture/adapter/live                   |
-| Fixture/conformance evidence must not be mislabeled as live evidence             | Skill matrix in `REALITY_VALIDATION.md` uses strict vocabulary                          |
-| Legacy Shroud behavior is not preserved merely for compatibility                 | `IMPLEMENTATION_REPORT.md` "Rewritten or discarded" section                             |
-
-### Frozen 2026-09-22
-
-Some of these now have code and tests behind them, named in the last column;
-the rest constrain work that has not started and are enforced by nothing but
-an agent holding them.
-
-| Invariant                                                                            | Where it is decided                                    | Enforced by tests                                                                                                         |
-| ------------------------------------------------------------------------------------ | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------- |
-| Physical truth, perception, belief, memory, knowledge and reasoning stay distinct    | PERSON_SPEC section 26                                 | Partly: `test_memory.py`, `test_affect.py` (`test_affect_is_not_belief`), `test_no_hypothesis_is_ever_declared_knowledge` |
-| A motor backend's world knowledge does not become Person's perception                | PERSON_SPEC section 8, ADR 0002                        | Yes: `tests/observation/perception-firewall.test.ts`, `vision.test.ts`                                                    |
-| The event store is engineering truth; Person gets recollection, not a database query | PERSON_SPEC section 24, ADR 0003                       | Yes: `test_memory_cannot_read_the_journal_for_itself`, `test_no_arbitrary_query_interface_to_memory_exists`               |
-| Baritone is motor cortex, not cognition; no command strings reach cognition          | PERSON_SPEC section 6.1, ADR 0001                      | No Baritone exists; the command-field test covers the protocol                                                            |
-| Targets are runtime-issued referents, never coordinates chosen by cognition          | PERSON_SPEC section 10.1, `docs/SEMANTIC_TARGETING.md` | No: skills still choose their own targets (C4)                                                                            |
-| Unrestricted subjects is not unrestricted external agency                            | PERSON_SPEC section 45.2, ADR 0004                     | No: nothing external exists                                                                                               |
-| Cognitive autonomy is not environmental authority; a refusal is reported honestly    | PERSON_SPEC section 3, ADR 0005                        | Yes: validator and attribution tests                                                                                      |
-| Raising one capability axis must not silently raise another                          | PERSON_SPEC section 4.1                                | No                                                                                                                        |
-| No cognition is fabricated for a period when the process did not run                 | PERSON_SPEC section 60, ADR 0006                       | Partly: the experienced-time clock (restart tests in `test_memory.py`, `test_affect.py`)                                  |
-| Containment, self-preservation and property policy are separate concerns             | PERSON_SPEC section 13, `docs/SAFETY.md`               | No: still documentary (C2)                                                                                                |
-| Operator and experimental intervention stays distinguishable from natural causality  | PERSON_SPEC section 51.1                               | Partly: `operatorIntervention` on skill-test reports                                                                      |
+The invariants are not restated here (ADR 0029). They are stated in
+`docs/PERSON_SPEC.md`, decided in `docs/decisions/`, and listed with the
+test that holds each one in **`docs/ARCHITECTURE.md`, "Invariants and where
+they are held"**. Read that table before changing anything it names. A rule
+marked "No" there is held only by review, so treat it with more care, not
+less.
 
 Known disagreements between the frozen architecture and the current code are
-listed in **`docs/CURRENT_STATE.md`, "Known Deviations"** (C1-C8; C1, C3, C7
-and C8 are resolved, C2, C4, C5 and C6 are open). Each needs a
+listed in **`docs/CURRENT_STATE.md`, "Known Deviations"**. Each needs a
 decision before the code it touches is changed. **Do not resolve one silently.**
 
 ---
@@ -177,17 +150,17 @@ When documenting any capability, use only these terms:
 
 ## 11. Quick Reference: Key Files
 
-| Area         | Key Files                                                            |
-| ------------ | -------------------------------------------------------------------- |
-| Architecture | `docs/ARCHITECTURE.md`, `docs/PERSON_SPEC.md`                        |
-| Protocol     | `packages/protocol/schemas/`, `docs/PROTOCOL.md`                     |
-| Skills       | `packages/skills/specs/*.json`, `apps/node-runtime/src/skills/impl/` |
-| Safety       | `apps/node-runtime/src/safety/`, `docs/SAFETY.md`                    |
-| Cognition    | `apps/cognition/python/person_cognition/`                            |
-| Learning     | `packages/policy/`, `packages/persistence/`, `docs/LEARNING.md`      |
-| Validation   | `REALITY_VALIDATION.md`, `docs/LAN_TESTING.md`, `docs/EVALUATION.md` |
-| Traceability | `TRACEABILITY.md`                                                    |
-| History      | `IMPLEMENTATION_REPORT.md`, `docs/PROJECT_HISTORY.md`                |
+| Area         | Key Files                                                                    |
+| ------------ | ---------------------------------------------------------------------------- |
+| Architecture | `docs/ARCHITECTURE.md`, `docs/PERSON_SPEC.md`                                |
+| Protocol     | `packages/protocol/schemas/`, `docs/PROTOCOL.md`                             |
+| Skills       | `environments/minecraft/skills/*.json`, `apps/node-runtime/src/skills/impl/` |
+| Safety       | `apps/node-runtime/src/safety/`, `docs/SAFETY.md`                            |
+| Cognition    | `apps/cognition/python/person_cognition/`                                    |
+| Learning     | `packages/policy/`, `packages/persistence/`, `docs/LEARNING.md`              |
+| Validation   | `REALITY_VALIDATION.md`, `docs/LAN_TESTING.md`, `docs/EVALUATION.md`         |
+| Traceability | `TRACEABILITY.md`                                                            |
+| History      | `IMPLEMENTATION_REPORT.md`, `docs/PROJECT_HISTORY.md`                        |
 
 ---
 

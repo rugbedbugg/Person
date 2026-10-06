@@ -1,8 +1,11 @@
-"""Symbolic planning over the skill library."""
+"""Symbolic planning over a skill library: generic infrastructure.
 
-from .evidence import EVIDENCE_FACTS, evidence_needed
+The facts it plans over, and how they are derived from what Person perceives
+and believes, are the environment's (ADR 0025, 0026).
+"""
+
+from .evidence import evidence_needed
 from .search import (
-    RECOVERY_SKILLS,
     Plan,
     PlanStep,
     parameter_variants,
@@ -11,20 +14,14 @@ from .search import (
     satisfied,
     simulate,
 )
-from .state import evidence_percepts, recognised, symbolic_state
 
 __all__ = [
-    "EVIDENCE_FACTS",
     "evidence_needed",
-    "evidence_percepts",
-    "recognised",
     "Plan",
     "PlanStep",
     "parameter_variants",
-    "RECOVERY_SKILLS",
     "plan_for",
     "relevant_skills",
     "satisfied",
     "simulate",
-    "symbolic_state",
 ]

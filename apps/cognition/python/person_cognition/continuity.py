@@ -13,11 +13,12 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from person_epistemics import ExperienceKey
 from person_persistence import (
+    CanonicalEvent,
     ContinuityRecord,
-    EvidenceEvent,
-    EvidenceJournal,
-    EvidenceStore,
+    EventJournal,
+    EventStore,
     Founding,
     IdentityError,
     LifeRecord,
@@ -41,7 +42,7 @@ class RootPlan:
 
 
 def plan_root(
-    first: EvidenceEvent | None,
+    first: CanonicalEvent | None,
     *,
     person_id: str,
     name: str | None,
@@ -139,7 +140,8 @@ def found(
     world_id: str,
     name: str | None,
     designation: str | None,
-    training_context: str,
+    environment_kind: str | None,
+    embodiment_kind: str | None,
     now: str | None = None,
 ) -> Founding:
     """The operator's founding command: write a founding into an empty root.
@@ -147,10 +149,15 @@ def found(
     The only way a canonical Person comes into existence (ADR 0017). It
     writes exactly one event and starts no cognition.
     """
+    if environment_kind is None or embodiment_kind is None:
+        raise IdentityError("a Person is founded with a version 3 configuration (ADR 0025)")
+    # The founding precedes any lived experience; it is recorded in the stream
+    # Person will live in, with no environment variant.
+    experience = ExperienceKey(environment_kind, embodiment_kind, None, "lived")
     moment = now or datetime.now(UTC).isoformat().replace("+00:00", "Z")
     lock = RootLock(evidence_directory).acquire()
     try:
-        store = EvidenceStore(evidence_directory)
+        store = EventStore(evidence_directory)
         plan = plan_root(
             store.first_event(),
             person_id=person_id,
@@ -169,13 +176,13 @@ def found(
             decision_id=None,
             tick=0,
             policy_revision=0,
-            training_context=training_context,
+            experience=experience,
             event_type="person_founded",
             payload=plan.found.payload(),
             previous_event_id=None,
         )
         # The founding's recorded time is its founding moment, by definition.
-        store.append(EvidenceEvent.from_json({**made.to_json(), "timestamp": moment}))
+        store.append(CanonicalEvent.from_json({**made.to_json(), "timestamp": moment}))
         return plan.found
     finally:
         lock.release()
@@ -203,7 +210,7 @@ def inspect_root(evidence_directory: Path) -> dict[str, Any]:
     }
     if not journal.is_dir() or not any(journal.glob("[0-9]*.jsonl")):
         return report
-    reader = EvidenceJournal(journal)
+    reader = EventJournal(journal)
     continuity = ContinuityRecord()
     life = LifeRecord()
     persons: set[str] = set()

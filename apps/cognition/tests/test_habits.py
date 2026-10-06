@@ -12,9 +12,9 @@ from person_cognition.deliberation.habits import (
     Episode,
     HabitBook,
     HabitTracker,
-    context_signature,
     template_id,
 )
+from person_minecraft.situation import context_signature
 from test_metareasoning import ANSWER, Step, emergency, event
 
 OBSERVATION = {
@@ -283,6 +283,7 @@ def test_shadow_habit_learning_changes_nothing_the_arbiter_does() -> None:
         if track:
             book = HabitBook("shadow")
             step.arbiter.tracker = HabitTracker(book)
+            step.arbiter.signature = context_signature
             step.arbiter.basis_for = lambda trigger: {
                 "observation": None,
                 "place": None,
@@ -380,6 +381,7 @@ def test_through_the_arbiter_a_remedy_without_a_retry_is_never_a_success(
     step = Step("active", [ANSWER])
     book = HabitBook("shadow")
     step.arbiter.tracker = HabitTracker(book)
+    step.arbiter.signature = context_signature
     step.arbiter.basis_for = lambda trigger: {
         "observation": None,
         "place": None,

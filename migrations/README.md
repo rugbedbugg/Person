@@ -5,19 +5,22 @@ migration rule.
 
 ## Configuration: `configVersion`
 
-Current version: 2.
+Current version: 3.
 
 Migration is explicit. `person validate <file>` recognises a legacy Shroud V1
 configuration and refuses to guess; `person validate <file> --migrate` prints
 the Person configuration it maps to, along with every decision the migration
-made. The mapping is implemented in `packages/config/ts/migrate.ts` and
-documented in `0001-shroud-v1-to-person-v2.md`.
+made. The mapping is implemented in `environments/minecraft/ts/legacy.ts` and
+documented in `0001-shroud-v1-to-person-v2.md`. A configVersion 2 document is
+read as version 3 in memory and never rewritten
+(`0002-person-v2-to-person-v3.md`).
 
 Nothing migrates silently, and learning is never carried across a migration.
 
 ## Protocol: `protocolVersion`
 
-Current version: `shroud-learning-v2`.
+Current version: `person-v3` (`0002-person-v2-to-person-v3.md`); before it,
+`shroud-learning-v2`.
 
 There is no in-place protocol migration. A backward-incompatible change takes a
 new version string, and both runtimes reject an unrecognised one by name. The
@@ -25,15 +28,17 @@ reason is that recorded evidence embeds the protocol version: silently
 reinterpreting an old trace under new rules would corrupt the history rather
 than migrate it.
 
-## Evidence: `schema_version`
+## Journal: `schema_version`
 
-Current version: `person-evidence-v1`.
+Current version: `person-event-v20`; `person-evidence-v1` to `-v19` are read
+alongside it (`0002-person-v2-to-person-v3.md`).
 
-Evidence is append-only and is never rewritten. A future schema version will be
-read alongside the current one by a reader that understands both, not by
-converting records on disk. `EvidenceEvent.from_json` refuses an unknown schema
-version outright, so a mixed journal fails loudly instead of being partially
-misread.
+The canonical event journal is append-only and is never rewritten. Each schema
+version is read alongside the current one by a reader that understands both,
+not by converting records on disk. `CanonicalEvent.from_json` refuses an
+unknown schema version outright, so a mixed journal fails loudly instead of
+being partially misread. A journal record is history; whether it is also
+evidence is decided separately (ADR 0027).
 
 ## Learning checkpoints
 

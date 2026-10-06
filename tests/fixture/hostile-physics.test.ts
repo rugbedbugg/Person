@@ -231,7 +231,12 @@ test("hostile physics puts nothing new into Person's observation", async () => {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -242,7 +247,11 @@ test("hostile physics puts nothing new into Person's observation", async () => {
     blockAt: (position) => bench.world.blockAt(position),
   });
   const said = JSON.stringify(observation);
-  assert.equal(observation.nearby.hostiles.length, 0, "walled off, not seen");
+  assert.equal(
+    observation.payload.nearby.hostiles.length,
+    0,
+    "walled off, not seen",
+  );
   assert.ok(
     !/skeleton|lineBlocked|lineOfAttack/.test(said),
     said.slice(0, 300),

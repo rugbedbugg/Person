@@ -7,9 +7,11 @@ sends in SessionHello.
 """
 
 from .load import (
+    CONFIG_VERSION,
     CognitionSettings,
     ConfigError,
     config_schema_path,
+    legacy_config_schema_path,
     load_cognition_settings,
     validate_config_document,
 )
@@ -20,11 +22,13 @@ from .migrate import (
 )
 
 __all__ = [
+    "CONFIG_VERSION",
     "LEGACY_CHECKPOINT_DIAGNOSTIC",
     "CognitionSettings",
     "ConfigError",
     "LegacyCheckpointError",
     "config_schema_path",
+    "legacy_config_schema_path",
     "is_legacy_learning_checkpoint",
     "load_cognition_settings",
     "validate_config_document",

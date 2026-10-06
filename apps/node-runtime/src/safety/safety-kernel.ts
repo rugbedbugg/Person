@@ -1,6 +1,6 @@
-import { distance } from "#config";
 import type { WorldSnapshot } from "../embodiment/types.ts";
 import type { PermissionGate } from "./permissions.ts";
+import { distance } from "#minecraft";
 
 export type EmergencyAction =
   | "flee"

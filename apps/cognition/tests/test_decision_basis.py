@@ -17,11 +17,15 @@ from typing import Any
 
 import pytest
 from person_cognition.affect import TOLERANCE_RANGE, Affect, AffectRecord, AffectState
-from person_persistence import EvidenceJournal
+from person_minecraft.offline import envelope_of
+from person_persistence import EventJournal
 from person_policy import EvidencePolicyProvider, RoutineStatistics
 from test_affect import experienced, known_success, option, skill_outcome, with_home
 from test_loop import Harness
 from test_spatial import STILL, at
+
+#: The experience stream every fixture test lives in (ADR 0025).
+FIXTURE = "lived:minecraft/fixture"
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 COGNITION = REPOSITORY / "apps/cognition/python/person_cognition"
@@ -32,9 +36,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -42,15 +46,15 @@ def view() -> dict[str, Any]:
 @pytest.fixture
 def two_goals(view: dict[str, Any]) -> dict[str, Any]:
     close = deepcopy(view)
-    close["home"]["shelterState"] = "complete"
-    close["inventory"]["items"].append({"name": "wooden_pickaxe", "count": 1})
+    close["payload"]["home"]["shelterState"] = "complete"
+    close["payload"]["inventory"]["items"].append({"name": "wooden_pickaxe", "count": 1})
     return close
 
 
 def records(evidence: Path, event_type: str) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(evidence / "journal").read()
+        for event in EventJournal(evidence / "journal").read()
         if event.type == event_type
     ]
 
@@ -88,7 +92,7 @@ def test_urgent_goals_are_recorded_as_beyond_affect(tmp_path: Path, view: dict[s
     harness = Harness(tmp_path)
     harness.hello()
     threatened = at(view, 100)
-    threatened["nearby"]["hostiles"] = [
+    threatened["payload"]["nearby"]["hostiles"] = [
         {
             "name": "zombie",
             "distance": 3.0,
@@ -116,7 +120,7 @@ def test_routine_candidates_carry_their_scores_across_the_tolerance_range(
         statistics.apply(known_success("r_known"))
     provider = EvidencePolicyProvider(
         statistics,
-        training_context="fixture",
+        experience=FIXTURE,
         learning_mode="supervised",
         minimum_support=3,
         exploration_bonus=0.9,
@@ -125,7 +129,7 @@ def test_routine_candidates_carry_their_scores_across_the_tolerance_range(
     uneasy = Affect(AffectRecord())
     uneasy.state = AffectState(unease=1.0, control=-1.0)
     choice = provider.propose(
-        view,
+        envelope_of(view),
         None,
         options,
         "c",
@@ -147,11 +151,9 @@ def test_routine_candidates_carry_their_scores_across_the_tolerance_range(
 
 
 def test_a_fallback_choice_is_not_a_scored_choice(view: dict[str, Any]) -> None:
-    provider = EvidencePolicyProvider(
-        RoutineStatistics(), training_context="fixture", learning_mode="off"
-    )
+    provider = EvidencePolicyProvider(RoutineStatistics(), experience=FIXTURE, learning_mode="off")
     choice = provider.propose(
-        view,
+        envelope_of(view),
         None,
         [option("a"), option("b")],
         "c",
@@ -167,7 +169,7 @@ def test_routine_decisions_record_the_tolerance_and_whether_scores_decided(
     hungry: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    hungry["nearby"]["resources"].append(
+    hungry["payload"]["nearby"]["resources"].append(
         {
             "kind": "plant_food",
             "name": "sweet_berry_bush",

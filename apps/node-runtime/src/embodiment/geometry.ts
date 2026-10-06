@@ -1,4 +1,4 @@
-import type { Position } from "#config";
+import { type Position } from "#minecraft";
 
 /**
  * True when a solid block stands between a point and a target block.

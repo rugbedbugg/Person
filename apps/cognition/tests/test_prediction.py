@@ -11,7 +11,7 @@ from typing import Any
 import pytest
 from person_cognition import CognitionLoop
 from person_cognition.prediction import apply_effect, compare
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from person_policy import RoutineStatistics
 from person_protocol import PROTOCOL_VERSION, decode_frame
 
@@ -104,7 +104,12 @@ class Harness:
             {
                 **envelope("SessionHello", 0),
                 "learningMode": "off",
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
                 "policyRevision": 0,
                 "skillLibraryRevision": skill_registry().revision,
                 "rngSeed": 7,
@@ -163,7 +168,7 @@ def observation() -> dict[str, Any]:
     document = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["nearby"]["resources"].append(
+    document["payload"]["nearby"]["resources"].append(
         {
             "kind": "plant_food",
             "name": "sweet_berry_bush",
@@ -188,8 +193,8 @@ def test_a_prediction_is_settled_by_the_next_observation(
     assert harness.loop.prediction_errors == [], "nothing is settled until the world is seen again"
 
     after = deepcopy(observation)
-    after["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
-    after["inventory"]["categories"]["food"] = 6
+    after["payload"]["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
+    after["payload"]["inventory"]["categories"]["food"] = 6
     harness.observe(after)
 
     assert len(harness.loop.prediction_errors) == 1
@@ -248,7 +253,12 @@ def test_an_unsettled_prediction_is_recorded_as_unobserved(
             **envelope("EpisodeEvent", 900),
             "episodeId": "ep_1",
             "phase": "ended",
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
             "rngSeed": 7,
             "reasonCodes": ["done"],
         }
@@ -267,10 +277,10 @@ def test_prediction_errors_are_persisted_but_never_scored(
     harness.outcome(invocation, expected=[{"fact": "plant_food", "op": "+=", "value": 6}])
     harness.observe(deepcopy(observation))
 
-    events = list(EvidenceJournal(tmp_path / "journal").read())
+    events = list(EventJournal(tmp_path / "journal").read())
     recorded = [event for event in events if event.type == "prediction_error"]
     assert len(recorded) == 1
-    assert recorded[0].schema_version == "person-evidence-v19"
+    assert recorded[0].schema_version == "person-event-v20"
     assert recorded[0].payload["decision_id"] == invocation["decisionId"]
 
     # Replaying the whole journal must leave the policy statistics untouched by
@@ -298,7 +308,12 @@ def test_the_learning_report_summarises_prediction_error(
             **envelope("EpisodeEvent", 900),
             "episodeId": "ep_report",
             "phase": "ended",
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
             "rngSeed": 7,
             "reasonCodes": ["done"],
         }

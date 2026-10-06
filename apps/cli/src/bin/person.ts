@@ -2,12 +2,6 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
-  loadConfig,
-  parseHost,
-  parsePort,
-  type ConnectionOverride,
-} from "#config";
-import {
   compareCommand,
   followStatus,
   inspectCommand,
@@ -23,6 +17,12 @@ import {
   renderPreflight,
   writeWorldManifest,
 } from "../preflight.ts";
+import {
+  loadMinecraftConfig,
+  parseHost,
+  parsePort,
+  type ConnectionOverride,
+} from "#minecraft";
 
 const USAGE = `Person: a persistent artificial inhabitant for Minecraft.
 
@@ -421,7 +421,7 @@ export async function main(argv: string[]): Promise<number> {
       return result.code;
     }
     if (parsed.command === "status") {
-      const config = loadConfig(parsed.configPath as string);
+      const config = loadMinecraftConfig(parsed.configPath as string);
       if (!parsed.follow) {
         const result = statusCommand(config, parsed.json);
         process.stdout.write(result.output);

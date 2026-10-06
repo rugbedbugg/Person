@@ -20,7 +20,7 @@ from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
 
 from . import encoding
 from .episodes import Episode, EpisodeDraft, Provenance
@@ -48,7 +48,7 @@ class MemoryStore:
         self._familiar.clear()
         self.experienced = 0
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         payload = event.payload
         if event.type == "memory_encoded":
             episode = Episode(
@@ -58,7 +58,7 @@ class MemoryStore:
                 experienced_tick=int(payload["experienced_tick"]),
                 world_tick=event.tick,
                 episode_id=event.episode_id,
-                training_context=event.training_context,
+                experience=event.context_key,
                 salience=float(payload["salience"]),
                 details=dict(payload["details"]),
                 provenance=Provenance.from_json(payload["provenance"]),
@@ -73,7 +73,7 @@ class MemoryStore:
         self._episodes[episode.memory_id] = episode
         self.experienced = max(self.experienced, episode.experienced_tick)
         for subject in episode.subjects:
-            self._familiar.add((episode.training_context, subject))
+            self._familiar.add((episode.experience, subject))
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -93,17 +93,13 @@ class MemoryStore:
     def get(self, memory_id: str) -> Episode | None:
         return self._episodes.get(memory_id)
 
-    def familiar(self, training_context: str, subjects: tuple[str, ...]) -> bool:
+    def familiar(self, experience: str, subjects: tuple[str, ...]) -> bool:
         """Whether Person has encoded anything about every one of these before."""
-        return all((training_context, subject) in self._familiar for subject in subjects)
+        return all((experience, subject) in self._familiar for subject in subjects)
 
-    def episodes_in(self, training_context: str) -> Iterator[Episode]:
+    def episodes_in(self, experience: str) -> Iterator[Episode]:
         """Candidates for recall. Fixture and live memories never mix."""
-        return (
-            episode
-            for episode in self._episodes.values()
-            if episode.training_context == training_context
-        )
+        return (episode for episode in self._episodes.values() if episode.experience == experience)
 
     def inspect(self) -> tuple[Episode, ...]:
         """Everything, in encoding order. For operators and tests, never cognition."""
@@ -142,11 +138,12 @@ class Memory:
         self,
         store: MemoryStore,
         *,
-        training_context: str,
+        experience: str,
         rules: RecallRules | None = None,
     ) -> None:
         self._store = store
-        self.training_context = training_context
+        #: The experience stream this memory lives in (`ExperienceKey.key`).
+        self.stream = experience
         self.rules = rules or RecallRules()
         self.working = WorkingMemory()
         self._now = store.experienced
@@ -162,6 +159,12 @@ class Memory:
     @property
     def now(self) -> int:
         """Person's experienced time: ticks it was present for, across restarts."""
+        return self._now
+
+    def time_at(self, tick: int) -> int:
+        """The experienced time an observation at `tick` will bring Person to."""
+        if self._last_tick is not None and tick > self._last_tick:
+            return self._now + tick - self._last_tick
         return self._now
 
     def observe_time(self, tick: int) -> None:
@@ -183,33 +186,43 @@ class Memory:
 
     # -------------------------------------------------------------- encoding
 
-    def experience(self, observation: Mapping[str, Any]) -> list[EpisodeDraft]:
-        """What in this observation is worth encoding: harm felt, and things newly seen."""
-        self.observe_time(int(observation["tick"]))
+    def experience(
+        self,
+        tick: int,
+        health: float,
+        message_id: str,
+        seen: Mapping[str, EpisodeDraft],
+    ) -> list[EpisodeDraft]:
+        """What one observation offers that is worth encoding: harm felt, and things newly seen.
+
+        `seen` maps each subject currently perceived to the episode the
+        environment would draft for having seen it; this decides which of
+        them are new enough to keep.
+        """
+        self.observe_time(tick)
         drafts: list[EpisodeDraft] = []
         if self._last_health is not None:
-            harm = encoding.hurt(self._last_health, observation)
+            harm = encoding.hurt(self._last_health, health, message_id)
             if harm is not None:
                 drafts.append(harm)
-        self._last_health = float(observation["vitals"]["health"])
+        self._last_health = float(health)
 
-        found = encoding.noticed(observation)
-        for subject in sorted(found):
+        for subject in sorted(seen):
             last = self._last_noticed.get(subject)
             fresh = subject not in self._in_view and (
                 last is None or self._now - last >= REFRACTORY_TICKS
             )
             if fresh:
-                drafts.append(encoding.perceived(observation, subject, found[subject]))
+                drafts.append(seen[subject])
             self._last_noticed[subject] = self._now
-        self._in_view = frozenset(found)
+        self._in_view = frozenset(seen)
         return drafts
 
     def payload(
         self, draft: EpisodeDraft, place: Mapping[str, Any] | None = None
     ) -> dict[str, Any]:
         """The journal payload for a draft, stamped with time, salience and place."""
-        novel = not self._store.familiar(self.training_context, draft.subjects)
+        novel = not self._store.familiar(self.stream, draft.subjects)
         return {
             "place": dict(place) if place else None,
             "kind": draft.kind,
@@ -228,15 +241,14 @@ class Memory:
 
     # ---------------------------------------------------------------- recall
 
-    def retrieve(self, cue: Cue) -> tuple[Recalled, ...]:
+    def recall_for_deliberation(self, cue: Cue) -> tuple[Recalled, ...]:
         """The same bounded, ranked recall, made available to one act of
         deliberation only: nothing enters working memory, and nothing about
-        ordinary recall changes (ADR 0020 as amended for C7)."""
+        ordinary recall changes (ADR 0020 as amended for C7). A typed cue in,
+        at most `RECALL_LIMIT` labelled memories out: not a query interface."""
         if not isinstance(cue, Cue):
-            raise TypeError("retrieve takes a Cue; there is no free-form query")
-        recalled, _ = rank(
-            self._store.episodes_in(self.training_context), cue, self._now, self.rules
-        )
+            raise TypeError("recall takes a Cue; there is no free-form query")
+        recalled, _ = rank(self._store.episodes_in(self.stream), cue, self._now, self.rules)
         return tuple(recalled)
 
     def recall(self, cue: Cue) -> tuple[Recalled, ...]:
@@ -244,7 +256,7 @@ class Memory:
         if not isinstance(cue, Cue):
             raise TypeError("recall takes a Cue; there is no free-form query")
         recalled, considered = rank(
-            self._store.episodes_in(self.training_context), cue, self._now, self.rules
+            self._store.episodes_in(self.stream), cue, self._now, self.rules
         )
         self.last_considered = considered
         for item in recalled:

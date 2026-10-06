@@ -1,4 +1,4 @@
-import type { ItemStack, Position } from "#protocol";
+import type { ItemStack } from "#protocol";
 import type {
   ContainerView,
   CraftResult,
@@ -11,6 +11,7 @@ import type {
   FindBlocksQuery,
 } from "../embodiment/types.ts";
 import type { GazeDirection } from "../embodiment/gaze.ts";
+import { type Position } from "#minecraft";
 
 export type TimedPhase = "navigation" | "interaction" | "waiting";
 

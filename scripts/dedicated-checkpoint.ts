@@ -19,7 +19,6 @@
  */
 import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { loadConfig } from "#config";
 import {
   PermissionGate,
   PlacementLedger,
@@ -29,8 +28,14 @@ import {
   type PhysicalGuard,
   type WorldSnapshot,
 } from "#node-runtime";
-import { protocolValidator, type Observation } from "#protocol";
+import { protocolValidator } from "#protocol";
 import { createEmbodiment } from "../apps/cli/src/embodiment.ts";
+import {
+  describeExperience,
+  experienceOf,
+  loadMinecraftConfig,
+  type MinecraftObservation,
+} from "#minecraft";
 
 const [configPath, serverDirectory, outFile] = process.argv.slice(2);
 if (!configPath || !serverDirectory || !outFile) {
@@ -90,7 +95,7 @@ function leaks(value: unknown, at = "observation"): string[] {
   return [];
 }
 
-const config = loadConfig(configPath);
+const config = loadMinecraftConfig(configPath);
 const username = config.bot?.username ?? "PersonAda";
 const embodiment = await createEmbodiment(config, path.dirname(configPath));
 const areas = new ProtectedAreas(config);
@@ -113,7 +118,7 @@ const guard: PhysicalGuard = {
 };
 
 function observe(): {
-  observation: Observation;
+  observation: MinecraftObservation;
   snapshot: WorldSnapshot;
   valid: boolean;
 } {
@@ -128,7 +133,7 @@ function observe(): {
     permissions,
     kernel,
     ledger,
-    trainingContext: config.runtime.trainingContext,
+    experience: experienceOf(config),
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -203,7 +208,7 @@ try {
     const record = {
       valid,
       observationVersion: observation.observationVersion,
-      perceivedHostiles: observation.nearby.hostiles,
+      perceivedHostiles: observation.payload.nearby.hostiles,
       kernelThreat: kernel.threatState(snapshot),
       hostilesInSnapshot: snapshot.entities.filter((entity) => entity.hostile)
         .length,
@@ -266,7 +271,7 @@ const evidence = {
   recordedAt: new Date().toISOString(),
   server: config.server ?? null,
   worldId: config.worldId,
-  trainingContext: config.runtime.trainingContext,
+  experience: describeExperience(experienceOf(config)),
   operatorActions,
   results,
   failures,

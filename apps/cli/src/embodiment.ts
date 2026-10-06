@@ -1,7 +1,7 @@
 import path from "node:path";
-import type { PersonConfig } from "#config";
 import type { Embodiment } from "#node-runtime";
 import { FixtureWorld } from "#fixture-world";
+import { type MinecraftConfig } from "#minecraft";
 
 /**
  * Chooses the body for a run.
@@ -11,7 +11,7 @@ import { FixtureWorld } from "#fixture-world";
  * imported lazily so a fixture run never loads a Minecraft client.
  */
 export async function createEmbodiment(
-  config: PersonConfig,
+  config: MinecraftConfig,
   baseDirectory: string,
 ): Promise<Embodiment> {
   if (config.runtime.embodiment === "fixture") {

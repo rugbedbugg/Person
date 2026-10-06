@@ -1,10 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { distance, type Box, type Position } from "#config";
 import { MineflayerEmbodiment } from "#minecraft-adapter";
 import type { PhysicalGuard } from "#node-runtime";
 import { baseConfig, harness } from "../support/harness.ts";
 import { doubleFactory } from "../support/mineflayer-double.ts";
+import { distance, type Box, type Position } from "#minecraft";
 
 const PROTECTED: Box = {
   min: { x: -4, y: 56, z: -40 },
@@ -88,13 +88,16 @@ test("the guard is consulted for every step the path search considers", async ()
       protectedAreas: [PROTECTED],
       home: { x: -12, y: 64, z: 0 },
     }),
+    environment: {
+      kind: "minecraft" as const,
+      difficulty: "peaceful" as const,
+    },
     runtime: {
       ...baseConfig({
         protectedAreas: [PROTECTED],
         home: { x: -12, y: 64, z: 0 },
       }).runtime,
-      embodiment: "minecraft" as const,
-      trainingContext: "minecraft_peaceful" as const,
+      embodiment: "mineflayer" as const,
     },
     server: { host: "127.0.0.1", port: 25565, version: "1.16.1" as const },
     bot: { username: "PersonAda", auth: "offline" as const },
@@ -167,13 +170,16 @@ test("a protected destination is refused before any movement is attempted", asyn
       protectedAreas: [PROTECTED],
       home: { x: -12, y: 64, z: 0 },
     }),
+    environment: {
+      kind: "minecraft" as const,
+      difficulty: "peaceful" as const,
+    },
     runtime: {
       ...baseConfig({
         protectedAreas: [PROTECTED],
         home: { x: -12, y: 64, z: 0 },
       }).runtime,
-      embodiment: "minecraft" as const,
-      trainingContext: "minecraft_peaceful" as const,
+      embodiment: "mineflayer" as const,
     },
     server: { host: "127.0.0.1", port: 25565, version: "1.16.1" as const },
     bot: { username: "PersonAda", auth: "offline" as const },

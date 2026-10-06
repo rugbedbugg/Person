@@ -1,14 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import {
-  PROTOCOL_VERSION,
-  type Observation,
-  type SkillInvocation,
-} from "#protocol";
+import { PROTOCOL_VERSION, type SkillInvocation } from "#protocol";
 import { skillRegistry } from "#skills";
 import { GAZE_DIRECTIONS, buildObservation } from "#node-runtime";
 import { harness, type Harness } from "../support/harness.ts";
+import type { MinecraftObservation } from "#minecraft";
 
 /**
  * `look`: one deliberate glance, and Person stays looking that way.
@@ -21,7 +18,7 @@ import { harness, type Harness } from "../support/harness.ts";
  * Deterministic and offline. Nothing here is live Minecraft evidence.
  */
 
-function observe(bench: Harness): Observation {
+function observe(bench: Harness): MinecraftObservation {
   return buildObservation({
     identity: {
       personId: bench.config.personId,
@@ -32,7 +29,12 @@ function observe(bench: Harness): Observation {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -106,19 +108,19 @@ test("a glance leaves Person facing the new way, unlike a sweep", async () => {
   bench.world.turn(0);
   // Behind Person to begin with.
   bench.world.spawn("cow", { x: 0, y: 64, z: 8 });
-  assert.equal(observe(bench).nearby.passiveAnimals.length, 0);
+  assert.equal(observe(bench).payload.nearby.passiveAnimals.length, 0);
 
   // Four glances, each an ordinary skill, and each a separate observation.
   const seen: string[] = [];
   for (let glance = 0; glance < 4; glance++) {
     const result = await bench.run("look", { direction: "left" });
     assert.equal(result.status, "SUCCESS");
-    const animals = observe(bench).nearby.passiveAnimals;
+    const animals = observe(bench).payload.nearby.passiveAnimals;
     seen.push(animals.map((animal) => animal.detail).join(",") || "nothing");
   }
 
   assert.deepEqual(seen, ["nothing", "peripheral", "peripheral", "central"]);
-  const [cow] = observe(bench).nearby.passiveAnimals;
+  const [cow] = observe(bench).payload.nearby.passiveAnimals;
   assert.equal(cow?.name, "cow", "recognised only once it is looked at");
 });
 
@@ -135,7 +137,7 @@ test("a bearing and a glance agree about which side is which", async () => {
     bench.world.turn(0);
     bench.world.spawn("cow", { x, y: 64, z: -2 });
 
-    const [glimpse] = observe(bench).nearby.passiveAnimals;
+    const [glimpse] = observe(bench).payload.nearby.passiveAnimals;
     assert.equal(glimpse?.detail, "peripheral");
     assert.equal(
       glimpse?.bearing,
@@ -145,7 +147,10 @@ test("a bearing and a glance agree about which side is which", async () => {
 
     await bench.run("look", { direction: side });
     await bench.run("look", { direction: side });
-    assert.equal(observe(bench).nearby.passiveAnimals[0]?.bearing, "ahead");
+    assert.equal(
+      observe(bench).payload.nearby.passiveAnimals[0]?.bearing,
+      "ahead",
+    );
   }
 });
 

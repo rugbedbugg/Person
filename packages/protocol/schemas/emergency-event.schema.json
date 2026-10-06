@@ -37,34 +37,15 @@
       "enum": ["L0", "L1"]
     },
     "trigger": {
-      "enum": [
-        "imminent_lethal_damage",
-        "lava_exposure",
-        "suffocation",
-        "hostile_swarm",
-        "immediate_threat",
-        "critical_health",
-        "critical_hunger",
-        "dangerous_path",
-        "protected_area_entry",
-        "invalid_destructive_interaction",
-        "forbidden_target",
-        "unauthorized_deposit"
-      ]
+      "$ref": "common.schema.json#/$defs/identifier",
+      "description": "What made the runtime act. The vocabulary is the environment profile's (environment.json, emergency.triggers); validators check it against every installed profile."
     },
     "reasonCodes": {
       "$ref": "common.schema.json#/$defs/reasonCodes"
     },
     "action": {
-      "enum": [
-        "flee",
-        "dig_in",
-        "restore_air",
-        "eat_to_target",
-        "return_home",
-        "cancel_skill",
-        "reject_proposal"
-      ]
+      "$ref": "common.schema.json#/$defs/identifier",
+      "description": "What the runtime did. The vocabulary is the environment profile's (environment.json, emergency.actions)."
     },
     "preemptedSkill": {
       "oneOf": [

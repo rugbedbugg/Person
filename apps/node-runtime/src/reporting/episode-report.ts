@@ -45,7 +45,8 @@ export interface EpisodeReport {
   personId: string;
   worldId: string;
   sessionId: string;
-  trainingContext: string;
+  /** The experience stream (ADR 0025), e.g. `lived:minecraft/fixture`. */
+  experience: string;
   learningMode: string;
   rngSeed: number | null;
   policyRevision: number;
@@ -262,7 +263,7 @@ export function summariseEpisode(report: EpisodeReport): string {
     `Episode ${report.episodeId} (${report.outcome}${report.reason ? `: ${report.reason}` : ""})`,
   );
   lines.push(
-    `  person=${report.personId} world=${report.worldId} context=${report.trainingContext} learning=${report.learningMode}`,
+    `  person=${report.personId} world=${report.worldId} experience=${report.experience} learning=${report.learningMode}`,
   );
   lines.push(
     `  decisions=${report.totals.decisions} accepted=${report.totals.accepted} replaced=${report.totals.replaced} rejected=${report.totals.rejected}`,

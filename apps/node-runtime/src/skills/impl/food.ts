@@ -1,4 +1,3 @@
-import { distance, type Position } from "#config";
 import {
   SkillFailure,
   type SkillContext,
@@ -13,6 +12,7 @@ import {
   tally,
 } from "../materials.ts";
 import { approach } from "../navigate.ts";
+import { distance, type Position } from "#minecraft";
 
 /**
  * Take raw food from unnamed, untamed passive animals only.

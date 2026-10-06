@@ -21,6 +21,9 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Literal
 
+from person_epistemics import Prediction
+from person_skills import skill_registry
+
 Severity = Literal["none", "minor", "major", "inverted", "unobserved"]
 
 SEVERITY_ORDER: dict[str, int] = {
@@ -34,33 +37,9 @@ SEVERITY_ORDER: dict[str, int] = {
 #: Facts worth reporting when they move without being predicted. Volatile facts
 #: such as hunger or what happens to be in view change for reasons that have
 #: nothing to do with the skill, and reporting those would bury the signal.
-TRACKED_FACTS: frozenset[str] = frozenset(
-    {
-        "wood",
-        "planks",
-        "stone",
-        "coal",
-        "fuel",
-        "raw_food",
-        "cooked_food",
-        "plant_food",
-        "edible_food",
-        "building_materials",
-        "chest_item",
-        "crafting_table",
-        "wooden_pickaxe",
-        "stone_pickaxe",
-        "wooden_axe",
-        "stone_axe",
-        "tool_tier",
-        "shelter_complete",
-        "furnace_placed",
-        "owned_storage_available",
-        "at_home",
-        "safe",
-        "sheltered",
-    }
-)
+#: The environment's vocabulary (`factClasses.tracked`, ADR 0025); this
+#: default is the installed environment's.
+TRACKED_FACTS: frozenset[str] = skill_registry().vocabulary.tracked_facts
 
 #: A tolerance below which a numeric miss is not worth calling an error.
 ABSOLUTE_TOLERANCE = 1.0
@@ -115,6 +94,10 @@ class PendingPrediction:
     perceived: dict[str, str | None] | None = None
     #: The hypothesis this decision was an experimental trial of, if any.
     experiment: str | None = None
+    #: What each of Person's predictive models said this skill would do, and
+    #: under which model and belief version (ADR 0028). Recorded with the
+    #: settled prediction; imagined, so never evidence and never a memory.
+    predictions: tuple[Prediction, ...] = ()
 
 
 def apply_effect(before: float, op: str, value: float) -> float:
@@ -149,8 +132,11 @@ def compare(
     expected_effects: Sequence[Mapping[str, Any]],
     state_before: Mapping[str, float],
     state_after: Mapping[str, float],
+    *,
+    tracked: frozenset[str] | None = None,
 ) -> tuple[list[FactError], list[dict[str, Any]], Severity]:
     """Compare declared effects with the observed symbolic change."""
+    watched = TRACKED_FACTS if tracked is None else tracked
     errors: list[FactError] = []
     predicted_facts: set[str] = set()
     for effect in expected_effects:
@@ -176,7 +162,7 @@ def compare(
             "before": float(state_before.get(fact, 0.0)),
             "observed": float(state_after.get(fact, 0.0)),
         }
-        for fact in sorted(TRACKED_FACTS - predicted_facts)
+        for fact in sorted(watched - predicted_facts)
         if float(state_after.get(fact, 0.0)) != float(state_before.get(fact, 0.0))
     ]
 
@@ -187,11 +173,20 @@ def compare(
     return errors, unexplained, worst
 
 
+def _models(pending: PendingPrediction) -> list[dict[str, Any]]:
+    return [
+        {**prediction.identity(), "outcomes": list(prediction.expected())}
+        for prediction in pending.predictions
+    ]
+
+
 def build_payload(
     pending: PendingPrediction,
     state_after: Mapping[str, float] | None,
+    *,
+    tracked: frozenset[str] | None = None,
 ) -> dict[str, Any]:
-    """The evidence payload for one settled prediction."""
+    """The event payload for one settled prediction."""
     if state_after is None:
         return {
             "decision_id": pending.decision_id,
@@ -210,10 +205,11 @@ def build_payload(
             "severity": "unobserved",
             "reason": "no observation followed the outcome",
             "evidence_refs": list(pending.evidence_refs),
+            "models": _models(pending),
         }
 
     errors, unexplained, worst = compare(
-        pending.expected_effects, pending.state_before, state_after
+        pending.expected_effects, pending.state_before, state_after, tracked=tracked
     )
     return {
         "decision_id": pending.decision_id,
@@ -231,4 +227,5 @@ def build_payload(
         "unexplained": unexplained,
         "severity": worst,
         "evidence_refs": list(pending.evidence_refs),
+        "models": _models(pending),
     }

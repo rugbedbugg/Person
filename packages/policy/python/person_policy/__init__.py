@@ -1,6 +1,6 @@
-"""Goal-independent routine selection: statistics, safe envelope, providers."""
+"""Goal-independent routine selection: statistics, the envelope verdict, providers."""
 
-from .envelope import EnvelopeThresholds, EnvelopeVerdict, safe_envelope
+from .envelope import CLOSED, EnvelopeVerdict
 from .providers import (
     DeterministicPolicyProvider,
     EvidencePolicyProvider,
@@ -14,8 +14,8 @@ from .providers import (
 from .statistics import OutcomeCounts, RoutineStatistics
 
 __all__ = [
+    "CLOSED",
     "DeterministicPolicyProvider",
-    "EnvelopeThresholds",
     "EnvelopeVerdict",
     "EvidencePolicyProvider",
     "NoCandidatesError",
@@ -26,5 +26,4 @@ __all__ = [
     "RoutineStatistics",
     "ScoredCandidate",
     "ScoringWeights",
-    "safe_envelope",
 ]

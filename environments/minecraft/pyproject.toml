@@ -1,0 +1,30 @@
+[project]
+name = "person-minecraft"
+version = "0.1.0"
+description = "Person's Minecraft environment profile: percepts, fact vocabulary, survival semantics and causal vocabulary for Minecraft"
+requires-python = ">=3.12,<3.13"
+license = "MIT"
+dependencies = [
+  "person-epistemics",
+  "person-protocol",
+  "person-skills",
+  "person-cognition",
+]
+
+[build-system]
+requires = ["hatchling==1.27.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["python/person_minecraft"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"environment.json" = "person_minecraft/environment.json"
+"schemas" = "person_minecraft/schemas"
+"skills" = "person_minecraft/skills"
+
+[tool.uv.sources]
+person-epistemics = { workspace = true }
+person-protocol = { workspace = true }
+person-skills = { workspace = true }
+person-cognition = { workspace = true }

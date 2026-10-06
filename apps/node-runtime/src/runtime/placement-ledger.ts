@@ -1,6 +1,6 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { positionKey, type Position } from "#config";
+import { positionKey, type Position } from "#minecraft";
 
 /**
  * Ownership provenance for a container Person placed itself.

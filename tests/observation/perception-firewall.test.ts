@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { protocolValidator, type Observation } from "#protocol";
+import { protocolValidator } from "#protocol";
 import { buildObservation } from "#node-runtime";
 import { harness, type Harness } from "../support/harness.ts";
+import type { MinecraftObservation } from "#minecraft";
 
 /**
  * The perception firewall, proved by absence.
@@ -19,7 +20,7 @@ import { harness, type Harness } from "../support/harness.ts";
  * the unshaped snapshot, so nothing here can change what Person may do.
  */
 
-function observe(bench: Harness): Observation {
+function observe(bench: Harness): MinecraftObservation {
   return buildObservation({
     identity: {
       personId: bench.config.personId,
@@ -30,7 +31,12 @@ function observe(bench: Harness): Observation {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -173,7 +179,7 @@ test("what the runtime knows is strictly larger than what it reports", async () 
   const snapshot = bench.world.snapshot();
   const observation = observe(bench);
   const known = snapshot.entities.filter((entity) => entity.name === "cow");
-  const reported = observation.nearby.passiveAnimals.filter(
+  const reported = observation.payload.nearby.passiveAnimals.filter(
     (animal) => animal.name === "cow",
   );
 
@@ -185,7 +191,7 @@ test("what the ledger supplies is labelled as the ledger, never as recollection"
   const bench = await harness();
   bench.ledger.craftingTablePosition = { x: 0, y: 64, z: 6 };
   bench.ledger.furnacePosition = { x: 2, y: 64, z: 6 };
-  const workstations = observe(bench).nearby.workstations;
+  const workstations = observe(bench).payload.nearby.workstations;
 
   assert.equal(workstations.length, 2, "both are reported, seen or not");
   for (const workstation of workstations)
@@ -225,7 +231,7 @@ test("hidden saturation never reaches cognition", async () => {
     empty.world.snapshot().saturation,
   );
   assert.deepEqual(felt(full), felt(empty), "only the hidden value differed");
-  assert.ok(!("saturation" in observe(full).vitals));
+  assert.ok(!("saturation" in observe(full).payload.vitals));
   assert.ok(!JSON.stringify(observe(full)).includes("exhaustion"));
 });
 
@@ -243,12 +249,12 @@ test("breath is felt as the bubbles a player sees, not as a tick counter", async
   for (const [air, bubbles] of cases) {
     bench.world.setVitals({ air });
     const observation = observe(bench);
-    assert.equal(observation.vitals.breath, bubbles, `air ${air}`);
-    assert.ok(!("air" in observation.vitals));
+    assert.equal(observation.payload.vitals.breath, bubbles, `air ${air}`);
+    assert.ok(!("air" in observation.payload.vitals));
     assert.ok(protocolValidator().validate(observation).valid);
   }
 });
 
 test("the observation declares the body contract it follows", async () => {
-  assert.equal(observe(await harness()).observationVersion, 8);
+  assert.equal(observe(await harness()).observationVersion, 9);
 });

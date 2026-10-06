@@ -89,12 +89,36 @@ test("a legacy configuration must be migrated deliberately", () => {
     configVersion: number;
     learning: { mode: string };
     permissions: { containers: { existing: { deposit: boolean } } };
-    runtime: { trainingContext: string };
+    environment: { kind: string; difficulty: string };
+    runtime: { embodiment: string };
   };
-  assert.equal(config.configVersion, 2);
+  assert.equal(config.configVersion, 3);
   assert.equal(config.learning.mode, "off");
   assert.equal(config.permissions.containers.existing.deposit, false);
-  assert.equal(config.runtime.trainingContext, "minecraft_peaceful");
+  assert.deepEqual(config.environment, {
+    kind: "minecraft",
+    difficulty: "peaceful",
+  });
+  assert.equal(config.runtime.embodiment, "mineflayer");
+});
+
+test("a version 2 configuration is read as version 3 and never rewritten", () => {
+  const legacy = path.join(
+    REPOSITORY,
+    "docs/evidence/dedicated-server/2026-09-29/person-dedicated.toml",
+  );
+  const before = readFileSync(legacy, "utf8");
+  const read = validateCommand(legacy, false);
+  assert.equal(read.code, 0, read.output);
+  assert.match(read.output, /experience=lived:minecraft\/mineflayer\/normal/);
+  const migrated = validateCommand(legacy, true);
+  assert.equal(migrated.code, 0, migrated.output);
+  assert.match(migrated.output, /configVersion 2 read as 3/);
+  assert.equal(
+    readFileSync(legacy, "utf8"),
+    before,
+    "the file is never written",
+  );
 });
 
 test("inspect skills lists the whole library with its revision", () => {
@@ -166,15 +190,14 @@ test("observe takes one observation and validates it", async () => {
     diagnostics: string[];
     observation: {
       type: string;
-      vitals: { alive: boolean };
-      environment: { biome: string };
+      payload: { vitals: { alive: boolean }; environment: { biome: string } };
     };
   };
   assert.equal(body.valid, true, body.diagnostics.join("; "));
   assert.equal(body.observation.type, "Observation");
-  assert.equal(body.observation.vitals.alive, true);
+  assert.equal(body.observation.payload.vitals.alive, true);
   assert.notEqual(
-    body.observation.environment.biome,
+    body.observation.payload.environment.biome,
     "unknown",
     "biome must come from the world, not a default",
   );
@@ -210,9 +233,10 @@ test("compare reports structural gaps and suspicious defaults", () => {
   >;
   // A real capture that is missing a block cognition depends on, and full of
   // fields nothing ever wrote.
-  delete actual["affordances"];
-  (actual["environment"] as Record<string, unknown>)["biome"] = "unknown";
-  (actual["nearby"] as Record<string, unknown>)["resources"] = [];
+  const payload = actual["payload"] as Record<string, Record<string, unknown>>;
+  delete payload["affordances"];
+  payload["environment"]!["biome"] = "unknown";
+  payload["nearby"]!["resources"] = [];
 
   const referencePath = path.join(directory, "reference.json");
   const actualPath = path.join(directory, "actual.json");
@@ -228,11 +252,14 @@ test("compare reports structural gaps and suspicious defaults", () => {
   };
   assert.equal(body.structural, 1);
   assert.ok(body.suspicious >= 2);
-  assert.ok(body.findings.some((finding) => finding.path === "/affordances"));
+  assert.ok(
+    body.findings.some((finding) => finding.path === "/payload/affordances"),
+  );
   assert.ok(
     body.findings.some(
       (finding) =>
-        finding.kind === "suspicious" && finding.path === "/environment/biome",
+        finding.kind === "suspicious" &&
+        finding.path === "/payload/environment/biome",
     ),
   );
 });

@@ -2,7 +2,7 @@ import { execFile } from "node:child_process";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import type { Observation } from "#protocol";
+import type { MinecraftObservation } from "#minecraft";
 
 /**
  * Asks the existing prediction-error code whether a skill did what it said.
@@ -47,8 +47,8 @@ export interface EffectComparison {
 
 export interface EffectComparisonRequest {
   expectedEffects: { fact: string; op: string; value: number }[];
-  before: Observation;
-  after: Observation | null;
+  before: MinecraftObservation;
+  after: MinecraftObservation | null;
 }
 
 /** Everything inconclusive, because the comparison itself could not be made. */

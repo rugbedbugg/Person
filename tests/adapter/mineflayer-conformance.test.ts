@@ -21,10 +21,13 @@ async function connected(
 ): Promise<{ body: MineflayerEmbodiment & Embodiment; bot: MineflayerDouble }> {
   const config = {
     ...baseConfig(overrides),
+    environment: {
+      kind: "minecraft" as const,
+      difficulty: "peaceful" as const,
+    },
     runtime: {
       ...baseConfig(overrides).runtime,
-      embodiment: "minecraft" as const,
-      trainingContext: "minecraft_peaceful" as const,
+      embodiment: "mineflayer" as const,
     },
     server: { host: "127.0.0.1", port: 25565, version: "1.16.1" as const },
     bot: { username: "PersonAda", auth: "offline" as const },

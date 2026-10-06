@@ -28,6 +28,7 @@ from person_cognition.deliberation.metareasoning import (
     band,
     prediction_key,
 )
+from person_epistemics import ExperienceKey
 from person_persistence import new_event
 from person_skills import skill_registry
 
@@ -49,7 +50,7 @@ def event(kind: str, **payload: Any) -> Any:
         decision_id=None,
         tick=0,
         policy_revision=0,
-        training_context="fixture",
+        experience=ExperienceKey("minecraft", "fixture"),
         event_type=kind,
         payload=payload,
         previous_event_id=None,
@@ -259,7 +260,7 @@ def context(trigger: Trigger) -> tuple[Any, frozenset[str]]:
         reason=trigger.kind,
         self_knowledge=None,
         world_available=True,
-        observation=None,
+        situation=(),
         place=None,
         working_memory=[{"kind": "endangered", "details": {"trigger": "suffocation"}}],
         beliefs=[],

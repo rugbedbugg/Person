@@ -1,5 +1,5 @@
 {
-  "protocolVersion": "shroud-learning-v2",
+  "protocolVersion": "person-v3",
   "messageId": "9c2d4e6f-1a3b-4c5d-8e7f-0a1b2c3d4e5f",
   "personId": "ada",
   "sessionId": "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11",
@@ -7,134 +7,12 @@
   "tick": 1200,
   "timestamp": "2026-09-15T08:30:00.000Z",
   "type": "Observation",
-  "observationVersion": 2,
-  "trainingContext": "fixture",
-  "vitals": {
-    "health": 14.0,
-    "food": 7.0,
-    "breath": 10,
-    "armor": 0,
-    "statusEffects": [],
-    "alive": true
-  },
-  "environment": {
-    "dimension": "overworld",
-    "dayPhase": "day",
-    "timeOfDay": 4000,
-    "weather": "clear",
-    "lightLevel": 15,
-    "biome": "forest"
-  },
-  "inventory": {
-    "items": [
-      {
-        "name": "oak_log",
-        "count": 3
-      }
-    ],
-    "categories": {
-      "food": 0,
-      "raw_food": 0,
-      "cooked_food": 0,
-      "fuel": 0,
-      "wood": 3,
-      "stone": 0,
-      "coal": 0,
-      "tools": 0,
-      "weapons": 0,
-      "armor": 0,
-      "building_materials": 0
-    },
-    "freeSlots": 35
-  },
-  "permissions": {
-    "harvest": true,
-    "mine": true,
-    "build": true,
-    "huntPassive": true,
-    "depositOwned": true,
-    "withdrawOwned": true,
-    "withdrawExisting": true,
-    "craft": true,
-    "consume": true
-  },
-  "affordances": {
-    "diggableGround": true,
-    "shelterSite": true,
-    "storageSite": false
-  },
-  "nearby": {
-    "resources": [
-      {
-        "kind": "wood",
-        "name": "oak_log",
-        "distance": 6.5,
-        "harvestPermitted": true,
-        "bearing": "ahead",
-        "elevation": "level",
-        "rangeBand": "near",
-        "detail": "central"
-      }
-    ],
-    "hostiles": [],
-    "passiveAnimals": [
-      {
-        "name": "cow",
-        "distance": 4.0,
-        "named": false,
-        "tamed": false,
-        "protectedTarget": false,
-        "bearing": "ahead",
-        "elevation": "level",
-        "rangeBand": "reach",
-        "detail": "central"
-      }
-    ],
-    "players": [
-      {
-        "name": "player",
-        "distance": 28,
-        "named": false,
-        "tamed": false,
-        "protectedTarget": true,
-        "username": "not a username",
-        "bearing": "ahead",
-        "elevation": "level",
-        "rangeBand": "far",
-        "detail": "central"
-      },
-      {
-        "name": "player",
-        "distance": 9,
-        "named": false,
-        "tamed": false,
-        "protectedTarget": true,
-        "username": "PersonWatcher",
-        "bearing": "ahead",
-        "elevation": "level",
-        "rangeBand": "near",
-        "detail": "central"
-      }
-    ],
-    "containers": [],
-    "workstations": [],
-    "hazards": []
-  },
-  "home": {
-    "activeHome": {
-      "homeId": "home_a"
-    },
-    "shelterState": "none",
-    "ownedStorage": [],
-    "bedKnown": false,
-    "foodReserve": 0,
-    "fuelReserve": 0
-  },
-  "navigation": {
-    "routeStatus": "idle",
-    "pathRisk": "low",
-    "stuckState": "free",
-    "returnPathKnown": true
+  "observationVersion": 9,
+  "experience": {
+    "context": "lived",
+    "environmentKind": "minecraft",
+    "embodimentKind": "fixture",
+    "environmentVariant": null
   },
   "cognition": {
     "activeGoal": null,
@@ -142,5 +20,134 @@
     "activeSkill": null,
     "suspendedGoals": []
   },
-  "previousOutcome": null
+  "previousOutcome": null,
+  "payload": {
+    "vitals": {
+      "health": 14.0,
+      "food": 7.0,
+      "breath": 10,
+      "armor": 0,
+      "statusEffects": [],
+      "alive": true
+    },
+    "environment": {
+      "dimension": "overworld",
+      "dayPhase": "day",
+      "timeOfDay": 4000,
+      "weather": "clear",
+      "lightLevel": 15,
+      "biome": "forest"
+    },
+    "inventory": {
+      "items": [
+        {
+          "name": "oak_log",
+          "count": 3
+        }
+      ],
+      "categories": {
+        "food": 0,
+        "raw_food": 0,
+        "cooked_food": 0,
+        "fuel": 0,
+        "wood": 3,
+        "stone": 0,
+        "coal": 0,
+        "tools": 0,
+        "weapons": 0,
+        "armor": 0,
+        "building_materials": 0
+      },
+      "freeSlots": 35
+    },
+    "permissions": {
+      "harvest": true,
+      "mine": true,
+      "build": true,
+      "huntPassive": true,
+      "depositOwned": true,
+      "withdrawOwned": true,
+      "withdrawExisting": true,
+      "craft": true,
+      "consume": true
+    },
+    "affordances": {
+      "diggableGround": true,
+      "shelterSite": true,
+      "storageSite": false
+    },
+    "nearby": {
+      "resources": [
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "distance": 6.5,
+          "harvestPermitted": true,
+          "bearing": "ahead",
+          "elevation": "level",
+          "rangeBand": "near",
+          "detail": "central"
+        }
+      ],
+      "hostiles": [],
+      "passiveAnimals": [
+        {
+          "name": "cow",
+          "distance": 4.0,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "bearing": "ahead",
+          "elevation": "level",
+          "rangeBand": "reach",
+          "detail": "central"
+        }
+      ],
+      "players": [
+        {
+          "name": "player",
+          "distance": 28,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": true,
+          "username": "not a username",
+          "bearing": "ahead",
+          "elevation": "level",
+          "rangeBand": "far",
+          "detail": "central"
+        },
+        {
+          "name": "player",
+          "distance": 9,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": true,
+          "username": "PersonWatcher",
+          "bearing": "ahead",
+          "elevation": "level",
+          "rangeBand": "near",
+          "detail": "central"
+        }
+      ],
+      "containers": [],
+      "workstations": [],
+      "hazards": []
+    },
+    "home": {
+      "activeHome": {
+        "homeId": "home_a"
+      },
+      "shelterState": "none",
+      "ownedStorage": [],
+      "bedKnown": false,
+      "foodReserve": 0,
+      "fuelReserve": 0
+    },
+    "navigation": {
+      "routeStatus": "idle",
+      "pathRisk": "low",
+      "stuckState": "free",
+      "returnPathKnown": true
+    }
+  }
 }

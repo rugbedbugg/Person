@@ -6,7 +6,7 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import type { Position } from "#config";
+import { type Position } from "#minecraft";
 
 export const STATUS_SCHEMA_VERSION = 1;
 
@@ -50,7 +50,8 @@ export interface RuntimeStatus {
   server: { host: string; port: number; version: string } | null;
 
   embodiment: string;
-  trainingContext: string;
+  /** The experience stream (ADR 0025), e.g. `lived:minecraft/fixture`. */
+  experience: string;
   learningMode: string;
   policyRevision: number;
   operatorIntervention: { flagged: boolean; reason: string | null };
@@ -112,7 +113,7 @@ const blank = (seed: Partial<RuntimeStatus>): RuntimeStatus => ({
   episodeId: null,
   server: null,
   embodiment: "unknown",
-  trainingContext: "unknown",
+  experience: "unknown",
   learningMode: "off",
   policyRevision: 0,
   operatorIntervention: { flagged: false, reason: null },
@@ -279,7 +280,7 @@ export function renderStatus(status: RuntimeStatus, now = Date.now()): string {
     }`,
   );
   lines.push(
-    `  learning  mode=${status.learningMode} policyRevision=${status.policyRevision} trainingContext=${status.trainingContext} decisions=${status.decisions}`,
+    `  learning  mode=${status.learningMode} policyRevision=${status.policyRevision} experience=${status.experience} decisions=${status.decisions}`,
   );
   if (status.operatorIntervention.flagged)
     lines.push(

@@ -27,7 +27,7 @@ from person_cognition.projects import (
     ProjectBook,
     ProjectManager,
 )
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from test_cognitive_home import outcome
 from test_loop import Harness, envelope
 from test_spatial import STILL, at
@@ -41,12 +41,12 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
-    document["home"]["shelterState"] = "complete"
+        document["payload"]["nearby"][key] = []
+    document["payload"]["home"]["shelterState"] = "complete"
     # Equipped too: without a stone pickaxe, tools are a more urgent need.
-    document["inventory"]["items"].append({"name": "stone_pickaxe", "count": 1})
+    document["payload"]["inventory"]["items"].append({"name": "stone_pickaxe", "count": 1})
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -54,7 +54,7 @@ def view() -> dict[str, Any]:
 def records(evidence: Path, kind: str) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(evidence / "journal").read()
+        for event in EventJournal(evidence / "journal").read()
         if event.type == kind
     ]
 
@@ -93,7 +93,7 @@ def step(harness: Harness, observation: dict[str, Any]) -> tuple[dict[str, Any],
 
 def hungry(view: dict[str, Any], tick: int) -> dict[str, Any]:
     changed = at(view, tick)
-    changed["vitals"]["food"] = 6.0
+    changed["payload"]["vitals"]["food"] = 6.0
     return changed
 
 
@@ -105,7 +105,12 @@ def finish(harness: Harness, tick: int) -> None:
             "phase": "ended",
             "reasonCodes": ["test"],
             "rngSeed": 7,
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
         }
     )
 
@@ -151,9 +156,9 @@ def test_no_project_is_taken_up_under_pressure_or_without_a_home(
         harness.hello()
     observation = at(view, 120)
     if pressure == "hungry":
-        observation["vitals"]["food"] = 6.0
+        observation["payload"]["vitals"]["food"] = 6.0
     elif pressure == "threatened":
-        observation["nearby"]["hostiles"] = [
+        observation["payload"]["nearby"]["hostiles"] = [
             {
                 "name": "zombie",
                 "distance": 6.0,
@@ -167,7 +172,7 @@ def test_no_project_is_taken_up_under_pressure_or_without_a_home(
             }
         ]
     elif pressure == "night":
-        observation["environment"]["dayPhase"] = "night"
+        observation["payload"]["environment"]["dayPhase"] = "night"
     harness.observe(observation)
     assert records(tmp_path, "project_started") == []
 
@@ -235,7 +240,7 @@ def test_a_project_the_world_already_satisfied_is_closed_not_resumed(
     second = Harness(tmp_path)
     second.hello()
     done = at(view, 5, {**STILL, "continuity": "start"})
-    done["home"]["ownedStorage"] = [{"storageId": "storage_a", "contents": []}]
+    done["payload"]["home"]["ownedStorage"] = [{"storageId": "storage_a", "contents": []}]
     goal, _ = step(second, done)
 
     project_id = first_project(tmp_path)
@@ -330,7 +335,7 @@ def test_the_manager_has_no_way_to_read_the_journal() -> None:
     source = (REPOSITORY / "apps/cognition/python/person_cognition/projects.py").read_text(
         encoding="utf-8"
     )
-    for forbidden in ("EvidenceJournal", "EvidenceStore", "read_text", "memory_store"):
+    for forbidden in ("EventJournal", "EventStore", "read_text", "memory_store"):
         assert forbidden not in source
     assert re.search(r"(?<![\w.])open\(", source) is None, "no file access"
     assert ProjectManager(ProjectBook()).current() is None

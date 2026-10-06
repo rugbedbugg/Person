@@ -40,7 +40,7 @@ new learning context; losing most of your health does.
 
 ## What is counted
 
-Per training context, per decision context, per routine:
+Per experience stream, per decision context, per routine:
 
 ```
 attempts  successes  failures  inconclusive
@@ -53,9 +53,22 @@ And separately, per executed skill, the same counts plus `preemptions`.
 Interruptions are counted but are not evidence for or against a routine: being
 preempted by a hostile says nothing about whether the routine works.
 
-Statistics never merge across training contexts. Evidence from the fixture and
-evidence from a live world stay in separate cells, so a fixture success cannot
-quietly stand in for a Minecraft one.
+Statistics never merge across experience streams. The experience key
+(ADR 0025) names the context (`lived` or `replay`), the environment, the body
+and the environment variant, for example `lived:minecraft/fixture` or
+`lived:minecraft/mineflayer/peaceful`. Evidence from the fixture and evidence
+from a live world stay in separate cells, so a fixture success cannot quietly
+stand in for a Minecraft one, and a replayed record is never new lived
+experience.
+
+## What may teach
+
+The journal is canonical history; it is not all evidence (ADR 0027). Three
+record types may move a belief: `belief_revised` (a fact belief from what the
+runtime reported), `effect_evidence` (effect reliability, from Person's own
+action) and `hypothesis_evidence` (a causal hypothesis). Recall, deliberation,
+prediction, replay and imagined outcomes are recorded as what they are and
+teach nothing by being recorded.
 
 ## Success estimate
 

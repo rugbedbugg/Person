@@ -1,5 +1,5 @@
-import type { Position } from "#config";
 import type { ItemStack } from "#protocol";
+import { type Position } from "#minecraft";
 
 export interface FixtureBlock {
   position: Position;

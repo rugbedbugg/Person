@@ -3,13 +3,6 @@ import { setTimeout as delay } from "node:timers/promises";
 import mineflayer from "mineflayer";
 import pathfinderPackage from "mineflayer-pathfinder";
 import vec3Package from "vec3";
-import {
-  contains,
-  distance,
-  positionKey,
-  type PersonConfig,
-  type Position,
-} from "#config";
 import type { ItemStack } from "#protocol";
 import {
   DisconnectedError,
@@ -45,6 +38,13 @@ import {
   type ConnectionContext,
 } from "./diagnose.ts";
 import { createGuardedMovements } from "./movements.ts";
+import {
+  contains,
+  distance,
+  positionKey,
+  type MinecraftConfig,
+  type Position,
+} from "#minecraft";
 
 const { pathfinder, goals } = pathfinderPackage;
 const { Vec3 } = vec3Package;
@@ -143,7 +143,7 @@ export interface MineflayerOptions {
  */
 export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
   readonly kind = "mineflayer" as const;
-  readonly #config: PersonConfig;
+  readonly #config: MinecraftConfig;
   readonly #createBot: typeof mineflayer.createBot;
   readonly #connectTimeoutMs: number;
   readonly #ownedStorage = new Map<string, string>();
@@ -164,7 +164,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
    */
   #generation = 0;
 
-  constructor(config: PersonConfig, options: MineflayerOptions = {}) {
+  constructor(config: MinecraftConfig, options: MineflayerOptions = {}) {
     super();
     this.#config = config;
     this.#createBot = options.createBot ?? mineflayer.createBot;
@@ -456,17 +456,16 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         "The daylight cycle is frozen, so day phase and night safety are meaningless",
       );
     const difficulty = String(bot.game?.difficulty ?? "unknown");
-    const expectPeaceful =
-      this.#config.runtime.trainingContext === "minecraft_peaceful";
+    const expectPeaceful = this.#config.environment.difficulty === "peaceful";
     if (expectPeaceful && difficulty !== "peaceful")
       throw new EmbodimentError(
         "difficulty_mismatch",
-        `trainingContext is minecraft_peaceful but the server difficulty is ${difficulty}`,
+        `environment.difficulty is peaceful but the server difficulty is ${difficulty}`,
       );
     if (!expectPeaceful && difficulty === "peaceful")
       throw new EmbodimentError(
         "difficulty_mismatch",
-        "trainingContext expects hostiles but the server difficulty is peaceful",
+        "environment.difficulty expects hostiles but the server difficulty is peaceful",
       );
   }
 

@@ -15,7 +15,8 @@ import pytest
 from person_cognition.continuity import found
 from person_cognition.loop import CognitionLoop
 from person_config import CognitionSettings
-from person_persistence import EvidenceJournal, IdentityError, SelfKnowledge, new_event
+from person_epistemics import ExperienceKey
+from person_persistence import EventJournal, IdentityError, SelfKnowledge, new_event
 from person_protocol import PROTOCOL_VERSION, decode_frame
 from person_skills import skill_registry
 
@@ -53,7 +54,12 @@ class Process:
             {
                 **envelope("SessionHello", person=self.person, at=at),
                 "learningMode": "off",
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
                 "policyRevision": 0,
                 "skillLibraryRevision": skill_registry().revision,
                 "rngSeed": 7,
@@ -69,7 +75,12 @@ class Process:
                 **envelope("EpisodeEvent", person=self.person, at=at, tick=10),
                 "episodeId": "ep",
                 "phase": "ended",
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
                 "rngSeed": 7,
                 "reasonCodes": ["done"],
             }
@@ -77,7 +88,7 @@ class Process:
 
 
 def journal(evidence: Path) -> list[Any]:
-    return list(EvidenceJournal(evidence / "journal").read())
+    return list(EventJournal(evidence / "journal").read())
 
 
 # ------------------------------------------------------------ a new Person
@@ -186,7 +197,8 @@ def test_the_founding_command_founds_once_and_startup_then_resumes(tmp_path: Pat
         world_id="test-world",
         name="Probe",
         designation="Person-999",
-        training_context="fixture",
+        environment_kind="minecraft",
+        embodiment_kind="fixture",
         now="2026-09-30T07:00:00Z",
     )
     assert made.designation == "Person-999"
@@ -197,7 +209,8 @@ def test_the_founding_command_founds_once_and_startup_then_resumes(tmp_path: Pat
             world_id="test-world",
             name="Probe",
             designation="Person-999",
-            training_context="fixture",
+            environment_kind="minecraft",
+            embodiment_kind="fixture",
         )
     process = Process(tmp_path, person="person-999")
     process.hello("2026-09-30T08:00:00Z")
@@ -214,7 +227,8 @@ def test_a_canonical_founding_needs_a_name_and_a_designation(tmp_path: Path) -> 
             world_id="test-world",
             name=None,
             designation=None,
-            training_context="fixture",
+            environment_kind="minecraft",
+            embodiment_kind="fixture",
         )
 
 
@@ -222,7 +236,7 @@ def test_a_canonical_founding_needs_a_name_and_a_designation(tmp_path: Path) -> 
 
 
 def legacy_root(evidence: Path, person: str = "ada") -> None:
-    journal_ = EvidenceJournal(evidence / "journal")
+    journal_ = EventJournal(evidence / "journal")
     journal_.append(
         new_event(
             person_id=person,
@@ -232,7 +246,7 @@ def legacy_root(evidence: Path, person: str = "ada") -> None:
             decision_id=None,
             tick=0,
             policy_revision=0,
-            training_context="fixture",
+            experience=ExperienceKey("minecraft", "fixture"),
             event_type="episode_started",
             payload={},
             previous_event_id=None,
@@ -255,7 +269,8 @@ def test_a_legacy_root_is_read_and_resumed_but_never_given_a_founding(tmp_path: 
             world_id="test-world",
             name="Ada",
             designation=None,
-            training_context="fixture",
+            environment_kind="minecraft",
+            embodiment_kind="fixture",
         )
 
 

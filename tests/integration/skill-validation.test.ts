@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { PersonConfig } from "#config";
 import { FixtureWorld } from "#fixture-world";
 import { runSkillValidation } from "#node-runtime";
 import { REPOSITORY, baseConfig } from "../support/harness.ts";
+import { type MinecraftConfig } from "#minecraft";
 
 /**
  * The effect comparison, end to end, against the real implementation.
@@ -16,7 +16,7 @@ import { REPOSITORY, baseConfig } from "../support/harness.ts";
  */
 const COGNITION = ["uv", "run", "person-cognition"];
 
-const withComparison = (config: PersonConfig): PersonConfig => ({
+const withComparison = (config: MinecraftConfig): MinecraftConfig => ({
   ...config,
   cognition: { ...config.cognition, command: COGNITION },
 });
@@ -83,7 +83,7 @@ test("an effect an observation cannot carry is not counted as a failure", async 
 
 test("a comparison that cannot run leaves the report honest rather than empty", async () => {
   const base = baseConfig({ home: { x: 0, y: 64, z: 0 } });
-  const config: PersonConfig = {
+  const config: MinecraftConfig = {
     ...base,
     cognition: {
       ...base.cognition,

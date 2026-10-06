@@ -19,7 +19,7 @@ claim without reading the whole tree.
 
 | Requirement                                       | Implementation                                                                           | Tests                                                                               |
 | ------------------------------------------------- | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Versioned protocol `shroud-learning-v2`           | `packages/protocol/ts/version.ts`, `packages/protocol/python/person_protocol/version.py` | `packages/protocol/ts/protocol.test.ts`, `packages/protocol/tests/test_protocol.py` |
+| Versioned protocol `person-v3`                    | `packages/protocol/ts/version.ts`, `packages/protocol/python/person_protocol/version.py` | `packages/protocol/ts/protocol.test.ts`, `packages/protocol/tests/test_protocol.py` |
 | Replay metadata on every message                  | `packages/protocol/schemas/common.schema.json` (`envelope`)                              | both protocol suites                                                                |
 | One canonical schema representation               | `packages/protocol/schemas/*.json` compiled by both runtimes                             | `test_node_and_python_validators_agree_on_the_whole_corpus`                         |
 | Unknown schema versions rejected with diagnostics | `ProtocolValidator.validate` in both bindings                                            | both protocol suites                                                                |
@@ -28,27 +28,27 @@ claim without reading the whole tree.
 
 ## Observation and context
 
-| Requirement                         | Implementation                                       | Tests                                            |
-| ----------------------------------- | ---------------------------------------------------- | ------------------------------------------------ |
-| Normalised semantic observation     | `apps/node-runtime/src/observation/builder.ts`       | `tests/integration/vertical-slice.test.ts`       |
-| No raw Mineflayer objects exposed   | `Observation` schema, `unevaluatedProperties: false` | protocol suites, architecture tests              |
-| Coarse decision context             | `apps/cognition/python/person_cognition/context.py`  | `apps/cognition/tests/test_context_and_goals.py` |
-| Deterministic context serialisation | `DecisionContext.identifier`                         | same                                             |
-| No context explosion                | seven bounded dimensions                             | `test_the_context_space_stays_small`             |
+| Requirement                         | Implementation                                              | Tests                                                    |
+| ----------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------- |
+| Normalised semantic observation     | `apps/node-runtime/src/observation/builder.ts`              | `tests/integration/vertical-slice.test.ts`               |
+| No raw Mineflayer objects exposed   | `Observation` schema, `unevaluatedProperties: false`        | protocol suites, architecture tests                      |
+| Coarse decision context             | `environments/minecraft/python/person_minecraft/context.py` | `environments/minecraft/tests/test_context_and_goals.py` |
+| Deterministic context serialisation | `DecisionContext.identifier`                                | same                                                     |
+| No context explosion                | seven bounded dimensions                                    | `test_the_context_space_stays_small`                     |
 
 ## Skills
 
-| Requirement                                  | Implementation                                           | Tests                                                                          |
-| -------------------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Typed SkillSpec contract                     | `packages/skills/specs/*.json`, `skill-spec.schema.json` | `packages/skills` registries load and validate at import; `tests/architecture` |
-| All 24 skills implemented for real           | `apps/node-runtime/src/skills/impl/`                     | `tests/skills/`, `tests/integration/survival-routine.test.ts`                  |
-| Implementations match the library exactly    | `SKILL_IMPLEMENTATIONS`                                  | `tests/architecture/architecture.test.ts`                                      |
-| No placeholder implementations               | same                                                     | `tests/architecture/architecture.test.ts`                                      |
-| Precondition enforcement                     | `SkillRegistry.resolveParameters`, per-skill guards      | `tests/skills/resources.test.ts`, `tests/skills/food-and-shelter.test.ts`      |
-| Effect evidence                              | `SkillContext.note`, `ExecutionResult.evidenceKinds`     | `tests/skills/*`                                                               |
-| Time and resource bounds                     | `SkillRunner.run` checkpoint                             | `tests/skills/resources.test.ts` (TIMED_OUT)                                   |
-| Interruption, unreachable, death, disconnect | `SkillRunner` error mapping                              | `tests/skills/resources.test.ts`, `tests/integration/survival-routine.test.ts` |
-| Exactly one terminal state                   | `TerminalStatus` in the schema and runner                | protocol suites, skill suites                                                  |
+| Requirement                                  | Implementation                                                   | Tests                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Typed SkillSpec contract                     | `environments/minecraft/skills/*.json`, `skill-spec.schema.json` | `packages/skills` registries load and validate at import; `tests/architecture` |
+| All 24 skills implemented for real           | `apps/node-runtime/src/skills/impl/`                             | `tests/skills/`, `tests/integration/survival-routine.test.ts`                  |
+| Implementations match the library exactly    | `SKILL_IMPLEMENTATIONS`                                          | `tests/architecture/architecture.test.ts`                                      |
+| No placeholder implementations               | same                                                             | `tests/architecture/architecture.test.ts`                                      |
+| Precondition enforcement                     | `SkillRegistry.resolveParameters`, per-skill guards              | `tests/skills/resources.test.ts`, `tests/skills/food-and-shelter.test.ts`      |
+| Effect evidence                              | `SkillContext.note`, `ExecutionResult.evidenceKinds`             | `tests/skills/*`                                                               |
+| Time and resource bounds                     | `SkillRunner.run` checkpoint                                     | `tests/skills/resources.test.ts` (TIMED_OUT)                                   |
+| Interruption, unreachable, death, disconnect | `SkillRunner` error mapping                                      | `tests/skills/resources.test.ts`, `tests/integration/survival-routine.test.ts` |
+| Exactly one terminal state                   | `TerminalStatus` in the schema and runner                        | protocol suites, skill suites                                                  |
 
 ## Safety
 
@@ -114,14 +114,14 @@ claim without reading the whole tree.
 | Invalid snapshot ignored                   | `SnapshotStore.latest_valid`, `EvidenceStore.restore`       | `test_snapshots_are_atomic_and_checksummed`, `test_a_snapshot_that_disagrees_with_the_journal` |
 | Rebuild from evidence                      | `EvidenceStore.restore`                                     | `test_restart_replays_from_the_snapshot_and_rebuilds_without_one`                              |
 | Facts persisted, not scores                | `RoutineStatistics` counts only                             | `test_statistics_round_trip_through_a_snapshot`                                                |
-| Statistics never merge across environments | training-context key                                        | `test_statistics_never_merge_across_training_contexts`                                         |
+| Statistics never merge across environments | experience key (ADR 0025)                                   | `test_statistics_never_merge_across_experience_streams`                                        |
 | Restart reuse                              | `CognitionLoop.on_session_hello`                            | `test_learning_survives_a_restart_of_the_process`, `tests/integration/vertical-slice.test.ts`  |
 
 ## Legacy and demonstrations
 
 | Requirement                                                | Implementation                                  | Tests                                                             |
 | ---------------------------------------------------------- | ----------------------------------------------- | ----------------------------------------------------------------- |
-| Versioned configuration migration                          | `packages/config/ts/migrate.ts`                 | `tests/cli/cli.test.ts`                                           |
+| Versioned configuration migration                          | `environments/minecraft/ts/legacy.ts`           | `tests/cli/cli.test.ts`                                           |
 | V1 Q-learning checkpoint refused with the exact diagnostic | `LEGACY_CHECKPOINT_DIAGNOSTIC` in both runtimes | `tests/cli/cli.test.ts`, `packages/config/tests/test_config.py`   |
 | Learning never carried across migration                    | `migrateConfig`                                 | `tests/cli/cli.test.ts`                                           |
 | Reviewed demonstration manifests                           | `persistence/demonstrations.py`                 | `test_demonstration_manifests_require_review_and_a_matching_hash` |
@@ -148,14 +148,33 @@ claim without reading the whole tree.
 | Full survival routine                        | `tests/integration/survival-routine.test.ts`      | itself                                     |
 | Seeds recorded for replay                    | `EpisodeReport.rngSeed`, `EpisodeEvent.rngSeed`   | `tests/integration/vertical-slice.test.ts` |
 
+## Environment boundary and epistemic state (ADR 0025 to 0028)
+
+| Requirement                                                                                                  | Implementation                                                                              | Tests                                                                                                                                                                    |
+| ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Person's core never imports or names an environment                                                          | `environments/<kind>/environment.json` discovered as data                                   | `test_person_core_never_imports_an_environment`, `test_person_core_code_names_no_minecraft_ontology`, `tests/architecture/environment-boundary.test.ts`                  |
+| The observation is a core envelope around an environment payload                                             | `observation.schema.json`, `environments/minecraft/schemas/observation-payload.schema.json` | `test_the_core_protocol_owns_no_minecraft_observation_vocabulary`, `environment-boundary.test.ts`                                                                        |
+| A second environment needs no core change                                                                    | `CognitiveEnvironment`, `load_environment`                                                  | `test_a_second_environment_needs_no_core_change`                                                                                                                         |
+| Experience key replaces training context; replay is not lived                                                | `person_epistemics.ExperienceKey`, `person_persistence/legacy.py`                           | `test_statistics_never_merge_across_experience_streams`, `test_a_legacy_record_is_read_as_the_stream_it_always_meant_and_never_rewritten`                                |
+| The loop crosses the epistemic boundary once; nothing reads raw observations after                           | `CognitionLoop._observe`, `MinecraftProfile.perceive`                                       | `test_the_loop_crosses_the_boundary_once_per_observation`, `test_nothing_downstream_of_the_boundary_reads_a_raw_observation`                                             |
+| Beliefs carry provenance, scope and evidence refs; journalled per change                                     | `BeliefState`, `belief_revised`                                                             | `apps/cognition/tests/test_epistemic_boundary.py`, `packages/epistemics/tests/test_epistemics.py`                                                                        |
+| Environment-specific belief never widens by itself                                                           | `check_widening`                                                                            | `test_no_code_widens_a_belief_but_the_explicit_gate`                                                                                                                     |
+| A memory is not a percept; planning uses recalled memory but never queries the store                         | `DecisionState.recalled`; `person_minecraft.facts.planning_facts` derives nothing from it   | `test_planning_never_queries_the_memory_store`, `test_recalled_memory_reaches_planning_but_never_as_a_current_fact`, `test_a_remembered_resource_is_not_a_perceived_one` |
+| A canonical event is evidence only if admitted                                                               | `person_cognition/admission.py`, `person_epistemics.admit`                                  | `test_a_canonical_event_is_not_evidence_unless_admitted`                                                                                                                 |
+| Only lived experience becomes an episode                                                                     | `memory/episodes.py` `SOURCE_CLASSES`                                                       | `test_every_episode_source_is_lived`                                                                                                                                     |
+| Prediction is plural; a prediction is never evidence                                                         | `PredictiveModel`, `DeclaredEffectModel`                                                    | `test_prediction_is_plural_and_a_prediction_is_never_evidence`, `test_a_predictive_model_has_no_route_to_the_body`                                                       |
+| Knowledge is initial until an explicit, evidence-backed promotion exists; none does yet                      | `person_epistemics.Knowledge`, `KnownFact`                                                  | `test_knowledge_is_initial_until_an_explicit_promotion_exists`                                                                                                           |
+| Environment vocabulary (drives, memory subjects, emergencies, skills, facts) never leaks into core cognition | `Drive.pressing`, `CognitiveEnvironment.emergency_subjects`, manifests                      | `test_environment_vocabulary_never_leaks_into_core_cognition`, `test_whether_a_drive_is_pressing_is_typed_not_named`, `test_every_emergency_says_what_it_is_about`       |
+| Respawn is the default; permadeath explicit and final                                                        | `LifeRecord`, `lifecycle.death`                                                             | `test_respawn_continues_the_same_person_and_terminal_death_is_final`, `test_respawn_is_the_default_and_permadeath_is_an_explicit_choice`                                 |
+
 ## Future interfaces
 
-| Requirement                                                                  | Implementation                                               | Tests                                                     |
-| ---------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------- |
-| WorldModel, Language, Social, Exploration providers                          | `apps/cognition/python/person_cognition/future_providers.py` | `test_future_providers_refuse_to_pretend_they_work`       |
-| A placeholder leaves when its capability is built (memory, projects, affect) | `person_cognition.memory`, `.projects`, `.affect`            | `test_no_placeholder_outlives_the_capability_it_reserved` |
-| No premature implementation                                                  | every placeholder raises                                     | same                                                      |
-| No LLM, no neural policy, no heavy dependencies                              | absent by construction                                       | `tests/python/test_architecture.py`                       |
+| Requirement                                                                               | Implementation                                                              | Tests                                                     |
+| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------- |
+| Language, Social, Exploration providers                                                   | `apps/cognition/python/person_cognition/future_providers.py`                | `test_future_providers_refuse_to_pretend_they_work`       |
+| A placeholder leaves when its capability is built (memory, projects, affect, world model) | `person_cognition.memory`, `.projects`, `.affect`, `.predictors` (ADR 0028) | `test_no_placeholder_outlives_the_capability_it_reserved` |
+| No premature implementation                                                               | every placeholder raises                                                    | same                                                      |
+| No LLM, no neural policy, no heavy dependencies                                           | absent by construction                                                      | `tests/python/test_architecture.py`                       |
 
 ## Real embodiment validation (Milestone 1)
 
@@ -360,7 +379,7 @@ claim without reading the whole tree.
 
 | Requirement                                                        | Implementation                                                | Tests                                                                                                                                                                   |
 | ------------------------------------------------------------------ | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Cognition is not given saturation or exhaustion; breath is bubbles | `observationVersion` 8, `breathBubbles`                       | `hidden saturation never reaches cognition`, `breath is felt as the bubbles a player sees`, `test_hidden_hunger_mechanics_never_reach_cognition`                        |
+| Cognition is not given saturation or exhaustion; breath is bubbles | `observationVersion` 8 (now 9), `breathBubbles`               | `hidden saturation never reaches cognition`, `breath is felt as the bubbles a player sees`, `test_hidden_hunger_mechanics_never_reach_cognition`                        |
 | Hunger, harm and breath press as conditions in experienced time    | `Interoception`, `Affect.apply_tonic`, `settle`               | `test_persistent_hunger_keeps_weighing_on_affect_without_new_events`, `test_low_health_is_a_sustained_vulnerability`, `test_running_short_of_breath_is_felt`            |
 | Tonic affect does not depend on observation cadence                | exact relaxation under a held offset, unrounded between steps | `test_hunger_pressure_depends_on_experienced_time_not_observations`, `test_doubling_the_observation_cadence_does_not_double_threat_affect`                              |
 | The body never moves control                                       | `TONIC_CAPS`, R2 harm                                         | `test_recovering_health_lifts_valence_but_not_control`, `test_one_damage_event_is_appraised_once`                                                                       |
@@ -611,7 +630,7 @@ claim without reading the whole tree.
 
 | Requirement                                               | Implementation                                                           | Tests                                                                          |
 | --------------------------------------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------ |
-| LAN port is runtime configuration, not file configuration | `packages/config/ts/override.ts` `withConnectionOverride`                | `tests/cli/observe-safety.test.ts`, `tests/cli/status.test.ts`                 |
+| LAN port is runtime configuration, not file configuration | `environments/minecraft/ts/override.ts` `withConnectionOverride`         | `tests/cli/observe-safety.test.ts`, `tests/cli/status.test.ts`                 |
 | `--port` and `--host` on every connecting command         | `apps/cli/src/bin/person.ts`, `runCommand`, `observeCommand`             | `tests/cli/status.test.ts`                                                     |
 | The override never reaches the file                       | `withConnectionOverride` returns a copy                                  | `test_the LAN port override never reaches the configuration file`              |
 | First-run connection diagnostics                          | `adapters/minecraft/src/diagnose.ts`                                     | `tests/adapter/connection-diagnostics.test.ts`                                 |
@@ -649,28 +668,28 @@ claim without reading the whole tree.
 
 ## Single-skill live validation (Milestone 2)
 
-| Requirement                                          | Implementation                                                                    | Tests                                                                                |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| One path from SkillInvocation to SkillOutcome        | `apps/node-runtime/src/skills/dispatch.ts`, called by the runtime and the harness | `tests/architecture/architecture.test.ts`                                            |
-| The harness cannot bypass the executor               | no `runner.run` and no `SKILL_IMPLEMENTATIONS` in `validation/skill-test.ts`      | same                                                                                 |
-| The normal safety kernel decides                     | `InvocationValidator` and `SafetyKernel` built exactly as the runtime builds them | `tests/validation/skill-test.test.ts`                                                |
-| A REJECT is reported and nothing runs                | `dispatchSkill` reject path, `report.safety`                                      | same                                                                                 |
-| A REPLACE never credits the requested skill          | `requestedSkillStatus`, `actualSkill` in the report                               | same                                                                                 |
-| `--skill` resolves only to a registered SkillSpec    | `SkillRegistry.has`/`get` before anything connects                                | `tests/validation/skill-test.test.ts`, `tests/cli/cli.test.ts`                       |
-| No arbitrary action channel through the CLI          | no free-form option; scalar spec parameters only                                  | `tests/cli/cli.test.ts`, `tests/validation/skill-test.test.ts`                       |
-| Parameters validated by the canonical rules          | `SkillRegistry.resolveParameters`                                                 | `tests/validation/skill-test.test.ts`                                                |
-| Cost limits come from the spec, never the caller     | `invocation.limits = spec.costLimits`, clamped again by the validator             | same                                                                                 |
-| Pre- and post-skill observations, both schema-valid  | `runSkillValidation`, `protocolValidator`                                         | same                                                                                 |
-| Effects compared with the existing machinery         | `person_cognition/effects.py` over `symbolic_state` and `prediction.compare`      | `apps/cognition/tests/test_effects.py`, `tests/integration/skill-validation.test.ts` |
-| An unobservable effect is not a failure              | `UNOBSERVABLE_FACTS`, verdict `not_observable`                                    | same                                                                                 |
-| A comparison that cannot run stays honest            | `unavailableComparison`, verdict `inconclusive`                                   | `tests/integration/skill-validation.test.ts`                                         |
-| Validation runs change no learning state             | `learningFingerprint` before and after, recorded in the report                    | `tests/validation/skill-test.test.ts`                                                |
-| Validation evidence is stored separately             | `runs/validation/skill-tests/`, `writeSkillValidationReport`                      | same                                                                                 |
-| Operator setup leaves Person inert                   | `confirmSetup` gate before any dispatch                                           | same                                                                                 |
-| Operator setup needs explicit continuation           | `confirmOnStdin`; a closed input aborts                                           | `tests/validation/skill-test-exit.test.ts`                                           |
-| An invalid post-setup state refuses the measured run | connected, alive, Overworld, in bounds, not in a protected area                   | `tests/validation/skill-test.test.ts`                                                |
-| No teleport capability is added                      | setup is a human action; the CLI exposes no position argument                     | `tests/cli/cli.test.ts`                                                              |
-| Operator setup is recorded as contamination          | `operatorIntervention` defaulted on for `--operator-setup`                        | `tests/validation/skill-test.test.ts`                                                |
-| `person status` distinguishes a validation run       | `RuntimeStatus.phase`, `command=skill-test`                                       | same                                                                                 |
-| Every path releases body, timers and input           | `finally` disconnect with a bound; readline closed and released                   | `tests/validation/skill-test-exit.test.ts`, `tests/validation/skill-test.test.ts`    |
-| A report that cannot be written is reported          | `finish` catches the write failure                                                | `tests/validation/skill-test.test.ts`                                                |
+| Requirement                                          | Implementation                                                                    | Tests                                                                                        |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| One path from SkillInvocation to SkillOutcome        | `apps/node-runtime/src/skills/dispatch.ts`, called by the runtime and the harness | `tests/architecture/architecture.test.ts`                                                    |
+| The harness cannot bypass the executor               | no `runner.run` and no `SKILL_IMPLEMENTATIONS` in `validation/skill-test.ts`      | same                                                                                         |
+| The normal safety kernel decides                     | `InvocationValidator` and `SafetyKernel` built exactly as the runtime builds them | `tests/validation/skill-test.test.ts`                                                        |
+| A REJECT is reported and nothing runs                | `dispatchSkill` reject path, `report.safety`                                      | same                                                                                         |
+| A REPLACE never credits the requested skill          | `requestedSkillStatus`, `actualSkill` in the report                               | same                                                                                         |
+| `--skill` resolves only to a registered SkillSpec    | `SkillRegistry.has`/`get` before anything connects                                | `tests/validation/skill-test.test.ts`, `tests/cli/cli.test.ts`                               |
+| No arbitrary action channel through the CLI          | no free-form option; scalar spec parameters only                                  | `tests/cli/cli.test.ts`, `tests/validation/skill-test.test.ts`                               |
+| Parameters validated by the canonical rules          | `SkillRegistry.resolveParameters`                                                 | `tests/validation/skill-test.test.ts`                                                        |
+| Cost limits come from the spec, never the caller     | `invocation.limits = spec.costLimits`, clamped again by the validator             | same                                                                                         |
+| Pre- and post-skill observations, both schema-valid  | `runSkillValidation`, `protocolValidator`                                         | same                                                                                         |
+| Effects compared with the existing machinery         | `person_minecraft/effects.py` over planning facts and `prediction.compare`        | `environments/minecraft/tests/test_effects.py`, `tests/integration/skill-validation.test.ts` |
+| An unobservable effect is not a failure              | `UNOBSERVABLE_FACTS`, verdict `not_observable`                                    | same                                                                                         |
+| A comparison that cannot run stays honest            | `unavailableComparison`, verdict `inconclusive`                                   | `tests/integration/skill-validation.test.ts`                                                 |
+| Validation runs change no learning state             | `learningFingerprint` before and after, recorded in the report                    | `tests/validation/skill-test.test.ts`                                                        |
+| Validation evidence is stored separately             | `runs/validation/skill-tests/`, `writeSkillValidationReport`                      | same                                                                                         |
+| Operator setup leaves Person inert                   | `confirmSetup` gate before any dispatch                                           | same                                                                                         |
+| Operator setup needs explicit continuation           | `confirmOnStdin`; a closed input aborts                                           | `tests/validation/skill-test-exit.test.ts`                                                   |
+| An invalid post-setup state refuses the measured run | connected, alive, Overworld, in bounds, not in a protected area                   | `tests/validation/skill-test.test.ts`                                                        |
+| No teleport capability is added                      | setup is a human action; the CLI exposes no position argument                     | `tests/cli/cli.test.ts`                                                                      |
+| Operator setup is recorded as contamination          | `operatorIntervention` defaulted on for `--operator-setup`                        | `tests/validation/skill-test.test.ts`                                                        |
+| `person status` distinguishes a validation run       | `RuntimeStatus.phase`, `command=skill-test`                                       | same                                                                                         |
+| Every path releases body, timers and input           | `finally` disconnect with a bound; readline closed and released                   | `tests/validation/skill-test-exit.test.ts`, `tests/validation/skill-test.test.ts`            |
+| A report that cannot be written is reported          | `finish` catches the write failure                                                | `tests/validation/skill-test.test.ts`                                                        |

@@ -12,10 +12,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import type { Position } from "#config";
 import { FixtureWorld } from "#fixture-world";
 import { temporaryDirectory } from "../support/harness.ts";
 import { runEpisode } from "../support/runtime.ts";
+import { type Position } from "#minecraft";
 
 const COGNITION = ["uv", "run", "person-cognition"];
 const HOME = { x: 8, y: 64, z: 0 };

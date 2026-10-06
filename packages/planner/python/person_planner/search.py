@@ -29,14 +29,12 @@ BRANCH_LIMIT = 3
 PLANS_PER_OPTION = 3
 PLANS_PER_CALL = 24
 
-#: Emergency reflexes belong to the runtime. Two of them are also ordinary
-#: intentions ("go home", "eat"), so those stay available to the planner.
-PLANNABLE_EMERGENCY_SKILLS = frozenset({"return_home", "eat_to_target"})
-#: Emergency skills a caller may additionally make plannable for one goal:
-#: `wait_safely` for a goal a deliberation adopted (ADR 0021, C4.1), so that
-#: rest Person decided on has a plan while idling stays the loop's own
-#: fallback and is never planned or scored as a routine.
-RECOVERY_SKILLS = frozenset({"wait_safely"})
+#: Emergency reflexes belong to the runtime. Some are also ordinary intentions
+#: ("go home", "eat"), so those stay available to the planner; and a caller
+#: may make the environment's recovery skills plannable for one goal (a rest
+#: Person decided on, ADR 0021, C4.1), while idling stays the loop's own
+#: fallback. Which skills those are is the environment's skill vocabulary
+#: (`planning.plannableEmergency`, `planning.recovery`, ADR 0025).
 
 
 @dataclass(frozen=True, slots=True)
@@ -319,8 +317,8 @@ def plan_for(
         registry.get(skill_id)
         for skill_id in (allowed_skills or registry.ids)
         if not registry.get(skill_id).emergency
-        or skill_id in PLANNABLE_EMERGENCY_SKILLS
-        or (skill_id in recovery and skill_id in RECOVERY_SKILLS)
+        or skill_id in registry.vocabulary.plannable_emergency
+        or (skill_id in recovery and skill_id in registry.vocabulary.recovery_skills)
     ]
     specs = relevant_skills(goal, available) or available
     start = dict(state)

@@ -20,11 +20,8 @@ from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
 
-from .context import breath_band, food_band, health_band
-
-CONTEXT_SIGNATURE_SCHEMA = "context_signature_v1"
 RESPONSE_TEMPLATE_SCHEMA = "response_template_v1"
 #: Declared engineering priors (ADR 0022), in experienced ticks or counts.
 STABILIZATION_WINDOW = 1_200
@@ -35,28 +32,6 @@ PROMOTION_STREAK = 3
 #: positive resolution evidence: the source goal, retried, succeeding at least
 #: once inside the window (ADR 0021/0022 amendment, C4.1).
 NEEDS_RESOLUTION: frozenset[str] = frozenset({"repeated_failure", "no_viable_plan"})
-
-#: Inventory categories a response's desired facts make relevant. A fact
-#: with no declared mapping adds no inventory to the signature.
-INVENTORY_FOR_FACT: Mapping[str, tuple[str, ...]] = {
-    "wood": ("wood",),
-    "planks": ("wood",),
-    "stone": ("stone",),
-    "coal": ("coal", "fuel"),
-    "fuel": ("fuel",),
-    "raw_food": ("raw_food",),
-    "cooked_food": ("cooked_food", "raw_food", "fuel"),
-    "plant_food": ("food",),
-    "edible_food": ("food",),
-    "food_level": ("food",),
-    "building_materials": ("building_materials",),
-    "shelter_complete": ("building_materials",),
-    "wooden_pickaxe": ("tools",),
-    "stone_pickaxe": ("tools",),
-    "wooden_axe": ("tools",),
-    "stone_axe": ("tools",),
-    "tool_tier": ("tools",),
-}
 
 SHADOW_EVENTS: frozenset[str] = frozenset(
     {
@@ -76,57 +51,11 @@ def signature_sha(value: Any) -> str:
     return hashlib.sha256(_canonical(value).encode("utf-8")).hexdigest()
 
 
-def _count_band(count: int) -> str:
-    return "one" if count <= 1 else "few" if count <= 3 else "many"
-
-
-def _confidence_band(confidence: float) -> str:
-    return "high" if confidence >= 0.8 else "medium"
-
-
-def context_signature(
-    *,
-    observation: Mapping[str, Any] | None,
-    place: Mapping[str, Any] | None,
-    desired_facts: Sequence[str],
-    source_goal_type: str | None,
-) -> dict[str, Any]:
-    """`context_signature_v1`: coarse, Person-visible, deterministic."""
-    vitals = (observation or {}).get("vitals", {})
-    environment = (observation or {}).get("environment", {})
-    nearby = (observation or {}).get("nearby", {})
-    threats: dict[str, dict[str, Any]] = {}
-    for hostile in nearby.get("hostiles", []):
-        kind = str(hostile.get("name") or hostile.get("kind"))
-        entry = threats.setdefault(kind, {"count": 0, "nearest": hostile.get("rangeBand")})
-        entry["count"] += 1
-    categories = (observation or {}).get("inventory", {}).get("categories", {})
-    relevant = sorted({c for fact in desired_facts for c in INVENTORY_FOR_FACT.get(fact, ())})
-    recognised = place is not None and float(place.get("confidence", 0.0)) >= 0.5
-    return {
-        "schema": CONTEXT_SIGNATURE_SCHEMA,
-        "health": health_band(float(vitals.get("health", 20.0))),
-        "food": food_band(float(vitals.get("food", 20.0))),
-        "breath": breath_band(float(vitals.get("breath", 10.0))),
-        "day_phase": str(environment.get("dayPhase", "unknown")),
-        "weather": str(environment.get("weather", "unknown")),
-        "place": (
-            {
-                "ref": str(place["place_id"]),
-                "confidence": _confidence_band(float(place["confidence"])),
-            }
-            if recognised and place is not None
-            else "unknown"
-        ),
-        "threats": [
-            {"kind": kind, "count": _count_band(entry["count"]), "nearest": entry["nearest"]}
-            for kind, entry in sorted(threats.items())
-        ],
-        "inventory": {
-            category: "some" if categories.get(category) else "0" for category in relevant
-        },
-        "source_goal_type": source_goal_type or "none",
-    }
+#: How a context signature is built is the environment's: it is a coarse,
+#: Person-visible summary of what Person perceives (Minecraft's:
+#: `person_minecraft.situation.context_signature`, schema
+#: `context_signature_v1`). The arbiter is given it by the loop (ADR 0025).
+SignatureBuilder = Callable[..., dict[str, Any]]
 
 
 def template_id(
@@ -246,7 +175,7 @@ class HabitBook:
             None,
         )
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         payload = event.payload
         if event.type == self.events["candidate"]:
             body = payload["template"]

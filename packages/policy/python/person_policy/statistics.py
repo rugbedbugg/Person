@@ -22,7 +22,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
 
 SUCCESS_STATUSES = frozenset({"SUCCESS"})
 FAILURE_STATUSES = frozenset(
@@ -123,8 +123,8 @@ class OutcomeCounts:
 Key = tuple[str, str, str]
 
 
-def _key(training_context: str, context_id: str, identifier: str) -> Key:
-    return (training_context, context_id, identifier)
+def _key(experience: str, context_id: str, identifier: str) -> Key:
+    return (experience, context_id, identifier)
 
 
 class RoutineStatistics:
@@ -140,12 +140,12 @@ class RoutineStatistics:
         self.skills.clear()
         self.events_applied = 0
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         self.events_applied += 1
         payload = event.payload
         if event.type == "routine_outcome":
             key = _key(
-                event.training_context,
+                event.context_key,
                 str(payload.get("context_id", "")),
                 str(payload.get("routine_id", "")),
             )
@@ -156,14 +156,14 @@ class RoutineStatistics:
             context_id = str(payload.get("context_id", ""))
             if executed:
                 counts = self.skills.setdefault(
-                    _key(event.training_context, context_id, str(executed)), OutcomeCounts()
+                    _key(event.context_key, context_id, str(executed)), OutcomeCounts()
                 )
                 self._record(counts, payload, event.event_id)
             if requested and requested != executed:
                 # The requested skill never ran. It gets the preemption and no
                 # attempt, so learning cannot credit it with the outcome.
                 preempted = self.skills.setdefault(
-                    _key(event.training_context, context_id, str(requested)), OutcomeCounts()
+                    _key(event.context_key, context_id, str(requested)), OutcomeCounts()
                 )
                 preempted.preemptions += 1
 
@@ -192,7 +192,7 @@ class RoutineStatistics:
         def pack(table: dict[Key, OutcomeCounts]) -> list[dict[str, Any]]:
             return [
                 {
-                    "training_context": key[0],
+                    "experience": key[0],
                     "context_id": key[1],
                     "id": key[2],
                     "counts": counts.to_json(),
@@ -217,17 +217,17 @@ class RoutineStatistics:
                 if not isinstance(entry, dict) or "id" not in entry:
                     raise ValueError(f"Malformed {table_name} entry in snapshot")
                 key = _key(
-                    str(entry.get("training_context", "")),
+                    str(entry.get("experience", "")),
                     str(entry.get("context_id", "")),
                     str(entry["id"]),
                 )
                 target[key] = OutcomeCounts.from_json(entry.get("counts", {}))
 
-    def routine(self, training_context: str, context_id: str, routine_id: str) -> OutcomeCounts:
-        return self.routines.get(_key(training_context, context_id, routine_id), OutcomeCounts())
+    def routine(self, experience: str, context_id: str, routine_id: str) -> OutcomeCounts:
+        return self.routines.get(_key(experience, context_id, routine_id), OutcomeCounts())
 
-    def skill(self, training_context: str, context_id: str, skill_id: str) -> OutcomeCounts:
-        return self.skills.get(_key(training_context, context_id, skill_id), OutcomeCounts())
+    def skill(self, experience: str, context_id: str, skill_id: str) -> OutcomeCounts:
+        return self.skills.get(_key(experience, context_id, skill_id), OutcomeCounts())
 
     def supported_routines(self, minimum_support: int) -> list[Key]:
         return [

@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from test_identity_continuity import PERSON, Process, envelope, journal, legacy_root
 from test_spatial import STILL, at
 
@@ -27,9 +27,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -47,7 +47,7 @@ def world(process: Process, state: str, at_: str, tick: int = 0) -> None:
 def observe(process: Process, document: dict[str, Any], tick: int, **vitals: float) -> None:
     observation = at(document, tick)
     observation["personId"] = process.person
-    observation["vitals"].update(vitals)
+    observation["payload"]["vitals"].update(vitals)
     process.loop.handle(observation)
 
 
@@ -221,7 +221,7 @@ def test_the_evidence_stays_a_valid_chain(tmp_path: Path, view: dict[str, Any]) 
     process.hello(T0)
     world(process, "available", T0)
     world(process, "unavailable", T0, tick=3)
-    events = list(EvidenceJournal(tmp_path / "journal").read())
+    events = list(EventJournal(tmp_path / "journal").read())
     for before, after in zip(events, events[1:], strict=False):
         assert after.previous_event_id == before.event_id
 

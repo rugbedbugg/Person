@@ -1,5 +1,4 @@
 import { appendFileSync, readFileSync } from "node:fs";
-import { distance, positionKey, type Position } from "#config";
 import type { ItemStack } from "#protocol";
 import {
   DisconnectedError,
@@ -38,6 +37,7 @@ import {
   type FixtureWorldDefinition,
 } from "./definition.ts";
 import { SeededRandom } from "./rng.ts";
+import { distance, positionKey, type Position } from "#minecraft";
 
 interface FixtureEntityState {
   entityId: number;

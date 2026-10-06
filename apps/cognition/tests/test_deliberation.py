@@ -32,6 +32,9 @@ from test_life_status import observe
 from test_operational_state import world
 from test_spatial import STILL
 
+#: The experience stream every fixture test lives in (ADR 0025).
+FIXTURE = "lived:minecraft/fixture"
+
 REPOSITORY = Path(__file__).resolve().parents[3]
 T0 = "2026-09-30T08:00:00Z"
 
@@ -41,9 +44,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -116,7 +119,7 @@ def test_every_collection_is_capped() -> None:
         request_refs=[f"x{n}" for n in range(100)],
         self_knowledge=None,
         world_available=True,
-        observation=None,
+        situation=(),
         place=None,
         working_memory=[{"kind": "acted", "subjects": ["a"] * 50} for _ in range(20)],
         beliefs=many,
@@ -481,7 +484,7 @@ def test_a_belief_person_holds_is_shown_with_its_uncertainty_and_can_support(
 
     process = lived(tmp_path, view)
     beliefs = process.loop.effect_beliefs.tables["active"]
-    beliefs[("fixture", "gather_wood", "wood")] = EffectBelief(
+    beliefs[(FIXTURE, "gather_wood", "wood")] = EffectBelief(
         "gather_wood", "wood", supporting=3.0, contradicting=1.0
     )
     context = process.loop.deliberation_context("reflection")

@@ -22,7 +22,7 @@
 import { EventEmitter } from "node:events";
 import { createRequire } from "node:module";
 import vec3Package from "vec3";
-import type { Position } from "#config";
+import { type Position } from "#minecraft";
 
 const require = createRequire(import.meta.url);
 const { Vec3 } = vec3Package;

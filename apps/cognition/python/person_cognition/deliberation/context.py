@@ -39,7 +39,7 @@ CAPS: Mapping[str, int] = {
     "request_refs": 8,
     "situation": 24,
     "in_view_per_kind": 4,
-    "inventory": 12,
+    "holdings": 12,
     "memories": 3,
     "beliefs": 12,
     "hypotheses": 6,
@@ -50,37 +50,8 @@ CAPS: Mapping[str, int] = {
     "list_items": 4,
 }
 
-NEARBY_KINDS: tuple[str, ...] = (
-    "hostiles",
-    "passiveAnimals",
-    "players",
-    "resources",
-    "hazards",
-    "containers",
-    "workstations",
-)
 
-
-def _band(value: float, bands: Sequence[tuple[float, str]], top: str) -> str:
-    for limit, name in bands:
-        if value <= limit:
-            return name
-    return top
-
-
-def health_band(health: float) -> str:
-    return _band(health, ((6, "critical"), (12, "low")), "healthy")
-
-
-def food_band(food: float) -> str:
-    return _band(food, ((6, "critical"), (12, "low"), (17, "sufficient")), "full")
-
-
-def breath_band(breath: float) -> str:
-    return _band(breath, ((3, "critical"), (7, "short")), "normal")
-
-
-def _capped(items: Iterable[Any], cap: int) -> list[Any]:
+def capped(items: Iterable[Any], cap: int) -> list[Any]:
     out: list[Any] = []
     for item in items:
         if len(out) >= cap:
@@ -134,7 +105,7 @@ def build_context(
     request_refs: Sequence[str] = (),
     self_knowledge: Mapping[str, Any] | None,
     world_available: bool | None,
-    observation: Mapping[str, Any] | None,
+    situation: Sequence[Mapping[str, Any]],
     place: Mapping[str, Any] | None,
     working_memory: Sequence[Mapping[str, Any]],
     beliefs: Sequence[Mapping[str, Any]],
@@ -171,35 +142,10 @@ def build_context(
             out.append(entry)
         return out
 
-    situation: list[dict[str, Any]] = []
-    if observation is not None:
-        vitals = observation["vitals"]
-        environment = observation["environment"]
-        situation.append({"fact": "health", "value": health_band(float(vitals["health"]))})
-        situation.append({"fact": "food", "value": food_band(float(vitals["food"]))})
-        situation.append({"fact": "breath", "value": breath_band(float(vitals["breath"]))})
-        situation.append({"fact": "day_phase", "value": str(environment["dayPhase"])})
-        situation.append({"fact": "weather", "value": str(environment["weather"])})
-        for kind in NEARBY_KINDS:
-            seen = observation.get("nearby", {}).get(kind, [])
-            names: dict[str, dict[str, Any]] = {}
-            for thing in seen:
-                name = str(thing.get("name") or thing.get("kind"))
-                entry = names.setdefault(name, {"count": 0, "nearest": thing.get("rangeBand")})
-                entry["count"] += 1
-            for name, entry in _capped(sorted(names.items()), CAPS["in_view_per_kind"]):
-                situation.append(
-                    {
-                        "fact": f"in_view.{kind}",
-                        "value": name,
-                        "count": entry["count"],
-                        "nearest": entry["nearest"],
-                    }
-                )
-        categories = observation.get("inventory", {}).get("categories", {})
-        held = [(name, count) for name, count in sorted(categories.items()) if count]
-        for name, count in _capped(held, CAPS["inventory"]):
-            situation.append({"fact": f"holding.{name}", "value": int(count)})
+    # What Person perceives now, as the environment summarises it: bounded,
+    # banded, and already capped per kind (Minecraft's:
+    # `person_minecraft.situation.situation_facts`). The core adds what it owns.
+    situation = [dict(fact) for fact in situation]
     if place is not None:
         situation.append(
             {
@@ -216,7 +162,7 @@ def build_context(
     memories = [
         {
             "kind": str(item["kind"]),
-            "subjects": _capped(item.get("subjects", ()), CAPS["list_items"]),
+            "subjects": capped(item.get("subjects", ()), CAPS["list_items"]),
             "details": dict(item.get("details") or {}),
             "place": place_ref(item.get("place")),
             "source": item.get("source", "perceived"),
@@ -227,15 +173,15 @@ def build_context(
         "schema": CONTEXT_SCHEMA,
         "request": {
             "reason": reason,
-            "refs": _capped(request_refs, CAPS["request_refs"]),
+            "refs": capped(request_refs, CAPS["request_refs"]),
         },
         "self": dict(self_knowledge) if self_knowledge is not None else None,
-        "situation": cite("s", "situation", _capped(situation, CAPS["situation"])),
+        "situation": cite("s", "situation", capped(situation, CAPS["situation"])),
         "memories": cite("m", "memories", memories),
-        "beliefs": cite("b", "beliefs", _capped(beliefs, CAPS["beliefs"])),
-        "hypotheses": cite("h", "hypotheses", _capped(hypotheses, CAPS["hypotheses"])),
-        "goals": cite("g", "goals", _capped(goals, CAPS["goals"])),
-        "projects": cite("p", "projects", _capped(projects, CAPS["projects"])),
+        "beliefs": cite("b", "beliefs", capped(beliefs, CAPS["beliefs"])),
+        "hypotheses": cite("h", "hypotheses", capped(hypotheses, CAPS["hypotheses"])),
+        "goals": cite("g", "goals", capped(goals, CAPS["goals"])),
+        "projects": cite("p", "projects", capped(projects, CAPS["projects"])),
         "recent": cite("r", "recent", list(recent)[-CAPS["recent"] :]),
         "capabilities": cite(
             "c",
@@ -246,7 +192,7 @@ def build_context(
                     "summary": capability.summary[:160],
                     "effects": list(capability.effects),
                 }
-                for capability in _capped(capabilities, CAPS["capabilities"])
+                for capability in capped(capabilities, CAPS["capabilities"])
             ),
         ),
         "vocabulary": {name: list(values) for name, values in sorted(vocabulary.items())},

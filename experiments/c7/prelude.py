@@ -69,9 +69,9 @@ class Life:
         self.view: dict[str, Any] = json.loads(
             (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text("utf-8")
         )
-        self.view["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
+        self.view["payload"]["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
         for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-            self.view["nearby"][key] = []
+            self.view["payload"]["nearby"][key] = []
         self.tick = 0
 
     def envelope(self, kind: str) -> dict[str, Any]:
@@ -91,7 +91,12 @@ class Life:
             {
                 **self.envelope("SessionHello"),
                 "learningMode": "off",
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
                 "policyRevision": 0,
                 "skillLibraryRevision": skill_registry().revision,
                 "rngSeed": 7,
@@ -110,7 +115,7 @@ class Life:
         view["selfMotion"] = motion or dict(STILL)
         if seen is not None:
             kind, name = RESOURCES[seen]
-            view["nearby"]["resources"] = [
+            view["payload"]["nearby"]["resources"] = [
                 {
                     "kind": kind,
                     "name": name,
@@ -169,7 +174,12 @@ class Life:
                 "phase": "ended",
                 "reasonCodes": ["prelude_complete"],
                 "rngSeed": 7,
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
             }
         )
 

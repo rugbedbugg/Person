@@ -8,10 +8,11 @@ import sys
 from pathlib import Path
 
 import pytest
+from person_epistemics import ExperienceKey
 from person_persistence import (
+    CanonicalEvent,
     ContinuityRecord,
-    EvidenceEvent,
-    EvidenceStore,
+    EventStore,
     Founding,
     IdentityError,
     RootLock,
@@ -21,7 +22,7 @@ from person_persistence import (
 )
 
 
-def event(kind: str, payload: dict, *, at: str, person: str = "test-person-000") -> EvidenceEvent:
+def event(kind: str, payload: dict, *, at: str, person: str = "test-person-000") -> CanonicalEvent:
     made = new_event(
         person_id=person,
         world_id="w",
@@ -30,12 +31,12 @@ def event(kind: str, payload: dict, *, at: str, person: str = "test-person-000")
         decision_id=None,
         tick=0,
         policy_revision=0,
-        training_context="fixture",
+        experience=ExperienceKey("minecraft", "fixture"),
         event_type=kind,
         payload=payload,
         previous_event_id=None,
     )
-    return EvidenceEvent.from_json({**made.to_json(), "timestamp": at})
+    return CanonicalEvent.from_json({**made.to_json(), "timestamp": at})
 
 
 def founding(person: str = "test-person-000") -> Founding:
@@ -127,7 +128,7 @@ def test_a_snapshot_of_another_person_is_refused_before_it_is_loaded(tmp_path: P
     class Reducer:
         loaded = False
 
-        def apply(self, event: EvidenceEvent) -> None: ...
+        def apply(self, event: CanonicalEvent) -> None: ...
         def to_json(self) -> dict:
             return {}
 
@@ -136,27 +137,27 @@ def test_a_snapshot_of_another_person_is_refused_before_it_is_loaded(tmp_path: P
 
         def reset(self) -> None: ...
 
-    store = EvidenceStore(tmp_path)
+    store = EventStore(tmp_path)
     store.identity = {"person_id": "test-person-a", "founding": "a"}
     store.append(event("episode_started", {}, at="2026-09-30T00:00:00Z"))
     store.write_snapshot(Reducer())
-    other = EvidenceStore(tmp_path)
+    other = EventStore(tmp_path)
     other.identity = {"person_id": "test-person-b", "founding": "b"}
     with pytest.raises(IdentityError):
         other.restore(Reducer())
     assert not Reducer.loaded
 
-    same = EvidenceStore(tmp_path)
+    same = EventStore(tmp_path)
     same.identity = {"person_id": "test-person-a", "founding": "a"}
     assert same.restore(Reducer()).from_snapshot is True
 
 
 def test_a_legacy_snapshot_without_identity_still_loads_for_a_legacy_root(tmp_path: Path) -> None:
-    store = EvidenceStore(tmp_path)
+    store = EventStore(tmp_path)
     store.append(event("episode_started", {}, at="2026-09-30T00:00:00Z"))
 
     class Reducer:
-        def apply(self, event: EvidenceEvent) -> None: ...
+        def apply(self, event: CanonicalEvent) -> None: ...
         def to_json(self) -> dict:
             return {}
 
@@ -165,7 +166,7 @@ def test_a_legacy_snapshot_without_identity_still_loads_for_a_legacy_root(tmp_pa
 
     path = store.write_snapshot(Reducer())
     assert "identity" not in path.read_text(encoding="utf-8")
-    assert EvidenceStore(tmp_path).restore(Reducer()).from_snapshot is True
+    assert EventStore(tmp_path).restore(Reducer()).from_snapshot is True
 
 
 # ------------------------------------------------------------------ lock

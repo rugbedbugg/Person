@@ -4,16 +4,11 @@
   "title": "Shared protocol definitions",
   "$defs": {
     "protocolVersion": {
-      "const": "shroud-learning-v2"
+      "const": "person-v3"
     },
     "uuid": {
       "type": "string",
       "format": "uuid"
-    },
-    "minecraftUsername": {
-      "type": "string",
-      "description": "A Minecraft account name. Mixed case and digits are ordinary, so this cannot reuse the lowercase identifier pattern.",
-      "pattern": "^[A-Za-z0-9_]{1,16}$"
     },
     "slug": {
       "type": "string",
@@ -47,28 +42,6 @@
     "timestamp": {
       "type": "string",
       "format": "date-time"
-    },
-    "position": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["x", "y", "z"],
-      "properties": {
-        "x": {
-          "type": "integer",
-          "minimum": -30000000,
-          "maximum": 30000000
-        },
-        "y": {
-          "type": "integer",
-          "minimum": -64,
-          "maximum": 320
-        },
-        "z": {
-          "type": "integer",
-          "minimum": -30000000,
-          "maximum": 30000000
-        }
-      }
     },
     "itemStack": {
       "type": "object",
@@ -116,8 +89,42 @@
     "safetyLevel": {
       "enum": ["L0", "L1", "L2", "L3", "L4"]
     },
-    "trainingContext": {
-      "enum": ["fixture", "minecraft_peaceful", "minecraft_normal", "replay"]
+    "token": {
+      "type": "string",
+      "description": "An environment-owned name: an environment, an embodiment, or an environment variant. The core checks its shape, never its value.",
+      "pattern": "^[a-z][a-z0-9_-]{0,31}$"
+    },
+    "experience": {
+      "type": "object",
+      "description": "Which experience stream a message belongs to (ADR 0025): lived or replayed, in which environment, through which embodiment, under which environment-owned variant. Replaces the conflated trainingContext.",
+      "additionalProperties": false,
+      "required": [
+        "context",
+        "environmentKind",
+        "embodimentKind",
+        "environmentVariant"
+      ],
+      "properties": {
+        "context": {
+          "enum": ["lived", "replay"]
+        },
+        "environmentKind": {
+          "$ref": "#/$defs/token"
+        },
+        "embodimentKind": {
+          "$ref": "#/$defs/token"
+        },
+        "environmentVariant": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/token"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
     },
     "learningMode": {
       "enum": ["off", "shadow", "supervised"]

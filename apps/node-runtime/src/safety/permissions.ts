@@ -1,7 +1,10 @@
-import type { PersonConfig, Position } from "#config";
-import type { Permission } from "#skills";
 import type { ContainerView, EntityView } from "../embodiment/types.ts";
 import { ProtectedAreas } from "./protected-areas.ts";
+import {
+  type MinecraftConfig,
+  type Position,
+  type MinecraftPermission,
+} from "#minecraft";
 
 export interface PermissionVerdict {
   allowed: boolean;
@@ -24,17 +27,17 @@ const deny = (reason: string): PermissionVerdict => ({
  */
 export class PermissionGate {
   readonly areas: ProtectedAreas;
-  readonly #config: PersonConfig;
+  readonly #config: MinecraftConfig;
 
   constructor(
-    config: PersonConfig,
+    config: MinecraftConfig,
     areas: ProtectedAreas = new ProtectedAreas(config),
   ) {
     this.#config = config;
     this.areas = areas;
   }
 
-  get permissions(): PersonConfig["permissions"] {
+  get permissions(): MinecraftConfig["permissions"] {
     return this.#config.permissions;
   }
 
@@ -116,9 +119,9 @@ export class PermissionGate {
   }
 
   /** Which of a skill's declared permissions are currently unavailable. */
-  missingFor(required: readonly Permission[]): Permission[] {
+  missingFor(required: readonly string[]): string[] {
     const config = this.#config.permissions;
-    const granted: Record<Permission, boolean> = {
+    const granted: Record<MinecraftPermission, boolean> = {
       harvest_resource: true,
       mine_resource: true,
       build: config.building.enabled,
@@ -131,7 +134,10 @@ export class PermissionGate {
       craft: true,
       consume: true,
     };
-    return required.filter((permission) => !granted[permission]);
+    // A permission this gate does not know is a permission it does not grant.
+    return required.filter(
+      (permission) => !granted[permission as MinecraftPermission],
+    );
   }
 
   /** The summary Node publishes in the Observation. */

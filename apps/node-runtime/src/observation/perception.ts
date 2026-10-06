@@ -1,5 +1,5 @@
-import { distance, positionKey, type Position } from "#config";
 import type { BlockKind, BlockView } from "../embodiment/types.ts";
+import { distance, positionKey, type Position } from "#minecraft";
 
 /**
  * Perception shaping.

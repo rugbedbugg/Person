@@ -1,9 +1,6 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import type { PersonConfig } from "#config";
-import type { Observation } from "#protocol";
 import { protocolValidator } from "#protocol";
-import { distance } from "#config";
 import {
   PermissionGate,
   ProtectedAreas,
@@ -16,6 +13,13 @@ import {
   type PhysicalGuard,
 } from "#node-runtime";
 import { createEmbodiment } from "./embodiment.ts";
+import {
+  type MinecraftConfig,
+  distance,
+  type MinecraftObservation,
+  experienceOf,
+  describeExperience,
+} from "#minecraft";
 
 /**
  * Captures exactly one observation and stops.
@@ -39,11 +43,11 @@ export interface CaptureOptions {
 }
 
 export async function captureObservation(
-  config: PersonConfig,
+  config: MinecraftConfig,
   baseDirectory: string,
   options: CaptureOptions = {},
 ): Promise<{
-  observation: Observation;
+  observation: MinecraftObservation;
   valid: boolean;
   diagnostics: string[];
 }> {
@@ -60,7 +64,7 @@ export async function captureObservation(
       sessionId,
       server: config.server ?? null,
       embodiment: config.runtime.embodiment,
-      trainingContext: config.runtime.trainingContext,
+      experience: describeExperience(experienceOf(config)),
       learningMode: config.learning.mode,
       operatorIntervention: {
         flagged: options.operatorIntervention !== undefined,
@@ -104,7 +108,7 @@ export async function captureObservation(
       permissions,
       kernel,
       ledger,
-      trainingContext: config.runtime.trainingContext,
+      experience: experienceOf(config),
       cognition: {
         activeGoal: null,
         activeRoutine: null,
@@ -197,27 +201,27 @@ const SUSPICIOUS: {
   note: string;
 }[] = [
   {
-    path: "/environment/biome",
+    path: "/payload/environment/biome",
     when: (value) => value === "unknown",
     note: "biome was not read from the world; block biome data may be unavailable",
   },
   {
-    path: "/vitals/armor",
+    path: "/payload/vitals/armor",
     when: (value) => value === 0,
     note: "armor is always zero: worn armour is not being read",
   },
   {
-    path: "/navigation/lastSafePosition",
+    path: "/payload/navigation/lastSafePosition",
     when: (value) => value === null,
     note: "no safe position has been recorded yet",
   },
   {
-    path: "/nearby/resources",
+    path: "/payload/nearby/resources",
     when: (value) => Array.isArray(value) && value.length === 0,
     note: "no resources in range at all: check the search radius and block classification",
   },
   {
-    path: "/inventory/freeSlots",
+    path: "/payload/inventory/freeSlots",
     when: (value) => value === 36,
     note: "the inventory reports completely empty, which may mean it was not read",
   },
@@ -320,10 +324,10 @@ export function compareObservations(
   };
 }
 
-export function renderObservation(observation: Observation): string {
+export function renderObservation(observation: MinecraftObservation): string {
   const lines: string[] = [];
-  const vitals = observation.vitals;
-  const environment = observation.environment;
+  const vitals = observation.payload.vitals;
+  const environment = observation.payload.environment;
   const nearest = <T extends { distance: number }>(
     items: T[],
     limit = 3,
@@ -331,7 +335,7 @@ export function renderObservation(observation: Observation): string {
   const away = (distance: number): string => `${distance.toFixed(1)}m`;
 
   lines.push(
-    `Observation v${observation.observationVersion} (${observation.trainingContext})`,
+    `Observation v${observation.observationVersion} (${describeExperience(observation.experience)})`,
   );
   lines.push(
     `  vitals    health=${vitals.health} food=${vitals.food} breath=${vitals.breath} armor=${vitals.armor} alive=${vitals.alive}`,
@@ -344,22 +348,22 @@ export function renderObservation(observation: Observation): string {
     `  world     ${environment.dimension} ${environment.dayPhase} time=${environment.timeOfDay} weather=${environment.weather} light=${environment.lightLevel} biome=${environment.biome}`,
   );
 
-  const categories = Object.entries(observation.inventory.categories)
+  const categories = Object.entries(observation.payload.inventory.categories)
     .filter(([, count]) => count > 0)
     .map(([name, count]) => `${name}=${count}`)
     .join(" ");
   lines.push(
-    `  inventory ${observation.inventory.items.length} stacks, ${observation.inventory.freeSlots} free slots${categories ? ` (${categories})` : ""}`,
+    `  inventory ${observation.payload.inventory.items.length} stacks, ${observation.payload.inventory.freeSlots} free slots${categories ? ` (${categories})` : ""}`,
   );
-  if (observation.inventory.items.length)
+  if (observation.payload.inventory.items.length)
     lines.push(
-      `            ${observation.inventory.items
+      `            ${observation.payload.inventory.items
         .map((item) => `${item.name}x${item.count}`)
         .slice(0, 10)
         .join(" ")}`,
     );
 
-  const nearby = observation.nearby;
+  const nearby = observation.payload.nearby;
   lines.push("  nearby");
   // The category breakdown is the point of a balanced search: a run that finds
   // sixty-four of one thing is reporting a perception failure, not a forest.
@@ -449,28 +453,28 @@ export function renderObservation(observation: Observation): string {
     }`,
   );
 
-  const home = observation.home;
+  const home = observation.payload.home;
   lines.push(
     `  home      ${
       home.activeHome ? home.activeHome.homeId : "none"
     } shelter=${home.shelterState} storage=${home.ownedStorage.length} foodReserve=${home.foodReserve} fuelReserve=${home.fuelReserve} bed=${home.bedKnown}`,
   );
-  const navigation = observation.navigation;
+  const navigation = observation.payload.navigation;
   lines.push(
     `  route     ${navigation.routeStatus} risk=${navigation.pathRisk} stuck=${navigation.stuckState} returnKnown=${navigation.returnPathKnown}`,
   );
-  const permitted = Object.entries(observation.permissions)
+  const permitted = Object.entries(observation.payload.permissions)
     .filter(([, allowed]) => allowed)
     .map(([name]) => name)
     .join(",");
-  const refused = Object.entries(observation.permissions)
+  const refused = Object.entries(observation.payload.permissions)
     .filter(([, allowed]) => !allowed)
     .map(([name]) => name)
     .join(",");
   lines.push(`  allowed   ${permitted || "nothing"}`);
   if (refused) lines.push(`  refused   ${refused}`);
   lines.push(
-    `  can       diggableGround=${observation.affordances.diggableGround} shelterSite=${observation.affordances.shelterSite} storageSite=${observation.affordances.storageSite}`,
+    `  can       diggableGround=${observation.payload.affordances.diggableGround} shelterSite=${observation.payload.affordances.shelterSite} storageSite=${observation.payload.affordances.storageSite}`,
   );
   return lines.join("\n");
 }

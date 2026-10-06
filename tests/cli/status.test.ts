@@ -12,8 +12,8 @@ import {
   stalenessSeconds,
   statusPath,
 } from "#node-runtime";
-import { loadConfig } from "#config";
 import { REPOSITORY } from "../support/harness.ts";
+import { loadMinecraftConfig } from "#minecraft";
 
 const CONFIG = path.join(REPOSITORY, "examples/fixture.toml");
 
@@ -200,7 +200,7 @@ test("a stale status says so rather than looking live", () => {
 });
 
 test("status is honest when nothing has run yet", () => {
-  const config = loadConfig(CONFIG);
+  const config = loadMinecraftConfig(CONFIG);
   const missing = {
     ...config,
     runtime: {
@@ -244,7 +244,7 @@ test("status never connects to anything", () => {
 });
 
 test("follow reprints only when the status changes", async () => {
-  const config = loadConfig(CONFIG);
+  const config = loadMinecraftConfig(CONFIG);
   const directory = mkdtempSync(path.join(tmpdir(), "person-follow-"));
   const file = statusPath(directory, config.worldId, config.personId);
   const writer = new StatusWriter(file, {
@@ -275,7 +275,7 @@ test("follow reprints only when the status changes", async () => {
 });
 
 test("statusCommand reports a missing store without throwing", () => {
-  const result = statusCommand(loadConfig(CONFIG), true);
+  const result = statusCommand(loadMinecraftConfig(CONFIG), true);
   assert.ok(result.code === 0 || result.code === 1);
   const body = JSON.parse(result.output) as { found?: boolean };
   if (result.code === 1) assert.equal(body.found, false);

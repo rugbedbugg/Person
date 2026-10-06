@@ -1,17 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import {
-  ConfigError,
-  LegacyCheckpointError,
-  assertNotLegacyCheckpoint,
-  describeConnection,
-  isLegacyConfig,
-  loadConfig,
-  migrateConfig,
-  withConnectionOverride,
-  type ConnectionOverride,
-  type PersonConfig,
-} from "#config";
+import { ConfigError, readConfigDocument } from "#config";
 import {
   PersonRuntime,
   readStatus,
@@ -30,6 +19,20 @@ import {
   renderObservation,
   resolveBase,
 } from "./observe.ts";
+import {
+  LegacyCheckpointError,
+  assertNotLegacyCheckpoint,
+  describeConnection,
+  isLegacyConfig,
+  loadMinecraftConfig,
+  migrateConfig,
+  upgradeConfigDocument,
+  withConnectionOverride,
+  type ConnectionOverride,
+  type MinecraftConfig,
+  experienceOf,
+  describeExperience,
+} from "#minecraft";
 
 export { skillTestCommand } from "./skill-test.ts";
 export type { SkillTestOptions, SkillTestResult } from "./skill-test.ts";
@@ -49,15 +52,15 @@ export interface RunOptions {
 }
 
 function withLearningMode(
-  config: PersonConfig,
+  config: MinecraftConfig,
   mode?: RunOptions["learningMode"],
-): PersonConfig {
+): MinecraftConfig {
   if (!mode || mode === config.learning.mode) return config;
   return { ...config, learning: { ...config.learning, mode } };
 }
 
 export async function runCommand(options: RunOptions): Promise<CommandResult> {
-  const base = loadConfig(options.configPath);
+  const base = loadMinecraftConfig(options.configPath);
   // The LAN port is runtime information, not configuration: Minecraft picks a
   // new one every time a world is opened. The override applies to this
   // invocation and is never written back.
@@ -69,7 +72,7 @@ export async function runCommand(options: RunOptions): Promise<CommandResult> {
     config,
     path.dirname(path.resolve(options.configPath)),
   );
-  if (!options.json && config.runtime.embodiment === "minecraft")
+  if (!options.json && config.runtime.embodiment === "mineflayer")
     process.stderr.write(
       `person: connecting to ${describeConnection(config, options.connection ?? {})}\n`,
     );
@@ -120,11 +123,11 @@ export async function observeCommand(
   options: ObserveOptions,
 ): Promise<CommandResult> {
   const config = withConnectionOverride(
-    loadConfig(options.configPath),
+    loadMinecraftConfig(options.configPath),
     options.connection ?? {},
   );
   const identity = describeConnection(config, options.connection ?? {});
-  if (!options.json && config.runtime.embodiment === "minecraft")
+  if (!options.json && config.runtime.embodiment === "mineflayer")
     process.stderr.write(`person: connecting to ${identity}\n`);
 
   let captured;
@@ -211,7 +214,7 @@ export async function observeCommand(
  * what Person does, and the last known state survives the run that produced it.
  */
 export function statusCommand(
-  config: PersonConfig,
+  config: MinecraftConfig,
   json: boolean,
 ): CommandResult {
   const file = statusPath(
@@ -237,7 +240,7 @@ export function statusCommand(
 
 /** Reprints the status whenever the runtime writes a new one. */
 export async function followStatus(
-  config: PersonConfig,
+  config: MinecraftConfig,
   json: boolean,
   intervalMs: number,
   write: (text: string) => void,
@@ -324,20 +327,29 @@ export function validateCommand(
     return {
       code: 0,
       output:
-        `Migrated from ${result.fromVersion} to configVersion 2.\n${notes}\n\n` +
+        `Migrated from ${result.fromVersion} to configVersion 3.\n${notes}\n\n` +
         `${JSON.stringify(result.config, null, 2)}\n`,
     };
   }
 
   try {
-    const config = loadConfig(absolute);
+    const config = loadMinecraftConfig(absolute);
     const registry = skillRegistry();
+    // An older document is read as the current version in memory, never
+    // rewritten; --migrate shows what that reading changed.
+    const upgrade = migrate
+      ? upgradeConfigDocument(readConfigDocument(absolute).document).notes
+      : [];
+    const upgraded = upgrade.length
+      ? `${upgrade.map((note) => `  - ${note}`).join("\n")}\n`
+      : "";
     return {
       code: 0,
       output:
+        upgraded +
         `Configuration valid: ${absolute}\n` +
         `  person=${config.personId} world=${config.worldId}\n` +
-        `  embodiment=${config.runtime.embodiment} trainingContext=${config.runtime.trainingContext}\n` +
+        `  embodiment=${config.runtime.embodiment} experience=${describeExperience(experienceOf(config))}\n` +
         `  learning=${config.learning.mode} (learning never enables itself)\n` +
         `  protocol=${PROTOCOL_VERSION} skills=${registry.ids.length} libraryRevision=${registry.revision}\n` +
         `  existing containers: withdraw=${config.permissions.containers.existing.withdraw} deposit=${config.permissions.containers.existing.deposit}\n` +
@@ -392,7 +404,7 @@ export function inspectCommand(
 
   if (!configPath)
     return { code: 2, output: "--config is required for this inspection.\n" };
-  const config = loadConfig(configPath);
+  const config = loadMinecraftConfig(configPath);
   if (what === "config")
     return { code: 0, output: `${JSON.stringify(config, null, 2)}\n` };
 

@@ -15,6 +15,10 @@ import {
   type MessageType,
 } from "./version.ts";
 import type { ProtocolMessage } from "./types.ts";
+import {
+  discoveredEnvironments,
+  type EnvironmentManifest,
+} from "./environments.ts";
 
 export const SCHEMA_DIRECTORY = fileURLToPath(
   new URL("../schemas/", import.meta.url),
@@ -49,8 +53,21 @@ const describe = (errors: ErrorObject[] | null | undefined): string[] =>
 export class ProtocolValidator {
   readonly #ajv: Ajv2020;
   readonly #byType = new Map<MessageType, ValidateFunction>();
+  readonly #payloads = new Map<string, ValidateFunction>();
+  readonly #triggers = new Set<string>();
+  readonly #actions = new Set<string>();
 
-  constructor(schemaDirectory: string = SCHEMA_DIRECTORY) {
+  /**
+   * The core contract, plus the payload and vocabulary of each environment
+   * profile (ADR 0025). An Observation's envelope is checked against the core
+   * schema and its payload against the schema of the environment its
+   * `experience` names; an environment that is not installed cannot be
+   * observed in.
+   */
+  constructor(
+    schemaDirectory: string = SCHEMA_DIRECTORY,
+    environments: Iterable<EnvironmentManifest> = discoveredEnvironments().values(),
+  ) {
     this.#ajv = new Ajv2020({
       strict: true,
       allErrors: true,
@@ -70,6 +87,45 @@ export class ProtocolValidator {
         throw new ProtocolError(`Missing schema for message type ${type}`);
       this.#byType.set(type, compiled);
     }
+    for (const manifest of environments) {
+      this.#payloads.set(
+        manifest.kind,
+        this.#ajv.compile(manifest.payloadSchema),
+      );
+      for (const trigger of manifest.emergencyTriggers)
+        this.#triggers.add(trigger);
+      for (const action of manifest.emergencyActions) this.#actions.add(action);
+    }
+  }
+
+  #environmentDiagnostics(
+    type: string,
+    record: Record<string, unknown>,
+  ): string[] {
+    if (type === "Observation") {
+      const experience = record["experience"] as { environmentKind: string };
+      const payload = this.#payloads.get(experience.environmentKind);
+      if (!payload)
+        return [
+          `/experience/environmentKind no installed environment ${JSON.stringify(experience.environmentKind)}`,
+        ];
+      return payload(record["payload"])
+        ? []
+        : describe(payload.errors).map((line) => `/payload${line}`);
+    }
+    if (type === "EmergencyEvent") {
+      const problems: string[] = [];
+      if (!this.#triggers.has(String(record["trigger"])))
+        problems.push(
+          `/trigger ${JSON.stringify(record["trigger"])} is not an emergency`,
+        );
+      if (!this.#actions.has(String(record["action"])))
+        problems.push(
+          `/action ${JSON.stringify(record["action"])} is not an emergency`,
+        );
+      return problems;
+    }
+    return [];
   }
 
   /** Message types this validator knows about, in a stable order. */
@@ -101,9 +157,10 @@ export class ProtocolValidator {
         diagnostics: [`/type unknown message type ${JSON.stringify(type)}`],
       };
     const check = this.#byType.get(type as MessageType) as ValidateFunction;
-    return check(message)
-      ? { valid: true, diagnostics: [] }
-      : { valid: false, diagnostics: describe(check.errors) };
+    if (!check(message))
+      return { valid: false, diagnostics: describe(check.errors) };
+    const diagnostics = this.#environmentDiagnostics(type, record);
+    return { valid: diagnostics.length === 0, diagnostics };
   }
 
   assertValid<T extends ProtocolMessage>(message: unknown): T {

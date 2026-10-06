@@ -1,4 +1,3 @@
-import { distance, type Position } from "#config";
 import {
   SkillFailure,
   itemCount,
@@ -8,6 +7,7 @@ import {
 import { isStone } from "../materials.ts";
 import { RecipeError, planCraft, preferredWood } from "../recipes.ts";
 import { approach } from "../navigate.ts";
+import { distance, type Position } from "#minecraft";
 
 /** A permitted, clear, solid-floored block to put a workstation on. */
 function placementSite(

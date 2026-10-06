@@ -1,4 +1,3 @@
-import { distance, type Position } from "#config";
 import {
   SkillFailure,
   type SkillContext,
@@ -7,6 +6,7 @@ import {
 import { isBuildingMaterial } from "../materials.ts";
 import { travelTo } from "../navigate.ts";
 import { shelterEntrance, shelterPlan } from "../shelter-plan.ts";
+import { distance, type Position } from "#minecraft";
 
 const buildingItem = (context: SkillContext): string | null =>
   context.snapshot().inventory.find((item) => isBuildingMaterial(item.name))

@@ -26,10 +26,9 @@ served is reopened as soon as the evidence is actually seen.
 
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
-
-from person_planner import evidence_percepts
 
 #: The fixed identifier of every search routine. Searching is not a strategy
 #: the learner scores, so it never gets a content-derived routine identity.
@@ -100,9 +99,12 @@ class InformationSearch:
     def remaining(self) -> int:
         return self.budget - len(self.looks)
 
-    def leads(self, observation: dict[str, Any]) -> list[dict[str, Any]]:
-        """Glimpses of what is sought: perceived, not yet recognised."""
-        percepts = evidence_percepts(observation)
+    def leads(self, percepts: Mapping[str, Sequence[dict[str, Any]]]) -> list[dict[str, Any]]:
+        """Glimpses of what is sought: perceived, not yet recognised.
+
+        `percepts` is the current percepts bearing on each evidence fact, as
+        the environment profile groups them; nothing earlier than now.
+        """
         glimpses = [
             percept
             for fact in self.purpose
@@ -111,14 +113,14 @@ class InformationSearch:
         ]
         return sorted(glimpses, key=lambda percept: (percept["distance"], percept["bearing"]))
 
-    def next_direction(self, observation: dict[str, Any]) -> str:
-        """Where to look next, decided from the current observation alone.
+    def next_direction(self, percepts: Mapping[str, Sequence[dict[str, Any]]]) -> str:
+        """Where to look next, decided from current perception alone.
 
         A glimpse of what is sought comes first, nearest first. Otherwise the
         search sweeps the horizon in one direction, levelling the head first
         if an earlier glance tilted it.
         """
-        leads = self.leads(observation)
+        leads = self.leads(percepts)
         if leads:
             return _toward(leads[0])
         return "forward" if self.pitch_steps != 0 else "left"

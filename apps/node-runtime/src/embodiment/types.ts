@@ -1,5 +1,6 @@
-import type { ItemStack, Position } from "#protocol";
+import type { ItemStack } from "#protocol";
 import type { GazeDirection } from "./gaze.ts";
+import { type Position } from "#minecraft";
 
 /**
  * The embodiment port.

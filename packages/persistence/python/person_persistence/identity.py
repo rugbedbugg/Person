@@ -18,7 +18,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .events import EvidenceEvent
+from .events import CanonicalEvent
 
 IDENTITY_SCHEMA_VERSION = "person-identity-v1"
 #: A canonical Person's identifier: `person-000`, `person-001`, ... A
@@ -131,7 +131,7 @@ class ContinuityRecord:
         #: Events that break the founding rule; nonzero means a corrupt root.
         self.violations: list[str] = []
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         if event.type == "person_founded":
             if self.events_seen:
                 self.violations.append(f"person_founded at position {self.events_seen}")
@@ -204,7 +204,7 @@ class LifeRecord:
         self.deaths = 0
         self.respawns = 0
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         if self.status == "terminated":
             return
         if event.type == "person_died":

@@ -20,11 +20,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { Position } from "#config";
 import { FixtureWorld } from "#fixture-world";
 import { shelterPlan } from "../../apps/node-runtime/src/skills/shelter-plan.ts";
 import { temporaryDirectory } from "../support/harness.ts";
 import { runEpisode } from "../support/runtime.ts";
+import { type Position } from "#minecraft";
 
 const COGNITION = ["uv", "run", "person-cognition"];
 const PERSON = "test-person-000";

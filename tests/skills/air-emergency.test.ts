@@ -5,10 +5,10 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { Position } from "#config";
 import { DisconnectedError } from "#node-runtime";
 import { FixtureWorld } from "#fixture-world";
 import { harness } from "../support/harness.ts";
+import { type Position } from "#minecraft";
 
 /** A pool from y 57 to 63 across x, z in [-3, 3], open to the sky above. */
 function pool(extra: { name: string; position: Position }[] = []) {

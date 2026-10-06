@@ -32,26 +32,20 @@
 - **Distinguish strictly:** IMPLEMENTED / TESTED IN FIXTURE / CONFORMANCE-TESTED / LIVE-VALIDATED IN MINECRAFT / PLANNED
 - **REALITY_VALIDATION.md** is the canonical evidence document — keep it honest
 
-### Architecture Boundaries
+### Architecture
 
-- Python proposes intentions; Node decides what is physically permitted
-- Cognition never receives Mineflayer access, raw movement, or command execution
-- Safety kernel (L0–L4) is Node-only; Python cannot override
-- Requested skill ≠ executed skill — learning credits executed only
-- Validation runs change no learning state (fingerprint verified)
-- **Perception firewall** (ADR 0002): a body's world knowledge is not Person's
-- **Memory firewall** (ADR 0003): the journal is engineering truth, not recall
-- **Autonomy ≠ authority** (ADR 0005): Person may plan what the runtime refuses
+Architectural rules are not restated here. See `docs/ARCHITECTURE.md`,
+"Invariants and where they are held", and the ADRs it cites.
 
 The known disagreements between the code and the frozen architecture are
-`docs/CURRENT_STATE.md`, "Known Deviations", C1-C8. Do not resolve one silently.
+`docs/CURRENT_STATE.md`, "Known Deviations". Do not resolve one silently.
 
 ### Implementation Discipline
 
 - **Inspect existing abstractions** before adding parallel implementations
-- Check `packages/` for shared protocols, skills, config, planner, policy, persistence
+- Check `packages/` for shared protocols, skills, config, planner, policy, persistence, epistemics
+- Check `environments/minecraft/` for everything Minecraft owns
 - Check `apps/node-runtime/src/` and `apps/cognition/python/` for runtime/cognition code
-- Skills written once against `Embodiment` port — two bodies (Mineflayer + Fixture)
 
 ### Commands
 
@@ -61,21 +55,6 @@ node apps/cli/src/bin/person.ts run --config examples/fixture.toml  # Fixture ep
 node apps/cli/src/bin/person.ts validate examples/fixture.toml      # Config validation
 node apps/cli/src/bin/person.ts inspect skills                      # List skill library
 ```
-
----
-
-## Quick Reference: Key Invariants (from AGENTS.md)
-
-| Invariant                            | Enforced By                                         |
-| ------------------------------------ | --------------------------------------------------- |
-| Python proposes; Node decides        | `dispatch.ts`, `validator.ts`, architecture tests   |
-| No Mineflayer in cognition           | `adapters/minecraft/` only importer; arch tests     |
-| Safety kernel pure function          | `safety-kernel.ts`, `kernel.test.ts`                |
-| Requested ≠ executed skill           | `SkillOutcome` schema, attribution tests            |
-| Validation doesn't train             | `skill-test.test.ts` fingerprint check              |
-| Live validation claimed only if done | `REALITY_VALIDATION.md` vocabulary                  |
-| Fixture ≠ live evidence              | Training-context key on all statistics              |
-| No legacy Shroud compatibility       | `IMPLEMENTATION_REPORT.md` "Rewritten or discarded" |
 
 ---
 

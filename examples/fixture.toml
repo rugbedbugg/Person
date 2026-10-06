@@ -1,11 +1,14 @@
 # Deterministic fixture configuration: no Minecraft server is contacted.
-configVersion = 2
+configVersion = 3
 personId = "ada"
 worldId = "fixture-world-01"
 
+[environment]
+# Person core is environment-neutral; this profile owns the rest (ADR 0025).
+kind = "minecraft"
+
 [runtime]
 embodiment = "fixture"
-trainingContext = "fixture"
 outputDirectory = "../runs"
 rngSeed = 20260915
 maxDecisions = 200

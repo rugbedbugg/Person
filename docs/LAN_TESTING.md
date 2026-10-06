@@ -147,8 +147,8 @@ debug session can never be mistaken later for an acceptance run.
 
 ### 1. Peaceful world, connection and one observation
 
-Set `difficulty` to Peaceful and `runtime.trainingContext` to
-`minecraft_peaceful`. Then:
+Set the world's difficulty to Peaceful and `environment.difficulty` to
+`"peaceful"`. Then:
 
 ```
 node apps/cli/src/bin/person.ts observe --config my-world.toml --out first-contact.json

@@ -270,7 +270,7 @@ def test_a_sterility_failure_is_journalled_as_a_rejected_answer(
         reason="reflection",
         self_knowledge=None,
         world_available=None,
-        observation=None,
+        situation=(),
         place=None,
         working_memory=[],
         beliefs=[],

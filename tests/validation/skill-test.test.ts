@@ -2,7 +2,6 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
-import type { PersonConfig } from "#config";
 import { FixtureWorld } from "#fixture-world";
 import {
   readStatus,
@@ -20,6 +19,7 @@ import {
   baseConfig,
   temporaryDirectory,
 } from "../support/harness.ts";
+import { type MinecraftConfig } from "#minecraft";
 
 /**
  * The single-skill validation harness.
@@ -67,7 +67,7 @@ function watched(world: FixtureWorld): {
 }
 
 interface Fixture {
-  config: PersonConfig;
+  config: MinecraftConfig;
   world: FixtureWorld;
 }
 
@@ -78,7 +78,7 @@ function fixture(
       name: string;
       position: { x: number; y: number; z: number };
     }[];
-    config?: Partial<PersonConfig>;
+    config?: Partial<MinecraftConfig>;
     outputDirectory?: string;
     evidenceDirectory?: string;
   } = {},
@@ -90,7 +90,7 @@ function fixture(
       : {}),
     ...(options.config ? { config: options.config } : {}),
   });
-  const config: PersonConfig = options.evidenceDirectory
+  const config: MinecraftConfig = options.evidenceDirectory
     ? {
         ...base,
         learning: {
@@ -106,7 +106,7 @@ function fixture(
   return { config, world };
 }
 
-const reportsIn = (config: PersonConfig): string[] => {
+const reportsIn = (config: MinecraftConfig): string[] => {
   const directory = skillValidationDirectory(config.runtime.outputDirectory);
   return existsSync(directory) ? readdirSync(directory) : [];
 };
@@ -194,7 +194,7 @@ test("the safety kernel refuses a skill whose permission is switched off", async
           tamedAnimals: false,
         },
       },
-    } as Partial<PersonConfig>,
+    } as Partial<MinecraftConfig>,
   });
 
   const run = await runSkillValidation({
@@ -322,7 +322,7 @@ test("the report is written where validation reports belong, and is complete", a
     readFileSync(run.reportPath as string, "utf8"),
   ) as SkillValidationReport;
 
-  assert.equal(stored.schemaVersion, 1);
+  assert.equal(stored.schemaVersion, 2);
   for (const field of [
     "testId",
     "startedAt",
@@ -330,7 +330,7 @@ test("the report is written where validation reports belong, and is complete", a
     "personId",
     "worldId",
     "sessionId",
-    "trainingContext",
+    "experience",
     "protocolVersion",
     "skillLibraryRevision",
     "requestedSkill",

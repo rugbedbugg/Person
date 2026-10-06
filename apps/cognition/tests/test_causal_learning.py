@@ -56,19 +56,24 @@ from person_cognition.hypotheses.hypothesis import (
 )
 from person_cognition.memory.episodes import Episode
 from person_cognition.prediction import PendingPrediction
-from person_persistence import EvidenceJournal, new_event
+from person_epistemics import ExperienceKey
+from person_minecraft.offline import envelope_of
+from person_persistence import EventJournal, new_event
 from person_policy import EvidencePolicyProvider, RoutineCandidate, RoutineStatistics
 from person_skills import skill_registry
 from test_loop import Harness, envelope
 from test_spatial import STILL
+
+#: The experience stream every fixture test lives in (ADR 0025).
+FIXTURE = "lived:minecraft/fixture"
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 BERRIES = (
     {"fact": "plant_food", "op": "+=", "value": 6},
     {"fact": "edible_food", "op": "+=", "value": 6},
 )
-RAIN = Perceived("rain", "day", "place_1")
-CLEAR = Perceived("clear", "day", "place_1")
+RAIN = Perceived((("weather", "rain"), ("day_phase", "day")), "place_1")
+CLEAR = Perceived((("weather", "clear"), ("day_phase", "day")), "place_1")
 
 
 # ------------------------------------------------------------------ helpers
@@ -185,7 +190,7 @@ def settle(
 def journal(harness: Harness, kind: str) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(harness.evidence / "journal").read()
+        for event in EventJournal(harness.evidence / "journal").read()
         if event.type == kind
     ]
 
@@ -498,10 +503,10 @@ def calm_view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
-    document["nearby"]["resources"] = [
+        document["payload"]["nearby"][key] = []
+    document["payload"]["nearby"]["resources"] = [
         {
             "kind": "plant_food",
             "name": "sweet_berry_bush",
@@ -513,14 +518,14 @@ def calm_view() -> dict[str, Any]:
             "harvestPermitted": True,
         }
     ]
-    document["home"].update(
+    document["payload"]["home"].update(
         {
             "shelterState": "complete",
             "foodReserve": 0,
         }
     )
-    document["inventory"]["items"] = [{"name": "stone_pickaxe", "count": 1}]
-    document["inventory"]["categories"].update({"wood": 0, "tools": 1})
+    document["payload"]["inventory"]["items"] = [{"name": "stone_pickaxe", "count": 1}]
+    document["payload"]["inventory"]["categories"].update({"wood": 0, "tools": 1})
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -546,13 +551,15 @@ class HiddenWorld:
         document = calm_view()
         document["tick"] = self.tick
         document["messageId"] = envelope("Observation", self.tick)["messageId"]
-        document["environment"]["weather"] = weather
-        document["vitals"]["food"] = self.food
+        document["payload"]["environment"]["weather"] = weather
+        document["payload"]["vitals"]["food"] = self.food
         if self.berries:
-            document["inventory"]["items"].append({"name": "sweet_berries", "count": self.berries})
-            document["inventory"]["categories"]["food"] = self.berries
+            document["payload"]["inventory"]["items"].append(
+                {"name": "sweet_berries", "count": self.berries}
+            )
+            document["payload"]["inventory"]["categories"]["food"] = self.berries
         if self.hostile:
-            document["nearby"]["hostiles"] = [
+            document["payload"]["nearby"]["hostiles"] = [
                 {
                     "kind": "hostile",
                     "name": "zombie",
@@ -759,7 +766,7 @@ def test_a_condition_that_changes_mid_trial_makes_it_inconclusive(tmp_path: Path
         1,
         {"hypothesis": about_here.to_json(), "question": "variation", "admitted_to": "active"},
     )
-    settle(harness, "contradicts", Perceived("rain", "day", None))
+    settle(harness, "contradicts", Perceived((("weather", "rain"), ("day_phase", "day")), None))
     unsure = [
         entry
         for entry in journal(harness, "hypothesis_evidence")
@@ -951,14 +958,17 @@ def provider() -> EvidencePolicyProvider:
                     decision_id=None,
                     tick=1,
                     policy_revision=0,
-                    training_context="fixture",
+                    experience=ExperienceKey("minecraft", "fixture"),
                     event_type="routine_outcome",
                     payload={"routine_id": routine, "context_id": "c", "status": "SUCCESS"},
                     previous_event_id=None,
                 )
             )
     return EvidencePolicyProvider(
-        statistics, training_context="fixture", learning_mode="supervised", minimum_support=3
+        statistics,
+        experience=FIXTURE,
+        learning_mode="supervised",
+        minimum_support=3,
     )
 
 
@@ -969,12 +979,14 @@ def test_a_supported_hypothesis_can_change_a_close_choice_when_its_condition_hol
     plants = option("plants", ("gather_plant_food",), risk=0.19)
     hunt = option("hunt", ("hunt_safe_passive_animals",))
     book = supported_book()
-    neutral = policy.propose(view, None, [plants, hunt], "c")
+    neutral = policy.propose(envelope_of(view), None, [plants, hunt], "c")
     assert neutral.routine_id == "r_plants", "without the belief, berries win the tie"
     raining = policy.propose(
-        view, None, [plants, hunt], "c", hypotheses=hypothesis_term(book, RAIN)
+        envelope_of(view), None, [plants, hunt], "c", hypotheses=hypothesis_term(book, RAIN)
     )
-    clear = policy.propose(view, None, [plants, hunt], "c", hypotheses=hypothesis_term(book, CLEAR))
+    clear = policy.propose(
+        envelope_of(view), None, [plants, hunt], "c", hypotheses=hypothesis_term(book, CLEAR)
+    )
     effects = {c.candidate.routine_id: c.hypothesis_effect for c in raining.candidates}
     assert effects["r_plants"] < 0 and effects["r_hunt"] == 0
     assert all(abs(value) <= HYPOTHESIS_LIMIT for value in effects.values())
@@ -984,7 +996,7 @@ def test_a_supported_hypothesis_can_change_a_close_choice_when_its_condition_hol
     # It cannot make a refused option win, nor create one.
     refused = option("hunt", ("hunt_safe_passive_animals",), applicable=False)
     chosen = policy.propose(
-        view, None, [plants, refused], "c", hypotheses=hypothesis_term(book, RAIN)
+        envelope_of(view), None, [plants, refused], "c", hypotheses=hypothesis_term(book, RAIN)
     )
     assert chosen.routine_id == "r_plants"
     assert len(chosen.candidates) == 2
@@ -1061,7 +1073,7 @@ def test_the_book_is_rebuilt_from_its_events_alone(tmp_path: Path) -> None:
     anomalous(harness)
     settle(harness, "contradicts", RAIN)
     rebuilt = HypothesisBook()
-    for event in EvidenceJournal(tmp_path / "journal").read():
+    for event in EventJournal(tmp_path / "journal").read():
         rebuilt.apply(event)
     assert rebuilt.to_json() == harness.loop.hypothesis_book.to_json()
     assert deepcopy(rebuilt.to_json()) == rebuilt.to_json()

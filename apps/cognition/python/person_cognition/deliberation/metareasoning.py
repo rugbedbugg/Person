@@ -15,7 +15,8 @@ from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
+from person_skills import skill_registry
 
 #: Declared engineering priors (ADR 0021), in experienced ticks.
 TRIGGER_COUNT = 3
@@ -39,7 +40,9 @@ PROJECT_BAND = 300.0
 #: Facts no observation carries: true only because the action that makes them
 #: true just succeeded (`rested` after waiting). A goal made only of these is
 #: satisfied by its routine's success, the only evidence there is.
-ACTION_FACTS: frozenset[str] = frozenset({"rested", "stored_surplus", "withdrawn", "looted"})
+#: The environment's vocabulary (`factClasses.action`, ADR 0025); the
+#: installed environment's.
+ACTION_FACTS: frozenset[str] = skill_registry().vocabulary.action_facts
 
 #: ADR 0023 (C6): the trigger kinds affect may advance, by exactly one signal,
 #: and the bands it is read in. Declared engineering priors.
@@ -273,7 +276,7 @@ class ArbitrationRecord:
         self.backoff.clear()
         self.adopted.clear()
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         payload = event.payload
         key = payload.get("trigger_key_full")
         if event.type == "deliberation_requested" and key:

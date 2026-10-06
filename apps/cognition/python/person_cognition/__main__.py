@@ -15,12 +15,20 @@ from pathlib import Path
 from typing import TextIO
 
 from person_config import ConfigError, load_cognition_settings
-from person_persistence import EvidenceError, IdentityError, JournalCorruption
+from person_persistence import EventRecordError, IdentityError, JournalCorruption
 
 from .affect import research_bounds
 from .continuity import found, inspect_root
-from .effects import main as compare_effects
+from .environment import load_environment
 from .loop import CognitionLoop
+
+
+def compare_effects(path: str) -> str:
+    """The validation harness's effect comparison, by the observations' environment."""
+    with open(path, encoding="utf8") as handle:
+        request = json.load(handle)
+    kind = str(request["before"]["experience"]["environmentKind"])
+    return json.dumps(load_environment(kind).compare_effects(request))
 
 
 def _lines(stream: TextIO) -> Iterator[str]:
@@ -41,7 +49,7 @@ def _lines(stream: TextIO) -> Iterator[str]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="person-cognition",
-        description="Person cognition process (speaks the shroud-learning-v2 protocol over stdio)",
+        description="Person cognition process (speaks the person-v3 protocol over stdio)",
     )
     parser.add_argument("--config", help="Person configuration file, for the cognition settings")
     parser.add_argument(
@@ -94,7 +102,7 @@ def main(argv: list[str] | None = None) -> int:
     if arguments.inspect_root:
         try:
             report = inspect_root(Path(arguments.inspect_root))
-        except (OSError, EvidenceError, JournalCorruption) as error:
+        except (OSError, EventRecordError, JournalCorruption) as error:
             sys.stderr.write(f"person-cognition: {error}\n")
             return 2
         sys.stdout.write(json.dumps(report, sort_keys=True) + "\n")
@@ -123,7 +131,8 @@ def main(argv: list[str] | None = None) -> int:
                 world_id=chosen.world_id,
                 name=chosen.identity_name,
                 designation=chosen.identity_designation,
-                training_context=chosen.training_context,
+                environment_kind=chosen.environment_kind,
+                embodiment_kind=chosen.embodiment_kind,
             )
         except (ConfigError, IdentityError) as error:
             sys.stderr.write(f"person-cognition: {error}\n")

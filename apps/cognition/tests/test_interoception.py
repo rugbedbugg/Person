@@ -24,7 +24,8 @@ from typing import Any
 import pytest
 from person_cognition.affect import Affect, AffectRecord, AffectState
 from person_cognition.interoception import Interoception
-from person_persistence import EvidenceJournal
+from person_minecraft.offline import body_of
+from person_persistence import EventJournal
 from test_affect import outcome, with_home
 from test_loop import Harness, envelope
 from test_spatial import STILL, at
@@ -38,9 +39,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -55,9 +56,9 @@ def body(
     name: str = "zombie",
 ) -> dict[str, Any]:
     observation = deepcopy(view)
-    observation["vitals"].update({"health": health, "food": food, "breath": breath})
+    observation["payload"]["vitals"].update({"health": health, "food": food, "breath": breath})
     if threat is not None:
-        observation["nearby"]["hostiles"] = [
+        observation["payload"]["nearby"]["hostiles"] = [
             {
                 "name": name,
                 "distance": threat,
@@ -83,7 +84,7 @@ class Life:
         self.tonic: list[dict[str, Any]] = []
 
     def live(self, observation: dict[str, Any], now: int) -> None:
-        sensed = self.sense.sense(observation)
+        sensed = self.sense.sense(body_of(observation))
         record = self.affect.apply_tonic(sensed.pressures, now)
         if record is not None:
             self.tonic.append(record)
@@ -184,8 +185,8 @@ def test_running_short_of_breath_is_felt(view: dict[str, Any]) -> None:
 def test_only_what_the_body_reports_can_move_affect(view: dict[str, Any]) -> None:
     plain = body(view, food=12)
     padded = deepcopy(plain)
-    padded["vitals"]["saturation"] = 20.0
-    padded["vitals"]["exhaustion"] = 3.5
+    padded["payload"]["vitals"]["saturation"] = 20.0
+    padded["payload"]["vitals"]["exhaustion"] = 3.5
     first, second = Life(), Life()
     first.through(plain, 0, 2000, 20)
     second.through(padded, 0, 2000, 20)
@@ -257,7 +258,7 @@ def test_no_hostile_needs_an_identity(view: dict[str, Any]) -> None:
 def records(evidence: Path, kind: str) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(evidence / "journal").read()
+        for event in EventJournal(evidence / "journal").read()
         if event.type == kind
     ]
 
@@ -265,8 +266,8 @@ def records(evidence: Path, kind: str) -> list[dict[str, Any]]:
 @pytest.fixture
 def two_goals(view: dict[str, Any]) -> dict[str, Any]:
     close_ = deepcopy(view)
-    close_["home"]["shelterState"] = "complete"
-    close_["inventory"]["items"].append({"name": "wooden_pickaxe", "count": 1})
+    close_["payload"]["home"]["shelterState"] = "complete"
+    close_["payload"]["inventory"]["items"].append({"name": "wooden_pickaxe", "count": 1})
     return close_
 
 
@@ -277,7 +278,7 @@ def test_one_act_that_completes_several_goals_is_one_appraisal(
     _, policy, invocation = harness.observe(at(two_goals, 120))
     harness.loop.handle(outcome(invocation, policy, "place_owned_chest"))
     stored = at(two_goals, 140)
-    stored["home"]["ownedStorage"] = [{"storageId": "storage_a", "contents": []}]
+    stored["payload"]["home"]["ownedStorage"] = [{"storageId": "storage_a", "contents": []}]
     before = len(records(tmp_path, "affect_appraised"))
     harness.observe(stored)
     appraised = records(tmp_path, "affect_appraised")[before:]
@@ -335,7 +336,12 @@ def test_a_restart_resumes_the_tonic_state(tmp_path: Path, view: dict[str, Any])
             "phase": "ended",
             "reasonCodes": ["test"],
             "rngSeed": 7,
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
         }
     )
     second = Harness(tmp_path)
@@ -392,7 +398,7 @@ def test_food_already_at_its_goal_is_neither_chosen_nor_appraised(
     tick = 100
     for food in [17, 16, 17, 16, 17]:
         document = at(view, tick)
-        document["vitals"]["food"] = food
+        document["payload"]["vitals"]["food"] = food
         goal, policy, invocation = harness.observe(document)
         assert goal["goal"]["goalType"] != "SECURE_FOOD", goal
         harness.complete(invocation, policy)

@@ -31,7 +31,12 @@ function observe(
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal,
       activeRoutine: null,
@@ -49,7 +54,7 @@ test("no home distance reaches cognition", async () => {
   await bench.world.connect();
   bench.world.teleport({ x: 10, y: 64, z: 7 });
   const observation = observe(bench, new SelfMotionSense(), null);
-  assert.ok(!("homeDistance" in observation.home));
+  assert.ok(!("homeDistance" in observation.payload.home));
   assert.ok(!JSON.stringify(observation).includes("homeDistance"));
 });
 

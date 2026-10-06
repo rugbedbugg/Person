@@ -13,7 +13,7 @@
     "type",
     "episodeId",
     "phase",
-    "trainingContext",
+    "experience",
     "rngSeed",
     "reasonCodes"
   ],
@@ -27,8 +27,8 @@
     "phase": {
       "enum": ["started", "ended"]
     },
-    "trainingContext": {
-      "$ref": "common.schema.json#/$defs/trainingContext"
+    "experience": {
+      "$ref": "common.schema.json#/$defs/experience"
     },
     "rngSeed": {
       "oneOf": [

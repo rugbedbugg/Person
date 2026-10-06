@@ -10,8 +10,11 @@ from typing import Any
 
 import pytest
 from person_cognition import CognitionLoop
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from person_protocol import PROTOCOL_VERSION, decode_frame, protocol_validator
+
+#: The experience stream every fixture test lives in (ADR 0025).
+FIXTURE = "lived:minecraft/fixture"
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 SESSION = "8f6c1c0e-3d0a-4a1e-9f3a-2b6f1d9c4e11"
@@ -59,7 +62,12 @@ class Harness:
             {
                 **envelope("SessionHello", 0),
                 "learningMode": self.learning_mode,
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
                 "policyRevision": 0,
                 "skillLibraryRevision": skill_registry().revision,
                 "rngSeed": 7,
@@ -121,7 +129,7 @@ def observation() -> dict[str, Any]:
     document = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["nearby"]["resources"].append(
+    document["payload"]["nearby"]["resources"].append(
         {
             "kind": "plant_food",
             "name": "sweet_berry_bush",
@@ -165,8 +173,8 @@ def test_the_loop_walks_a_routine_step_by_step(tmp_path: Path, observation: dict
     # The world moved on the way the skill said it would, so the next step of
     # the same routine becomes applicable.
     after = deepcopy(observation)
-    after["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
-    after["inventory"]["categories"]["food"] = 6
+    after["payload"]["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
+    after["payload"]["inventory"]["categories"]["food"] = 6
     _, _, second = harness.observe(after)
     assert second["routineId"] == first["routineId"]
     assert second["routineStepIndex"] == 1
@@ -183,11 +191,11 @@ def test_a_completed_routine_is_recorded_as_evidence(
         _, policy, invocation = harness.observe(document)
         harness.complete(invocation, policy)
         if invocation["skillId"] == "gather_plant_food":
-            document["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
-            document["inventory"]["categories"]["food"] = 6
+            document["payload"]["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
+            document["payload"]["inventory"]["categories"]["food"] = 6
         if invocation["skillId"] == "eat_to_target":
-            document["vitals"]["food"] = 20
-    events = [event.type for event in EvidenceJournal(tmp_path / "journal").read()]
+            document["payload"]["vitals"]["food"] = 20
+    events = [event.type for event in EventJournal(tmp_path / "journal").read()]
     assert "routine_selected" in events
     assert "skill_completed" in events
     assert "routine_outcome" in events
@@ -239,7 +247,7 @@ def test_an_emergency_override_is_recorded_and_interrupts_the_routine(
             "completionEvidence": {"kinds": ["threat_clearance"], "details": {}},
         }
     )
-    events = list(EvidenceJournal(tmp_path / "journal").read())
+    events = list(EventJournal(tmp_path / "journal").read())
     kinds = [event.type for event in events]
     assert "emergency_override" in kinds
     interrupted = next(event for event in events if event.type == "skill_interrupted")
@@ -250,9 +258,9 @@ def test_an_emergency_override_is_recorded_and_interrupts_the_routine(
     assert outcome.payload["recovered"] is True
 
     statistics = harness.loop.statistics
-    assert statistics.skill("fixture", policy["contextId"], "flee").successes == 1
-    assert statistics.skill("fixture", policy["contextId"], invocation["skillId"]).attempts == 0
-    assert statistics.skill("fixture", policy["contextId"], invocation["skillId"]).preemptions == 1
+    assert statistics.skill(FIXTURE, policy["contextId"], "flee").successes == 1
+    assert statistics.skill(FIXTURE, policy["contextId"], invocation["skillId"]).attempts == 0
+    assert statistics.skill(FIXTURE, policy["contextId"], invocation["skillId"]).preemptions == 1
 
 
 def test_learning_survives_a_restart_of_the_process(
@@ -271,7 +279,12 @@ def test_learning_survives_a_restart_of_the_process(
             **envelope("EpisodeEvent", 500),
             "episodeId": "ep_1",
             "phase": "ended",
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
             "rngSeed": 7,
             "reasonCodes": ["done"],
         }

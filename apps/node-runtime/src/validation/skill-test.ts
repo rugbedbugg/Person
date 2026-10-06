@@ -1,11 +1,9 @@
 import { randomUUID } from "node:crypto";
-import { contains, distance, type PersonConfig } from "#config";
 import {
   PROTOCOL_VERSION,
   envelope,
   protocolValidator,
   type MessageType,
-  type Observation,
   type PreviousOutcome,
   type SessionIdentity,
   type SkillInvocation,
@@ -31,6 +29,14 @@ import {
   writeSkillValidationReport,
   type SkillValidationReport,
 } from "./report.ts";
+import {
+  contains,
+  distance,
+  type MinecraftConfig,
+  type MinecraftObservation,
+  experienceOf,
+  describeExperience,
+} from "#minecraft";
 
 /**
  * Validates one already-registered skill against a real body, on purpose,
@@ -68,7 +74,7 @@ export class OperatorSetupAborted extends Error {
 }
 
 export interface SkillValidationOptions {
-  config: PersonConfig;
+  config: MinecraftConfig;
   embodiment: Embodiment;
   skillId: string;
   parameters?: Readonly<Record<string, number | string | boolean>>;
@@ -129,7 +135,7 @@ export async function runSkillValidation(
     sessionId: identity.sessionId,
     embodiment: config.runtime.embodiment,
     minecraftVersion: config.server?.version ?? null,
-    trainingContext: config.runtime.trainingContext,
+    experience: describeExperience(experienceOf(config)),
     protocolVersion: PROTOCOL_VERSION,
     skillLibraryRevision: registry.revision,
     requestedSkill: options.skillId,
@@ -321,7 +327,7 @@ export async function runSkillValidation(
       sessionId: identity.sessionId,
       server: config.server ?? null,
       embodiment: config.runtime.embodiment,
-      trainingContext: config.runtime.trainingContext,
+      experience: describeExperience(experienceOf(config)),
       learningMode: config.learning.mode,
       policyRevision: before.policyRevision,
       skill: options.skillId,
@@ -360,14 +366,16 @@ export async function runSkillValidation(
     });
   };
 
-  const observe = (previousOutcome: PreviousOutcome | null): Observation =>
+  const observe = (
+    previousOutcome: PreviousOutcome | null,
+  ): MinecraftObservation =>
     buildObservation({
       identity,
       snapshot: options.embodiment.snapshot(),
       permissions,
       kernel,
       ledger,
-      trainingContext: config.runtime.trainingContext,
+      experience: experienceOf(config),
       cognition: {
         activeGoal: null,
         activeRoutine: null,
@@ -464,8 +472,8 @@ export async function runSkillValidation(
       options.embodiment.snapshot().position,
       ledger.home.position,
     );
-    report.navigation.routeStatusBefore = pre.navigation.routeStatus;
-    report.navigation.stuckStateBefore = pre.navigation.stuckState;
+    report.navigation.routeStatusBefore = pre.payload.navigation.routeStatus;
+    report.navigation.stuckStateBefore = pre.payload.navigation.stuckState;
     if (!preResult.valid)
       throw new OperatorSetupAborted(
         "pre_observation_invalid",
@@ -603,8 +611,9 @@ export async function runSkillValidation(
           options.embodiment.snapshot().position,
           ledger.home.position,
         );
-        report.navigation.routeStatusAfter = post.navigation.routeStatus;
-        report.navigation.stuckStateAfter = post.navigation.stuckState;
+        report.navigation.routeStatusAfter =
+          post.payload.navigation.routeStatus;
+        report.navigation.stuckStateAfter = post.payload.navigation.stuckState;
       } catch (error) {
         report.postObservationReason = (error as Error).message.slice(0, 160);
       }

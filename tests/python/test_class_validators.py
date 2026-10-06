@@ -25,7 +25,7 @@ PLANS = REPOSITORY / "experiments/benchmarks"
 CLASSES = {"a-wide-margin": "A", "b-near-tie": "B", "c-exploration": "C"}
 
 spec = importlib.util.spec_from_file_location(
-    "validate_class", REPOSITORY / "scripts/benchmarks/validate_class.py"
+    "validate_class", REPOSITORY / "scripts/benchmarks/current/validate_class.py"
 )
 assert spec and spec.loader
 validator = importlib.util.module_from_spec(spec)
@@ -41,7 +41,7 @@ def observe(world: dict[str, Any] | Path, tmp_path: Path) -> dict[str, Any]:
     else:
         path = world
     out = subprocess.run(
-        ["node", "scripts/benchmarks/initial-observation.ts", str(path)],
+        ["node", "scripts/benchmarks/current/initial-observation.ts", str(path)],
         cwd=REPOSITORY,
         capture_output=True,
         text=True,
@@ -94,7 +94,7 @@ def test_b_fails_when_tool_readiness_removes_the_tools_goal(tmp_path: Path) -> N
 
 def test_b_fails_when_storage_is_not_the_projects_next_milestone(tmp_path: Path) -> None:
     observation = observe(world("development", "b-near-tie"), tmp_path)
-    observation["home"]["ownedStorage"] = [{"storageId": "storage_a", "contents": []}]
+    observation["payload"]["home"]["ownedStorage"] = [{"storageId": "storage_a", "contents": []}]
     failing("B", observation)
 
 

@@ -1,7 +1,7 @@
-import { distance, type Position } from "#config";
 import { type SkillContext } from "./execution.ts";
 import { isBuildingMaterial } from "./materials.ts";
 import { shelterEntrance, shelterPlan } from "./shelter-plan.ts";
+import { distance, type Position } from "#minecraft";
 
 /** A sealed shelter Person built is a room, and a room needs a door. */
 export function shelterIsSealed(

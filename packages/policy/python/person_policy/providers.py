@@ -1,8 +1,10 @@
 """Policy providers.
 
-A provider answers one question: given the observation, the active goal and the
-candidate routines the planner produced, which routine should Person run, and
-on what grounds?
+A provider answers one question: given whether Person can afford to explore
+now, the active goal and the candidate routines the planner produced, which
+routine should Person run, and on what grounds? It never reads an
+observation: whether exploring is safe is judged by the environment profile
+from the decision state, and arrives here as an `EnvelopeVerdict`.
 
 Two providers exist. The deterministic one is the survival-first fallback and
 never needs evidence, so Person works with learning switched off. The evidence
@@ -20,7 +22,7 @@ from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from typing import Any, Protocol, runtime_checkable
 
-from .envelope import EnvelopeThresholds, safe_envelope
+from .envelope import EnvelopeVerdict
 from .statistics import OutcomeCounts, RoutineStatistics
 
 
@@ -80,12 +82,11 @@ class PolicyProvider(Protocol):
 
     def propose(
         self,
-        observation: dict[str, Any],
+        envelope: EnvelopeVerdict,
         goal: Any,
         candidates: Sequence[RoutineCandidate],
         context_id: str,
         *,
-        home: str = "unknown",
         tolerance: float = 1.0,
         tolerance_bounds: tuple[float, float] | None = None,
     ) -> PolicyChoice: ...
@@ -116,12 +117,11 @@ class DeterministicPolicyProvider:
 
     def propose(
         self,
-        observation: dict[str, Any],
+        envelope: EnvelopeVerdict,
         goal: Any,
         candidates: Sequence[RoutineCandidate],
         context_id: str,
         *,
-        home: str = "unknown",
         tolerance: float = 1.0,
         reliability: Callable[[tuple[str, ...]], float] | None = None,
         hypotheses: Callable[[tuple[str, ...]], float] | None = None,
@@ -174,21 +174,19 @@ class EvidencePolicyProvider:
         self,
         statistics: RoutineStatistics,
         *,
-        training_context: str,
+        experience: str,
         learning_mode: str = "off",
         minimum_support: int = 3,
         exploration_bonus: float = 0.15,
         weights: ScoringWeights | None = None,
-        thresholds: EnvelopeThresholds | None = None,
         policy_revision: int = 0,
     ) -> None:
         self.statistics = statistics
-        self.training_context = training_context
+        self.experience = experience
         self.learning_mode = learning_mode
         self.minimum_support = minimum_support
         self.exploration_bonus = exploration_bonus
         self.weights = weights or ScoringWeights()
-        self.thresholds = thresholds
         self.policy_revision = policy_revision
         self.fallback = DeterministicPolicyProvider(policy_revision)
 
@@ -240,12 +238,11 @@ class EvidencePolicyProvider:
 
     def propose(
         self,
-        observation: dict[str, Any],
+        envelope: EnvelopeVerdict,
         goal: Any,
         candidates: Sequence[RoutineCandidate],
         context_id: str,
         *,
-        home: str = "unknown",
         tolerance: float = 1.0,
         reliability: Callable[[tuple[str, ...]], float] | None = None,
         hypotheses: Callable[[tuple[str, ...]], float] | None = None,
@@ -257,12 +254,9 @@ class EvidencePolicyProvider:
         mode lets learned beliefs act (ADR 0011, ADR 0012)."""
         if not candidates:
             raise NoCandidatesError("No candidate routine for the active goal")
-        envelope = safe_envelope(observation, self.thresholds, home=home)
         scored: list[ScoredCandidate] = []
         for candidate in candidates:
-            counts = self.statistics.routine(
-                self.training_context, context_id, candidate.routine_id
-            )
+            counts = self.statistics.routine(self.experience, context_id, candidate.routine_id)
             value, reasons = self.score(
                 candidate, counts, envelope_open=bool(envelope), tolerance=tolerance
             )
@@ -298,7 +292,7 @@ class EvidencePolicyProvider:
             )
         )
         best = scored[0]
-        fallback = self.fallback.propose(observation, goal, candidates, context_id, home=home)
+        fallback = self.fallback.propose(envelope, goal, candidates, context_id)
 
         supported = best.counts.decisive >= self.minimum_support
         reason_codes: list[str] = [*best.reasons]

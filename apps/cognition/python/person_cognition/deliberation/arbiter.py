@@ -24,7 +24,7 @@ from dataclasses import dataclass, field
 from functools import partial
 from typing import Any, cast
 
-from person_planner import RECOVERY_SKILLS, plan_for
+from person_planner import plan_for
 from person_skills import Condition
 
 from .context import DeliberationContext
@@ -33,8 +33,8 @@ from .habits import (
     Episode,
     HabitBook,
     HabitTracker,
+    SignatureBuilder,
     Template,
-    context_signature,
     signature_sha,
     template_id,
 )
@@ -164,6 +164,8 @@ class Arbiter:
     #: What a context signature is built from when a trigger fires: the
     #: observation, the recognised place and the source goal type (the loop's).
     basis_for: Callable[[Trigger], dict[str, Any]] | None = None
+    #: How a basis becomes a context signature: the environment's (ADR 0025).
+    signature: SignatureBuilder | None = None
     #: C5: the active book promoted habits are invoked from (habits `active`).
     active_book: HabitBook | None = None
     new_invocation_id: Callable[[], str] = lambda: f"hinv_{uuid.uuid4().hex[:16]}"
@@ -454,7 +456,11 @@ class Arbiter:
         plans = [
             plan
             for plan in plan_for(
-                state, conditions, registry=registry, limit=1, recovery=tuple(RECOVERY_SKILLS)
+                state,
+                conditions,
+                registry=registry,
+                limit=1,
+                recovery=tuple(registry.vocabulary.recovery_skills),
             )
             if plan.steps
         ]
@@ -484,7 +490,7 @@ class Arbiter:
         problem = origin(trigger)
         if self.tracker is not None and flight.basis is not None:
             desired = [str(f) for f, _, _ in admitted["conditions"]]
-            signature = context_signature(**flight.basis, desired_facts=desired)
+            signature = self._signature(**flight.basis, desired_facts=desired)
             directions = [
                 [str(entry.get("fact")), str(entry.get("direction"))]
                 for strategy in outcome.verdict.proposal.get("strategies", [])
@@ -624,7 +630,7 @@ class Arbiter:
             if t.state != "promoted":
                 continue
             observed = signature_sha(
-                context_signature(**basis, desired_facts=[str(f) for f, _ in t.desired])
+                self._signature(**basis, desired_facts=[str(f) for f, _ in t.desired])
             )
             if observed == t.signature_sha:
                 return t
@@ -662,7 +668,7 @@ class Arbiter:
             return False
         signatures = {
             t.template_id: signature_sha(
-                context_signature(**basis, desired_facts=[str(f) for f, _ in t.desired])
+                self._signature(**basis, desired_facts=[str(f) for f, _ in t.desired])
             )
             for t in scoped
         }
@@ -710,7 +716,11 @@ class Arbiter:
         plans = [
             plan
             for plan in plan_for(
-                state, conditions, registry=registry, limit=1, recovery=tuple(RECOVERY_SKILLS)
+                state,
+                conditions,
+                registry=registry,
+                limit=1,
+                recovery=tuple(registry.vocabulary.recovery_skills),
             )
             if plan.steps
         ]
@@ -761,6 +771,11 @@ class Arbiter:
             template_id=habit.template_id,
         )
         return True
+
+    def _signature(self, **basis: Any) -> dict[str, Any]:
+        if self.signature is None:
+            raise RuntimeError("habits need the environment's context signature")
+        return self.signature(**basis)
 
     def habit_broke(self, template: Template, reason: str, now: int) -> None:
         """A habit was demoted: its problem goes back to System 2 at once,

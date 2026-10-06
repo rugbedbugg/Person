@@ -58,7 +58,6 @@ RISK_WEIGHT = 1.0
 DISRUPTION_WEIGHT = 0.15
 #: No investigation while any pressing need is more urgent than this.
 CALM = 0.3
-PRESSING_DRIVES = ("health", "food", "safety")
 OPEN = frozenset({"ACTIVE", "SUSPENDED"})
 GOAL_TYPE = "INVESTIGATE"
 
@@ -256,7 +255,7 @@ def arm_of(design_: Design, now: Perceived) -> str | None:
 
 
 def calm(drives: Sequence[Drive], night: bool) -> bool:
-    pressing = [drive.urgency for drive in drives if drive.name in PRESSING_DRIVES]
+    pressing = [drive.urgency for drive in drives if drive.pressing]
     return not night and all(urgency <= CALM for urgency in pressing)
 
 

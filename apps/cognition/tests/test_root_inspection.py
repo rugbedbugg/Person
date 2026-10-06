@@ -41,7 +41,8 @@ def found_validation(evidence: Path, person: str = "validation-000") -> None:
         world_id="test-world",
         name="Rehearsal",
         designation="Validation-000",
-        training_context="fixture",
+        environment_kind="minecraft",
+        embodiment_kind="fixture",
         now="2026-09-30T07:00:00Z",
     )
 
@@ -70,7 +71,8 @@ def test_a_validation_founding_needs_a_name_and_a_designation(tmp_path: Path) ->
             world_id="test-world",
             name=None,
             designation=None,
-            training_context="fixture",
+            environment_kind="minecraft",
+            embodiment_kind="fixture",
         )
 
 

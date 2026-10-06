@@ -16,7 +16,6 @@ import {
   PROTOCOL_VERSION,
   type Envelope,
   type MessageType,
-  type Observation,
   type SkillInvocation,
 } from "#protocol";
 import { skillRegistry } from "#skills";
@@ -32,6 +31,7 @@ import {
 } from "#node-runtime";
 import { REPOSITORY, harness, type Harness } from "../support/harness.ts";
 import { runEpisode } from "../support/runtime.ts";
+import type { MinecraftObservation } from "#minecraft";
 
 const NODE = process.execPath;
 const SCRIPTED = path.join(REPOSITORY, "tests/support/scripted-cognition.ts");
@@ -58,7 +58,7 @@ const world = {
 const behind = (d: number) => ({ x: 0, y: 64, z: d });
 const inFront = (d: number) => ({ x: 0, y: 64, z: -d });
 
-function observe(bench: Harness): Observation {
+function observe(bench: Harness): MinecraftObservation {
   return buildObservation({
     identity: {
       personId: bench.config.personId,
@@ -69,7 +69,12 @@ function observe(bench: Harness): Observation {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -138,8 +143,8 @@ for (const [skill, parameters] of SKILLS) {
     seen.world.spawn("zombie", inFront(8));
     const unseen = await harness({ world });
     unseen.world.spawn("zombie", behind(8));
-    assert.equal(observe(seen).nearby.hostiles.length, 1);
-    assert.equal(observe(unseen).nearby.hostiles.length, 0);
+    assert.equal(observe(seen).payload.nearby.hostiles.length, 1);
+    assert.equal(observe(unseen).payload.nearby.hostiles.length, 0);
     const a = await seen.run(skill, parameters);
     const b = await unseen.run(skill, parameters);
     assert.equal(a.status, b.status);
@@ -159,7 +164,7 @@ test("a wait that completes beside an unseen hostile says nothing about it", asy
     evidence: result.evidenceDetails,
   });
   assert.ok(!/zombie|hostile|threat/.test(said), said);
-  assert.equal(observe(bench).nearby.hostiles.length, 0);
+  assert.equal(observe(bench).payload.nearby.hostiles.length, 0);
 });
 
 // ------------------------------------------------------------ fixture time

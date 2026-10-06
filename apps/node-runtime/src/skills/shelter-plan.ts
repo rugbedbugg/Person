@@ -1,4 +1,4 @@
-import type { Position } from "#config";
+import { type Position } from "#minecraft";
 
 /**
  * The shelter is a sealed three by three by three shell around the home block.

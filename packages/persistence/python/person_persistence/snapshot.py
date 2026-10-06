@@ -14,7 +14,10 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-SNAPSHOT_VERSION = 1
+#: 2: reducers key their tables by experience stream rather than by the
+#: conflated training context (ADR 0025). A version 1 snapshot is ignored and
+#: the state rebuilt from the journal, which maps old records itself.
+SNAPSHOT_VERSION = 2
 
 #: How many snapshots a store keeps. More than one, so a damaged newest
 #: snapshot still leaves a recent one to start from; few, because each is

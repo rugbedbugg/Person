@@ -34,9 +34,10 @@ from __future__ import annotations
 
 from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, Literal
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
+from person_skills import skill_registry
 
 DIMENSIONS: tuple[str, ...] = ("valence", "unease", "control")
 
@@ -62,19 +63,13 @@ BIAS_LIMIT = 25.0
 #: exploration bonus: never below half, never above a quarter more.
 TOLERANCE_RANGE = (0.5, 1.25)
 
-#: Facts whose pursuit keeps Person close and protected, as opposed to going
-#: out and getting things. A goal's character is read from its completion
-#: condition, so the bias is generic, never "state X means project Y".
-PROTECTIVE_FACTS: frozenset[str] = frozenset(
-    {
-        "shelter_complete",
-        "sheltered",
-        "at_home",
-        "owned_storage_available",
-        "stored_surplus",
-        "safe",
-    }
-)
+#: What a goal is like, for affect: `protective` goals keep Person close and
+#: protected, `outgoing` goals go out and get things. Which goals are which is
+#: the environment's to say, from the goal's completion condition
+#: (`CognitiveEnvironment.goal_character`; Minecraft's is
+#: `person_minecraft.goals.goal_character`, ADR 0025). Affect never reads a
+#: fact name, so the bias is generic, never "state X means project Y".
+type GoalCharacter = Literal["protective", "outgoing"]
 
 #: How each dimension pulls on each character of goal.
 SENSITIVITY: Mapping[str, Mapping[str, float]] = {
@@ -139,14 +134,13 @@ class Appraisal:
 # ---------------------------------------------------------------- appraisal
 
 
-def appraise_threat(observation: Mapping[str, Any]) -> Appraisal | None:
-    """A threat Person perceives: a hostile or a hazard in the observation."""
-    nearby = observation["nearby"]
-    threat = 0.0
-    for hostile in nearby["hostiles"]:
-        threat = max(threat, 1.0 - float(hostile["distance"]) / 16.0)
-    for hazard in nearby["hazards"]:
-        threat = max(threat, 1.0 - float(hazard["distance"]) / 4.0)
+def appraise_threat(threat: float) -> Appraisal | None:
+    """A threat Person perceives, as one intensity from 0 to 1.
+
+    The environment says how its percepts add up to that intensity (for
+    Minecraft, `person_minecraft.body.threat_intensity`); affect never reads a
+    percept itself.
+    """
     if threat <= 0.0:
         return None
     threat = round(threat, 4)
@@ -165,14 +159,24 @@ def appraise_harm(health_lost: float) -> Appraisal | None:
     )
 
 
-def appraise_outcome(outcome: Mapping[str, Any]) -> Appraisal | None:
-    """Whether Person's own action worked, as the runtime reported it."""
+def appraise_outcome(
+    outcome: Mapping[str, Any], unremarkable: frozenset[str] | None = None
+) -> Appraisal | None:
+    """Whether Person's own action worked, as the runtime reported it.
+
+    `unremarkable` is the environment's skills whose plain success is no
+    achievement (its skill vocabulary's `unremarkable`); the installed
+    environment's by default.
+    """
+    routine = (
+        skill_registry().vocabulary.unremarkable_skills if unremarkable is None else unremarkable
+    )
     executed = str(outcome["executedSkill"])
     status = str(outcome["status"])
     if outcome["emergency"]:
         # Something else took over. Person's own intentions did not steer.
         return Appraisal("overridden", {"controllability": -1.0}, {"control": -0.1, "unease": 0.05})
-    if executed in {"look", "look_around", "wait_safely"}:
+    if executed in routine:
         return None
     if status == "SUCCESS":
         return Appraisal("action_succeeded", {"success": 1.0}, {"valence": 0.05, "control": 0.05})
@@ -311,7 +315,7 @@ class AffectRecord:
         self.at = 0
         self.offset = {}
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         if event.type in {"affect_appraised", "affect_tonic"}:
             self.state = AffectState.from_json(event.payload["after"])
             self.at = int(event.payload["experienced_tick"])
@@ -419,11 +423,7 @@ class Affect:
 
     # ----------------------------------------------------------------- bias
 
-    @staticmethod
-    def character(completion_facts: frozenset[str]) -> str:
-        return "protective" if completion_facts & PROTECTIVE_FACTS else "outgoing"
-
-    def bias(self, completion_facts: frozenset[str], source: str) -> float:
+    def bias(self, character: GoalCharacter, source: str) -> float:
         """The affective adjustment to a goal's priority, within ±BIAS_LIMIT.
 
         Urgent survival goals are never adjusted: affect reorders near
@@ -432,7 +432,7 @@ class Affect:
         """
         if self.mode != "active" or source == "emergency":
             return 0.0
-        pull = SENSITIVITY[self.character(completion_facts)]
+        pull = SENSITIVITY[character]
         raw = sum(weight * self.state.get(dimension) for dimension, weight in pull.items())
         return round(max(-BIAS_LIMIT, min(BIAS_LIMIT, BIAS_LIMIT * raw)), 3)
 
@@ -467,10 +467,13 @@ def adjusted(state: AffectState) -> Affect:
 #: The characters a goal can have for affect. `fixed` goals (urgent survival,
 #: experimental trials) receive no bias at all.
 CHARACTERS: tuple[str, ...] = ("protective", "outgoing", "fixed")
-_EXEMPLAR: Mapping[str, tuple[frozenset[str], str]] = {
-    "protective": (frozenset({"safe"}), "homeostasis"),
-    "outgoing": (frozenset({"tool_tier"}), "homeostasis"),
-    "fixed": (frozenset(), "emergency"),
+#: How `bias_swings` probes each character: a goal of that character, and a
+#: source. A `fixed` goal is any goal from an emergency. No environment's fact
+#: names are needed: the bound is a property of affect alone.
+_PROBE: Mapping[str, tuple[GoalCharacter, str]] = {
+    "protective": ("protective", "homeostasis"),
+    "outgoing": ("outgoing", "homeostasis"),
+    "fixed": ("outgoing", "emergency"),
 }
 
 
@@ -494,8 +497,8 @@ def bias_swings(steps: int = 20) -> dict[str, dict[str, float]]:
             for control in axis("control"):
                 affect.state = AffectState(valence, unease, control)
                 bias = {
-                    character: affect.bias(facts, source)
-                    for character, (facts, source) in _EXEMPLAR.items()
+                    character: affect.bias(probe, source)
+                    for character, (probe, source) in _PROBE.items()
                 }
                 for a in CHARACTERS:
                     for b in CHARACTERS:

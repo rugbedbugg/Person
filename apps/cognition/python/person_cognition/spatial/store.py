@@ -13,7 +13,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
+from person_protocol import discovered
 
 from .integration import Estimate, integrate, resumed
 from .places import REASONS, Place, Whereabouts, recognise
@@ -26,9 +27,13 @@ NEAR_HOME = 32.0
 HOME_RELATIONS: frozenset[str] = frozenset({"at_home", "near", "far", "unknown"})
 
 #: Coarse scene subjects that may make up a place's signature. Kinds, never
-#: particular objects.
-SIGNATURE_SUBJECTS: frozenset[str] = frozenset(
-    {"wood", "stone", "coal", "plant_food", "animal", "container", "hazard"}
+#: particular objects, and only lasting ones: each installed environment
+#: declares its own in its manifest (`spatial.signatureSubjects`, ADR 0025).
+SIGNATURE_SUBJECTS: frozenset[str] = frozenset().union(
+    *(
+        manifest.document.get("spatial", {}).get("signatureSubjects", ())
+        for manifest in discovered().values()
+    )
 )
 
 
@@ -47,7 +52,7 @@ class SpatialMap:
         self.routes.clear()
         self.estimate = None
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         payload = event.payload
         if event.type == "place_formed":
             place = Place.from_json(payload["place"])

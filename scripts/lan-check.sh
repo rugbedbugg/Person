@@ -149,7 +149,7 @@ echo "Before connecting, confirm all of the following:"
 echo "  - the world is disposable and yours"
 echo "  - it is opened to LAN, and the port above is the one Minecraft displayed"
 echo "  - the port changes every time you reopen the world; pass the new one with --port"
-echo "  - difficulty and runtime.trainingContext agree (peaceful with minecraft_peaceful)"
+echo "  - the world difficulty and environment.difficulty agree (peaceful with peaceful)"
 echo "  - cheats may stay on for you; Person must remain a non-operator survival player"
 echo "  - anything you care about is inside world.protectedAreas"
 

@@ -1,9 +1,11 @@
 # PERSON
 
-## A Persistent Artificial Individual Whose Embodied Life Occurs in Minecraft
+## A Persistent Developmental Agent Architecture That Constructs and Revises Beliefs Through Embodied Experience
 
 **Status:** Architecture specification. Canonical source of truth.
 **Architecture reconciled:** 2026-09-22
+**Course-corrected:** 2026-10-03, before Person-000 (Ada): Person's core and its environments separated, and epistemic state made explicit (ADRs 0025 to 0029). The subtitle until then was "A Persistent Artificial Individual Whose Embodied Life Occurs in Minecraft"; Minecraft is now Person's **first controlled environment**, not its definition.
+**First environment:** Minecraft (`environments/minecraft/`)
 **Current live-validation target:** Minecraft Java Edition 1.16.1
 **Planned target:** Minecraft Java Edition 1.16.5, as part of the Baritone motor work (not yet begun)
 **Primary runtime:** Node.js 22 + Python 3.12
@@ -45,6 +47,13 @@ into the single document below. Read it top to bottom.
 ---
 
 # 1. Vision
+
+Person is a persistent developmental agent architecture for constructing and
+revising beliefs through embodied experience. Minecraft is its first
+controlled environment. Everything below that is specific to Minecraft is
+specific to that environment, and lives behind its profile (ADR 0025); what
+is Person's own is the architecture that perceives, believes, remembers,
+predicts, decides and learns through whatever body it is given.
 
 Person is not a chatbot connected to Minecraft and not a conventional game bot.
 
@@ -620,6 +629,16 @@ closed five-word vocabulary, and the planner uses it to look for evidence a
 goal needs before giving the goal up, a bounded search that concludes "not
 found" and never "absent" (`docs/CURRENT_STATE.md`, Known Deviations, C1).
 Only recognised percepts, in central vision, count as evidence to act on.
+
+**CURRENTLY IMPLEMENTED (ADR 0025, ADR 0026):** the observation is a
+Person-core envelope (`observationVersion`, `experience`, `selfMotion`,
+`cognition`, `previousOutcome`) around an environment `payload`. Sections 8.1
+to 8.6 describe the Minecraft payload, which the Minecraft profile owns and
+validates. Cognition crosses into it once per observation, producing a
+perceptual state whose channels say how each percept is known: sensed
+(`nearby`, sky), bodily (`vitals`, `inventory`) or reported by the trusted
+runtime about Person's own situation (`home`, `permissions`, `affordances`,
+`navigation`). Nothing downstream reads the observation again.
 
 ## 8.1 Vitals
 
@@ -1497,6 +1516,16 @@ observation or experiment, and skill contracts and the vocabulary are initial
 knowledge. The other classes above (told, read, another Person) have no
 channel yet, because nothing external reaches Person.
 
+**CURRENTLY IMPLEMENTED (ADR 0027):** the distinctions above, and the ones
+between lived and imagined material, are one closed set of provenance classes
+(`person_epistemics.Source`): `REAL_OBSERVATION` and `INTERVENTION_OUTCOME`
+(personal observation and experiment), `RUNTIME_REPORT`, `INFERENCE`,
+`INITIAL_KNOWLEDGE`, `TESTIMONY` (taught by a person or another Person),
+`RESEARCH` (external web), `OPERATOR_INTERVENTION`, and the classes that are
+never evidence about the world: `MEMORY_RECALL`, `REPLAY`, `COUNTERFACTUAL`
+and `MODEL_ROLLOUT`. The training context mentioned above is now an
+experience key (section 47).
+
 Canonical initial Person starts at approximately experienced-player Minecraft
 knowledge, detailed in section 45.1. It is not initialized with a catalog of
 obscure exploits, and the difference between what Person started with and what
@@ -1556,6 +1585,15 @@ snapshots/
 ```
 
 Scores are rebuilt from evidence.
+
+**CURRENTLY IMPLEMENTED (ADR 0027):** this journal is the **canonical event
+journal**. It records Person's history, and most of that history is not
+evidence: an appraisal, a deliberation, a recall or a prediction is a
+canonical event and nothing more. Only `belief_revised`, `effect_evidence`
+and `hypothesis_evidence` may move a belief, each through the reducer that
+owns it, and only with an admissible provenance class. Lived experience is
+recorded once; nothing internal is journalled as if it had been lived.
+Records carry an experience key; older records are read as they were written.
 
 ---
 
@@ -1819,10 +1857,20 @@ simpler architecture. It is a different and less interesting one.
 **CURRENTLY IMPLEMENTED:** physical truth (`WorldSnapshot`) and perceptual
 truth (`Observation`) are already distinct objects, and the shaping between
 them lives in `apps/node-runtime/src/observation/perception.ts` (section 8).
-Belief, memory and knowledge have no representation at all; the symbolic state
-the planner reasons over is derived fresh from the latest observation every
-tick, so today Person believes exactly what it last saw and nothing else. See
-`docs/CURRENT_STATE.md`, "Known Deviations", C6.
+Until 2026-10-03, belief, memory and knowledge had no representation at all;
+the symbolic state the planner reasons over was derived fresh from the latest
+observation every tick, so Person believed exactly what it last saw and
+nothing else. **Since ADR 0026:** a decision is made from a `DecisionState`
+of percepts, beliefs, a composed self-state, recalled memories and initial
+knowledge. Beliefs are persistent, journalled, revisable, and carry
+confidence, provenance, freshness, evidence references and a scope (world,
+embodiment, environment or general) that never widens by itself. Memory
+(ADR 0007) is separate: planning may use what a bounded recall supplies, but
+memory never sets a planning fact and planning never queries the store.
+Knowledge is initial knowledge today; the core has a typed place for learned
+knowledge (`KnownFact`, keeping provenance, evidence and scope), and nothing
+promotes to it until an explicit, evidence-backed gate is decided. See `docs/CURRENT_STATE.md`,
+"Known Deviations", C6.
 
 Do not persist every Minecraft block.
 
@@ -2751,6 +2799,13 @@ Minecraft evidence remains separate.
 
 # 47. Training Context
 
+**Superseded in part (ADR 0025):** the single training-context token is now
+an **experience key**: `context` (`lived` or `replay`), `environmentKind`,
+`embodimentKind` and `environmentVariant`, for example
+`lived:minecraft/mineflayer/peaceful` or `lived:minecraft/fixture`. The rule
+below is unchanged: statistics never silently merge across streams. The
+original specification follows.
+
 Every experience records:
 
 ```text
@@ -3129,6 +3184,14 @@ FlyInspiredAffectProvider
 
 # 58. World Model Provider
 
+**Superseded (ADR 0028):** there is no single world-model provider. The shape
+below merged belief, history and prediction into one object. Descriptive
+state is beliefs (section 26, ADR 0026), history is the canonical event
+journal (section 23), and prediction is any number of `PredictiveModel`s,
+the first of which is the declared-effect model Person has always used.
+Every prediction is a model rollout and is never evidence. The original
+specification follows for the record.
+
 Responsible for descriptive state:
 
 ```text
@@ -3463,6 +3526,12 @@ Multiple People should share one language model where practical.
 ---
 
 # 70. Repository Layout
+
+**CURRENTLY IMPLEMENTED (ADR 0025):** an `environments/` layer beside
+`packages/`: `environments/minecraft/` holds the Minecraft profile (manifest,
+payload and configuration schemas, skill library and vocabulary, and its
+Python and TypeScript halves). `packages/epistemics/` holds Person's
+epistemic core. The original recommendation follows.
 
 Recommended new repository:
 

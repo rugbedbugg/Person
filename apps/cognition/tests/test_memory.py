@@ -36,8 +36,11 @@ from person_cognition.memory import (
 )
 from person_cognition.memory import encoding as remembering
 from person_cognition.search import LOOK_BUDGET, NOT_FOUND
-from person_persistence import EvidenceJournal, new_event
-from person_planner import symbolic_state
+from person_epistemics import ExperienceKey
+from person_minecraft import memory as minecraft_memory
+from person_minecraft.offline import facts_from_observation as symbolic_state
+from person_minecraft.offline import percepts_of
+from person_persistence import EventJournal, new_event
 from person_skills import skill_registry
 from test_loop import Harness, envelope
 
@@ -54,9 +57,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     return document
 
 
@@ -75,7 +78,7 @@ def tree(detail: str = "central", distance: float = 7.0) -> dict[str, Any]:
 
 def seeing(view: dict[str, Any], *resources: dict[str, Any], tick: int = 100) -> dict[str, Any]:
     changed = deepcopy(view)
-    changed["nearby"]["resources"] = list(resources)
+    changed["payload"]["nearby"]["resources"] = list(resources)
     changed["tick"] = tick
     changed["messageId"] = envelope("Observation", tick)["messageId"]
     return changed
@@ -90,10 +93,21 @@ def event(kind: str, payload: dict[str, Any], *, tick: int = 1, context: str = "
         decision_id=None,
         tick=tick,
         policy_revision=0,
-        training_context=context,
+        experience=ExperienceKey("minecraft", context),
         event_type=kind,
         payload=payload,
         previous_event_id=None,
+    )
+
+
+def acted(message: dict[str, Any], ref: str) -> Any:
+    """Memory's drafting of an outcome, with Minecraft saying what the skill is about."""
+    registry = skill_registry()
+    return remembering.acted(
+        message,
+        minecraft_memory.skill_subjects(str(message["executedSkill"]), registry),
+        ref,
+        unremarkable=registry.vocabulary.unremarkable_skills,
     )
 
 
@@ -128,7 +142,7 @@ def memory_at(store: MemoryStore, now: int, context: str = "fixture") -> Memory:
     A new Memory resumes from the latest experienced time in the store, as a
     restarted Person does, and then lives through the difference.
     """
-    memory = Memory(store, training_context=context)
+    memory = Memory(store, experience=ExperienceKey("minecraft", context).key)
     assert now >= memory.now
     memory.observe_time(0)
     memory.observe_time(now - memory.now)
@@ -137,9 +151,7 @@ def memory_at(store: MemoryStore, now: int, context: str = "fixture") -> Memory:
 
 
 def journal(evidence: Path, kind: str) -> list[Any]:
-    return [
-        record for record in EvidenceJournal(evidence / "journal").read() if record.type == kind
-    ]
+    return [record for record in EventJournal(evidence / "journal").read() if record.type == kind]
 
 
 def episodes(harness: Harness) -> list[Episode]:
@@ -154,7 +166,12 @@ def finish(harness: Harness, tick: int) -> None:
             "phase": "ended",
             "reasonCodes": ["test"],
             "rngSeed": 7,
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
         }
     )
 
@@ -204,12 +221,13 @@ def test_no_method_reachable_from_cognition_returns_the_store() -> None:
         if not name.startswith("_") and callable(value)
     }
     # `lose_continuity` (ADR 0017, I2) returns nothing and exposes no record.
-    # `retrieve` (ADR 0020 as amended for C7) is `recall` for one act of
+    # `recall_for_deliberation` (ADR 0020 as amended for C7) is `recall` for one act of
     # deliberation: the same cue, ranking and limit, never into working memory.
     assert public == {
         "recall",
-        "retrieve",
+        "recall_for_deliberation",
         "experience",
+        "time_at",
         "payload",
         "encoded",
         "observe_time",
@@ -326,9 +344,9 @@ def test_memories_are_immutable_and_never_refreshed() -> None:
 
 
 def test_a_glimpse_is_not_remembered_as_a_thing(view: dict[str, Any]) -> None:
-    glimpse = remembering.noticed(seeing(view, tree("peripheral")))
+    glimpse = minecraft_memory.noticed(percepts_of(seeing(view, tree("peripheral"))))
     assert "wood" not in glimpse
-    seen = remembering.noticed(seeing(view, tree("central")))
+    seen = minecraft_memory.noticed(percepts_of(seeing(view, tree("central"))))
     assert [percept["detail"] for percept in seen["wood"]] == ["central"]
 
 
@@ -337,7 +355,8 @@ def test_encoding_copies_only_whitelisted_fields(view: dict[str, Any]) -> None:
     # what it was not asked to keep, even if a bug upstream let it through.
     smuggled = tree("central") | {"position": {"x": 12, "y": 64, "z": -3}, "entityId": 991}
     observation = seeing(view, smuggled) | {"worldSnapshot": {"secret": True}}
-    draft = remembering.perceived(observation, "wood", remembering.noticed(observation)["wood"])
+    seen = percepts_of(observation)
+    draft = minecraft_memory.perceived(seen, "wood", minecraft_memory.noticed(seen)["wood"])
 
     kept = {"details": draft.details, "provenance": draft.provenance.to_json()}
     body = json.dumps(kept)
@@ -392,7 +411,7 @@ def outcome(skill: str, *, executed: str | None = None, status: str = "SUCCESS")
 
 
 def test_an_action_is_remembered_by_what_ran_and_what_was_felt() -> None:
-    draft = remembering.acted(outcome("gather_wood"), skill_registry(), "e1")
+    draft = acted(outcome("gather_wood"), "e1")
     assert draft is not None
     assert draft.kind == "acted"
     assert draft.subjects == ("wood",)
@@ -408,7 +427,7 @@ def test_an_action_is_remembered_by_what_ran_and_what_was_felt() -> None:
     body = json.dumps(dict(draft.details))
     assert "target" not in body and "tree_b" not in body and "11" not in body
 
-    replaced = remembering.acted(outcome("gather_wood", executed="flee"), skill_registry(), "e2")
+    replaced = acted(outcome("gather_wood", executed="flee"), "e2")
     assert replaced is not None
     assert replaced.details["skill"] == "flee"
     assert replaced.details["requested"] == "gather_wood"
@@ -528,7 +547,7 @@ def test_a_search_that_found_nothing_is_remembered_as_exactly_that(
     _, policy, invocation = second.observe(seeing(view, tick=100))
     started = [
         record.payload
-        for record in EvidenceJournal(tmp_path / "journal").read()
+        for record in EventJournal(tmp_path / "journal").read()
         if record.type == "information_search" and record.payload["phase"] == "started"
     ][-1]
     assert set(started["recalled"]) & {episode.memory_id for episode in searched}
@@ -576,7 +595,7 @@ def test_every_memory_can_say_why_it_exists(tmp_path: Path, view: dict[str, Any]
     _, policy, invocation = harness.observe(seeing(view, tree("central"), tick=100))
     harness.complete(invocation, policy, status="FAILED")
     hurt = seeing(view, tick=200)
-    hurt["vitals"]["health"] = 14.0
+    hurt["payload"]["vitals"]["health"] = 14.0
     harness.observe(hurt)
 
     kinds = {episode.kind: episode for episode in episodes(harness)}
@@ -610,7 +629,7 @@ def test_a_deliberative_retrieval_is_recall_without_holding() -> None:
         encoded(store, "wood", at=index)
     memory = memory_at(store, 20)
     cue = Cue.about("wood", purpose="goal")
-    retrieved = memory.retrieve(cue)
+    retrieved = memory.recall_for_deliberation(cue)
     assert 0 < len(retrieved) <= RECALL_LIMIT, "the same limit, no wider surface"
     assert len(memory.working) == 0, "nothing entered working memory"
     assert [i.episode.memory_id for i in retrieved] == [
@@ -622,7 +641,9 @@ def test_a_forgotten_or_live_isolated_memory_cannot_be_retrieved_by_wanting_it()
     store = MemoryStore()
     encoded(store, "wood", at=0, salience=0.0)
     cue = Cue.about("wood", purpose="goal")
-    assert memory_at(store, 24_000 * 5).retrieve(cue) == (), "forgotten stays forgotten"
+    assert memory_at(store, 24_000 * 5).recall_for_deliberation(cue) == (), (
+        "forgotten stays forgotten"
+    )
     fixture = MemoryStore()
     encoded(fixture, "wood", at=0, context="fixture")
-    assert memory_at(fixture, 10, context="live").retrieve(cue) == ()
+    assert memory_at(fixture, 10, context="live").recall_for_deliberation(cue) == ()

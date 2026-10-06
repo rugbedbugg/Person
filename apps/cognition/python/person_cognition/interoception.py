@@ -24,7 +24,7 @@ parameters.
 
 from __future__ import annotations
 
-from collections.abc import Mapping, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -45,32 +45,19 @@ ESCALATION_STEP = 0.25
 
 @dataclass(frozen=True, slots=True)
 class BodyReading:
+    """What the body reports this observation, as interoception reads it.
+
+    The environment profile produces it from its percepts (Minecraft's:
+    `person_minecraft.body.body_reading`), and it is the body view of the
+    SelfState (ADR 0026). Its scales are Minecraft's today: 20 health and food
+    points and 10 bubbles of breath; see `docs/CURRENT_STATE.md`.
+    """
+
     health: float
     food: float
     breath: int
     #: The strongest perceived threat, 0 (none) to 1 (upon Person).
     threat: float
-
-    @classmethod
-    def of(cls, observation: Mapping[str, Any]) -> BodyReading:
-        vitals = observation["vitals"]
-        return cls(
-            health=float(vitals["health"]),
-            food=float(vitals["food"]),
-            breath=int(vitals["breath"]),
-            threat=threat_intensity(observation),
-        )
-
-
-def threat_intensity(observation: Mapping[str, Any]) -> float:
-    """One number for all the danger Person perceives: how close the nearest is."""
-    nearby = observation["nearby"]
-    level = 0.0
-    for hostile in nearby["hostiles"]:
-        level = max(level, 1.0 - float(hostile["distance"]) / 16.0)
-    for hazard in nearby["hazards"]:
-        level = max(level, 1.0 - float(hazard["distance"]) / 4.0)
-    return round(max(0.0, level), 4)
 
 
 def pressures(reading: BodyReading) -> dict[str, float]:
@@ -116,8 +103,7 @@ class Interoception:
         self.previous = None
         self.exposure = None
 
-    def sense(self, observation: Mapping[str, Any]) -> Sensed:
-        reading = BodyReading.of(observation)
+    def sense(self, reading: BodyReading) -> Sensed:
         events: list[Appraisal] = []
         previous = self.previous
         if previous is not None:

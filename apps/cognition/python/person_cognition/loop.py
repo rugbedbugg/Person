@@ -7,6 +7,13 @@ a SkillInvocation, which the runtime is free to reject or replace.
 
 Everything the process learns from is the outcome the runtime reports, and the
 outcome says what actually ran.
+
+Each observation crosses the epistemic boundary once (ADR 0026): the
+environment profile turns it into a `PerceptualState`, the runtime's reports
+in it are admitted as evidence and revise persistent beliefs, and a
+`DecisionState` (percepts, beliefs, self-state, knowledge) is what goals,
+planning, policy and appraisal read. Nothing below that point reads the raw
+message, and nothing in this module knows which environment it is living in.
 """
 
 from __future__ import annotations
@@ -18,10 +25,24 @@ from pathlib import Path
 from typing import Any
 
 from person_config import CognitionSettings, ConfigError
+from person_epistemics import (
+    BeliefState,
+    DecisionState,
+    EvidenceRefused,
+    ExperienceKey,
+    Freshness,
+    Intervention,
+    Knowledge,
+    PerceptualState,
+    PlaceEstimate,
+    PredictionQuery,
+    Predictors,
+    SelfState,
+)
 from person_persistence import (
+    CanonicalEvent,
     ContinuityRecord,
-    EvidenceEvent,
-    EvidenceStore,
+    EventStore,
     Founding,
     IdentityError,
     LifeRecord,
@@ -29,16 +50,11 @@ from person_persistence import (
     SelfKnowledge,
     new_event,
 )
-from person_planner import (
-    EVIDENCE_FACTS,
-    RECOVERY_SKILLS,
-    evidence_needed,
-    plan_for,
-    relevant_skills,
-    symbolic_state,
-)
+from person_planner import evidence_needed, plan_for, relevant_skills
 from person_policy import (
+    CLOSED,
     DeterministicPolicyProvider,
+    EnvelopeVerdict,
     EvidencePolicyProvider,
     NoCandidatesError,
     PolicyChoice,
@@ -65,7 +81,6 @@ from .affect import (
     appraise_search,
     appraise_threat,
 )
-from .context import decision_context
 from .continuity import OperationalView, plan_root, self_knowledge, session_payload
 from .deliberation import (
     Capability,
@@ -88,14 +103,14 @@ from .deliberation.metareasoning import (
 from .deliberation.model import TemplateModel
 from .deliberation.proposal import DIRECTIONS as DELIBERATION_DIRECTIONS
 from .effect_learning import (
-    EVALUABLE_FACTS,
     EffectBeliefs,
     Trial,
     admitted_to,
     classify,
     reliability_term,
 )
-from .goals import GOAL_TYPES, Goal, GoalStack, SurvivalGoalProvider, homeostasis
+from .environment import CognitiveEnvironment, load_environment
+from .goals import CORE_GOAL_TYPES, Goal, GoalStack
 from .hypotheses import (
     CausalHypothesis,
     ContrastProposer,
@@ -114,13 +129,14 @@ from .hypotheses import (
 )
 from .hypotheses.experiments import GOAL_TYPE as INVESTIGATE
 from .hypotheses.generation import CONTEXT_TRIALS
-from .interoception import Interoception, combined
+from .interoception import BodyReading, Interoception, combined
 from .memory import Cue, Memory, MemoryStore, Recalled
 from .memory import encoding as remembering
 from .memory.episodes import SUBJECTS, EpisodeDraft
 from .memory.recall import MAX_CUE_SUBJECTS
 from .prediction import PendingPrediction, build_payload
-from .projects import BY_KIND, ProjectBook, ProjectManager
+from .predictors import DeclaredEffectModel
+from .projects import ProjectBook, ProjectManager
 from .reducers import CognitiveReducers
 from .reporting import LearningSummary
 from .routines import (
@@ -187,8 +203,13 @@ class CognitionLoop:
         validator: ProtocolValidator | None = None,
         affect_mode: str = "active",
         interoception: bool = True,
+        environment: CognitiveEnvironment | None = None,
     ) -> None:
         self.settings = settings
+        #: The environment profile Person lives in (ADR 0025): given, or found
+        #: from the manifest of the environment SessionHello names.
+        self.environment: CognitiveEnvironment | None = environment
+        self._registry_given = registry is not None
         #: How far affect is switched on (ADR 0013); from Person's own
         #: configuration, never from the runtime.
         self.affect_mode = affect_mode
@@ -213,8 +234,22 @@ class CognitionLoop:
         #: journal; and what C3 holds between decisions.
         self.arbitration = ArbitrationRecord()
         self.arbiter = Arbiter(record=self.arbitration)
-        #: The last observation Person received, for what it knew at a death.
-        self._last_observation: dict[str, Any] | None = None
+        #: The last observation Person perceived, as perception (ADR 0026):
+        #: what it knew at a death, and what a deliberation is shown.
+        self._last_percepts: PerceptualState[Any] | None = None
+        #: The decision state of the current observation.
+        self.decision: DecisionState[Any, BodyReading] | None = None
+        #: Whether Person may afford to explore now, as the environment judges.
+        self._verdict: EnvelopeVerdict = CLOSED
+        #: Persistent fact beliefs (ADR 0026), rebuilt from `belief_revised`,
+        #: and the ephemeral record of when each was last confirmed.
+        self.belief_state = BeliefState()
+        self.freshness = Freshness()
+        #: The experience stream this session lives in (ADR 0025).
+        self.experience: ExperienceKey | None = None
+        #: Person's predictive models (ADR 0028): the declared-effect model
+        #: once the environment is known.
+        self.predictors = Predictors()
         self.self_knowledge: SelfKnowledge | None = None
         #: Whether the world is available to the body now (I2); all Person
         #: may know of its operational state.
@@ -273,6 +308,7 @@ class CognitionLoop:
             self.continuity,
             self.life,
             self.arbitration,
+            beliefs=self.belief_state,
         )
         # ADR 0022: habit learning. record_only writes the shadow stream and
         # never acts (C4); active writes the active stream, whose promoted
@@ -291,21 +327,19 @@ class CognitionLoop:
         )
         self.arbiter.detectors.early = self.arbiter.affect_arbitration != "off"
         self.arbiter.basis_for = self._habit_basis
-        self.memory = Memory(self.memory_store, training_context="fixture")
+        self.memory = Memory(self.memory_store, experience="unstarted")
         self.spatial = Spatial(self.spatial_map)
         #: Person's belief about where it is relative to home (C8).
         self.home = "unknown"
-        self.goal_provider = SurvivalGoalProvider()
         self.goals = GoalStack()
         self.library = RoutineLibrary()
         self.summary = LearningSummary()
         self.identity: SessionIdentity | None = None
         self.episode_id = "ep_unstarted"
         self.learning_mode = "off"
-        self.training_context = "fixture"
         self.policy_revision = 0
         self.rng_seed: int | None = None
-        self.store: EvidenceStore | None = None
+        self.store: EventStore | None = None
         self.evidence_directory = evidence_directory
         self.active: ActiveRoutine | None = None
         self.previous_event_id: str | None = None
@@ -349,8 +383,8 @@ class CognitionLoop:
         payload: dict[str, Any],
         decision_id: str | None = None,
         timestamp: str | None = None,
-    ) -> EvidenceEvent | None:
-        if self.store is None or self.identity is None:
+    ) -> CanonicalEvent | None:
+        if self.store is None or self.identity is None or self.experience is None:
             return None
         event = new_event(
             person_id=self.identity.person_id,
@@ -360,7 +394,7 @@ class CognitionLoop:
             decision_id=decision_id,
             tick=tick,
             policy_revision=self.policy_revision,
-            training_context=self.training_context,
+            experience=self.experience,
             event_type=event_type,
             payload=payload,
             previous_event_id=self.previous_event_id,
@@ -419,7 +453,7 @@ class CognitionLoop:
             for (context, skill, fact), belief in sorted(
                 self.effect_beliefs.tables["active"].items()
             )
-            if context == self.training_context and belief.estimate is not None
+            if context == self.experience_key and belief.estimate is not None
         ]
         hypotheses = [
             {
@@ -478,7 +512,11 @@ class CognitionLoop:
             world_available=(
                 None if self.operational.world is None else self.operational.world == "available"
             ),
-            observation=self._last_observation,
+            situation=(
+                self.environment.situation(self._last_percepts)
+                if self.environment is not None
+                else []
+            ),
             place=({"place_id": here.place_id, "confidence": here.confidence} if here else None),
             working_memory=working,
             home_relation=self.spatial.home_relation()[0],
@@ -497,8 +535,8 @@ class CognitionLoop:
             recent=recent,
             capabilities=capabilities,
             vocabulary={
-                "goal_types": GOAL_TYPES,
-                "project_kinds": tuple(sorted(BY_KIND)),
+                "goal_types": self.goal_types,
+                "project_kinds": tuple(sorted(self.projects.by_kind)),
                 "facts": tuple(sorted(self.registry.facts)),
                 "directions": DELIBERATION_DIRECTIONS,
             },
@@ -537,7 +575,7 @@ class CognitionLoop:
             goals=self.goals,
             projects=self.project_book,
             registry=self.registry,
-            goal_types=GOAL_TYPES,
+            goal_types=self.goal_types,
             context_for=self._trigger_context,
             decision=self.decision_counter,
             failures=lambda goal_id: self.consecutive_failures.get(goal_id, 0),
@@ -605,7 +643,11 @@ class CognitionLoop:
             else None
         )
         return {
-            "observation": self._last_observation,
+            "observation": (
+                self.environment.signature_basis(self._last_percepts)
+                if self.environment is not None
+                else None
+            ),
             "place": {"place_id": here.place_id, "confidence": here.confidence} if here else None,
             "source_goal_type": source_type,
         }
@@ -640,15 +682,15 @@ class CognitionLoop:
                     condition.fact
                     for spec in relevant_skills(goal.completion_condition, specs)
                     for condition in spec.preconditions
-                    if condition.fact in EVIDENCE_FACTS
+                    if condition.fact in self.registry.vocabulary.evidence_facts
                 ]
         elif problem.kind == "repeated_prediction_error":
             facts += problem.key.split(":", 1)[1].split("+") if ":" in problem.key else []
         elif problem.kind == "emergency_recurrence":
             # As the endangerment was encoded (memory encoding, ADR 0007).
-            hostile = "hostile" in problem.key or "threat" in problem.key
-            return frozenset({"danger", "hostile"} if hostile else {"danger"}), self.EMERGENCY_KINDS
-        subjects = sorted(remembering.evidence_subjects(tuple(facts)) & SUBJECTS)
+            about = self._environment().emergency_subjects(problem.key)
+            return frozenset({"danger", *about}), self.EMERGENCY_KINDS
+        subjects = sorted(self._evidence_subjects(facts) & SUBJECTS)
         return frozenset(subjects[:MAX_CUE_SUBJECTS]), kinds
 
     def _trigger_context(self, trigger: Trigger) -> tuple[DeliberationContext, frozenset[str]]:
@@ -660,7 +702,7 @@ class CognitionLoop:
         """
         subjects, kinds = self._deliberative_cue(trigger)
         recalled = (
-            self.memory.retrieve(Cue.about(*subjects, purpose="goal", kinds=kinds))
+            self.memory.recall_for_deliberation(Cue.about(*subjects, purpose="goal", kinds=kinds))
             if subjects
             else ()
         )
@@ -701,7 +743,7 @@ class CognitionLoop:
         """
         if self.deliberation_mode == "off" or self.cognitive_model is None:
             return None
-        tick = int(self._last_observation["tick"]) if self._last_observation else 0
+        tick = self._last_percepts.tick if self._last_percepts else 0
         deliberator = Deliberator(
             mode=self.deliberation_mode,
             model=self.cognitive_model,
@@ -717,7 +759,7 @@ class CognitionLoop:
             return DeterministicPolicyProvider(self.policy_revision)
         return EvidencePolicyProvider(
             self.statistics,
-            training_context=self.training_context,
+            experience=self.experience_key,
             learning_mode=self.learning_mode,
             minimum_support=self.settings.minimum_support if self.settings else 3,
             exploration_bonus=self.settings.exploration_bonus if self.settings else 0.15,
@@ -752,7 +794,7 @@ class CognitionLoop:
             world_id=message["worldId"],
         )
         self.learning_mode = message["learningMode"]
-        self.training_context = message["trainingContext"]
+        self.experience = ExperienceKey.from_message(message["experience"])
         self.policy_revision = message["policyRevision"]
         self.rng_seed = message["rngSeed"]
         directory = self.evidence_directory or Path(message["evidenceDirectory"])
@@ -760,13 +802,16 @@ class CognitionLoop:
             self.settings.cross_check(
                 learning_mode=self.learning_mode,
                 evidence_directory=message["evidenceDirectory"],
+                environment_kind=self.experience.environment_kind,
+                embodiment_kind=self.experience.embodiment_kind,
             )
+        self._enter_environment(self.experience.environment_kind)
         if message["skillLibraryRevision"] != self.registry.revision:
             self._log(
                 "skill library revision mismatch: runtime "
                 f"{message['skillLibraryRevision']} vs cognition {self.registry.revision}"
             )
-        self.store = EvidenceStore(
+        self.store = EventStore(
             directory,
             snapshot_every=self.settings.snapshot_every_events if self.settings else 50,
         )
@@ -812,13 +857,13 @@ class CognitionLoop:
         self._lifecycle = not plan.legacy
         self.operational = OperationalView(world=None)
         # Working memory starts empty: the past comes back only when cued.
-        self.memory = Memory(self.memory_store, training_context=self.training_context)
+        self.memory = Memory(self.memory_store, experience=self.experience_key)
         # Waking where it last knew it was, less sure of it: nothing about the
         # body's actual location is available, or used.
         self.spatial = Spatial(self.spatial_map)
         # Projects persist; which of them still apply is checked when Person
         # next observes the world, not assumed.
-        self.projects = ProjectManager(self.project_book)
+        self.projects = ProjectManager(self.project_book, self._templates())
         # Affect persists too, and settles only as experienced time passes.
         self.affect = Affect(
             self.affect_record, mode=self.affect_mode, precise=self.interoception_on
@@ -862,7 +907,7 @@ class CognitionLoop:
             {
                 "reason_codes": message["reasonCodes"],
                 "rng_seed": message["rngSeed"],
-                "training_context": message["trainingContext"],
+                "experience": dict(message["experience"]),
                 "learning_mode": self.learning_mode,
                 "affect_mode": self.affect_mode,
                 "interoception": "on" if self.interoception_on else "off",
@@ -894,7 +939,7 @@ class CognitionLoop:
                     statistics=self.statistics,
                     episode_id=self.episode_id,
                     learning_mode=self.learning_mode,
-                    training_context=self.training_context,
+                    experience=self.experience_key,
                     policy_revision=self.policy_revision,
                     goals=self.goals,
                     restore_notes=self.restore_notes,
@@ -913,30 +958,42 @@ class CognitionLoop:
 
     def _observe(self, message: dict[str, Any]) -> None:
         tick = message["tick"]
-        self._last_observation = message
+        environment = self._environment()
+        # The epistemic boundary (ADR 0026): the message is read here, once,
+        # as perception, and nothing below reads it again.
+        percepts = environment.perceive(message)
+        self._last_percepts = percepts
         # Where Person is comes first: its sense of place decides whether it
         # believes it is home, and what it notices is remembered there.
-        self.spatial.feel(message["selfMotion"], frozenset(remembering.noticed(message)))
+        self.spatial.feel(percepts.self_motion, frozenset(environment.noticed(percepts)))
         self.home, _ = self.spatial.home_relation()
-        self._now = perceived(message, self.spatial.here())
-        state = symbolic_state(message, home=self.home)
-        context = decision_context(message, self.home)
-        context_id = context.identifier()
+        self._now = perceived(environment.conditions(percepts), self.spatial.here())
+        self._revise_beliefs(percepts, tick)
+        decision = self._decision_state(percepts)
+        self.decision = decision
+        self._verdict = environment.envelope(decision)
+        state = environment.planning_facts(decision)
+        context_id = environment.decision_context(decision).identifier()
         # The first thing a new observation is good for is settling whatever
         # the last skill claimed it would do.
         self._settle_prediction(state, tick)
         self._last_state = dict(state)
-        self._remember(self.memory.experience(message), tick)
+        self._remember(
+            self.memory.experience(
+                tick, environment.health(percepts), percepts.message_id, environment.seen(percepts)
+            ),
+            tick,
+        )
         if self.interoception_on:
-            self._sense_body(message, tick)
+            self._sense_body(decision.self_state.body, tick)
         else:
-            self._appraise_body(message, tick)
+            self._appraise_body(percepts, tick)
 
         self._reopen_unfound(state, tick)
-        self._deliberate_projects(message, state, tick)
-        self._deliberate_investigations(message, state, tick)
+        self._deliberate_projects(decision, state, tick)
+        self._deliberate_investigations(decision, state, tick)
         self._metareason(state, tick)
-        proposals = self.goal_provider.propose(message, state, tick, home=self.home)
+        proposals = environment.propose_goals(decision, state, tick)
         project_goal = self.projects.goal(state, tick)
         if project_goal is not None:
             proposals.append(project_goal)
@@ -976,18 +1033,18 @@ class CognitionLoop:
                 reason="goal_changed" if not self.active.finished else "routine_complete",
             )
 
-        if self.active is None and not self._start_routine(message, state, context_id, goal, tick):
+        if self.active is None and not self._start_routine(decision, state, context_id, goal, tick):
             return
         assert self.active is not None
 
         step = self.active.current()
         if step is None:
             self._finish_routine("SUCCESS", tick, reason="routine_complete")
-            if not self._start_routine(message, state, context_id, goal, tick):
+            if not self._start_routine(decision, state, context_id, goal, tick):
                 return
             step = self.active.current() if self.active else None
         if step is None:
-            self._emit_idle(message, goal, context_id, tick)
+            self._emit_idle(decision, goal, context_id, tick)
             return
 
         spec = self.registry.get(step.skill_id)
@@ -996,33 +1053,110 @@ class CognitionLoop:
             # proposal the runtime would only reject.
             self.active.failure_modes.append("preconditions_changed")
             self._finish_routine("INVALIDATED", tick, reason="preconditions_changed")
-            if not self._start_routine(message, state, context_id, goal, tick):
+            if not self._start_routine(decision, state, context_id, goal, tick):
                 return
             step = self.active.current() if self.active else None
             if step is None:
-                self._emit_idle(message, goal, context_id, tick)
+                self._emit_idle(decision, goal, context_id, tick)
                 return
             spec = self.registry.get(step.skill_id)
 
-        self._emit_decision(message, goal, context_id, step, spec, tick)
+        self._emit_decision(decision, goal, context_id, step, spec, tick)
 
     def _idle_goal(self, tick: int) -> Goal:
-        from person_skills import Condition
+        return self._environment().idle_goal(tick)
 
-        return Goal(
-            goal_id="goal_maintain_reserves",
-            goal_type="MAINTAIN_RESERVES",
-            priority=10.0,
-            source="maintenance",
-            created_at_tick=tick,
-            status="QUEUED",
-            completion_condition=(Condition("rested", ">=", 1),),
-            reason_codes=("nothing_urgent",),
+    # ----------------------------------------------------- epistemic state
+
+    def _revise_beliefs(self, percepts: PerceptualState[Any], tick: int) -> None:
+        """Admit what the observation reports as evidence, and revise beliefs.
+
+        Only the environment's admissible reports become evidence; a replayed
+        stream admits none. Each revision is journalled and the store is
+        rebuilt from the journal; a belief confirmed unchanged is refreshed in
+        the ephemeral overlay and journals nothing.
+        """
+        environment = self._environment()
+        now = self.memory.time_at(percepts.tick)
+        try:
+            evidence = environment.belief_evidence(percepts, now)
+        except EvidenceRefused:
+            return
+        for revision in self.belief_state.revise(evidence, self.freshness):
+            event = self._record("belief_revised", tick, revision.payload())
+            if event is None:
+                # No continuity root to journal to: the belief is still held.
+                self.belief_state.admit_revision(revision)
+
+    def _decision_state(self, percepts: PerceptualState[Any]) -> DecisionState[Any, BodyReading]:
+        """The views one decision is made from (ADR 0026). Composed, not stored:
+        each part of the self-state is read from the mechanism that owns it."""
+        environment = self._environment()
+        here = self.spatial.here()
+        affect = self.affect.state
+        return DecisionState(
+            percepts=percepts,
+            beliefs=self.belief_state.view(percepts.situation, self.freshness),
+            self_state=SelfState(
+                body=environment.body(percepts),
+                life=self.life.status,
+                world_available=(
+                    None
+                    if self.operational.world is None
+                    else self.operational.world == "available"
+                ),
+                place=PlaceEstimate(here.place_id, here.confidence) if here is not None else None,
+                home_relation=self.home,
+                affect=(
+                    None
+                    if self.affect_mode == "off"
+                    else {
+                        "valence": affect.valence,
+                        "unease": affect.unease,
+                        "control": affect.control,
+                    }
+                ),
+                capabilities=self.offered,
+                identity=self.self_knowledge,
+            ),
+            knowledge=Knowledge(skills=self.registry, facts=self.registry.facts),
         )
+
+    def _environment(self) -> CognitiveEnvironment:
+        if self.environment is None:
+            raise RuntimeError("no environment profile: SessionHello has not named one")
+        return self.environment
+
+    def _enter_environment(self, kind: str) -> None:
+        """Take up the environment SessionHello names, through its manifest."""
+        if self.environment is None or self.environment.kind != kind:
+            self.environment = load_environment(kind)
+        if not self._registry_given:
+            self.registry = self.environment.skills()
+        self.arbiter.signature = self.environment.context_signature
+        self.predictors = Predictors([DeclaredEffectModel(self.registry, kind)])
+
+    def _templates(self) -> tuple[Any, ...]:
+        return self.environment.project_templates if self.environment is not None else ()
+
+    @property
+    def experience_key(self) -> str:
+        return self.experience.key if self.experience is not None else "unstarted"
+
+    @property
+    def goal_types(self) -> tuple[str, ...]:
+        if self.environment is None:
+            return CORE_GOAL_TYPES
+        return self.environment.goal_types
+
+    def _evidence_subjects(self, facts: Any) -> frozenset[str]:
+        if self.environment is None:
+            return frozenset()
+        return self.environment.evidence_subjects(tuple(facts))
 
     def _start_routine(
         self,
-        observation: dict[str, Any],
+        decision: DecisionState[Any, BodyReading],
         state: dict[str, float],
         context_id: str,
         goal: Goal,
@@ -1037,7 +1171,11 @@ class CognitionLoop:
             registry=self.registry,
             limit=MAX_CANDIDATES,
             allowed_skills=(method,) if method else None,
-            recovery=tuple(RECOVERY_SKILLS) if goal.planning_profile == "recovery" else (),
+            recovery=(
+                tuple(self.registry.vocabulary.recovery_skills)
+                if goal.planning_profile == "recovery"
+                else ()
+            ),
         )
         plans = [plan for plan in plans if plan.steps]
         if self._metareasoning() and goal.source != "maintenance":
@@ -1055,7 +1193,7 @@ class CognitionLoop:
                 )
             )
         if not plans:
-            return self._seek(observation, state, context_id, goal, tick)
+            return self._seek(decision, state, context_id, goal, tick)
         if self.search is not None:
             # The planner found a way from what Person now perceives. That is
             # the whole test of whether the looking was enough.
@@ -1067,11 +1205,10 @@ class CognitionLoop:
         ]
         try:
             choice = self._policy().propose(
-                observation,
+                self._verdict,
                 goal,
                 candidates,
                 context_id,
-                home=self.home,
                 tolerance=self.affect.tolerance(),
                 reliability=self._reliability(),
                 hypotheses=self._hypotheses(),
@@ -1079,7 +1216,7 @@ class CognitionLoop:
             )
         except NoCandidatesError:
             self.goals.block(goal.goal_id, "no_candidate_routine", tick)
-            self._emit_idle(observation, goal, context_id, tick)
+            self._emit_idle(decision, goal, context_id, tick)
             return False
         chosen = next(
             (routine for routine in routines if routine.routine_id == choice.routine_id),
@@ -1131,7 +1268,7 @@ class CognitionLoop:
 
     def _emit_decision(
         self,
-        observation: dict[str, Any],
+        decision: DecisionState[Any, BodyReading],
         goal: Goal,
         context_id: str,
         step: SkillStep,
@@ -1143,7 +1280,7 @@ class CognitionLoop:
         decision_id = _decision_uuid(self.decision_counter, self.identity)
         self.pending_decision_id = decision_id
         choice: PolicyChoice = self._pending_choice or self._policy().propose(
-            observation,
+            self._verdict,
             goal,
             [candidate_from_routine(self.active.routine, self.library, {}, self.registry)],
             context_id,
@@ -1212,6 +1349,14 @@ class CognitionLoop:
         # The state a prediction is measured against is the one the planner
         # reasoned over, captured before anything physical happens.
         experiment = self.investigations.hypothesis_for(goal.goal_id)
+        parameters = step.parameter_map or spec.default_parameters()
+        predictions = self.predictors.predict(
+            PredictionQuery(
+                state=dict(self._last_state),
+                intervention=Intervention(step.skill_id, parameters),
+                belief_version=self.belief_state.version,
+            )
+        )
         self.pending_prediction = PendingPrediction(
             decision_id=decision_id,
             context_id=context_id,
@@ -1224,6 +1369,7 @@ class CognitionLoop:
             experiment=experiment
             if step.skill_id == self.investigations.method(goal.goal_id)
             else None,
+            predictions=predictions,
         )
         # ADR 0023: the affect this skill's outcome will be judged against is
         # the affect before that outcome is appraised.
@@ -1249,39 +1395,40 @@ class CognitionLoop:
         )
 
     def _emit_idle(
-        self, observation: dict[str, Any], goal: Goal, context_id: str, tick: int
+        self, decision: DecisionState[Any, BodyReading], goal: Goal, context_id: str, tick: int
     ) -> None:
         """Nothing is planned, so wait safely rather than stall the runtime."""
-        spec = self.registry.get("wait_safely")
+        idle = self.registry.vocabulary.roles["idle"]
+        spec = self.registry.get(idle)
         self.active = ActiveRoutine(
             routine=Routine(
                 routine_id="r_idle_wait",
-                name="idle__wait_safely",
+                name=f"idle__{idle}",
                 goal_type=goal.goal_type,
-                elements=(SkillStep("wait_safely"),),
+                elements=(SkillStep(idle),),
                 risk=spec.risk,
                 cost=1.0,
                 ticks=spec.max_ticks,
             ),
             goal_id=goal.goal_id,
             context_id=context_id,
-            steps=(SkillStep("wait_safely"),),
+            steps=(SkillStep(idle),),
             started_tick=tick,
         )
         self.library.add(self.active.routine)
         self._pending_choice = DeterministicPolicyProvider(self.policy_revision).propose(
-            observation,
+            self._verdict,
             goal,
             [candidate_from_routine(self.active.routine, self.library, {}, self.registry)],
             context_id,
         )
-        self._emit_decision(observation, goal, context_id, self.active.steps[0], spec, tick)
+        self._emit_decision(decision, goal, context_id, self.active.steps[0], spec, tick)
 
     # ------------------------------------------------------ information seeking
 
     def _seek(
         self,
-        observation: dict[str, Any],
+        decision: DecisionState[Any, BodyReading],
         state: dict[str, float],
         context_id: str,
         goal: Goal,
@@ -1298,12 +1445,12 @@ class CognitionLoop:
             if not purpose:
                 # Seeing more would not help. This is the old, real "no plan".
                 self.goals.block(goal.goal_id, "no_feasible_plan", tick)
-                self._emit_idle(observation, goal, context_id, tick)
+                self._emit_idle(decision, goal, context_id, tick)
                 return False
             # A search happens somewhere. Person settles where it believes it
             # is, and tries to remember searching for the same things here.
             where = self._settle("search", tick)
-            sought = remembering.evidence_subjects(purpose)
+            sought = self._evidence_subjects(purpose)
             recalled = self._recall(
                 Cue.about(
                     *sought,
@@ -1353,29 +1500,30 @@ class CognitionLoop:
                 search.purpose,
                 search.place["place_id"] if search.place else None,
             )
-            self._emit_idle(observation, goal, context_id, tick)
+            self._emit_idle(decision, goal, context_id, tick)
             return False
 
-        direction = search.next_direction(observation)
+        direction = search.next_direction(self._environment().evidence_percepts(decision.percepts))
         search.record(direction)
-        self._emit_look(observation, goal, context_id, search, direction, tick)
+        self._emit_look(decision, goal, context_id, search, direction, tick)
         return False
 
     def _emit_look(
         self,
-        observation: dict[str, Any],
+        decision: DecisionState[Any, BodyReading],
         goal: Goal,
         context_id: str,
         search: InformationSearch,
         direction: str,
         tick: int,
     ) -> None:
-        spec = self.registry.get("look")
-        step = SkillStep("look", (("direction", direction),))
+        look = self.registry.vocabulary.roles["look"]
+        spec = self.registry.get(look)
+        step = SkillStep(look, (("direction", direction),))
         self.active = ActiveRoutine(
             routine=Routine(
                 routine_id=SEARCH_ROUTINE_ID,
-                name="seek_evidence__look",
+                name=f"seek_evidence__{look}",
                 goal_type=goal.goal_type,
                 elements=(step,),
                 risk=spec.risk,
@@ -1389,7 +1537,7 @@ class CognitionLoop:
         )
         self.library.add(self.active.routine)
         choice = DeterministicPolicyProvider(self.policy_revision).propose(
-            observation,
+            self._verdict,
             goal,
             [candidate_from_routine(self.active.routine, self.library, {}, self.registry)],
             context_id,
@@ -1404,7 +1552,7 @@ class CognitionLoop:
                 *(("searched_here_before",) if search.revisit > 0 else ()),
             ),
         )
-        self._emit_decision(observation, goal, context_id, step, spec, tick)
+        self._emit_decision(decision, goal, context_id, step, spec, tick)
 
     def _conclude_search(self, phase: str, tick: int, **extra: Any) -> None:
         search = self.search
@@ -1420,7 +1568,14 @@ class CognitionLoop:
             else:
                 self._feel(appraise_search(conclusion), tick)
             self._remember(
-                [remembering.searched(search.purpose, conclusion, len(search.looks), None)],
+                [
+                    remembering.searched(
+                        tuple(self._evidence_subjects(search.purpose)),
+                        conclusion,
+                        len(search.looks),
+                        None,
+                    )
+                ],
                 tick,
                 place=search.place,
             )
@@ -1490,7 +1645,13 @@ class CognitionLoop:
                 self.arbiter.detectors.emergency(message["trigger"], self.memory.now)
             )
         self._remember(
-            [remembering.endangered(message, event.event_id if event else None)],
+            [
+                remembering.endangered(
+                    message,
+                    event.event_id if event else None,
+                    self._environment().emergency_subjects(str(message["trigger"])),
+                )
+            ],
             message["tick"],
             message["decisionId"],
         )
@@ -1536,17 +1697,26 @@ class CognitionLoop:
         self.summary.note_outcome(message)
         if self.interoception_on:
             # Appraised with what it brought about, once Person has seen that.
-            self._pending_actions.append((message["decisionId"], appraise_outcome(message)))
+            self._pending_actions.append((message["decisionId"], self._appraise_outcome(message)))
         else:
-            self._feel(appraise_outcome(message), message["tick"])
-        experience = remembering.acted(message, self.registry, event.event_id if event else None)
+            self._feel(self._appraise_outcome(message), message["tick"])
+        executed = str(message["executedSkill"])
+        experience = remembering.acted(
+            message,
+            self._environment().skill_subjects(executed, self.registry)
+            if executed in self.registry
+            else ("self",),
+            event.event_id if event else None,
+            unremarkable=self.registry.vocabulary.unremarkable_skills,
+        )
         if experience is not None:
             succeeded = message["status"] == "SUCCESS"
-            built_home = message["executedSkill"] == "build_basic_shelter" and succeeded
+            roles = self.registry.vocabulary.roles
+            built_home = executed == roles.get("buildsHome") and succeeded
             # Having gone home, Person believes it is home: a belief from its
             # own action's outcome, which labels the place it is at and moves
             # no estimate. The runtime's home position never comes up.
-            went_home = message["executedSkill"] == "return_home" and succeeded
+            went_home = executed == roles.get("goesHome") and succeeded
             where = self._settle(
                 "shelter" if built_home else "action",
                 message["tick"],
@@ -1632,6 +1802,9 @@ class CognitionLoop:
             expected_effects=pending.expected_effects,
             state_before=pending.state_before,
             state_after=state,
+            evaluable=self.registry.vocabulary.evaluable_facts,
+            not_attempted=self.registry.vocabulary.not_attempted,
+            tracked=self.registry.vocabulary.tracked_facts,
         )
         destination = admitted_to(self.learning_mode)
         judged: list[tuple[Trial, str | None]] = []
@@ -1649,11 +1822,14 @@ class CognitionLoop:
             judged.append((trial, event.event_id if event else None))
         return judged
 
+    def _appraise_outcome(self, message: dict[str, Any]) -> Appraisal | None:
+        return appraise_outcome(message, self.registry.vocabulary.unremarkable_skills)
+
     def _reliability(self) -> Any:
         """The learned term for routine scoring, only when beliefs may act."""
         if self.learning_mode != "supervised":
             return None
-        return reliability_term(self.effect_beliefs, self.registry, self.training_context)
+        return reliability_term(self.effect_beliefs, self.registry, self.experience_key)
 
     # ---------------------------------------------------- causal hypotheses
 
@@ -1797,7 +1973,7 @@ class CognitionLoop:
         ]
         if len(live) >= MAX_LIVE_HYPOTHESES:
             return
-        belief = self.effect_beliefs.belief(table, self.training_context, skill, fact)
+        belief = self.effect_beliefs.belief(table, self.experience_key, skill, fact)
         context = ReasoningContext(
             skill=skill,
             fact=fact,
@@ -1848,7 +2024,7 @@ class CognitionLoop:
                 )
 
     def _deliberate_investigations(
-        self, observation: dict[str, Any], state: dict[str, float], tick: int
+        self, decision: DecisionState[Any, BodyReading], state: dict[str, float], tick: int
     ) -> None:
         """Perhaps start finding something out. Experiments change behaviour,
         so they run only when learned beliefs may act."""
@@ -1864,7 +2040,8 @@ class CognitionLoop:
             for variable, value in trial.conditions.items():
                 if value is not None:
                     seen.setdefault(variable, set()).add(str(value))
-        night = observation["environment"]["dayPhase"] in {"dusk", "night"}
+        environment = self._environment()
+        night = environment.night(decision.percepts)
         self._record_changes(
             self.investigations.consider(
                 hypotheses=self.hypothesis_book.hypotheses["active"],
@@ -1872,7 +2049,7 @@ class CognitionLoop:
                 experience={"attempts": attempts, "seen": seen},
                 tolerance=self.affect.tolerance(),
                 open_projects=len(self.projects.unfinished()),
-                is_calm=calm(homeostasis(observation, state), night),
+                is_calm=calm(environment.drives(decision, state), night),
                 now=self.memory.now,
             ),
             tick,
@@ -1903,9 +2080,12 @@ class CognitionLoop:
         if record is not None:
             self._record("affect_appraised", tick, record)
 
-    def _sense_body(self, observation: dict[str, Any], tick: int) -> None:
-        """The body's conditions press on, and its events are felt once (ADR 0014)."""
-        sensed = self.interoception.sense(observation)
+    def _sense_body(self, reading: BodyReading, tick: int) -> None:
+        """The body's conditions press on, and its events are felt once (ADR 0014).
+
+        `reading` is the body view of the self-state (ADR 0026): interoception
+        reads the self, never the world."""
+        sensed = self.interoception.sense(reading)
         record = self.affect.apply_tonic(sensed.pressures, self.memory.now)
         if record is not None:
             self._record("affect_tonic", tick, record)
@@ -1981,11 +2161,12 @@ class CognitionLoop:
                 {"cause": cause, "consequences": [item for item, _ in consequences]},
             )
 
-    def _appraise_body(self, observation: dict[str, Any], tick: int) -> None:
+    def _appraise_body(self, percepts: PerceptualState[Any], tick: int) -> None:
         """What the world and the body feel like now: threat perceived, harm felt."""
+        environment = self._environment()
         self.affect.advance(self.memory.now)
-        self._feel(appraise_threat(observation), tick)
-        health = float(observation["vitals"]["health"])
+        self._feel(appraise_threat(environment.threat(percepts)), tick)
+        health = environment.health(percepts)
         if self._felt_health is not None:
             self._feel(appraise_harm(self._felt_health - health), tick)
         self._felt_health = health
@@ -2002,8 +2183,7 @@ class CognitionLoop:
             project = payload["project"]
             self._feel(appraise_project(payload["change"], project["kind"]), tick)
 
-    @staticmethod
-    def _basis(goal: Goal) -> dict[str, Any]:
+    def _basis(self, goal: Goal) -> dict[str, Any]:
         """One goal candidate as the engineering record describes it."""
         fixed = goal.goal_type == INVESTIGATE or goal.source == "emergency"
         facts = frozenset(condition.fact for condition in goal.completion_condition)
@@ -2011,7 +2191,7 @@ class CognitionLoop:
             "goal_id": goal.goal_id,
             "goal_type": goal.goal_type,
             "source": goal.source,
-            "character": "fixed" if fixed else Affect.character(facts),
+            "character": "fixed" if fixed else self._environment().goal_character(facts),
             "base_priority": goal.base_priority
             if goal.base_priority is not None
             else goal.priority,
@@ -2025,7 +2205,7 @@ class CognitionLoop:
             # risk, as it reaches exploration (ADR 0012): no priority bias.
             return replace(goal, base_priority=goal.priority, affect_bias=0.0)
         facts = frozenset(condition.fact for condition in goal.completion_condition)
-        bias = self.affect.bias(facts, goal.source)
+        bias = self.affect.bias(self._environment().goal_character(facts), goal.source)
         return replace(
             goal,
             base_priority=goal.priority,
@@ -2036,13 +2216,15 @@ class CognitionLoop:
     # -------------------------------------------------------------- projects
 
     def _deliberate_projects(
-        self, observation: dict[str, Any], state: dict[str, float], tick: int
+        self, decision: DecisionState[Any, BodyReading], state: dict[str, float], tick: int
     ) -> None:
         """Check restored projects still apply, then perhaps take up a new one."""
         home_place = self.spatial.home_place()
         waiting = self.projects.unexamined()
         if waiting:
-            subjects = sorted({s for project in waiting for s in BY_KIND[project.kind].subjects})
+            subjects = sorted(
+                {s for project in waiting for s in self.projects.template(project).subjects}
+            )
             # How has this kind of work gone before? Bounded, cued recall.
             recalled = self._recall(
                 Cue.about(*subjects, purpose="goal", kinds=("acted",)),
@@ -2053,11 +2235,12 @@ class CognitionLoop:
                 self.projects.reexamine(state=state, home_place=home_place, failures=failures),
                 tick,
             )
-        night = observation["environment"]["dayPhase"] in {"dusk", "night"}
+        environment = self._environment()
+        night = environment.night(decision.percepts)
         self._record_changes(
             self.projects.consider(
                 state=state,
-                drives=homeostasis(observation, state),
+                drives=environment.drives(decision, state),
                 home_place=home_place,
                 night=night,
                 now=self.memory.now,
@@ -2123,13 +2306,14 @@ class CognitionLoop:
         if pending is None or not pending.settled:
             return
         self.pending_prediction = None
-        payload = build_payload(pending, state)
+        payload = build_payload(pending, state, tracked=self.registry.vocabulary.tracked_facts)
         if self._metareasoning():
             erred = self.goals.entries.get(str(payload.get("goal_id")))
+            evaluable = self.registry.vocabulary.evaluable_facts
             failed_facts = [
                 str(entry.get("fact"))
                 for entry in payload.get("observed", [])
-                if entry.get("fact") in EVALUABLE_FACTS
+                if entry.get("fact") in evaluable
             ]
             if str(payload.get("severity")) in ("major", "inverted") and failed_facts:
                 self.arbiter.raw_signal(
@@ -2146,7 +2330,7 @@ class CognitionLoop:
                     [
                         str(entry.get("fact"))
                         for entry in payload.get("observed", [])
-                        if entry.get("fact") in EVALUABLE_FACTS
+                        if entry.get("fact") in evaluable
                     ],
                     str(payload.get("severity")),
                     self.memory.now,
@@ -2307,13 +2491,17 @@ class CognitionLoop:
             self._drop_body_continuity()
 
     def _death_memory(self, message: dict[str, Any]) -> EpisodeDraft:
-        seen = self._last_observation
+        health, food, threat = (
+            self.environment.last_felt(self._last_percepts)
+            if self.environment is not None
+            else (None, None, False)
+        )
         active = self.goals.active
         project = self.projects.current()
         return remembering.died(
-            health=float(seen["vitals"]["health"]) if seen else None,
-            food=float(seen["vitals"]["food"]) if seen else None,
-            threat_in_view=bool(seen and seen["nearby"]["hostiles"]),
+            health=health,
+            food=food,
+            threat_in_view=threat,
             goal_type=active.goal_type if active is not None else None,
             project_kind=project.kind if project is not None else None,
             message_id=str(message["messageId"]),

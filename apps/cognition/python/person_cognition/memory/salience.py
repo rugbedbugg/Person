@@ -12,6 +12,8 @@ from __future__ import annotations
 from collections.abc import Iterable, Mapping
 from typing import Any
 
+from person_protocol import discovered
+
 BASE: Mapping[str, float] = {
     "perceived": 0.2,
     "acted": 0.2,
@@ -22,13 +24,16 @@ BASE: Mapping[str, float] = {
     "endangered": 0.8,
 }
 
-#: Threats and scarce things are worth remembering for longer.
+#: Threats and scarce things are worth remembering for longer. Danger is
+#: Person's own; which things are threats or scarce is each environment's
+#: (its manifest's `memory.salience`, ADR 0025).
 SUBJECT_BONUS: Mapping[str, float] = {
-    "hostile": 0.3,
-    "hazard": 0.2,
     "danger": 0.1,
-    "coal": 0.1,
-    "container": 0.1,
+    **{
+        subject: float(bonus)
+        for manifest in discovered().values()
+        for subject, bonus in manifest.document.get("memory", {}).get("salience", {}).items()
+    },
 }
 
 #: The first episode about a subject.

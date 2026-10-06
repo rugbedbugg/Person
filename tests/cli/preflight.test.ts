@@ -74,13 +74,13 @@ function writeProperties(file: string, values: Record<string, string>): void {
 
 function configDocument(evidence: string, output: string) {
   return {
-    configVersion: 2,
+    configVersion: 3,
     personId: "validation-000",
     worldId: "rehearsal-world",
     identity: { name: "Rehearsal", designation: "Validation-000" },
+    environment: { kind: "minecraft", difficulty: "normal" },
     runtime: {
-      embodiment: "minecraft",
-      trainingContext: "minecraft_normal",
+      embodiment: "mineflayer",
       outputDirectory: output,
       reconnectAttempts: 3,
       reconnectIntervalMs: 5000,
@@ -400,15 +400,12 @@ const DEFECTS: [
     },
   ],
   [
-    "a peaceful training context on an easy world",
-    "training context matches difficulty",
+    "a peaceful difficulty configured for an easy world",
+    "configured difficulty matches the server",
     (s) =>
       s.writeConfig({
         ...s.document,
-        runtime: {
-          ...s.document.runtime,
-          trainingContext: "minecraft_peaceful",
-        },
+        environment: { kind: "minecraft", difficulty: "peaceful" },
         authorization: { ...s.document.authorization, normalDifficulty: false },
       }),
   ],

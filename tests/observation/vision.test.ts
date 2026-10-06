@@ -1,9 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import type { Observation } from "#protocol";
 import { VISION, buildObservation, canSee, eyePose } from "#node-runtime";
 import { harness, type Harness } from "../support/harness.ts";
+import type { MinecraftObservation } from "#minecraft";
 
 /**
  * What Person can and cannot see.
@@ -16,7 +16,7 @@ import { harness, type Harness } from "../support/harness.ts";
  * Deterministic and offline. This proves the geometry, not Minecraft.
  */
 
-function observe(bench: Harness): Observation {
+function observe(bench: Harness): MinecraftObservation {
   return buildObservation({
     identity: {
       personId: bench.config.personId,
@@ -27,7 +27,12 @@ function observe(bench: Harness): Observation {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -39,8 +44,8 @@ function observe(bench: Harness): Observation {
   });
 }
 
-const animals = (observation: Observation): string[] =>
-  observation.nearby.passiveAnimals
+const animals = (observation: MinecraftObservation): string[] =>
+  observation.payload.nearby.passiveAnimals
     .map((animal) => animal.name)
     .filter((name): name is string => name !== undefined);
 
@@ -172,7 +177,7 @@ test("the periphery reports that something is there, not what it is", async () =
   bench.world.spawn("pig", { x: -6, y: 64, z: -1 });
   bench.world.face({ x: 0, y: 64, z: -6 });
 
-  const seen = observe(bench).nearby.passiveAnimals;
+  const seen = observe(bench).payload.nearby.passiveAnimals;
   const central = seen.filter((animal) => animal.detail === "central");
   const peripheral = seen.filter((animal) => animal.detail === "peripheral");
 
@@ -209,7 +214,7 @@ test("whose a thing is, like what it is, is read off a thing Person looks at", a
   bench.world.spawn("sheep", { x: 6, y: 64, z: -1 });
   bench.world.face({ x: 0, y: 64, z: -6 });
 
-  const seen = observe(bench).nearby.passiveAnimals;
+  const seen = observe(bench).payload.nearby.passiveAnimals;
   const central = seen.filter((animal) => animal.detail === "central");
   const peripheral = seen.filter((animal) => animal.detail === "peripheral");
 
@@ -237,10 +242,10 @@ test("distance is an estimate, and a coarser one further away", async () => {
   const bench = await harness();
   const observation = observe(bench);
   const every = [
-    ...observation.nearby.resources,
-    ...observation.nearby.passiveAnimals,
-    ...observation.nearby.hostiles,
-    ...observation.nearby.hazards,
+    ...observation.payload.nearby.resources,
+    ...observation.payload.nearby.passiveAnimals,
+    ...observation.payload.nearby.hostiles,
+    ...observation.payload.nearby.hazards,
   ];
 
   for (const percept of every) {
@@ -279,12 +284,16 @@ test("the path risk Person is told of comes from threats it perceives", async ()
   bench.world.spawn("zombie", { x: 0, y: 64, z: 5 });
   bench.world.face({ x: 0, y: 64, z: -6 });
   const unseen = observe(bench);
-  assert.equal(unseen.nearby.hostiles.length, 0, "the zombie is behind Person");
+  assert.equal(
+    unseen.payload.nearby.hostiles.length,
+    0,
+    "the zombie is behind Person",
+  );
   assert.notEqual(bench.kernel.threatState(bench.world.snapshot()), "none");
-  assert.equal(unseen.navigation.pathRisk, "low");
+  assert.equal(unseen.payload.navigation.pathRisk, "low");
 
   bench.world.face({ x: 0, y: 64, z: 5 });
   const seen = observe(bench);
-  assert.equal(seen.nearby.hostiles.length, 1);
-  assert.equal(seen.navigation.pathRisk, "high");
+  assert.equal(seen.payload.nearby.hostiles.length, 1);
+  assert.equal(seen.payload.navigation.pathRisk, "high");
 });

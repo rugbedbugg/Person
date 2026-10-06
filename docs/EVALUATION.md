@@ -60,11 +60,12 @@ consolidation precision are all future scope. The evidence
 format is designed so they can be computed later from episodes recorded now:
 expected effects are stored next to observed effects, the executed action is
 distinguishable from the requested one, every event carries world, session,
-episode and training context, and fixture episodes record their RNG seed.
+episode and experience key (ADR 0025), and fixture episodes record their RNG seed.
 
 That is a claim about the data, not about the capability. Nothing here learns a
-world model. Prediction error is now recorded, which is the input such a model
-would need, and no model consumes it.
+world model. Prediction error is now recorded with the predictive model that
+made each prediction (the declared-effect model, ADR 0028), which is the input
+a learned model would need, and no learned model consumes it.
 
 Nothing in this suite has been run against a Minecraft server. See
 `REALITY_VALIDATION.md`.
@@ -74,4 +75,4 @@ Nothing in this suite has been run against a Minecraft server. See
 `fixtures/worlds/` currently holds the acceptance world and a safety probe
 world. Held-out evaluation worlds, with their own evidence stores, belong to
 the next milestone; keeping training and evaluation evidence separate is
-already supported by the training-context key on every statistic.
+already supported by the experience key on every statistic.

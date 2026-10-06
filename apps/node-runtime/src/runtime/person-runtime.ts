@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { distance, type PersonConfig } from "#config";
 import {
   PROTOCOL_VERSION,
   envelope,
@@ -47,9 +46,15 @@ import {
 import { StatusWriter, statusPath } from "../reporting/status.ts";
 import { PlacementLedger } from "./placement-ledger.ts";
 import { SelfMotionSense } from "../observation/self-motion.ts";
+import {
+  distance,
+  type MinecraftConfig,
+  experienceOf,
+  describeExperience,
+} from "#minecraft";
 
 export interface PersonRuntimeOptions {
-  config: PersonConfig;
+  config: MinecraftConfig;
   embodiment: Embodiment;
   registry?: SkillRegistry;
   identity?: Partial<SessionIdentity>;
@@ -78,7 +83,7 @@ export interface PersonRuntimeOptions {
  * outcome of what ran, not of what it asked for.
  */
 export class PersonRuntime {
-  readonly config: PersonConfig;
+  readonly config: MinecraftConfig;
   readonly identity: SessionIdentity;
   readonly registry: SkillRegistry;
   readonly ledger: PlacementLedger;
@@ -158,7 +163,7 @@ export class PersonRuntime {
         episodeId: this.#episodeId,
         server: options.config.server ?? null,
         embodiment: options.config.runtime.embodiment,
-        trainingContext: options.config.runtime.trainingContext,
+        experience: describeExperience(experienceOf(options.config)),
         learningMode: options.config.learning.mode,
         operatorIntervention: this.#operatorIntervention,
         home: {
@@ -220,7 +225,7 @@ export class PersonRuntime {
       personId: this.identity.personId,
       worldId: this.identity.worldId,
       sessionId: this.identity.sessionId,
-      trainingContext: runtime.trainingContext,
+      experience: describeExperience(experienceOf(this.config)),
       learningMode: this.config.learning.mode,
       rngSeed: runtime.rngSeed,
       policyRevision: 0,
@@ -249,7 +254,7 @@ export class PersonRuntime {
         ...this.#envelope("SessionHello", this.#embodiment.snapshot().tick),
         type: "SessionHello",
         learningMode: this.config.learning.mode,
-        trainingContext: runtime.trainingContext,
+        experience: experienceOf(this.config),
         policyRevision: 0,
         skillLibraryRevision: this.registry.revision,
         rngSeed: runtime.rngSeed,
@@ -491,7 +496,7 @@ export class PersonRuntime {
       type: "EpisodeEvent",
       episodeId: this.#episodeId,
       phase,
-      trainingContext: this.config.runtime.trainingContext,
+      experience: experienceOf(this.config),
       rngSeed: this.config.runtime.rngSeed,
       // The contamination marker travels with the evidence, so an episode
       // recorded during a debug session can never be mistaken for a counted one.
@@ -528,7 +533,7 @@ export class PersonRuntime {
       permissions: this.permissions,
       kernel: this.kernel,
       ledger: this.ledger,
-      trainingContext: this.config.runtime.trainingContext,
+      experience: experienceOf(this.config),
       cognition: this.#cognitionState,
       previousOutcome: this.#previousOutcome,
       blockAt: (position) => this.#embodiment.blockAt(position),

@@ -20,18 +20,10 @@ from person_skills import Condition, SkillRegistry, skill_registry
 
 from .search import plan_for
 
-#: Facts only current perception establishes. No skill produces them, a test
-#: asserts that, and a zero means "not seen" rather than "not there".
-EVIDENCE_FACTS: frozenset[str] = frozenset(
-    {
-        "reachable_wood",
-        "reachable_stone",
-        "reachable_coal",
-        "reachable_plant_food",
-        "reachable_animal",
-        "permitted_container_nearby",
-    }
-)
+#: Which facts only current perception establishes is the environment's
+#: (`factClasses.evidence` in its skill vocabulary, ADR 0025). No skill
+#: produces them, a test asserts that, and a zero means "not seen" rather
+#: than "not there".
 
 #: How many hypothetical plans to read the missing evidence from.
 HYPOTHESIS_PLANS = 4
@@ -51,7 +43,7 @@ def evidence_needed(
     registry = registry or skill_registry()
     if plan_for(state, goal, registry=registry, limit=1):
         return ()
-    unseen = sorted(fact for fact in EVIDENCE_FACTS if state.get(fact, 0.0) < 1)
+    unseen = sorted(fact for fact in registry.vocabulary.evidence_facts if state.get(fact, 0.0) < 1)
     if not unseen:
         return ()
     imagined = {**state, **{fact: 1.0 for fact in unseen}}

@@ -35,11 +35,16 @@ from person_cognition.affect import (
 )
 from person_cognition.memory import RecallRules
 from person_cognition.memory import salience as memory_salience
-from person_persistence import EvidenceJournal, new_event
+from person_epistemics import ExperienceKey
+from person_minecraft.offline import envelope_of, facts_from_observation, threat_of
+from person_persistence import EventJournal, new_event
 from person_policy import EvidencePolicyProvider, RoutineCandidate, RoutineStatistics
 from test_cognitive_home import outcome
 from test_loop import Harness, envelope
 from test_spatial import STILL, at
+
+#: The experience stream every fixture test lives in (ADR 0025).
+FIXTURE = "lived:minecraft/fixture"
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 COGNITION = REPOSITORY / "apps/cognition/python/person_cognition"
@@ -50,9 +55,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -74,7 +79,7 @@ def zombie(distance: float) -> dict[str, Any]:
 def appraisals(evidence: Path) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(evidence / "journal").read()
+        for event in EventJournal(evidence / "journal").read()
         if event.type == "affect_appraised"
     ]
 
@@ -95,7 +100,7 @@ def test_a_perceived_threat_raises_unease(tmp_path: Path, view: dict[str, Any]) 
     harness = Harness(tmp_path)
     harness.hello()
     threatened = at(view, 100)
-    threatened["nearby"]["hostiles"] = [zombie(6.0)]
+    threatened["payload"]["nearby"]["hostiles"] = [zombie(6.0)]
     harness.observe(threatened)
 
     # One onset for the exposure (ADR 0014), not an appraisal per observation.
@@ -107,7 +112,7 @@ def test_a_perceived_threat_raises_unease(tmp_path: Path, view: dict[str, Any]) 
 def test_no_threat_in_view_means_no_threat_appraisal(view: dict[str, Any]) -> None:
     # An unperceived threat is not in the observation at all, so there is
     # nothing to appraise. The end-to-end wall test is in TypeScript.
-    assert appraise_threat(view) is None
+    assert appraise_threat(threat_of(view)) is None
 
 
 def test_harm_felt_through_the_body_is_appraised(tmp_path: Path, view: dict[str, Any]) -> None:
@@ -115,7 +120,7 @@ def test_harm_felt_through_the_body_is_appraised(tmp_path: Path, view: dict[str,
     harness.hello()
     harness.observe(at(view, 100))
     hurt = at(view, 120)
-    hurt["vitals"]["health"] = 14.0
+    hurt["payload"]["vitals"]["health"] = 14.0
     harness.observe(hurt)
     record = appraisals(tmp_path)[-1]
     assert record["trigger"] == "harm"
@@ -142,7 +147,7 @@ def test_every_change_is_recorded_with_its_cause(tmp_path: Path, view: dict[str,
     harness = Harness(tmp_path)
     harness.hello()
     threatened = at(view, 100)
-    threatened["nearby"]["hostiles"] = [zombie(4.0)]
+    threatened["payload"]["nearby"]["hostiles"] = [zombie(4.0)]
     harness.observe(threatened)
     for record in appraisals(tmp_path):
         # Every record says what triggered it and what it changed; under
@@ -193,7 +198,7 @@ def test_a_restart_resumes_affect_rather_than_resetting_it(
     first = Harness(tmp_path)
     first.hello()
     threatened = at(view, 100)
-    threatened["nearby"]["hostiles"] = [zombie(3.0)]
+    threatened["payload"]["nearby"]["hostiles"] = [zombie(3.0)]
     first.observe(threatened)
     felt = first.loop.affect.state
     first.loop.handle(
@@ -203,7 +208,12 @@ def test_a_restart_resumes_affect_rather_than_resetting_it(
             "phase": "ended",
             "reasonCodes": ["test"],
             "rngSeed": 7,
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
         }
     )
     second = Harness(tmp_path)
@@ -223,9 +233,9 @@ def test_the_bias_is_bounded_and_never_touches_urgent_goals() -> None:
     for state in extreme:
         affect = Affect(AffectRecord())
         affect.state = state
-        for facts in (frozenset({"owned_storage_available"}), frozenset({"tool_tier"})):
-            assert abs(affect.bias(facts, "homeostasis")) <= BIAS_LIMIT
-        assert affect.bias(frozenset({"safe"}), "emergency") == 0.0
+        for character in ("protective", "outgoing"):
+            assert abs(affect.bias(character, "homeostasis")) <= BIAS_LIMIT
+        assert affect.bias("protective", "emergency") == 0.0
 
 
 def test_the_recorded_bias_always_accounts_for_the_priority(
@@ -239,7 +249,7 @@ def test_the_recorded_bias_always_accounts_for_the_priority(
     harness.observe(at(two_goals, 200))
     selected = [
         event.payload
-        for event in EvidenceJournal(tmp_path / "journal").read()
+        for event in EventJournal(tmp_path / "journal").read()
         if event.type == "goal_selected"
     ]
     assert any(record["affect_bias"] != 0.0 for record in selected)
@@ -277,8 +287,8 @@ def ranked(harness: Harness, view: dict[str, Any], state: AffectState | None) ->
 def two_goals(view: dict[str, Any]) -> dict[str, Any]:
     """A home, no storage, a wooden pickaxe: tools (290) and the project (300)."""
     close = deepcopy(view)
-    close["home"]["shelterState"] = "complete"
-    close["inventory"]["items"].append({"name": "wooden_pickaxe", "count": 1})
+    close["payload"]["home"]["shelterState"] = "complete"
+    close["payload"]["inventory"]["items"].append({"name": "wooden_pickaxe", "count": 1})
     return close
 
 
@@ -323,7 +333,7 @@ def test_affect_cannot_create_a_goal_or_outrank_an_urgent_one(
 ) -> None:
     harness = with_home(tmp_path, two_goals)
     hungry = deepcopy(two_goals)
-    hungry["vitals"]["food"] = 6.0
+    hungry["payload"]["vitals"]["food"] = 6.0
     harness.loop.affect.state = AffectState(valence=-1, unease=1, control=-1)
     goal, _, _ = harness.observe(at(hungry, 200))
     assert goal["goal"]["goalType"] == "SECURE_FOOD", "hunger still comes first"
@@ -354,7 +364,7 @@ def known_success(routine_id: str) -> Any:
         decision_id=None,
         tick=1,
         policy_revision=0,
-        training_context="fixture",
+        experience=ExperienceKey("minecraft", "fixture"),
         event_type="routine_outcome",
         payload={"routine_id": routine_id, "context_id": "c", "status": "SUCCESS"},
         previous_event_id=None,
@@ -384,7 +394,7 @@ def test_calm_explores_and_unease_prefers_the_familiar_inside_the_same_permissio
         statistics.apply(known_success("r_known"))
     provider = EvidencePolicyProvider(
         statistics,
-        training_context="fixture",
+        experience=FIXTURE,
         learning_mode="supervised",
         minimum_support=3,
         exploration_bonus=0.9,
@@ -394,8 +404,8 @@ def test_calm_explores_and_unease_prefers_the_familiar_inside_the_same_permissio
     uneasy = Affect(AffectRecord())
     uneasy.state = AffectState(unease=1.0, control=-1.0)
 
-    bold = provider.propose(view, None, options, "c", tolerance=calm.tolerance())
-    wary = provider.propose(view, None, options, "c", tolerance=uneasy.tolerance())
+    bold = provider.propose(envelope_of(view), None, options, "c", tolerance=calm.tolerance())
+    wary = provider.propose(envelope_of(view), None, options, "c", tolerance=uneasy.tolerance())
     assert bold.routine_id == "r_untried", bold.reason_codes
     assert wary.routine_id == "r_known", wary.reason_codes
     assert "safe_envelope_open" in bold.reason_codes and "safe_envelope_open" in wary.reason_codes
@@ -412,7 +422,7 @@ def test_affect_code_reads_nothing_privileged_and_runs_no_skill() -> None:
         "pitch",
         "position",
         "homeDistance",
-        "EvidenceJournal",
+        "EventJournal",
         "SkillInvocation",
         "skill_id",
         "_emit",
@@ -447,9 +457,7 @@ def test_the_protocol_has_no_way_to_carry_affect_to_the_runtime() -> None:
 
 
 def test_affect_is_not_belief(view: dict[str, Any]) -> None:
-    from person_planner import symbolic_state
-
-    assert "unease" not in symbolic_state(view)
+    assert "unease" not in facts_from_observation(view)
     assert dataclasses.fields(AffectState)
 
 
@@ -472,10 +480,10 @@ def eventful(harness: Harness, view: dict[str, Any]) -> list[dict[str, Any]]:
     """A short stretch of life with a threat, harm and a failure in it."""
     decided: list[dict[str, Any]] = []
     threatened = at(view, 100)
-    threatened["nearby"]["hostiles"] = [zombie(5.0)]
+    threatened["payload"]["nearby"]["hostiles"] = [zombie(5.0)]
     decided.extend(harness.observe(threatened))
     hurt = at(view, 140)
-    hurt["vitals"]["health"] = 13.0
+    hurt["payload"]["vitals"]["health"] = 13.0
     goal, policy, invocation = harness.observe(hurt)
     decided.extend((goal, policy, invocation))
     harness.complete(invocation, policy, status="FAILED")
@@ -531,7 +539,7 @@ def test_only_active_affect_reaches_a_decision(tmp_path: Path, two_goals: dict[s
         chosen[mode] = goal["goal"]["goalType"]
         selected = [
             event.payload
-            for event in EvidenceJournal(tmp_path / mode / "journal").read()
+            for event in EventJournal(tmp_path / mode / "journal").read()
             if event.type == "goal_selected"
         ][-1]
         if mode != "active":
@@ -551,7 +559,7 @@ def test_neither_consumption_point_answers_unless_active() -> None:
     for mode in MODES:
         affect = Affect(AffectRecord(), mode=mode)
         affect.state = extreme
-        bias = affect.bias(frozenset({"owned_storage_available"}), "homeostasis")
+        bias = affect.bias("protective", "homeostasis")
         if mode == "active":
             assert bias != 0.0 and affect.tolerance() != 1.0
         else:
@@ -574,12 +582,17 @@ def test_the_mode_is_recorded_on_episode_started(tmp_path: Path) -> None:
                 "phase": "started",
                 "reasonCodes": [],
                 "rngSeed": 7,
-                "trainingContext": "fixture",
+                "experience": {
+                    "context": "lived",
+                    "environmentKind": "minecraft",
+                    "embodimentKind": "fixture",
+                    "environmentVariant": None,
+                },
             }
         )
         started = [
             event.payload
-            for event in EvidenceJournal(tmp_path / mode / "journal").read()
+            for event in EventJournal(tmp_path / mode / "journal").read()
             if event.type == "episode_started"
         ]
         assert started[-1]["affect_mode"] == mode

@@ -17,9 +17,10 @@ from typing import Any
 
 import pytest
 from person_cognition.spatial import Estimate, Spatial, SpatialMap
+from person_epistemics import ExperienceKey
+from person_minecraft.offline import envelope_of
+from person_minecraft.offline import facts_from_observation as symbolic_state
 from person_persistence import new_event
-from person_planner import symbolic_state
-from person_policy import safe_envelope
 from person_protocol import protocol_validator
 from test_loop import Harness, envelope
 from test_spatial import STILL, at, moved
@@ -32,9 +33,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -51,7 +52,7 @@ def settled_home(spatial: Spatial, spatial_map: SpatialMap) -> None:
             decision_id=None,
             tick=0,
             policy_revision=0,
-            training_context="fixture",
+            experience=ExperienceKey("minecraft", "fixture"),
             event_type=kind,
             payload=payload,
             previous_event_id=None,
@@ -70,9 +71,9 @@ def fresh() -> Spatial:
 
 
 def test_the_observation_carries_no_home_distance(view: dict[str, Any]) -> None:
-    assert "homeDistance" not in view["home"]
+    assert "homeDistance" not in view["payload"]["home"]
     smuggled = deepcopy(view)
-    smuggled["home"]["homeDistance"] = 0.0
+    smuggled["payload"]["home"]["homeDistance"] = 0.0
     valid, _ = protocol_validator().validate(smuggled)
     assert not valid, "the schema refuses a home distance"
 
@@ -162,8 +163,8 @@ def home_via(harness: Harness, view: dict[str, Any], skill: str) -> None:
 
 def night(view: dict[str, Any], tick: int, motion: dict[str, Any] | None = None) -> dict[str, Any]:
     dark = at(view, tick, motion)
-    dark["environment"]["dayPhase"] = "night"
-    dark["environment"]["lightLevel"] = 2
+    dark["payload"]["environment"]["dayPhase"] = "night"
+    dark["payload"]["environment"]["lightLevel"] = 2
     return dark
 
 
@@ -213,7 +214,12 @@ def test_a_believed_home_survives_restart_with_honest_doubt(
             "phase": "ended",
             "reasonCodes": ["test"],
             "rngSeed": 7,
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
         }
     )
     second = Harness(tmp_path)
@@ -225,8 +231,8 @@ def test_a_believed_home_survives_restart_with_honest_doubt(
 
 
 def test_the_exploration_envelope_reads_belief(view: dict[str, Any]) -> None:
-    assert "too_far_from_home" in safe_envelope(view, home="far").reasons
-    assert "too_far_from_home" not in safe_envelope(view, home="unknown").reasons
+    assert "too_far_from_home" in envelope_of(view, home="far").reasons
+    assert "too_far_from_home" not in envelope_of(view, home="unknown").reasons
 
 
 def test_an_estimate_is_never_set_from_outside_the_sense() -> None:
@@ -267,7 +273,7 @@ def test_a_runtime_home_anchor_is_never_a_cognitive_home(
 ) -> None:
     """2: the runtime has an active home anchor, but Person never formed a
     home: the relation is unknown and no place is labelled home."""
-    assert view["home"]["activeHome"]["homeId"], "the runtime anchor is present"
+    assert view["payload"]["home"]["activeHome"]["homeId"], "the runtime anchor is present"
     harness = Harness(tmp_path)
     harness.hello()
     harness.observe(at(view, 100))
@@ -288,7 +294,7 @@ def test_labels_reach_only_places_the_context_already_cites() -> None:
         reason="reflection",
         self_knowledge=None,
         world_available=True,
-        observation=None,
+        situation=(),
         place={"place_id": "place_2", "confidence": 0.9},
         working_memory=[{"kind": "perceived", "subjects": ["wood"], "place": "place_3"}],
         beliefs=[],

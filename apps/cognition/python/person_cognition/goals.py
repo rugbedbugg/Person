@@ -1,4 +1,7 @@
-"""Goals, homeostasis and the goal stack.
+"""Goals, drives and the goal stack: the environment-neutral mechanism.
+
+Which needs exist and which goals they raise belong to the environment
+profile (Minecraft's are `person_minecraft.goals`, ADR 0025).
 
 A goal answers "what should Person accomplish"; a routine answers "how". They
 are separate systems on purpose, so the same need can be met by different
@@ -11,25 +14,18 @@ doing.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, Protocol
 
 from person_skills import Condition
 
 GoalStatus = str
 
-GOAL_TYPES = (
-    "SURVIVE_IMMEDIATE",
-    "SECURE_FOOD",
-    "SECURE_SHELTER",
-    "ESTABLISH_TOOLS",
-    "ESTABLISH_STORAGE",
-    "RECOVER_HOME",
-    "MAINTAIN_RESERVES",
-    #: One trial of an experiment (ADR 0012).
-    "INVESTIGATE",
-)
+#: Goal types Person's core owns, whatever the environment: one trial of an
+#: experiment (ADR 0012). An environment profile adds its own (its needs and
+#: projects), and the loop's vocabulary is the union.
+CORE_GOAL_TYPES: tuple[str, ...] = ("INVESTIGATE",)
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,163 +69,28 @@ class Goal:
 
 @dataclass(frozen=True, slots=True)
 class Drive:
-    """One homeostatic need and how badly it is unmet, from 0 to 1."""
+    """One homeostatic need and how badly it is unmet, from 0 to 1.
+
+    `name` and `reason` are the environment's own words, and Person's core
+    never branches on them. What the core needs to know about a drive is
+    typed here: whether it is `pressing`, a need that keeps Person from
+    taking up anything voluntary (a project, an investigation) while it is
+    urgent. The environment's homeostasis decides which of its drives those
+    are (Minecraft's: `person_minecraft.goals`, ADR 0025).
+    """
 
     name: str
     urgency: float
     reason: str
+    pressing: bool
 
 
-def homeostasis(observation: dict[str, Any], state: dict[str, float]) -> list[Drive]:
-    """Survival needs, expressed as urgency rather than as actions."""
-    vitals = observation["vitals"]
-    home = observation["home"]
-    environment = observation["environment"]
-    drives: list[Drive] = []
+class GoalProvider(Protocol):
+    """Proposes goals from the decision state, ordered by urgency."""
 
-    drives.append(Drive("health", max(0.0, (20.0 - vitals["health"]) / 20.0), "health_below_full"))
-    drives.append(Drive("food", max(0.0, (20.0 - vitals["food"]) / 20.0), "food_below_full"))
+    name: str
 
-    threat = 0.0
-    for hostile in observation["nearby"]["hostiles"]:
-        threat = max(threat, max(0.0, 1.0 - hostile["distance"] / 16.0))
-    for hazard in observation["nearby"]["hazards"]:
-        threat = max(threat, max(0.0, 1.0 - hazard["distance"] / 4.0))
-    drives.append(Drive("safety", threat, "threat_proximity"))
-
-    night = environment["dayPhase"] in {"dusk", "night"}
-    shelter_gap = 0.0 if state.get("shelter_complete", 0) >= 1 else (1.0 if night else 0.5)
-    drives.append(Drive("shelter", shelter_gap, "shelter_incomplete"))
-
-    tool_gap = max(0.0, (2.0 - state.get("tool_tier", 0)) / 2.0)
-    drives.append(Drive("tool_readiness", tool_gap, "tool_tier_below_stone"))
-
-    drives.append(Drive("fuel", 0.0 if state.get("fuel", 0) >= 4 else 0.5, "fuel_reserve_low"))
-    drives.append(
-        Drive(
-            "food_reserve",
-            0.0 if home["foodReserve"] >= 4 else 0.6,
-            "stored_food_reserve_low",
-        )
-    )
-    capacity = observation["inventory"]["freeSlots"]
-    drives.append(
-        Drive("inventory_capacity", 0.0 if capacity > 4 else 0.7, "inventory_nearly_full")
-    )
-    return drives
-
-
-def _condition(fact: str, value: float) -> Condition:
-    return Condition(fact, ">=", value)
-
-
-class SurvivalGoalProvider:
-    """Deterministic survival goals, ordered by homeostatic urgency."""
-
-    name = "survival"
-
-    def propose(
-        self,
-        observation: dict[str, Any],
-        state: dict[str, float],
-        tick: int,
-        *,
-        home: str = "unknown",
-    ) -> list[Goal]:
-        home_relation = home
-        drives = {drive.name: drive for drive in homeostasis(observation, state)}
-        environment = observation["environment"]
-        home_record = observation["home"]
-        night = environment["dayPhase"] in {"dusk", "night"}
-        proposals: list[Goal] = []
-
-        def add(
-            goal_type: str,
-            priority: float,
-            conditions: Sequence[Condition],
-            reasons: Sequence[str],
-            source: str = "homeostasis",
-        ) -> None:
-            proposals.append(
-                Goal(
-                    goal_id=f"goal_{goal_type.lower()}",
-                    goal_type=goal_type,
-                    priority=round(min(1000.0, max(0.0, priority)), 3),
-                    source=source,
-                    created_at_tick=tick,
-                    status="QUEUED",
-                    completion_condition=tuple(conditions),
-                    reason_codes=tuple(reasons),
-                )
-            )
-
-        safety = drives["safety"].urgency
-        health = drives["health"].urgency
-        if safety > 0.4 or observation["vitals"]["health"] < 7:
-            add(
-                "SURVIVE_IMMEDIATE",
-                900 + 100 * safety,
-                [_condition("safe", 1)],
-                ["threat_present" if safety > 0.4 else "health_critical"],
-                source="emergency",
-            )
-
-        food_urgency = drives["food"].urgency
-        if observation["vitals"]["food"] < 18:
-            add(
-                "SECURE_FOOD",
-                400 + 400 * food_urgency + 100 * health,
-                [_condition("food_level", 16)],
-                ["food_band_below_full"],
-            )
-
-        if state.get("shelter_complete", 0) < 1:
-            add(
-                "SECURE_SHELTER",
-                350 + (300 if night else 0) + 100 * drives["shelter"].urgency,
-                [_condition("shelter_complete", 1)],
-                ["night_approaching" if night else "shelter_incomplete"],
-            )
-
-        if state.get("tool_tier", 0) < 2:
-            add(
-                "ESTABLISH_TOOLS",
-                260 + 60 * drives["tool_readiness"].urgency,
-                [_condition("tool_tier", 2)],
-                ["tool_tier_below_stone"],
-            )
-
-        # Storage serves basic reserves and inventory capacity, which are needs
-        # (`PERSON_SPEC` section 17). The `improve_home` project also has it as
-        # a milestone, at higher priority, when Person commits to its home.
-        if state.get("owned_storage_available", 0) < 1:
-            add(
-                "ESTABLISH_STORAGE",
-                220,
-                [_condition("owned_storage_available", 1)],
-                ["no_owned_storage"],
-            )
-
-        # Person's own belief that it is far from a home it remembers, never
-        # a distance the runtime measured (C8).
-        if home_relation == "far" and night:
-            add(
-                "RECOVER_HOME",
-                600,
-                [_condition("at_home", 1)],
-                ["far_from_home_at_night"],
-            )
-
-        if home_record["foodReserve"] < 4 and state.get("owned_storage_available", 0) >= 1:
-            add(
-                "MAINTAIN_RESERVES",
-                180,
-                [_condition("stored_surplus", 1)],
-                ["stored_food_reserve_low"],
-            )
-
-        proposals.sort(key=lambda goal: (-goal.priority, goal.goal_type))
-        return proposals
+    def propose(self, decision: Any, state: dict[str, float], tick: int) -> list[Goal]: ...
 
 
 @dataclass

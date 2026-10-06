@@ -46,7 +46,7 @@ The following categories of changes **must receive explicit review** from both P
 
 ### 3.3 Skill System Semantics
 
-- `SkillSpec` schema (`packages/skills/specs/skill-spec.schema.json`)
+- `SkillSpec` schema (`packages/skills/schema/skill-spec.schema.json`) and the Minecraft skill vocabulary (`environments/minecraft/skills/vocabulary.json`)
 - Skill library composition (adding/removing skills, changing categories)
 - Terminal status set (SUCCESS, FAILED, PREEMPTED, etc.)
 - Completion evidence kinds

@@ -1,5 +1,27 @@
 import { existsSync, readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
+import { LEGACY_EXPERIENCE_KEYS } from "#minecraft";
+
+/**
+ * The experience stream a journal record belongs to (ADR 0025): stated by a
+ * v20 record, mapped for an older one from the context it was written with.
+ */
+export function experienceKeyOf(event: Record<string, unknown>): string {
+  const stated = event["experience"] as
+    | {
+        context: string;
+        environment: string;
+        embodiment: string;
+        variant: string | null;
+      }
+    | undefined;
+  if (stated) {
+    const variant = stated.variant ? `/${stated.variant}` : "";
+    return `${stated.context}:${stated.environment}/${stated.embodiment}${variant}`;
+  }
+  const legacy = String(event["training_context"] ?? "");
+  return LEGACY_EXPERIENCE_KEYS[legacy] ?? legacy;
+}
 
 export interface EvidenceSummary {
   directory: string;
@@ -10,7 +32,7 @@ export interface EvidenceSummary {
   duplicateRecords: number;
   eventTypes: Record<string, number>;
   routines: {
-    trainingContext: string;
+    experience: string;
     contextId: string;
     routineId: string;
     attempts: number;
@@ -19,7 +41,7 @@ export interface EvidenceSummary {
     posteriorMean: number;
   }[];
   skillAttribution: {
-    trainingContext: string;
+    experience: string;
     contextId: string;
     skillId: string;
     attempts: number;
@@ -133,7 +155,7 @@ export class EvidenceInspector {
         const type = String(event["type"]);
         summary.eventTypes[type] = (summary.eventTypes[type] ?? 0) + 1;
         const payload = (event["payload"] ?? {}) as Record<string, unknown>;
-        const trainingContext = String(event["training_context"] ?? "");
+        const experience = experienceKeyOf(event);
         const contextId = String(payload["context_id"] ?? "");
 
         if (type === "prediction_error") {
@@ -166,7 +188,7 @@ export class EvidenceInspector {
             });
         }
         if (type === "routine_outcome") {
-          const key = `${trainingContext}|${contextId}|${String(payload["routine_id"] ?? "")}`;
+          const key = `${experience}|${contextId}|${String(payload["routine_id"] ?? "")}`;
           const counts = routines.get(key) ?? blank();
           counts.attempts += 1;
           const status = String(payload["status"] ?? "");
@@ -182,7 +204,7 @@ export class EvidenceInspector {
           const executed = payload["executed_skill"];
           const requested = payload["requested_skill"];
           if (typeof executed === "string") {
-            const key = `${trainingContext}|${contextId}|${executed}`;
+            const key = `${experience}|${contextId}|${executed}`;
             const counts = skills.get(key) ?? blank();
             counts.attempts += 1;
             const status = String(payload["status"] ?? "");
@@ -191,7 +213,7 @@ export class EvidenceInspector {
             skills.set(key, counts);
           }
           if (typeof requested === "string" && requested !== executed) {
-            const key = `${trainingContext}|${contextId}|${requested}`;
+            const key = `${experience}|${contextId}|${requested}`;
             const counts = skills.get(key) ?? blank();
             counts.preemptions += 1;
             skills.set(key, counts);
@@ -202,10 +224,10 @@ export class EvidenceInspector {
 
     summary.routines = [...routines]
       .map(([key, counts]) => {
-        const [trainingContext = "", contextId = "", routineId = ""] =
+        const [experience = "", contextId = "", routineId = ""] =
           key.split("|");
         return {
-          trainingContext,
+          experience,
           contextId,
           routineId,
           attempts: counts.attempts,
@@ -219,10 +241,9 @@ export class EvidenceInspector {
 
     summary.skillAttribution = [...skills]
       .map(([key, counts]) => {
-        const [trainingContext = "", contextId = "", skillId = ""] =
-          key.split("|");
+        const [experience = "", contextId = "", skillId = ""] = key.split("|");
         return {
-          trainingContext,
+          experience,
           contextId,
           skillId,
           attempts: counts.attempts,
@@ -267,7 +288,7 @@ export class EvidenceInspector {
     ];
     for (const routine of summary.routines)
       lines.push(
-        `    ${routine.routineId} [${routine.trainingContext}] ${routine.contextId} attempts=${routine.attempts} successes=${routine.successes} mean=${routine.posteriorMean.toFixed(3)}`,
+        `    ${routine.routineId} [${routine.experience}] ${routine.contextId} attempts=${routine.attempts} successes=${routine.successes} mean=${routine.posteriorMean.toFixed(3)}`,
       );
     const prediction = summary.predictionError;
     lines.push(

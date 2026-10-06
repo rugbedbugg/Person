@@ -2,11 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import path from "node:path";
-import { loadConfig } from "#config";
 import { SCHEMA_DIRECTORY, protocolValidator } from "#protocol";
 import { skillRegistry } from "#skills";
 import { implementedSkillIds } from "#node-runtime";
 import { REPOSITORY } from "../support/harness.ts";
+import { loadMinecraftConfig } from "#minecraft";
 
 const read = (relative: string): string =>
   readFileSync(path.join(REPOSITORY, relative), "utf8");
@@ -197,7 +197,7 @@ test("the cognition process is spawned with pipes and nothing else", () => {
 test("learning is off in every shipped configuration", () => {
   for (const file of readdirSync(path.join(REPOSITORY, "examples"))) {
     if (!file.endsWith(".toml")) continue;
-    const config = loadConfig(path.join(REPOSITORY, "examples", file));
+    const config = loadMinecraftConfig(path.join(REPOSITORY, "examples", file));
     assert.equal(
       config.learning.mode,
       "off",

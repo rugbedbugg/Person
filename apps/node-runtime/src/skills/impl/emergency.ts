@@ -1,4 +1,3 @@
-import { distance, type Position } from "#config";
 import type { BlockView } from "../../embodiment/types.ts";
 import {
   SkillFailure,
@@ -13,6 +12,7 @@ import {
   sealShelterEntrance,
   shelterIsSealed,
 } from "../shelter-access.ts";
+import { distance, type Position } from "#minecraft";
 
 const DIRECTIONS: [number, number][] = [
   [1, 0],

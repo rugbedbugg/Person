@@ -23,10 +23,13 @@ async function swimmer(blocks: Record<string, string> = COLUMN) {
   const body = new MineflayerEmbodiment(
     {
       ...base,
+      environment: {
+        kind: "minecraft" as const,
+        difficulty: "peaceful" as const,
+      },
       runtime: {
         ...base.runtime,
-        embodiment: "minecraft",
-        trainingContext: "minecraft_peaceful",
+        embodiment: "mineflayer",
       },
       server: { host: "127.0.0.1", port: 25565, version: "1.16.1" },
       bot: { username: "PersonAda", auth: "offline" },

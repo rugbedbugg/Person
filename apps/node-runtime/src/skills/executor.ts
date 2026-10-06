@@ -5,7 +5,6 @@ import type {
   TerminalStatus,
 } from "#protocol";
 import { type SkillRegistry } from "#skills";
-import type { Position } from "#config";
 import type { Embodiment, WorldSnapshot } from "../embodiment/types.ts";
 import { DisconnectedError } from "../embodiment/types.ts";
 import type { PermissionGate } from "../safety/permissions.ts";
@@ -29,6 +28,7 @@ import {
   instrument,
   type SkillTimings,
 } from "./timing.ts";
+import { type Position } from "#minecraft";
 
 /**
  * Evidence keys travel over the protocol, which requires lower snake case.

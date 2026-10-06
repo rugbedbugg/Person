@@ -9,9 +9,9 @@
  */
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import type { Position } from "#config";
 import { FixtureWorld } from "#fixture-world";
 import { shelterPlan } from "../../apps/node-runtime/src/skills/shelter-plan.ts";
+import { type Position } from "#minecraft";
 
 export const COGNITION = ["uv", "run", "person-cognition"];
 export const PERSON = "test-person-000";

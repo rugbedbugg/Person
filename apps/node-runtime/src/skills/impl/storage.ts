@@ -1,4 +1,3 @@
-import { distance, positionKey, type Position } from "#config";
 import type { ItemStack } from "#protocol";
 import {
   SkillFailure,
@@ -10,6 +9,7 @@ import { isCoal, isEdible, isLog, isStone } from "../materials.ts";
 import { approach } from "../navigate.ts";
 import { placementSite } from "./crafting.ts";
 import type { ContainerView } from "../../embodiment/types.ts";
+import { distance, positionKey, type Position } from "#minecraft";
 
 type Category = "food" | "wood" | "stone" | "coal" | "any";
 

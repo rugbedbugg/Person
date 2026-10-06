@@ -13,7 +13,7 @@ from collections.abc import Mapping
 from dataclasses import replace
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
 
 from .experiments import Investigation
 from .generation import TrialRecord
@@ -47,7 +47,7 @@ class HypothesisBook:
             self.rejected[name] = 0
         self.investigations.clear()
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         payload = event.payload
         table = str(payload.get("admitted_to", ""))
         if event.type == "causal_trial" and table in TABLES:

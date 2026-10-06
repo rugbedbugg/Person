@@ -3,11 +3,11 @@ import assert from "node:assert/strict";
 import { existsSync, mkdtempSync, readFileSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { loadConfig, withConnectionOverride } from "#config";
 import { FixtureWorld } from "#fixture-world";
 import { readStatus, statusPath, type Embodiment } from "#node-runtime";
 import { captureObservation } from "../../apps/cli/src/observe.ts";
 import { REPOSITORY } from "../support/harness.ts";
+import { loadMinecraftConfig, withConnectionOverride } from "#minecraft";
 
 const PHYSICAL = [
   "moveTo",
@@ -60,7 +60,9 @@ function watched(
 function fixtureConfig(
   overrides: { outputDirectory?: string; evidenceDirectory?: string } = {},
 ) {
-  const loaded = loadConfig(path.join(REPOSITORY, "examples/fixture.toml"));
+  const loaded = loadMinecraftConfig(
+    path.join(REPOSITORY, "examples/fixture.toml"),
+  );
   return {
     ...loaded,
     runtime: {
@@ -262,7 +264,7 @@ test("a hung disconnect cannot hold the command open", async () => {
 
 test("the LAN port override never reaches the configuration file", () => {
   const file = path.join(REPOSITORY, "examples/minecraft-lan.toml");
-  const original = loadConfig(file);
+  const original = loadMinecraftConfig(file);
   const overridden = withConnectionOverride(original, { port: 51234 });
 
   assert.equal(overridden.server?.port, 51234);
@@ -272,7 +274,7 @@ test("the LAN port override never reaches the configuration file", () => {
     "the loaded config is not mutated",
   );
   assert.equal(
-    loadConfig(file).server?.port,
+    loadMinecraftConfig(file).server?.port,
     33759,
     "the file on disk is unchanged, so the next run reads the same thing",
   );

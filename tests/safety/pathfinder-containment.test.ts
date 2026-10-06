@@ -1,6 +1,5 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import type { Box, Position } from "#config";
 import {
   BLOCKS,
   FEET,
@@ -10,6 +9,7 @@ import {
   cornerTrespasses,
   trespasses,
 } from "../support/pathfinder-bench.ts";
+import { type Box, type Position } from "#minecraft";
 
 /**
  * Protected-region containment, proved against the real pathfinder.

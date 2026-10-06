@@ -17,6 +17,14 @@ Affect and projects left for the same reason: they are implemented, in
 `person_cognition.affect` (ADR 0010) and `person_cognition.projects` (ADR
 0009), and neither took the shape reserved for it. A placeholder that outlives
 its implementation is a false claim that the capability does not exist.
+
+The singleton `WorldModelProvider` left too (ADR 0028). It reserved one
+object to observe, predict, update and answer queries about "the world", a
+shape that merged prediction with belief and history and named nothing it
+would be evidence for. Prediction is plural and implemented:
+`person_epistemics.PredictiveModel`, whose first implementation is the
+declared-effect model in `person_cognition.predictors`. Beliefs are
+`person_epistemics.BeliefState`; history is the canonical event journal.
 """
 
 from __future__ import annotations
@@ -32,21 +40,6 @@ class NotYetImplemented(NotImplementedError):
             f"{provider} is a future interface; it is scheduled for {milestone} "
             "and has no implementation in this milestone."
         )
-
-
-@runtime_checkable
-class WorldModelProvider(Protocol):
-    """Descriptive world state plus predictive and causal beliefs."""
-
-    def observe(self, event: dict[str, Any]) -> None: ...
-
-    def predict(
-        self, state: dict[str, float], candidate_action: dict[str, Any]
-    ) -> dict[str, Any]: ...
-
-    def update(self, prediction: dict[str, Any], outcome: dict[str, Any]) -> None: ...
-
-    def query(self, belief: str) -> dict[str, Any] | None: ...
 
 
 @runtime_checkable
@@ -72,22 +65,6 @@ class ExplorationProvider(Protocol):
     """Epistemic exploration: what is worth finding out, and how safely."""
 
     def propose_experiment(self, state: dict[str, float]) -> dict[str, Any] | None: ...
-
-
-class UnimplementedWorldModelProvider:
-    milestone = "Phase 6, persistent and predictive world"
-
-    def observe(self, event: dict[str, Any]) -> None:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-    def predict(self, state: dict[str, float], candidate_action: dict[str, Any]) -> dict[str, Any]:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-    def update(self, prediction: dict[str, Any], outcome: dict[str, Any]) -> None:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-    def query(self, belief: str) -> dict[str, Any] | None:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
 
 
 class UnimplementedLanguageProvider:
@@ -118,7 +95,6 @@ class UnimplementedExplorationProvider:
 
 
 FUTURE_PROVIDERS = {
-    "WorldModelProvider": UnimplementedWorldModelProvider,
     "LanguageProvider": UnimplementedLanguageProvider,
     "SocialProvider": UnimplementedSocialProvider,
     "ExplorationProvider": UnimplementedExplorationProvider,

@@ -5,8 +5,9 @@ statistics read outcomes, the memory store reads encoded episodes, the
 spatial map reads the places Person formed and revisited, the project book
 reads the projects Person took up, the affect record reads appraisals, the
 effect beliefs read classified prediction evidence, and the hypothesis book
-reads causal trials, hypotheses, their evidence and investigations; and the
-continuity record reads the founding and session events (ADR 0017). None sees
+reads causal trials, hypotheses, their evidence and investigations; the
+continuity record reads the founding and session events (ADR 0017); and the
+belief store reads `belief_revised` (ADR 0026). None sees
 the other's state, and each ignores the events it has no case for.
 """
 
@@ -15,7 +16,8 @@ from __future__ import annotations
 from collections.abc import Mapping
 from typing import Any
 
-from person_persistence import ContinuityRecord, EvidenceEvent, LifeRecord
+from person_epistemics import BeliefState
+from person_persistence import CanonicalEvent, ContinuityRecord, LifeRecord
 from person_policy import RoutineStatistics
 
 from .affect import AffectRecord
@@ -43,6 +45,7 @@ class CognitiveReducers:
         arbitration: ArbitrationRecord | None = None,
         habits_shadow: HabitBook | None = None,
         habits_active: HabitBook | None = None,
+        beliefs: BeliefState | None = None,
     ) -> None:
         self.statistics = statistics
         self.memory = memory
@@ -57,6 +60,8 @@ class CognitiveReducers:
         #: ADR 0022: two books, each reading only its own event stream.
         self.habits_shadow = habits_shadow if habits_shadow is not None else HabitBook("shadow")
         self.habits_active = habits_active if habits_active is not None else HabitBook("active")
+        #: ADR 0026: fact beliefs, rebuilt from `belief_revised` alone.
+        self.beliefs = beliefs if beliefs is not None else BeliefState()
 
     def reset(self) -> None:
         self.statistics.reset()
@@ -71,8 +76,9 @@ class CognitiveReducers:
         self.arbitration.reset()
         self.habits_shadow.reset()
         self.habits_active.reset()
+        self.beliefs.reset()
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         self.statistics.apply(event)
         self.memory.apply(event)
         self.spatial.apply(event)
@@ -85,6 +91,7 @@ class CognitiveReducers:
         self.arbitration.apply(event)
         self.habits_shadow.apply(event)
         self.habits_active.apply(event)
+        self.beliefs.apply(event)
 
     def to_json(self) -> dict[str, Any]:
         return {
@@ -100,6 +107,7 @@ class CognitiveReducers:
             "arbitration": self.arbitration.to_json(),
             "habits_shadow": self.habits_shadow.to_json(),
             "habits_active": self.habits_active.to_json(),
+            "beliefs": self.beliefs.to_json(),
         }
 
     def load_json(self, body: Mapping[str, Any]) -> None:
@@ -117,3 +125,4 @@ class CognitiveReducers:
         self.arbitration.load_json(body["arbitration"])
         self.habits_shadow.load_json(body["habits_shadow"])
         self.habits_active.load_json(body["habits_active"])
+        self.beliefs.load_json(body["beliefs"])

@@ -31,11 +31,16 @@ from person_cognition.effect_learning import (
 )
 from person_cognition.memory import MemoryStore, RecallRules
 from person_cognition.prediction import PendingPrediction
-from person_persistence import EvidenceJournal, new_event
+from person_epistemics import ExperienceKey
+from person_minecraft.offline import envelope_of
+from person_persistence import EventJournal, new_event
 from person_policy import EvidencePolicyProvider, RoutineCandidate, RoutineStatistics
 from person_skills import skill_registry
 from test_loop import Harness, envelope
 from test_spatial import STILL, at
+
+#: The experience stream every fixture test lives in (ADR 0025).
+FIXTURE = "lived:minecraft/fixture"
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 WOOD = ({"fact": "wood", "op": "+=", "value": 8},)
@@ -75,7 +80,7 @@ def evidence(verdict: str, admitted: str = "active", skill: str = "gather_wood")
         decision_id=None,
         tick=1,
         policy_revision=0,
-        training_context="fixture",
+        experience=ExperienceKey("minecraft", "fixture"),
         event_type="effect_evidence",
         payload={
             "skill": skill,
@@ -93,7 +98,7 @@ def belief_after(*verdicts: str) -> EffectBelief:
     beliefs = EffectBeliefs()
     for verdict in verdicts:
         beliefs.apply(evidence(verdict))
-    found = beliefs.belief("active", "fixture", "gather_wood", "wood")
+    found = beliefs.belief("active", FIXTURE, "gather_wood", "wood")
     assert found is not None
     return found
 
@@ -242,7 +247,7 @@ def test_off_learns_nothing_shadow_only_shadow_supervised_the_active_table(
         assert tables(harness) == expected, mode
         recorded = [
             dict(event.payload)
-            for event in EvidenceJournal(tmp_path / mode / "journal").read()
+            for event in EventJournal(tmp_path / mode / "journal").read()
             if event.type == "effect_evidence"
         ]
         assert len(recorded) == 3, "every trial is journalled, whatever the mode"
@@ -265,7 +270,7 @@ BERRIES = (
 
 def hungry_by_berries(view: dict[str, Any]) -> dict[str, Any]:
     changed = at(view, 100)
-    changed["nearby"]["resources"] = [
+    changed["payload"]["nearby"]["resources"] = [
         {
             "kind": "plant_food",
             "name": "sweet_berry_bush",
@@ -293,7 +298,7 @@ def test_shadow_learning_changes_no_decision(tmp_path: Path, view: dict[str, Any
         runs[mode] = (invocation["skillId"], invocation["parameters"], invocation["routineId"])
         selected = [
             dict(event.payload)
-            for event in EvidenceJournal(tmp_path / mode / "journal").read()
+            for event in EventJournal(tmp_path / mode / "journal").read()
             if event.type == "routine_selected"
         ]
         steps = {step for record in selected for step in record["steps"]}
@@ -309,11 +314,11 @@ def test_active_beliefs_survive_restart_without_filling_the_mind(tmp_path: Path)
     first.hello()
     for _ in range(4):
         settle(first, "supports")
-    before = first.loop.effect_beliefs.belief("active", "fixture", "gather_wood", "wood")
+    before = first.loop.effect_beliefs.belief("active", FIXTURE, "gather_wood", "wood")
 
     second = Harness(tmp_path, learning_mode="supervised")
     second.hello()
-    after = second.loop.effect_beliefs.belief("active", "fixture", "gather_wood", "wood")
+    after = second.loop.effect_beliefs.belief("active", FIXTURE, "gather_wood", "wood")
     assert after == before and after is not None
     assert len(second.loop.memory.working) == 0
     assert len(second.loop.memory_store) == len(first.loop.memory_store), "no episodes added"
@@ -348,14 +353,17 @@ def supervised_provider() -> EvidencePolicyProvider:
                     decision_id=None,
                     tick=1,
                     policy_revision=0,
-                    training_context="fixture",
+                    experience=ExperienceKey("minecraft", "fixture"),
                     event_type="routine_outcome",
                     payload={"routine_id": routine, "context_id": "c", "status": "SUCCESS"},
                     previous_event_id=None,
                 )
             )
     return EvidencePolicyProvider(
-        statistics, training_context="fixture", learning_mode="supervised", minimum_support=3
+        statistics,
+        experience=FIXTURE,
+        learning_mode="supervised",
+        minimum_support=3,
     )
 
 
@@ -377,7 +385,7 @@ def beliefs_where(unreliable: str, reliable: str) -> EffectBeliefs:
                             "decision_id",
                             "tick",
                             "policy_revision",
-                            "training_context",
+                            "experience",
                         )
                     },
                     event_type="effect_evidence",
@@ -396,13 +404,13 @@ def test_supported_reliability_can_change_a_close_choice_and_only_a_close_one(
     hunt = option("hunt", ("hunt_safe_passive_animals",))
     registry = skill_registry()
 
-    neutral = provider.propose(view, None, [plants, hunt], "c")
+    neutral = provider.propose(envelope_of(view), None, [plants, hunt], "c")
     for unreliable, reliable in (
         ("gather_plant_food", "hunt_safe_passive_animals"),
         ("hunt_safe_passive_animals", "gather_plant_food"),
     ):
-        term = reliability_term(beliefs_where(unreliable, reliable), registry, "fixture")
-        chosen = provider.propose(view, None, [plants, hunt], "c", reliability=term)
+        term = reliability_term(beliefs_where(unreliable, reliable), registry, FIXTURE)
+        chosen = provider.propose(envelope_of(view), None, [plants, hunt], "c", reliability=term)
         winner = {"gather_plant_food": "r_plants", "hunt_safe_passive_animals": "r_hunt"}
         assert chosen.routine_id == winner[reliable], (neutral.routine_id, chosen.reason_codes)
         learned = {
@@ -413,10 +421,12 @@ def test_supported_reliability_can_change_a_close_choice_and_only_a_close_one(
 
     # And no reliability can make an option the runtime would refuse win.
     term = reliability_term(
-        beliefs_where("gather_plant_food", "hunt_safe_passive_animals"), registry, "fixture"
+        beliefs_where("gather_plant_food", "hunt_safe_passive_animals"),
+        registry,
+        FIXTURE,
     )
     refused = option("hunt", ("hunt_safe_passive_animals",), applicable=False)
-    chosen = provider.propose(view, None, [plants, refused], "c", reliability=term)
+    chosen = provider.propose(envelope_of(view), None, [plants, refused], "c", reliability=term)
     assert chosen.routine_id == "r_plants"
 
 
@@ -455,7 +465,7 @@ def test_the_learner_reads_nothing_privileged_and_touches_nothing_else() -> None
         "position",
         "homeDistance",
         "completionEvidence",
-        "EvidenceJournal",
+        "EventJournal",
         "read_text",
         "affect",
         "salience",

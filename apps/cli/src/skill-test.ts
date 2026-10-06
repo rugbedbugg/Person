@@ -1,11 +1,5 @@
 import { createInterface } from "node:readline";
 import {
-  describeConnection,
-  loadConfig,
-  withConnectionOverride,
-  type ConnectionOverride,
-} from "#config";
-import {
   OperatorSetupAborted,
   runSkillValidation,
   summariseSkillValidation,
@@ -14,6 +8,12 @@ import {
 import { skillRegistry } from "#skills";
 import { createEmbodiment } from "./embodiment.ts";
 import { resolveBase } from "./observe.ts";
+import {
+  describeConnection,
+  loadMinecraftConfig,
+  withConnectionOverride,
+  type ConnectionOverride,
+} from "#minecraft";
 
 /**
  * `person skill-test`: validate one existing skill against a real body.
@@ -94,7 +94,7 @@ export async function skillTestCommand(
   options: SkillTestOptions,
 ): Promise<SkillTestResult> {
   const config = withConnectionOverride(
-    loadConfig(options.configPath),
+    loadMinecraftConfig(options.configPath),
     options.connection ?? {},
   );
   const registry = skillRegistry();
@@ -107,7 +107,7 @@ export async function skillTestCommand(
     };
 
   const identity = describeConnection(config, options.connection ?? {});
-  if (!options.json && config.runtime.embodiment === "minecraft")
+  if (!options.json && config.runtime.embodiment === "mineflayer")
     process.stderr.write(`person: connecting to ${identity}\n`);
 
   const embodiment = await createEmbodiment(

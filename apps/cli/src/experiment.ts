@@ -8,7 +8,6 @@ import {
   writeFileSync,
 } from "node:fs";
 import path from "node:path";
-import { loadConfig, type PersonConfig } from "#config";
 import { FixtureWorld, type FixtureWorldDefinition } from "#fixture-world";
 import { PersonRuntime, type EpisodeReport } from "#node-runtime";
 import {
@@ -18,6 +17,7 @@ import {
   type AffectBounds,
   type JournalEvent,
 } from "./affect-analysis.ts";
+import { loadMinecraftConfig, type MinecraftConfig } from "#minecraft";
 
 /**
  * The experiment harness (ADR 0013).
@@ -515,7 +515,7 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
   mkdirSync(reportDirectory, { recursive: true });
 
   const configFile = path.join(runDirectory, "config.json");
-  const base = loadConfig(path.resolve(planDirectory, plan.config));
+  const base = loadMinecraftConfig(path.resolve(planDirectory, plan.config));
   const cognitionCommand = [
     "uv",
     "run",
@@ -523,12 +523,11 @@ export async function runOne(options: RunOneOptions): Promise<RunResult> {
     "--config",
     configFile,
   ];
-  const config: PersonConfig = {
+  const config: MinecraftConfig = {
     ...base,
     runtime: {
       ...base.runtime,
       embodiment: "fixture",
-      trainingContext: "fixture",
       outputDirectory: reportDirectory,
       maxDecisions: horizon.maxDecisions,
       ...(horizon.maxExperiencedTicks

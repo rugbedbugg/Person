@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 import pytest
-from person_persistence import EvidenceJournal, IdentityError
+from person_persistence import EventJournal, IdentityError
 from test_identity_continuity import PERSON, Process, envelope, journal, legacy_root
 from test_operational_state import world
 from test_spatial import STILL, at
@@ -27,9 +27,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0, "breath": 10})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -48,7 +48,7 @@ def life(process: Process, event: str, *, terminal: bool = False, tick: int = 0)
 def observe(process: Process, document: dict[str, Any], tick: int, **vitals: float) -> None:
     observation = at(document, tick)
     observation["personId"] = process.person
-    observation["vitals"].update(vitals)
+    observation["payload"]["vitals"].update(vitals)
     process.loop.handle(observation)
 
 
@@ -198,7 +198,7 @@ def test_a_crash_right_after_a_terminal_death_still_reconstructs_termination(
     process = alive_person(tmp_path, view)
     life(process, "died", terminal=True, tick=140)
     # Simulate the crash: the terminal death was written, nothing after it.
-    journal_ = EvidenceJournal(tmp_path / "journal")
+    journal_ = EventJournal(tmp_path / "journal")
     events = list(journal_.read())
     cut = next(i for i, e in enumerate(events) if e.type == "person_died") + 1
     segment = sorted((tmp_path / "journal").glob("*.jsonl"))[-1]

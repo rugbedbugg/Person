@@ -1,9 +1,9 @@
 import type mineflayer from "mineflayer";
 import pathfinderPackage from "mineflayer-pathfinder";
-import type { Position } from "#config";
 import type { PhysicalGuard } from "#node-runtime";
 import { HAZARD_BLOCKS } from "./registry.ts";
 import { EXTRA_HOSTILE_MOBS, HOSTILE_CATEGORY } from "./classify.ts";
+import { type Position } from "#minecraft";
 
 const { Movements } = pathfinderPackage;
 

@@ -1,7 +1,11 @@
-"""Person cognition: context, goals, routines, decision loop, reporting."""
+"""Person cognition: goals, routines, the decision loop and reporting.
 
-from .context import DecisionContext, context_id, decision_context
-from .goals import Goal, GoalStack, SurvivalGoalProvider, homeostasis
+Environment-neutral: what any one environment means is its profile's
+(`environment.py`, ADR 0025).
+"""
+
+from .environment import CognitiveEnvironment, load_environment
+from .goals import CORE_GOAL_TYPES, Drive, Goal, GoalStack
 from .loop import COGNITION_VERSION, ActiveRoutine, CognitionLoop
 from .reporting import LearningSummary
 from .routines import (
@@ -17,9 +21,11 @@ from .routines import (
 
 __all__ = [
     "COGNITION_VERSION",
+    "CORE_GOAL_TYPES",
     "ActiveRoutine",
     "CognitionLoop",
-    "DecisionContext",
+    "CognitiveEnvironment",
+    "Drive",
     "Goal",
     "GoalStack",
     "LearningSummary",
@@ -28,11 +34,8 @@ __all__ = [
     "RoutineLibrary",
     "RoutineRef",
     "SkillStep",
-    "SurvivalGoalProvider",
     "candidate_from_routine",
-    "context_id",
-    "decision_context",
-    "homeostasis",
+    "load_environment",
     "routine_from_plan",
     "routine_identifier",
 ]

@@ -1,6 +1,6 @@
-import type { Position } from "#config";
 import type { WorldSnapshot } from "../embodiment/types.ts";
 import { estimateDistance, type Bearing } from "./relative.ts";
+import { type Position } from "#minecraft";
 
 /**
  * Person's sense of its own motion (ADR 0008).

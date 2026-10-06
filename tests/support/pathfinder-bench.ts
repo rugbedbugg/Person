@@ -8,9 +8,9 @@ import MoveNode from "mineflayer-pathfinder/lib/move.js";
 import registryLoader from "prismarine-registry";
 import blockLoader from "prismarine-block";
 import vec3Package from "vec3";
-import { contains, type Box, type Position } from "#config";
 import type { PhysicalGuard } from "#node-runtime";
 import { createGuardedMovements } from "#minecraft-adapter";
+import { contains, type Box, type Position } from "#minecraft";
 
 const { Vec3 } = vec3Package;
 const { goals } = pathfinderPackage;

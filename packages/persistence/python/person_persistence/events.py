@@ -1,9 +1,18 @@
-"""Immutable evidence records.
+"""Immutable canonical events: Person's append-only longitudinal history.
 
-Evidence is the substrate everything else is rebuilt from. Scores change when
-the scoring algorithm changes; the facts must not. Each record therefore keeps
-what happened, in what context, under which policy revision, with a link to the
-record before it.
+A canonical event is a record that something happened: an episode began, a
+skill ran, a memory was encoded or recalled, an affect changed, a deliberation
+was requested, the body died. It is the substrate everything else is rebuilt
+from. Scores change when the scoring algorithm changes; the history must not.
+Each record therefore keeps what happened, in which experience stream, under
+which policy revision, with a link to the record before it.
+
+A canonical event is **not** epistemic evidence (ADR 0027). Most events are
+history and nothing more; the few that bear on a belief do so through an
+explicit admission (`person_epistemics.evidence`), never by being recorded.
+The journal used to be called the evidence journal, and its records still
+carry `person-evidence-v1` to `-v19` as their schema names; those records are
+read as they are and never rewritten. New records are `person-event-v20`.
 """
 
 from __future__ import annotations
@@ -14,7 +23,13 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 
-EVIDENCE_SCHEMA_VERSION = "person-evidence-v19"
+from person_epistemics import ExperienceKey
+
+from .legacy import legacy_experience
+
+#: The schema new records are written under. v20 renamed the family from
+#: "evidence" to "event" and replaced `training_context` with `experience`.
+EVENT_SCHEMA_VERSION = "person-event-v20"
 
 #: Versions this reader understands. A journal written before prediction-error
 #: instrumentation existed is still valid history and is read unchanged; only
@@ -40,7 +55,10 @@ SUPPORTED_EVIDENCE_SCHEMAS: tuple[str, ...] = (
     "person-evidence-v17",
     "person-evidence-v18",
     "person-evidence-v19",
+    "person-event-v20",
 )
+#: Records written before v20 carry `training_context`; from v20, `experience`.
+LEGACY_SCHEMAS: frozenset[str] = frozenset(SUPPORTED_EVIDENCE_SCHEMAS[:19])
 
 EVENT_TYPES: tuple[str, ...] = (
     "episode_started",
@@ -160,6 +178,10 @@ EVENT_TYPES: tuple[str, ...] = (
     "habit_source_retry",
     # ADR 0023, C6: the facts at the affective arbitration point.
     "affective_arbitration_shadow",
+    #: ADR 0026: one fact belief revised by admitted evidence, with its
+    #: value, confidence, basis, evidence references and scope. The belief
+    #: store is rebuilt from these alone.
+    "belief_revised",
 )
 
 #: Event types introduced after the first evidence schema version.
@@ -239,6 +261,9 @@ V18_EVENT_TYPES: frozenset[str] = frozenset({"habit_goal_ended", "habit_source_r
 #: Event types introduced with the nineteenth: affective metareasoning (C6).
 V19_EVENT_TYPES: frozenset[str] = frozenset({"affective_arbitration_shadow"})
 
+#: Event types introduced with the twentieth: fact beliefs (ADR 0026).
+V20_EVENT_TYPES: frozenset[str] = frozenset({"belief_revised"})
+
 #: The first schema each later event type may appear under. A record cannot
 #: claim a schema older than its own type, so history cannot be backdated.
 INTRODUCED_IN: dict[str, str] = {
@@ -260,6 +285,7 @@ INTRODUCED_IN: dict[str, str] = {
     **dict.fromkeys(V17_EVENT_TYPES, "person-evidence-v17"),
     **dict.fromkeys(V18_EVENT_TYPES, "person-evidence-v18"),
     **dict.fromkeys(V19_EVENT_TYPES, "person-evidence-v19"),
+    **dict.fromkeys(V20_EVENT_TYPES, "person-event-v20"),
 }
 
 REQUIRED_FIELDS: tuple[str, ...] = (
@@ -274,18 +300,20 @@ REQUIRED_FIELDS: tuple[str, ...] = (
     "timestamp",
     "schema_version",
     "policy_revision",
-    "training_context",
     "type",
     "payload",
 )
+#: The field that says which experience stream a record belongs to.
+LEGACY_CONTEXT_FIELD = "training_context"
+EXPERIENCE_FIELD = "experience"
 
 
-class EvidenceError(ValueError):
-    """A record is not a well-formed evidence event."""
+class EventRecordError(ValueError):
+    """A record is not a well-formed canonical event."""
 
 
 @dataclass(frozen=True, slots=True)
-class EvidenceEvent:
+class CanonicalEvent:
     event_id: str
     previous_event_id: str | None
     person_id: str
@@ -297,11 +325,25 @@ class EvidenceEvent:
     timestamp: str
     schema_version: str
     policy_revision: int
-    training_context: str
+    experience: ExperienceKey
     type: str
     payload: Mapping[str, Any] = field(default_factory=dict)
+    #: For a record read from a pre-v20 schema: the conflated value it was
+    #: written with, kept so the record re-serialises exactly as it was.
+    legacy_training_context: str | None = None
+
+    @property
+    def context_key(self) -> str:
+        """The experience stream's partition key (`ExperienceKey.key`)."""
+        return self.experience.key
 
     def to_json(self) -> dict[str, Any]:
+        if self.schema_version in LEGACY_SCHEMAS:
+            # A legacy record is re-serialised exactly as it was read.
+            return self._fields(LEGACY_CONTEXT_FIELD, self.legacy_training_context)
+        return self._fields(EXPERIENCE_FIELD, self.experience.to_json())
+
+    def _fields(self, name: str, value: Any) -> dict[str, Any]:
         return {
             "event_id": self.event_id,
             "previous_event_id": self.previous_event_id,
@@ -314,40 +356,61 @@ class EvidenceEvent:
             "timestamp": self.timestamp,
             "schema_version": self.schema_version,
             "policy_revision": self.policy_revision,
-            "training_context": self.training_context,
+            name: value,
             "type": self.type,
             "payload": dict(self.payload),
         }
 
     @staticmethod
-    def from_json(document: Any) -> EvidenceEvent:
+    def from_json(document: Any) -> CanonicalEvent:
         if not isinstance(document, dict):
-            raise EvidenceError("Evidence record is not a JSON object")
+            raise EventRecordError("Event record is not a JSON object")
         missing = [field_name for field_name in REQUIRED_FIELDS if field_name not in document]
         if missing:
-            raise EvidenceError(f"Evidence record is missing {', '.join(missing)}")
+            raise EventRecordError(f"Event record is missing {', '.join(missing)}")
         schema = document["schema_version"]
         if schema not in SUPPORTED_EVIDENCE_SCHEMAS:
-            raise EvidenceError(
+            raise EventRecordError(
                 f"Unsupported evidence schema {schema!r}; "
                 f"this runtime reads {', '.join(SUPPORTED_EVIDENCE_SCHEMAS)}"
             )
         if document["type"] not in EVENT_TYPES:
-            raise EvidenceError(f"Unknown evidence event type {document['type']!r}")
+            raise EventRecordError(f"Unknown event type {document['type']!r}")
         introduced = INTRODUCED_IN.get(document["type"])
         if introduced is not None and SUPPORTED_EVIDENCE_SCHEMAS.index(
             schema
         ) < SUPPORTED_EVIDENCE_SCHEMAS.index(introduced):
-            raise EvidenceError(f"Event type {document['type']!r} cannot claim schema {schema!r}")
+            raise EventRecordError(
+                f"Event type {document['type']!r} cannot claim schema {schema!r}"
+            )
         if not isinstance(document["payload"], dict):
-            raise EvidenceError("Evidence payload must be an object")
+            raise EventRecordError("Event payload must be an object")
         if not isinstance(document["tick"], int) or document["tick"] < 0:
-            raise EvidenceError("Evidence tick must be a non-negative integer")
+            raise EventRecordError("Event tick must be a non-negative integer")
         try:
             uuid.UUID(document["event_id"])
         except (ValueError, AttributeError, TypeError) as error:
-            raise EvidenceError("Evidence event_id must be a UUID") from error
-        return EvidenceEvent(**{name: document[name] for name in REQUIRED_FIELDS})
+            raise EventRecordError("Event event_id must be a UUID") from error
+        fields = {name: document[name] for name in REQUIRED_FIELDS}
+        if schema in LEGACY_SCHEMAS:
+            # Read compatibility (ADR 0025): the conflated training context is
+            # mapped to the stream it always meant; the record is not changed.
+            if LEGACY_CONTEXT_FIELD not in document:
+                raise EventRecordError(f"Event record is missing {LEGACY_CONTEXT_FIELD}")
+            legacy = str(document[LEGACY_CONTEXT_FIELD])
+            try:
+                experience = legacy_experience(legacy)
+            except KeyError as error:
+                raise EventRecordError(f"Unknown legacy training context {legacy!r}") from error
+            return CanonicalEvent(experience=experience, legacy_training_context=legacy, **fields)
+        else:
+            if not isinstance(document.get(EXPERIENCE_FIELD), dict):
+                raise EventRecordError(f"Event record is missing {EXPERIENCE_FIELD}")
+            try:
+                experience = ExperienceKey.from_json(document[EXPERIENCE_FIELD])
+            except (KeyError, ValueError) as error:
+                raise EventRecordError(f"Event experience is malformed: {error}") from error
+        return CanonicalEvent(experience=experience, **fields)
 
 
 def new_event(
@@ -359,16 +422,16 @@ def new_event(
     decision_id: str | None,
     tick: int,
     policy_revision: int,
-    training_context: str,
+    experience: ExperienceKey,
     event_type: str,
     payload: Mapping[str, Any],
     previous_event_id: str | None,
     event_id: str | None = None,
     timestamp: str | None = None,
-) -> EvidenceEvent:
+) -> CanonicalEvent:
     if event_type not in EVENT_TYPES:
-        raise EvidenceError(f"Unknown evidence event type {event_type!r}")
-    return EvidenceEvent(
+        raise EventRecordError(f"Unknown event type {event_type!r}")
+    return CanonicalEvent(
         event_id=event_id or str(uuid.uuid4()),
         previous_event_id=previous_event_id,
         person_id=person_id,
@@ -378,9 +441,16 @@ def new_event(
         decision_id=decision_id,
         tick=tick,
         timestamp=timestamp or datetime.now(UTC).isoformat().replace("+00:00", "Z"),
-        schema_version=EVIDENCE_SCHEMA_VERSION,
+        schema_version=EVENT_SCHEMA_VERSION,
         policy_revision=policy_revision,
-        training_context=training_context,
+        experience=experience,
         type=event_type,
         payload=dict(payload),
     )
+
+
+# Compatibility names. The journal was called the evidence journal before ADR
+# 0027 separated history from evidence; these keep old scripts importable.
+EvidenceEvent = CanonicalEvent
+EvidenceError = EventRecordError
+EVIDENCE_SCHEMA_VERSION = EVENT_SCHEMA_VERSION

@@ -4,11 +4,16 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import type { ValidateFunction } from "ajv";
-import type { ParameterSpec, SkillSpec } from "./types.ts";
+import { soleEnvironment } from "#protocol";
+import type { ParameterSpec, SkillSpec, SkillVocabulary } from "./types.ts";
 
-export const SPEC_DIRECTORY = fileURLToPath(
-  new URL("../specs/", import.meta.url),
+/** The generic SkillSpec schema. Each environment supplies the specs. */
+export const SKILL_SPEC_SCHEMA = fileURLToPath(
+  new URL("../schema/skill-spec.schema.json", import.meta.url),
 );
+
+/** Files in a skill directory that are not specs. */
+const NOT_SPECS = new Set(["facts.json", "vocabulary.json"]);
 
 export class SkillSpecError extends Error {
   constructor(message: string) {
@@ -22,38 +27,72 @@ export interface FactVocabulary {
   facts: Record<string, string>;
 }
 
-function compileSpecValidator(directory: string): ValidateFunction {
+function compileSpecValidator(): ValidateFunction {
   const ajv = new Ajv2020({
     strict: true,
     allErrors: true,
     allowUnionTypes: true,
   });
-  const schema: object = JSON.parse(
-    readFileSync(path.join(directory, "skill-spec.schema.json"), "utf8"),
-  );
+  const schema: object = JSON.parse(readFileSync(SKILL_SPEC_SCHEMA, "utf8"));
   return ajv.compile(schema);
 }
 
+/** What a spec names that its environment's vocabulary does not allow. */
+function vocabularyProblems(
+  spec: SkillSpec,
+  vocabulary: SkillVocabulary,
+): string[] {
+  const problems: string[] = [];
+  if (!vocabulary.categories.includes(spec.category))
+    problems.push(`category ${spec.category}`);
+  for (const permission of spec.requiredPermissions)
+    if (!vocabulary.permissions.includes(permission))
+      problems.push(`permission ${permission}`);
+  for (const kind of spec.completionEvidence)
+    if (!vocabulary.completionEvidence.includes(kind))
+      problems.push(`completion evidence ${kind}`);
+  const limits = spec.costLimits;
+  if (limits.maxTicks > vocabulary.limits.maxTicks)
+    problems.push(`maxTicks above ${vocabulary.limits.maxTicks}`);
+  if (limits.maxDistance > vocabulary.limits.maxDistance)
+    problems.push(`maxDistance above ${vocabulary.limits.maxDistance}`);
+  if (limits.minHealth > vocabulary.limits.minHealth)
+    problems.push(`minHealth above ${vocabulary.limits.minHealth}`);
+  return problems;
+}
+
 /**
- * The skill library, loaded from the canonical JSON specs that the cognition
- * process also reads. Nothing here executes anything: this is the contract the
- * planner reasons over and the runtime enforces.
+ * A skill library, loaded from an environment's canonical JSON specs, which
+ * the cognition process also reads. Generic: the mechanism is Person's, the
+ * specs and their vocabulary are the environment's (ADR 0025). Nothing here
+ * executes anything: this is the contract the planner reasons over and the
+ * runtime enforces.
  */
 export class SkillRegistry {
   readonly specs: ReadonlyMap<string, SkillSpec>;
   readonly facts: FactVocabulary;
+  readonly vocabulary: SkillVocabulary;
   readonly revision: string;
 
-  constructor(directory: string = SPEC_DIRECTORY) {
-    const validate = compileSpecValidator(directory);
+  constructor(directory: string = soleEnvironment().skillsDirectory) {
+    const validate = compileSpecValidator();
     this.facts = JSON.parse(
       readFileSync(path.join(directory, "facts.json"), "utf8"),
     );
+    this.vocabulary = JSON.parse(
+      readFileSync(path.join(directory, "vocabulary.json"), "utf8"),
+    );
+    for (const [name, facts] of Object.entries(this.vocabulary.factClasses))
+      for (const fact of facts)
+        if (!(fact in this.facts.facts))
+          throw new SkillSpecError(
+            `vocabulary fact class ${name} names unknown fact ${fact}`,
+          );
     const specs = new Map<string, SkillSpec>();
     const digest = createHash("sha256");
     for (const file of readdirSync(directory).sort()) {
       if (!file.endsWith(".json")) continue;
-      if (file === "facts.json" || file === "skill-spec.schema.json") continue;
+      if (NOT_SPECS.has(file)) continue;
       const raw = readFileSync(path.join(directory, file), "utf8");
       const spec: SkillSpec = JSON.parse(raw);
       if (!validate(spec))
@@ -61,6 +100,11 @@ export class SkillRegistry {
           `${file} is not a valid SkillSpec: ${(validate.errors ?? [])
             .map((e) => `${e.instancePath} ${e.message}`)
             .join("; ")}`,
+        );
+      const outside = vocabularyProblems(spec, this.vocabulary);
+      if (outside.length)
+        throw new SkillSpecError(
+          `${file} names what its environment does not allow: ${outside.join(", ")}`,
         );
       if (spec.id !== path.basename(file, ".json"))
         throw new SkillSpecError(

@@ -97,7 +97,7 @@ class LearningSummary:
         statistics: RoutineStatistics,
         episode_id: str,
         learning_mode: str,
-        training_context: str,
+        experience: str,
         policy_revision: int,
         goals: GoalStack,
         restore_notes: list[str],
@@ -106,7 +106,7 @@ class LearningSummary:
             "schema_version": 1,
             "episode_id": episode_id,
             "learning_mode": learning_mode,
-            "training_context": training_context,
+            "experience": experience,
             "policy_revision": policy_revision,
             "restore_notes": restore_notes,
             "selections": self.selections,
@@ -126,7 +126,7 @@ class LearningSummary:
             "goal_resumptions": goals.resume_counts(),
             "routine_statistics": [
                 {
-                    "training_context": key[0],
+                    "experience": key[0],
                     "context_id": key[1],
                     "routine_id": key[2],
                     "attempts": counts.attempts,
@@ -139,7 +139,7 @@ class LearningSummary:
             ],
             "skill_statistics": [
                 {
-                    "training_context": key[0],
+                    "experience": key[0],
                     "context_id": key[1],
                     "skill_id": key[2],
                     "attempts": counts.attempts,

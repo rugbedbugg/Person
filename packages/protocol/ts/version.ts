@@ -5,7 +5,11 @@
  * evidence record. A backward-incompatible change must take a new name so old
  * evidence stays interpretable instead of being silently reinterpreted.
  */
-export const PROTOCOL_VERSION = "shroud-learning-v2";
+/**
+ * 3: Observation became a core envelope around an environment-owned payload,
+ * and trainingContext became `experience` (ADR 0025).
+ */
+export const PROTOCOL_VERSION = "person-v3";
 
 /** Message types the Node runtime is allowed to emit. */
 export const NODE_MESSAGE_TYPES = [

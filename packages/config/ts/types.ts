@@ -1,40 +1,17 @@
-export interface Position {
-  x: number;
-  y: number;
-  z: number;
-}
-
-export interface Box {
-  min: Position;
-  max: Position;
-}
-
-export interface ContainerPermissions {
-  existing: { withdraw: boolean; deposit: false };
-  owned: { withdraw: boolean; deposit: boolean };
-}
-
-export interface Permissions {
-  containers: ContainerPermissions;
-  hunting: {
-    passiveUnnamedAnimals: boolean;
-    namedAnimals: false;
-    tamedAnimals: false;
-  };
-  players: { combat: false };
-  villagers: { harm: false };
-  building: { enabled: boolean };
-  protectedAreas: { enforcement: "strict" };
-}
-
-export interface PersonConfig {
-  configVersion: 2;
+/**
+ * The core, environment-neutral configuration (ADR 0025). The environment
+ * named in `environment.kind` owns every other key of the document, through
+ * its own configuration schema and its own typed view: Minecraft's is
+ * `MinecraftConfig` in `#minecraft`.
+ */
+export interface CoreConfig {
+  configVersion: 3;
   personId: string;
   worldId: string;
+  environment: { kind: string };
   runtime: {
-    embodiment: "fixture" | "minecraft";
-    trainingContext:
-      "fixture" | "minecraft_peaceful" | "minecraft_normal" | "replay";
+    /** Which embodiment of the environment; the profile names the legal ones. */
+    embodiment: string;
     outputDirectory: string;
     rngSeed: number | null;
     maxDecisions: number;
@@ -79,14 +56,4 @@ export interface PersonConfig {
     startTimeoutMs: number;
     decisionTimeoutMs: number;
   };
-  server?: { host: string; port: number; version: "1.16.1" };
-  bot?: { username: string; auth: "offline" };
-  authorization?: Record<string, boolean>;
-  world: {
-    home: Position;
-    exploration: Box;
-    resourceAreas: Box[];
-    protectedAreas: Box[];
-  };
-  permissions: Permissions;
 }

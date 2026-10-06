@@ -23,7 +23,7 @@ from typing import Any
 
 from person_cognition.affect import decay
 from person_cognition.loop import CognitionLoop
-from person_protocol import decode_frame
+from person_protocol import PROTOCOL_VERSION, decode_frame
 from person_skills import skill_registry
 
 DIMENSIONS = ("valence", "unease", "control")
@@ -54,9 +54,22 @@ def restore(evidence: Path, metadata: dict[str, Any]) -> tuple[CognitionLoop, di
         **settings,
     )
     registry = skill_registry()
+    # Before person-v3 (ADR 0025) the hello stated a training context; from
+    # it, the experience stream. Speak whichever this commit speaks.
+    if PROTOCOL_VERSION == "shroud-learning-v2":
+        stream: dict[str, Any] = {"trainingContext": "fixture"}
+    else:
+        stream = {
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            }
+        }
     loop.handle(
         {
-            "protocolVersion": "shroud-learning-v2",
+            "protocolVersion": PROTOCOL_VERSION,
             "messageId": str(uuid.uuid4()),
             "personId": "ada",
             "sessionId": str(uuid.uuid4()),
@@ -65,7 +78,7 @@ def restore(evidence: Path, metadata: dict[str, Any]) -> tuple[CognitionLoop, di
             "timestamp": "2026-09-30T00:00:00Z",
             "type": "SessionHello",
             "learningMode": "off",
-            "trainingContext": "fixture",
+            **stream,
             "policyRevision": 0,
             "skillLibraryRevision": registry.revision,
             "rngSeed": 1,

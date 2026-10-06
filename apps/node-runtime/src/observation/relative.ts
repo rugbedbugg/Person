@@ -1,10 +1,10 @@
-import type { Position } from "#config";
 import {
   centreOf,
   inCentralVision,
   viewAngles,
   type EyePose,
 } from "./vision.ts";
+import { type Position } from "#minecraft";
 
 /**
  * Where something is, described the way a person would describe it.

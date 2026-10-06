@@ -45,6 +45,53 @@ Person-000 root has not been created.
 The Minecraft target is **Java 1.16.1**. A move to 1.16.5 is planned as part of
 the Baritone work (ADR 0001) and has not begun.
 
+### Course correction before Ada (2026-10-03, ADRs 0025 to 0029)
+
+Before Person-000 becomes the canonical baseline, Person's core was separated
+from its first environment and its epistemic state made explicit. All of it
+is IMPLEMENTED and TESTED IN FIXTURE; none of it has run against Minecraft.
+
+- **Environment profile (ADR 0025).** `environments/minecraft/` owns the
+  observation payload, the configuration sections, the skill library and
+  vocabulary, emergency vocabulary and the Minecraft cognitive profile.
+  Protocol `person-v3`, observation version 9 (envelope plus `payload`),
+  configuration version 3 (v2 read, never rewritten), journal
+  `person-event-v20` (v1 to v19 read), snapshots version 2, skill-validation
+  reports version 2. `trainingContext` became a four-part experience key.
+- **Epistemic state (ADR 0026).** `packages/epistemics/`: provenance classes,
+  scope, evidence admission, persistent fact beliefs (`belief_revised`),
+  perceptual state, composed self-state, initial knowledge and the decision
+  state. The loop crosses the boundary once per observation; no downstream
+  module reads the observation.
+- **Canonical events (ADR 0027).** The journal types are `CanonicalEvent`,
+  `EventJournal`, `EventStore` (former `Evidence*` names kept as aliases).
+  Three event types are admissible as evidence; every other is history only.
+- **Prediction (ADR 0028).** `WorldModelProvider` retired; the declared-effect
+  model is the first `PredictiveModel`; every prediction records its model.
+- **Architecture in docs and tests (ADR 0029).** `docs/ARCHITECTURE.md`,
+  "Invariants and where they are held".
+- **No environment vocabulary in core cognition.** Whether a drive is
+  pressing is a typed flag the environment sets (`Drive.pressing`), not a
+  list of Minecraft drive names; what an emergency is about beyond `danger`
+  is the environment's (`CognitiveEnvironment.emergency_subjects`), not a
+  guess from the trigger's name; place signatures come from the manifest. An
+  architecture test fails if core cognition names any drive, memory subject,
+  emergency, skill or fact an environment owns. Affect, too, reads a goal's
+  character (`GoalCharacter`) from the environment
+  (`CognitiveEnvironment.goal_character`) and never a fact name (C10,
+  resolved). The one recorded exception is C9's interoception `food` key.
+- **Memory and planning.** Planning may use memory as the bounded recall
+  supplies it (`DecisionState.recalled`, or a recall the loop hands over),
+  never by querying the store; a recalled episode never sets a planning fact.
+- **Knowledge.** Initial knowledge today. `Knowledge.learned` holds typed
+  `KnownFact`s that keep a promoted belief's provenance, evidence and scope;
+  no promotion gate exists, so it is empty, and inference, recall, replay
+  and rollouts can never become knowledge.
+- **Held-out V2 stays frozen.** `scripts/benchmarks/initial-observation.ts`
+  and `validate_class.py` are byte-identical to
+  `experiments/benchmarks/heldout-v2/MANIFEST.json` and run at its procedure
+  commit; their ports to person-v3 are `scripts/benchmarks/current/`.
+
 ---
 
 ## 1. Current Architecture
@@ -74,7 +121,7 @@ Python cognition  →  SkillInvocation  →  [TRUST BOUNDARY]  →  Node validat
 
 ### Protocol (`packages/protocol/`)
 
-- **Version:** `shroud-learning-v2`
+- **Version:** `person-v3` (was `shroud-learning-v2`; ADR 0025)
 - **11 message types** with canonical JSON Schemas
 - Dual runtime validation: Ajv (Node) + jsonschema (Python)
 - Shared corpus: 11 valid, 18 invalid messages — both runtimes agree on all
@@ -157,14 +204,14 @@ Two implementations, same skill code:
 - **Atomic checksummed snapshots** (temp-file + rename)
 - **Strict reading:** rejects corruption, ignores duplicates, drops crash-truncated tail
 - **Restore:** replay from newest valid snapshot, fallback to full rebuild
-- **Statistics keyed by training context** — fixture/live evidence never merges
+- **Statistics keyed by experience key** (ADR 0025) — fixture/live/replay evidence never merges
 - **Event types:** episode_started, goal_selected, routine_selected, routine_outcome, skill_started, skill_completed, skill_failed, skill_interrupted, emergency_override, death, episode_ended, prediction_error (schema v2, instrumentation), information_search (schema v3, instrumentation), memory_encoded and memory_recalled (schema v4; the memory store is rebuilt from `memory_encoded` alone), place_formed and place_visited (schema v5; the spatial map is rebuilt from these and `episode_ended`), project_started and project_changed (schema v6; the project book is rebuilt from these alone), affect_appraised (schema v7; trigger, components, before, delta, after), effect_evidence (schema v8; one classified trial per declared effect, and what the learning mode admitted it to), causal_trial, hypothesis_proposed, hypothesis_rejected, hypothesis_evidence and investigation_changed (schema v9; the hypothesis book is rebuilt from these alone), affect_tonic (schema v10; the pressures, the offset they set, the time covered and the state before and after), person_founded, session_started and session_ended (schema v11; identity and session continuity, ADR 0017), world_availability_changed (schema v12; the world's availability to the body, written only on a change), person_died, person_respawned and person_terminated (schema v13; life status, ADR 0017 I3), deliberation_requested, deliberation_completed and deliberation_unavailable (schema v14; ADR 0020 C1, engineering evidence nothing is rebuilt from)
-- **Schema versions:** new records are `person-evidence-v14`; v1 to v13 journals are still read unchanged, and an event type cannot claim a schema older than the one that introduced it
+- **Schema versions:** new records are `person-event-v20` (ADR 0025, ADR 0027: an `experience` key on every record, and `belief_revised`); v1 to v19 journals are still read unchanged, their `training_context` mapped to an experience key, and an event type cannot claim a schema older than the one that introduced it
 
 ### Configuration (`packages/config/`)
 
-- TOML, validated against JSON Schema by both runtimes
-- Legacy Shroud V1 migration supported (`validate --migrate`)
+- TOML, validated by both runtimes against the core schema and the environment's own together (configVersion 3, ADR 0025)
+- configVersion 2 read as 3 in memory, never rewritten; legacy Shroud V1 migration supported (`validate --migrate`)
 - V1 Q-learning checkpoints recognised and refused (not converted)
 - LAN port/host are **runtime overrides** (`--port`, `--host`) — never written to file
 
@@ -292,12 +339,13 @@ not. The evidence is the four `person skill-test` reports described in
 | Causal hypotheses, grounding gate, experiments         | IMPLEMENTED + TESTED IN FIXTURE (integration test)                        |
 
 **Future providers (placeholder, raise not implemented):**
-WorldModelProvider, LanguageProvider, SocialProvider, ExplorationProvider.
+LanguageProvider, SocialProvider, ExplorationProvider.
 Memory, projects and affect left the list when they were built (ADR 0007, ADR
-0009, ADR 0010), and a test asserts that no placeholder outlives its
-implementation. The world model and exploration placeholders are already
-partly overtaken by effect beliefs and hypotheses (ADR 0011, ADR 0012) and
-stay until their own systems are designed.
+0009, ADR 0010), and the world model left when prediction became the plural
+`PredictiveModel` interface (ADR 0028); a test asserts that no placeholder
+outlives its implementation. The exploration placeholder is already partly
+overtaken by hypotheses (ADR 0012) and stays until its own system is
+designed.
 
 ---
 
@@ -457,9 +505,11 @@ it.
 | C3  | `WorldMemory` is an ownership ledger, not memory, and is named badly | `6b99830`  | **Resolved**: renamed `PlacementLedger` |
 | C4  | Skills choose their own targets; cognition cannot name one           | `6b99830`  | any goal about a particular thing       |
 | C5  | The `Embodiment` port is shaped by what Mineflayer offers            | `6b99830`  | the Baritone spike (ADR 0001)           |
-| C6  | No belief, memory or knowledge representation exists at all          | n/a, a gap | any epistemic claim about Person        |
+| C6  | No belief, memory or knowledge representation (partly addressed)     | n/a, a gap | any epistemic claim about Person        |
 | C7  | The Mineflayer route veto missed two movement families (repaired)    | `6b99830`  | resolved 2026-09-22, see below          |
 | C8  | `home.homeDistance` was a drift-free homing channel (resolved)       | `6b99830`  | resolved 2026-09-25, see below          |
+| C9  | Minecraft body measurements remain in core protocol messages         | `6b99830`  | a second environment, or a protocol v4  |
+| C10 | Affect classified goals as protective by Minecraft facts (resolved)  | ADR 0010   | resolved 2026-10-06, see below          |
 
 ### C1. The observation carried exact coordinates
 
@@ -787,6 +837,19 @@ are defined as separate (ADR 0012); no consolidation and no knowledge store
 exist, so nothing is ever promoted to knowledge. C6 is therefore still
 **not** resolved.
 
+**Now implemented (ADR 0026, 2026-10-03):** an epistemic state apart from
+the observation. The loop crosses the epistemic boundary once per observation
+into a perceptual state; runtime reports about Person's own situation (shelter
+state, home known, owned storage and stations, food reserve) become persistent
+fact beliefs with confidence, provenance, evidence references and a world
+scope, journalled as `belief_revised` and rebuilt from the journal alone. The
+decision state composes percepts, beliefs, a self-state read from
+interoception, lifecycle, spatial and affect, recalled memories and initial
+knowledge. Planning facts read beliefs and current percepts, never memory.
+**Still absent:** beliefs about sensed facts (they reach planning as percepts),
+semantic, social and autobiographical memory, consolidation, and any
+promotion to knowledge. C6 is partly addressed, not resolved.
+
 **Memory uses so far.** Recall is cued at the start of each information
 search, with the place Person believes it is at. Recalling an earlier search
 at that place, for the same things, that found none of them makes the new
@@ -794,6 +857,51 @@ search shorter in proportion to the recognition confidence, down to a minimum
 of two glances, and adds `searched_here_before`. The conclusion is still
 `not_found_in_bounded_search`, never absence, and a goal blocked by a
 fruitless search reopens when Person believes it is somewhere else.
+
+### C9. Minecraft body measurements remain in core protocol messages
+
+Found during the 2026-10-03 course correction (ADR 0025) and **deliberately
+not changed** there. These core messages still carry Minecraft's body scale
+and goal vocabulary: `SkillOutcome` `healthBefore`, `healthAfter`,
+`foodBefore`, `foodAfter`, `healthCost`; `SkillStarted` `startHealth`,
+`startFood`; skill cost limits' `minHealth` (bounded to Minecraft's 20); and
+the `GoalDecision` goal-type enum (`SECURE_FOOD` and the rest). They are
+**compatibility-only**, and not contained: core cognition still reads some of
+them directly from the messages, as reported numbers it journals or costs
+(`loop.py` journals `startHealth`/`startFood` on `skill_started` and sums
+`healthCost`; `reporting.py` and `memory/encoding.py` record `healthCost`).
+None of them is read from the observation, so the epistemic boundary is not
+bypassed, but the core message contract still has Minecraft's body scale, and
+no architecture test covers these fields. Interoception's `BodyReading` is on
+the same scale (hunger from 18 of 20 food); its appraisal details name
+`food`, the one interoception word the vocabulary test exempts. Moving them behind an environment
+payload is a protocol change of its own, needed before a second
+environment's outcomes could be reported.
+
+### C10. Affect classified goals as protective by Minecraft planning facts — RESOLVED
+
+Found during the 2026-10-03 course correction. `person_cognition/affect.py`
+decided whether a goal was `protective` or `outgoing` by whether its
+completion condition named one of `PROTECTIVE_FACTS` (`shelter_complete`,
+`sheltered`, `at_home`, `owned_storage_available`, `stored_surplus`, `safe`),
+and its research bound `bias_swings` used `safe` and `tool_tier` as
+exemplars: Minecraft planning facts in core cognition. In a second
+environment every goal would have been `outgoing`, and affect's bias would
+have lost its protective direction.
+
+**Resolved 2026-10-06.** Core affect biases by a typed `GoalCharacter`
+(`"protective"` or `"outgoing"`) and names no fact. The environment says
+which goals are which: `CognitiveEnvironment.goal_character`, implemented by
+the Minecraft profile with the same `PROTECTIVE_FACTS`, now in
+`person_minecraft/goals.py`. `bias_swings` probes the characters directly,
+so the bound is a property of affect alone. Nothing about Ada changed: the
+research bounds, the classification of every single fact and pair of facts,
+and a 10,800-point grid of bias values are identical to before, as are the
+120-decision vertical-slice fixture runs (learning off and supervised)
+against `2b0b545`. `test_environment_vocabulary_never_leaks_into_core_cognition`
+no longer exempts `affect.py`, and
+`test_affect_reads_a_goals_character_never_its_facts` holds the fix,
+including with a toy second environment.
 
 ### C7. The Mineflayer route veto did not cover every movement family
 
@@ -951,11 +1059,11 @@ runtime would allow a direct route home), not a distance.
 
 ## 13. Test Counts
 
-| Suite        | Tests    | Pass     |
-| ------------ | -------- | -------- |
-| Node (all)   | 438      | 438      |
-| Python (all) | 613      | 613      |
-| **Total**    | **1051** | **1051** |
+| Suite        | Tests    | Pass            |
+| ------------ | -------- | --------------- |
+| Node (all)   | 443      | 443             |
+| Python (all) | 676      | 675 (1 skipped) |
+| **Total**    | **1119** | **1118**        |
 
 **Coverage by area, as last broken down at `48728e8` (188 Node / 129 Python);
 not recounted since:**
@@ -975,8 +1083,11 @@ not recounted since:**
 - Observation: 4
 
 `mise run check` **PASSES** (typecheck, build, lint, test-node, test-python).
-Verified on `cognition/affect-active` on 2026-10-01: Node 438 pass / 0 fail,
-Python 613 pass. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
+Verified on 2026-10-03 against the course-correction change set (ADRs 0025
+to 0029), based on `2b0b545`: Node 443 pass / 0 fail, Python 675 pass / 1
+skipped. At `2b0b545` itself Python was 619 pass / 1 skipped / 1 fail
+(`test_no_arbitrary_query_interface_to_memory_exists`, fixed by the change
+set). Earlier: `cognition/affect-active` on 2026-10-01, Node 438, Python 613. History: 188 / 129 at `48728e8`; 234 / 129 after PR #5;
 242 / 148 after PR #6; 243 / 151 after PR #7; 248 / 176 after PR #8;
 261 / 197 after PR #9; 264 / 211 after PR #10; 265 / 223 after PR #11;
 267 / 240 after PR #12; 268 / 240 after PR #13; 269 / 265 after PR #14;

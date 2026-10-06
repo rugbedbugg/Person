@@ -2,9 +2,9 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
-import type { Observation } from "#protocol";
 import { GAZE, VISION, buildObservation, survey } from "#node-runtime";
 import { harness, type Harness } from "../support/harness.ts";
+import type { MinecraftObservation } from "#minecraft";
 
 /**
  * Active perception: Person deciding to look, rather than happening to face.
@@ -17,7 +17,7 @@ import { harness, type Harness } from "../support/harness.ts";
  * Deterministic and offline. Nothing here is live Minecraft evidence.
  */
 
-function observe(bench: Harness): Observation {
+function observe(bench: Harness): MinecraftObservation {
   return buildObservation({
     identity: {
       personId: bench.config.personId,
@@ -28,7 +28,12 @@ function observe(bench: Harness): Observation {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -49,11 +54,11 @@ function observe(bench: Harness): Observation {
  * can name, and only one animal is ever spawned in each of them.
  */
 const sees = (bench: Harness, _name: string): boolean =>
-  observe(bench).nearby.passiveAnimals.length > 0;
+  observe(bench).payload.nearby.passiveAnimals.length > 0;
 
 /** Anything perceptible at all, named or not. */
 const perceivedCount = (bench: Harness): number =>
-  observe(bench).nearby.passiveAnimals.length;
+  observe(bench).payload.nearby.passiveAnimals.length;
 
 test("something behind Person is absent until Person looks at it", async () => {
   const bench = await harness();

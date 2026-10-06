@@ -20,7 +20,7 @@ import {
 } from "node:fs";
 import path from "node:path";
 import { parse as parseToml } from "smol-toml";
-import { loadConfig, type PersonConfig } from "#config";
+import { loadMinecraftConfig, type MinecraftConfig } from "#minecraft";
 
 /** Kept inside the world directory it describes, so one server can hold several. */
 export const WORLD_MANIFEST = "person-world-manifest.json";
@@ -157,7 +157,7 @@ function hasPath(document: unknown, keys: string[]): boolean {
   return true;
 }
 
-function defaultInspect(config: PersonConfig, repository: string) {
+function defaultInspect(config: MinecraftConfig, repository: string) {
   return (evidenceDirectory: string): RootReport => {
     const [command, ...rest] = config.cognition.command;
     const output = execFileSync(
@@ -259,7 +259,7 @@ export async function preflight(
   );
   if (configText) pinned.configSha256 = sha256(configText);
   const config = attempt("configuration", "schema-valid", () =>
-    loadConfig(options.configPath),
+    loadMinecraftConfig(options.configPath),
   );
   if (config) check("configuration", "schema-valid", true, options.configPath);
   const raw = configText
@@ -294,7 +294,7 @@ export async function preflight(
   check(
     "configuration",
     "Minecraft embodiment",
-    config.runtime.embodiment === "minecraft",
+    config.runtime.embodiment === "mineflayer",
     config.runtime.embodiment,
   );
 
@@ -490,10 +490,9 @@ export async function preflight(
     const peaceful = manifest.difficulty === "peaceful";
     check(
       "minecraft",
-      "training context matches difficulty",
-      config.runtime.trainingContext ===
-        (peaceful ? "minecraft_peaceful" : "minecraft_normal"),
-      `${config.runtime.trainingContext} on ${manifest.difficulty}`,
+      "configured difficulty matches the server",
+      config.environment.difficulty === (peaceful ? "peaceful" : "normal"),
+      `${config.environment.difficulty ?? "no difficulty"} on ${manifest.difficulty}`,
     );
   }
   const uuid = offlineUuid(bot.username);

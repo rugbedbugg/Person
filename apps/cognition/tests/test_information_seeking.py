@@ -21,7 +21,7 @@ from typing import Any
 
 import pytest
 from person_cognition.search import LOOK_BUDGET, SEARCH_ROUTINE_ID, InformationSearch
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from test_loop import Harness
 
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -34,9 +34,9 @@ def empty_view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
-    document["nearby"]["resources"] = []
-    document["nearby"]["passiveAnimals"] = []
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["nearby"]["resources"] = []
+    document["payload"]["nearby"]["passiveAnimals"] = []
     return document
 
 
@@ -55,14 +55,14 @@ def tree(detail: str, bearing: str = "ahead") -> dict[str, Any]:
 
 def with_tree(observation: dict[str, Any], detail: str, bearing: str = "ahead") -> dict[str, Any]:
     changed = deepcopy(observation)
-    changed["nearby"]["resources"] = [tree(detail, bearing)]
+    changed["payload"]["nearby"]["resources"] = [tree(detail, bearing)]
     return changed
 
 
 def searches(evidence: Path) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(evidence / "journal").read()
+        for event in EventJournal(evidence / "journal").read()
         if event.type == "information_search"
     ]
 
@@ -185,9 +185,9 @@ def test_a_more_urgent_goal_abandons_the_search(tmp_path: Path, empty_view: dict
     harness.complete(look, policy)
 
     hungry = deepcopy(empty_view)
-    hungry["vitals"]["food"] = 4.0
-    hungry["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
-    hungry["inventory"]["categories"]["food"] = 6
+    hungry["payload"]["vitals"]["food"] = 4.0
+    hungry["payload"]["inventory"]["items"].append({"name": "sweet_berries", "count": 6})
+    hungry["payload"]["inventory"]["categories"]["food"] = 6
     goal, _, _ = harness.observe(hungry)
 
     assert goal["goal"]["goalType"] == "SECURE_FOOD"

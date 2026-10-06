@@ -1,9 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomUUID } from "node:crypto";
-import { protocolValidator, type Observation } from "#protocol";
+import { protocolValidator } from "#protocol";
 import { PERCEPTION, buildObservation } from "#node-runtime";
 import { harness, type Harness } from "../support/harness.ts";
+import type { MinecraftObservation } from "#minecraft";
 
 /**
  * What cognition is told about the world, as opposed to what the runtime knows.
@@ -15,7 +16,7 @@ import { harness, type Harness } from "../support/harness.ts";
  * that also knows what Person is permitted to do, and it is deliberately not a
  * safety mechanism: the snapshot the kernel and the guard read is untouched.
  */
-function observe(bench: Harness): Observation {
+function observe(bench: Harness): MinecraftObservation {
   return buildObservation({
     identity: {
       personId: bench.config.personId,
@@ -26,7 +27,12 @@ function observe(bench: Harness): Observation {
     permissions: bench.permissions,
     kernel: bench.kernel,
     ledger: bench.ledger,
-    trainingContext: "fixture",
+    experience: {
+      context: "lived",
+      environmentKind: "minecraft",
+      embodimentKind: "fixture",
+      environmentVariant: null,
+    },
     cognition: {
       activeGoal: null,
       activeRoutine: null,
@@ -48,7 +54,7 @@ test("animals outside the region Person may enter are not reported", async () =>
 
   // Identified by what Person can perceive about them rather than by a
   // Mineflayer handle, which no longer crosses the firewall.
-  const reported = observation.nearby.passiveAnimals;
+  const reported = observation.payload.nearby.passiveAnimals;
   assert.ok(
     reported.some((animal) => animal.distance <= 8),
     "the usable animal is reported",
@@ -75,7 +81,7 @@ test("an animal inside a protected area is not quietly made huntable", async () 
   const inside = bench.world.spawn("cow", { x: 24, y: 64, z: 24 });
   const observation = observe(bench);
   assert.ok(
-    !observation.nearby.passiveAnimals.some(
+    !observation.payload.nearby.passiveAnimals.some(
       (animal) => animal.name === inside.name && animal.distance > 30,
     ),
     "a protected area is not part of the region Person may use",
@@ -97,7 +103,7 @@ test("protections on the animals that remain visible are unchanged", async () =>
   bench.world.spawn("wolf", { x: 6, y: 64, z: 0 }, { tamed: true });
   // Whose an animal is shows only on one Person is looking at.
   bench.world.face({ x: 5, y: 64, z: 0 });
-  const animals = observe(bench).nearby.passiveAnimals;
+  const animals = observe(bench).payload.nearby.passiveAnimals;
   assert.ok(animals.every((animal) => animal.detail === "central"));
   const plain = animals.find((animal) => !animal.named && !animal.tamed);
   const named = animals.find((animal) => animal.named);
@@ -110,8 +116,8 @@ test("the animal list stays bounded and nearest-first", async () => {
   const bench = await harness();
   for (let index = 0; index < 40; index++)
     bench.world.spawn("cow", { x: 40 - index, y: 64, z: 0 });
-  const first = observe(bench).nearby.passiveAnimals;
-  const second = observe(bench).nearby.passiveAnimals;
+  const first = observe(bench).payload.nearby.passiveAnimals;
+  const second = observe(bench).payload.nearby.passiveAnimals;
 
   assert.equal(first.length, PERCEPTION.entities.passiveTotal);
   assert.deepEqual(
@@ -133,7 +139,7 @@ test("hostiles are bounded but never region-filtered", async () => {
   const outside = bench.world.spawn("skeleton", { x: 60, y: 64, z: 0 });
   for (let index = 0; index < 40; index++)
     bench.world.spawn("zombie", { x: 2 + index, y: 64, z: 4 });
-  const hostiles = observe(bench).nearby.hostiles;
+  const hostiles = observe(bench).payload.nearby.hostiles;
   assert.ok(
     hostiles.length <= PERCEPTION.entities.hostileTotal,
     "the hostile list is bounded",
@@ -164,7 +170,7 @@ test("two players survive into the observation as two people", async () => {
   // eye.
   bench.world.face({ x: 8, y: 64, z: 0 });
   const observation = observe(bench);
-  const players = observation.nearby.players;
+  const players = observation.payload.nearby.players;
   assert.equal(players.length, 2);
   assert.deepEqual(
     players.map((player) => player.username),
@@ -188,7 +194,7 @@ test("an observation without identities is still a valid observation", async () 
   const bench = await harness();
   bench.world.spawn("cow", { x: 3, y: 64, z: 0 });
   const observation = observe(bench);
-  const [cow] = observation.nearby.passiveAnimals;
+  const [cow] = observation.payload.nearby.passiveAnimals;
   assert.ok(cow);
   assert.ok(
     !("username" in cow) && !("uuid" in cow),

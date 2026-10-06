@@ -31,7 +31,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass, field, replace
 from typing import Any
 
-from person_persistence import EvidenceEvent
+from person_persistence import CanonicalEvent
 from person_skills import Condition
 
 from .goals import Drive, Goal, GoalStack
@@ -45,10 +45,9 @@ MAX_OPEN = 2
 BLOCKS_TO_ABANDON = 2
 #: No new project while any pressing need is more urgent than this.
 CALM = 0.3
-#: An abandoned kind is not taken up again for a Minecraft day of experience.
+#: An abandoned kind is not taken up again for this long, in experienced ticks.
 ABANDON_COOLDOWN = 24_000
 
-PRESSING_DRIVES = ("health", "food", "safety")
 OPEN = frozenset({"ACTIVE", "SUSPENDED"})
 
 
@@ -69,30 +68,6 @@ class Template:
     reason: str
 
 
-TEMPLATES: tuple[Template, ...] = (
-    Template(
-        kind="improve_home",
-        purpose="make_home_livable",
-        milestones=(
-            Milestone("shelter", "SECURE_SHELTER", Condition("shelter_complete", ">=", 1)),
-            Milestone(
-                "storage", "ESTABLISH_STORAGE", Condition("owned_storage_available", ">=", 1)
-            ),
-        ),
-        subjects=("shelter", "storage"),
-        reason="home_attachment",
-    ),
-    Template(
-        kind="secure_food_supply",
-        purpose="keep_food_in_hand",
-        milestones=(Milestone("cooked_food", "SECURE_FOOD", Condition("cooked_food", ">=", 4)),),
-        subjects=("food",),
-        reason="food_security",
-    ),
-)
-BY_KIND: Mapping[str, Template] = {template.kind: template for template in TEMPLATES}
-
-
 @dataclass(frozen=True, slots=True)
 class Project:
     project_id: str
@@ -109,16 +84,12 @@ class Project:
     note: str | None = None
 
     @property
-    def template(self) -> Template:
-        return BY_KIND[self.kind]
-
-    @property
     def goal_id(self) -> str:
         return f"goal_{self.project_id}"
 
-    def next_milestone(self, state: Mapping[str, float]) -> Milestone | None:
+    def next_milestone(self, template: Template, state: Mapping[str, float]) -> Milestone | None:
         """The first milestone not met now. Satisficing: the world decides."""
-        for milestone in self.template.milestones:
+        for milestone in template.milestones:
             if not milestone.condition.holds(dict(state)):
                 return milestone
         return None
@@ -167,7 +138,7 @@ class ProjectBook:
     def reset(self) -> None:
         self._projects.clear()
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         if event.type in {"project_started", "project_changed"}:
             project = Project.from_json(event.payload["project"])
             self._projects[project.project_id] = project
@@ -200,10 +171,20 @@ class ProjectManager:
     """Takes up, pursues, interrupts, resumes and gives up projects."""
 
     book: ProjectBook
+    #: The kinds of project the environment offers, in the order they are
+    #: tried (Minecraft's: `person_minecraft.projects`, ADR 0025).
+    templates: tuple[Template, ...] = ()
     #: The project whose goal was active on the last update, if any.
     _pursuing: str | None = None
     #: Projects already re-examined since this process started.
     _examined: set[str] = field(default_factory=set)
+
+    def template(self, project: Project) -> Template:
+        return self.by_kind[project.kind]
+
+    @property
+    def by_kind(self) -> Mapping[str, Template]:
+        return {template.kind: template for template in self.templates}
 
     def unfinished(self) -> list[Project]:
         return [project for project in self.book.projects() if project.status in OPEN]
@@ -225,12 +206,12 @@ class ProjectManager:
         now: int,
     ) -> list[Change]:
         """Perhaps take up a new project. Only when calm, and only one at a time."""
-        pressing = {drive.name: drive.urgency for drive in drives if drive.name in PRESSING_DRIVES}
-        calm = all(urgency <= CALM for urgency in pressing.values()) and not night
+        pressing = [drive.urgency for drive in drives if drive.pressing]
+        calm = all(urgency <= CALM for urgency in pressing) and not night
         if not calm or home_place is None or len(self.unfinished()) >= MAX_OPEN:
             return []
         busy = {project.kind for project in self.unfinished()}
-        for template in TEMPLATES:
+        for template in self.templates:
             if template.kind in busy or self._cooling(template.kind, now):
                 continue
             candidate = Project(
@@ -242,7 +223,7 @@ class ProjectManager:
                 anchor=home_place,
                 started_at=now,
             )
-            if candidate.next_milestone(state) is None:
+            if candidate.next_milestone(template, state) is None:
                 continue  # Already true of the world: nothing to commit to.
             self._examined.add(candidate.project_id)
             return [_change("project_started", candidate, "started")]
@@ -263,7 +244,7 @@ class ProjectManager:
         project = self.current()
         if project is None:
             return None
-        milestone = project.next_milestone(state)
+        milestone = project.next_milestone(self.template(project), state)
         if milestone is None:
             return None
         return Goal(
@@ -293,7 +274,7 @@ class ProjectManager:
             self._examined.add(project.project_id)
             if waiting and home_place is None:
                 continue
-            if project.next_milestone(state) is None:
+            if project.next_milestone(self.template(project), state) is None:
                 done = replace(project, status="COMPLETE", note="already_done")
                 changes.append(_change("project_changed", done, "completed"))
             elif home_place is None:
@@ -326,12 +307,12 @@ class ProjectManager:
 
         completed = tuple(
             milestone.name
-            for milestone in project.template.milestones
+            for milestone in self.template(project).milestones
             if milestone.condition.holds(dict(state))
         )
         if completed != project.completed:
             project = replace(project, completed=completed)
-            if project.next_milestone(state) is None:
+            if project.next_milestone(self.template(project), state) is None:
                 done = replace(project, status="COMPLETE", note="milestones_met")
                 self._pursuing = None
                 return [_change("project_changed", done, "completed")]
@@ -362,7 +343,7 @@ class ProjectManager:
             changes.append(_change("project_changed", project, "interrupted"))
             self._pursuing = None
         elif entry.status == "BLOCKED":
-            milestone = project.next_milestone(state)
+            milestone = project.next_milestone(self.template(project), state)
             name = milestone.name if milestone else "unknown"
             count = project.blocked(name) + 1
             blocks = tuple((key, value) for key, value in project.blocks if key != name)

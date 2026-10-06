@@ -14,7 +14,12 @@ interface JournalEvent {
   previous_event_id: string | null;
   episode_id: string;
   type: string;
-  training_context: string;
+  experience: {
+    context: string;
+    environment: string;
+    embodiment: string;
+    variant: string | null;
+  };
   payload: Record<string, unknown>;
 }
 
@@ -122,7 +127,7 @@ test(
           1,
           "the fixture seed is recorded for replay",
         );
-        assert.equal(report.trainingContext, "fixture");
+        assert.equal(report.experience, "lived:minecraft/fixture");
         assert.equal(report.learningMode, "off");
 
         const written = readdirSync(path.join(outputDirectory, "reports"));
@@ -175,7 +180,16 @@ test(
           events[index - 1]?.event_id,
         );
       for (const event of events)
-        assert.equal(event.training_context, "fixture");
+        assert.deepEqual(
+          event.experience,
+          {
+            context: "lived",
+            environment: "minecraft",
+            embodiment: "fixture",
+            variant: null,
+          },
+          "every record states the experience stream it belongs to",
+        );
       assert.ok(events.some((event) => event.type === "episode_started"));
       assert.ok(events.some((event) => event.type === "routine_outcome"));
     });

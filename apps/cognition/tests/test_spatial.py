@@ -23,7 +23,7 @@ import pytest
 from person_cognition.search import LOOK_BUDGET, NOT_FOUND, REVISIT_MIN_LOOKS
 from person_cognition.spatial import Estimate, Spatial, SpatialMap, integrate, recognise
 from person_cognition.spatial.places import Place
-from person_persistence import EvidenceJournal
+from person_persistence import EventJournal
 from test_loop import Harness, envelope
 
 REPOSITORY = Path(__file__).resolve().parents[3]
@@ -134,9 +134,9 @@ def view() -> dict[str, Any]:
     document: dict[str, Any] = json.loads(
         (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
     )
-    document["vitals"].update({"health": 20.0, "food": 20.0})
+    document["payload"]["vitals"].update({"health": 20.0, "food": 20.0})
     for key in ("resources", "passiveAnimals", "hostiles", "players", "containers", "hazards"):
-        document["nearby"][key] = []
+        document["payload"]["nearby"][key] = []
     document["selfMotion"] = dict(STILL)
     return document
 
@@ -152,7 +152,7 @@ def at(view: dict[str, Any], tick: int, motion: dict[str, Any] | None = None) ->
 def records(evidence: Path, kind: str) -> list[dict[str, Any]]:
     return [
         dict(event.payload)
-        for event in EvidenceJournal(evidence / "journal").read()
+        for event in EventJournal(evidence / "journal").read()
         if event.type == kind
     ]
 
@@ -180,7 +180,12 @@ def finish(harness: Harness, tick: int) -> None:
             "phase": "ended",
             "reasonCodes": ["test"],
             "rngSeed": 7,
-            "trainingContext": "fixture",
+            "experience": {
+                "context": "lived",
+                "environmentKind": "minecraft",
+                "embodimentKind": "fixture",
+                "environmentVariant": None,
+            },
         }
     )
 
@@ -278,7 +283,7 @@ def test_seeing_wood_still_reopens_a_goal_at_a_place_searched_before(
     harness.hello()
     _, tick = search_here(harness, view, 100)
     wood = at(view, tick)
-    wood["nearby"]["resources"] = [
+    wood["payload"]["nearby"]["resources"] = [
         {
             "kind": "wood",
             "name": "oak_log",
@@ -302,8 +307,8 @@ def test_the_map_changes_only_through_felt_motion(tmp_path: Path, view: dict[str
     harness.observe(at(view, 100))
     before = harness.loop.spatial.estimate
     changed = at(view, 120)
-    changed["home"]["homeDistance"] = 0.0
-    changed["nearby"]["workstations"] = []
+    changed["payload"]["home"]["homeDistance"] = 0.0
+    changed["payload"]["nearby"]["workstations"] = []
     harness.observe(changed)
     assert harness.loop.spatial.estimate == before
 
@@ -329,7 +334,7 @@ def test_places_persist_and_a_restart_resumes_less_sure_without_revealing_anythi
 
     # The first observation after waking says nothing about where the body is.
     start = at(view, 5, {**STILL, "continuity": "start"})
-    start["home"]["homeDistance"] = 250.0
+    start["payload"]["home"]["homeDistance"] = 250.0
     second.observe(start)
     assert second.loop.spatial.estimate == woke
 
