@@ -1,8 +1,8 @@
 # ADR 0026: Epistemic state: percepts, beliefs, self-state and the decision boundary
 
-**Status:** Proposed (2026-10-03; awaiting maintainer review)
+**Status:** Accepted (2026-10-06)
 **Date:** 2026-10-03
-**Authors:** to be confirmed by the operator
+**Authors:** @rugbedbugg
 **Reviewers:** @rugbedbugg, @upayanmazumder
 **Addresses:** `docs/CURRENT_STATE.md`, Known Deviations, C6 (in part)
 
