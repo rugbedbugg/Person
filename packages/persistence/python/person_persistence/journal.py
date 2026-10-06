@@ -1,4 +1,7 @@
-"""Append-only evidence journal.
+"""Append-only canonical event journal.
+
+Person's longitudinal history (ADR 0027). Called the evidence journal until
+history and evidence were separated; `EvidenceJournal` remains as an alias.
 
 The journal has no update and no delete. Records are appended and flushed to
 disk, segments roll over by size, and reading is strict: a malformed record is
@@ -13,17 +16,17 @@ import os
 from collections.abc import Iterator
 from pathlib import Path
 
-from .events import EvidenceError, EvidenceEvent
+from .events import CanonicalEvent, EventRecordError
 
 SEGMENT_LIMIT_BYTES = 8 * 1024 * 1024
 
 
-class JournalCorruption(EvidenceError):
+class JournalCorruption(EventRecordError):
     """The journal on disk cannot be trusted."""
 
 
-class EvidenceJournal:
-    """Append-only journal of immutable evidence records."""
+class EventJournal:
+    """Append-only journal of immutable canonical events."""
 
     def __init__(self, directory: Path, *, segment_limit: int = SEGMENT_LIMIT_BYTES) -> None:
         self.directory = Path(directory)
@@ -48,11 +51,11 @@ class EvidenceJournal:
 
     # ------------------------------------------------------------------ write
 
-    def append(self, event: EvidenceEvent) -> EvidenceEvent:
+    def append(self, event: CanonicalEvent) -> CanonicalEvent:
         """Append one record and flush it to disk before returning."""
         line = json.dumps(event.to_json(), separators=(",", ":"), allow_nan=False)
         if "\n" in line:
-            raise EvidenceError("Evidence record contains a newline")
+            raise EventRecordError("Evidence record contains a newline")
         path = self._active_segment()
         with path.open("a", encoding="utf-8") as handle:
             handle.write(line + "\n")
@@ -62,7 +65,7 @@ class EvidenceJournal:
 
     # ------------------------------------------------------------------- read
 
-    def read(self, *, after_event_id: str | None = None) -> Iterator[EvidenceEvent]:
+    def read(self, *, after_event_id: str | None = None) -> Iterator[CanonicalEvent]:
         """Yield every record, optionally only those after a known event.
 
         A final line without its newline is treated as a crash-truncated write
@@ -86,8 +89,8 @@ class EvidenceJournal:
                 if not line.strip():
                     continue
                 try:
-                    event = EvidenceEvent.from_json(json.loads(line))
-                except (json.JSONDecodeError, EvidenceError) as error:
+                    event = CanonicalEvent.from_json(json.loads(line))
+                except (json.JSONDecodeError, EventRecordError) as error:
                     if last_line and not complete:
                         self.truncated_records += 1
                         continue
@@ -116,3 +119,7 @@ class EvidenceJournal:
 
     def count(self) -> int:
         return sum(1 for _ in self.read())
+
+
+#: Compatibility name (ADR 0027).
+EvidenceJournal = EventJournal

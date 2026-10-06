@@ -1,0 +1,122 @@
+{
+  "name": "bench-c-exploration-heldout",
+  "seed": 1,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "forest",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "spawnYaw": 1.5707963267948966,
+  "vitals": {
+    "health": 20,
+    "air": 300,
+    "armor": 0,
+    "food": 6,
+    "saturation": 0
+  },
+  "inventory": [
+    {
+      "name": "stone_pickaxe",
+      "count": 1
+    },
+    {
+      "name": "oak_log",
+      "count": 24
+    },
+    {
+      "name": "furnace",
+      "count": 1
+    },
+    {
+      "name": "coal",
+      "count": 16
+    }
+  ],
+  "blocks": [],
+  "clusters": [
+    {
+      "name": "sweet_berry_bush",
+      "center": {
+        "x": -6,
+        "y": 64,
+        "z": 3
+      },
+      "count": 12,
+      "spread": 2
+    },
+    {
+      "name": "oak_log",
+      "center": {
+        "x": 9,
+        "y": 64,
+        "z": -9
+      },
+      "count": 30,
+      "spread": 3
+    }
+  ],
+  "entities": [
+    {
+      "name": "pig",
+      "position": {
+        "x": -6,
+        "y": 64,
+        "z": -2
+      }
+    },
+    {
+      "name": "pig",
+      "position": {
+        "x": -7,
+        "y": 64,
+        "z": -3
+      }
+    },
+    {
+      "name": "pig",
+      "position": {
+        "x": -8,
+        "y": 64,
+        "z": -1
+      }
+    },
+    {
+      "name": "pig",
+      "position": {
+        "x": -5,
+        "y": 64,
+        "z": -4
+      }
+    },
+    {
+      "name": "pig",
+      "position": {
+        "x": -7,
+        "y": 64,
+        "z": 1
+      }
+    }
+  ],
+  "containers": [
+    {
+      "position": {
+        "x": -4,
+        "y": 64,
+        "z": 2
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "apple",
+          "count": 16
+        }
+      ],
+      "ownedByPerson": true
+    }
+  ],
+  "events": []
+}

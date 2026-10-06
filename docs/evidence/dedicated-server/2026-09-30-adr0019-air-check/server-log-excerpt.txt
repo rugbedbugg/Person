@@ -1,0 +1,24 @@
+[21:50:52] [Server thread/INFO]: Starting minecraft server version 1.16.1
+[21:51:06] [Server thread/INFO]: Done (13.235s)! For help, type "help"
+[21:51:07] [Server thread/INFO]: Marked chunk [3, -15] in minecraft:overworld to be force loaded
+[21:51:08] [Server thread/INFO]: Successfully filled 588 blocks
+[21:51:09] [Server thread/INFO]: Successfully filled 200 blocks
+[21:51:10] [Server thread/INFO]: Successfully filled 50 blocks
+[21:51:29] [Server thread/INFO]: PersonAirCheck[/127.0.0.1:42672] logged in with entity id 146 at (44.5, 67.0, -230.5)
+[21:51:29] [Server thread/INFO]: PersonAirCheck joined the game
+[21:51:36] [Server thread/INFO]: Teleported PersonAirCheck to 55.5, 92.0, -232.5
+[21:51:37] [Server thread/INFO]: PersonAirCheck has the following entity data: 280s
+[21:52:20] [Server thread/INFO]: PersonAirCheck lost connection: Disconnected
+[21:52:20] [Server thread/INFO]: PersonAirCheck left the game
+[21:57:12] [Server thread/INFO]: Unmarked all force loaded chunks in minecraft:overworld
+[21:57:13] [Server thread/INFO]: Stopping the server
+[21:57:13] [Server thread/INFO]: Saving chunks for level 'ServerLevel[validation-e3-rehearsal]'/minecraft:overworld
+[21:57:13] [Server thread/INFO]: ThreadedAnvilChunkStorage (validation-e3-rehearsal): All chunks are saved
+[21:57:13] [Server thread/INFO]: Saving chunks for level 'ServerLevel[validation-e3-rehearsal]'/minecraft:the_nether
+[21:57:13] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[21:57:13] [Server thread/INFO]: Saving chunks for level 'ServerLevel[validation-e3-rehearsal]'/minecraft:the_end
+[21:57:13] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[21:57:13] [Server thread/INFO]: ThreadedAnvilChunkStorage (validation-e3-rehearsal): All chunks are saved
+[21:57:13] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[21:57:13] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+(and 82 'moved too quickly' warnings at the teleport, omitted)

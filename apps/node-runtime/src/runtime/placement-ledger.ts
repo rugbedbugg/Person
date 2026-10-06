@@ -1,0 +1,163 @@
+import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import path from "node:path";
+import { positionKey, type Position } from "#minecraft";
+
+/**
+ * Ownership provenance for a container Person placed itself.
+ *
+ * Deposit authorisation requires one of these records. A container Person did
+ * not create has no record, so there is no code path that can authorise a
+ * deposit into it.
+ */
+export interface StorageRecord {
+  storageId: string;
+  worldId: string;
+  dimension: string;
+  position: Position;
+  createdByPerson: string;
+  creationEvent: string;
+  homeId: string;
+  lastVerified: string;
+}
+
+export interface HomeRecord {
+  homeId: string;
+  position: Position;
+  shelterState: "none" | "partial" | "complete" | "breached";
+  bedKnown: boolean;
+}
+
+interface PersistedState {
+  version: 1;
+  worldId: string;
+  personId: string;
+  home: HomeRecord;
+  storage: StorageRecord[];
+  placedBlocks: string[];
+  furnacePosition: Position | null;
+  craftingTablePosition: Position | null;
+}
+
+/**
+ * Durable, runtime-owned world facts: where home is, what Person built, and
+ * which containers it owns. Written atomically so a crash mid-write cannot
+ * leave a half-parsed provenance file behind.
+ *
+ * This is trusted runtime bookkeeping, used by the permission gate and the
+ * skills, and it holds exact positions. It is not Person's memory (ADR 0003
+ * rule 5, ADR 0007): nothing here reaches cognition except through the
+ * observation builder, and it is never a source of recollection. It was called
+ * `WorldMemory` until the memory system arrived and made that name wrong.
+ */
+export class PlacementLedger {
+  readonly worldId: string;
+  readonly personId: string;
+  home: HomeRecord;
+  furnacePosition: Position | null = null;
+  craftingTablePosition: Position | null = null;
+  readonly storage = new Map<string, StorageRecord>();
+  readonly placedBlocks = new Set<string>();
+  #file: string | null = null;
+
+  constructor(worldId: string, personId: string, home: Position) {
+    this.worldId = worldId;
+    this.personId = personId;
+    this.home = {
+      homeId: "home_primary",
+      position: home,
+      shelterState: "none",
+      bedKnown: false,
+    };
+  }
+
+  static load(
+    directory: string,
+    worldId: string,
+    personId: string,
+    home: Position,
+  ): PlacementLedger {
+    const ledger = new PlacementLedger(worldId, personId, home);
+    ledger.#file = path.join(directory, `world-${worldId}-${personId}.json`);
+    try {
+      const saved: PersistedState = JSON.parse(
+        readFileSync(ledger.#file, "utf8"),
+      );
+      if (
+        saved.version !== 1 ||
+        saved.worldId !== worldId ||
+        saved.personId !== personId
+      )
+        return ledger;
+      ledger.home = saved.home;
+      ledger.furnacePosition = saved.furnacePosition;
+      ledger.craftingTablePosition = saved.craftingTablePosition;
+      for (const record of saved.storage)
+        ledger.storage.set(record.storageId, record);
+      for (const key of saved.placedBlocks) ledger.placedBlocks.add(key);
+    } catch {
+      // A missing or unreadable file is simply an unrecorded world. The
+      // evidence journal, not this cache, is the authoritative history.
+    }
+    return ledger;
+  }
+
+  save(): void {
+    if (!this.#file) return;
+    const state: PersistedState = {
+      version: 1,
+      worldId: this.worldId,
+      personId: this.personId,
+      home: this.home,
+      storage: [...this.storage.values()],
+      placedBlocks: [...this.placedBlocks],
+      furnacePosition: this.furnacePosition,
+      craftingTablePosition: this.craftingTablePosition,
+    };
+    mkdirSync(path.dirname(this.#file), { recursive: true, mode: 0o700 });
+    const temporary = `${this.#file}.tmp`;
+    writeFileSync(temporary, `${JSON.stringify(state, null, 2)}\n`, {
+      mode: 0o600,
+    });
+    renameSync(temporary, this.#file);
+  }
+
+  recordPlacement(position: Position): void {
+    this.placedBlocks.add(positionKey(position));
+  }
+
+  isOwnedBlock(position: Position): boolean {
+    return this.placedBlocks.has(positionKey(position));
+  }
+
+  recordStorage(
+    position: Position,
+    creationEvent: string,
+    dimension: string,
+  ): StorageRecord {
+    const storageId = `storage_${positionKey(position).replace(/,/g, "_")}`;
+    const record: StorageRecord = {
+      storageId,
+      worldId: this.worldId,
+      dimension,
+      position,
+      createdByPerson: this.personId,
+      creationEvent,
+      homeId: this.home.homeId,
+      lastVerified: new Date().toISOString(),
+    };
+    this.storage.set(storageId, record);
+    this.recordPlacement(position);
+    return record;
+  }
+
+  storageAt(position: Position): StorageRecord | null {
+    const key = positionKey(position);
+    for (const record of this.storage.values())
+      if (positionKey(record.position) === key) return record;
+    return null;
+  }
+
+  get ownedStorage(): StorageRecord[] {
+    return [...this.storage.values()];
+  }
+}

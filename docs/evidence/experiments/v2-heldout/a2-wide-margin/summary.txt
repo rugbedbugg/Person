@@ -1,0 +1,173 @@
+person: P0 short seed 205: 21 decisions, 5640 ticks
+person: P0 short seed 203: 21 decisions, 5640 ticks
+person: P0 short seed 204: 21 decisions, 5640 ticks
+person: P0 short seed 202: 21 decisions, 5640 ticks
+person: P0 short seed 201: 21 decisions, 5640 ticks
+person: P0 medium seed 201: 51 decisions, 23640 ticks
+person: P0 medium seed 202: 51 decisions, 23640 ticks
+person: P0 medium seed 205: 51 decisions, 23640 ticks
+person: P0 medium seed 203: 51 decisions, 23640 ticks
+person: P0 medium seed 204: 51 decisions, 23640 ticks
+person: A15 short seed 201: 21 decisions, 5640 ticks
+person: A15 short seed 202: 21 decisions, 5640 ticks
+person: A15 short seed 203: 21 decisions, 5640 ticks
+person: P0 long seed 201: 131 decisions, 71640 ticks
+person: A15 short seed 204: 21 decisions, 5640 ticks
+person: A15 short seed 205: 21 decisions, 5640 ticks
+person: P0 long seed 202: 131 decisions, 71640 ticks
+person: P0 long seed 203: 131 decisions, 71640 ticks
+person: P0 long seed 204: 131 decisions, 71640 ticks
+person: P0 long seed 205: 131 decisions, 71640 ticks
+person: A15 medium seed 201: 51 decisions, 23640 ticks
+person: A15 medium seed 202: 51 decisions, 23640 ticks
+person: A15 medium seed 203: 51 decisions, 23640 ticks
+person: A15 medium seed 204: 51 decisions, 23640 ticks
+person: A15 medium seed 205: 51 decisions, 23640 ticks
+person: R2rec short seed 201: 21 decisions, 5640 ticks
+person: R2rec short seed 202: 21 decisions, 5640 ticks
+person: R2rec short seed 203: 21 decisions, 5640 ticks
+person: A15 long seed 201: 131 decisions, 71640 ticks
+person: R2rec short seed 204: 21 decisions, 5640 ticks
+person: A15 long seed 202: 131 decisions, 71640 ticks
+person: R2rec short seed 205: 21 decisions, 5640 ticks
+person: A15 long seed 203: 131 decisions, 71640 ticks
+person: A15 long seed 204: 131 decisions, 71640 ticks
+person: A15 long seed 205: 131 decisions, 71640 ticks
+person: R2rec medium seed 201: 51 decisions, 23640 ticks
+person: R2rec medium seed 202: 51 decisions, 23640 ticks
+person: R2rec medium seed 203: 51 decisions, 23640 ticks
+person: R2rec medium seed 204: 51 decisions, 23640 ticks
+person: R2rec medium seed 205: 51 decisions, 23640 ticks
+person: R2act short seed 201: 21 decisions, 5640 ticks
+person: R2act short seed 202: 21 decisions, 5640 ticks
+person: R2act short seed 203: 21 decisions, 5640 ticks
+person: R2act short seed 204: 21 decisions, 5640 ticks
+person: R2rec long seed 201: 131 decisions, 71640 ticks
+person: R2rec long seed 202: 131 decisions, 71640 ticks
+person: R2act short seed 205: 21 decisions, 5640 ticks
+person: R2rec long seed 203: 131 decisions, 71640 ticks
+person: R2rec long seed 204: 131 decisions, 71640 ticks
+person: R2rec long seed 205: 131 decisions, 71640 ticks
+person: R2act medium seed 201: 51 decisions, 23640 ticks
+person: R2act medium seed 202: 51 decisions, 23640 ticks
+person: R2act medium seed 203: 51 decisions, 23640 ticks
+person: R2act medium seed 204: 51 decisions, 23640 ticks
+person: R2act medium seed 205: 51 decisions, 23640 ticks
+person: R2act long seed 201: 131 decisions, 71640 ticks
+person: R2act long seed 202: 131 decisions, 71640 ticks
+person: R2act long seed 203: 131 decisions, 71640 ticks
+person: R2act long seed 204: 131 decisions, 71640 ticks
+person: R2act long seed 205: 131 decisions, 71640 ticks
+Experiment r2-heldout-a2-a-wide-margin at 519a344e9cf6
+  split: heldout; seeds: 201, 202, 203, 204, 205; horizons: short (5000 decisions, 6000 ticks), medium (5000 decisions, 24000 ticks), long (5000 decisions, 72000 ticks)
+  short: P0 vs R2rec: 0/5 seeds diverge (negative control: affect that reaches no decision must change no decision)
+  short: R2rec vs R2act: 0/5 seeds diverge (the causal effect of letting the same affect reach decisions)
+  short: P0 vs R2act: 0/5 seeds diverge (the whole affect system)
+  short: P0 vs A15: 0/5 seeds diverge (the whole affect system)
+  short: A15 vs R2act: 0/5 seeds diverge (the interoceptive contribution to behaviour: R1.5 appraisal against R2)
+  medium: P0 vs R2rec: 0/5 seeds diverge (negative control: affect that reaches no decision must change no decision)
+  medium: R2rec vs R2act: 0/5 seeds diverge (the causal effect of letting the same affect reach decisions)
+  medium: P0 vs R2act: 0/5 seeds diverge (the whole affect system)
+  medium: P0 vs A15: 0/5 seeds diverge (the whole affect system)
+  medium: A15 vs R2act: 0/5 seeds diverge (the interoceptive contribution to behaviour: R1.5 appraisal against R2)
+  long: P0 vs R2rec: 0/5 seeds diverge (negative control: affect that reaches no decision must change no decision)
+  long: R2rec vs R2act: 0/5 seeds diverge (the causal effect of letting the same affect reach decisions)
+  long: P0 vs R2act: 0/5 seeds diverge (the whole affect system)
+  long: P0 vs A15: 0/5 seeds diverge (the whole affect system)
+  long: A15 vs R2act: 0/5 seeds diverge (the interoceptive contribution to behaviour: R1.5 appraisal against R2)
+  metric: short/P0 mean [min-max] | medium/P0 mean [min-max] | long/P0 mean [min-max] | short/A15 mean [min-max] | medium/A15 mean [min-max] | long/A15 mean [min-max] | short/R2rec mean [min-max] | medium/R2rec mean [min-max] | long/R2rec mean [min-max] | short/R2act mean [min-max] | medium/R2act mean [min-max] | long/R2act mean [min-max]
+  completed: 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1]
+  experienced_ticks: 5640 [5640-5640] | 23640 [23640-23640] | 71640 [71640-71640] | 5640 [5640-5640] | 23640 [23640-23640] | 71640 [71640-71640] | 5640 [5640-5640] | 23640 [23640-23640] | 71640 [71640-71640] | 5640 [5640-5640] | 23640 [23640-23640] | 71640 [71640-71640]
+  died: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  decisions: 21 [21-21] | 51 [51-51] | 131 [131-131] | 21 [21-21] | 51 [51-51] | 131 [131-131] | 21 [21-21] | 51 [51-51] | 131 [131-131] | 21 [21-21] | 51 [51-51] | 131 [131-131]
+  elapsed_ticks: 6240 [6240-6240] | 24240 [24240-24240] | 72240 [72240-72240] | 6240 [6240-6240] | 24240 [24240-24240] | 72240 [72240-72240] | 6240 [6240-6240] | 24240 [24240-24240] | 72240 [72240-72240] | 6240 [6240-6240] | 24240 [24240-24240] | 72240 [72240-72240]
+  successes: 15 [15-15] | 45 [45-45] | 125 [125-125] | 15 [15-15] | 45 [45-45] | 125 [125-125] | 15 [15-15] | 45 [45-45] | 125 [125-125] | 15 [15-15] | 45 [45-45] | 125 [125-125]
+  failures: 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6]
+  emergencies: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  kernel_replacements: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  kernel_rejections: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  safety_overrides: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  health_lost: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  food_lost: 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 10 [10-10]
+  hunger_crises: 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1]
+  goal_switches: 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2]
+  distinct_goals: 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3] | 3 [3-3]
+  distinct_routines: 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 5 [5-5]
+  distinct_skills: 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7]
+  repeated_failures: 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4] | 4 [4-4]
+  setbacks: 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6] | 6 [6-6]
+  mean_decisions_to_recover: 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2]
+  unrecovered_setbacks: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploring_decisions: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_bonus_decisions: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  searches_started: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  searches_exhausted: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  glances: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  projects_started: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  projects_interrupted: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  projects_resumed: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  projects_completed: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  projects_abandoned: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  effect_evidence: 29 [29-29] | 59 [59-59] | 139 [139-139] | 29 [29-29] | 59 [59-59] | 139 [139-139] | 29 [29-29] | 59 [59-59] | 139 [139-139] | 29 [29-29] | 59 [59-59] | 139 [139-139]
+  effect_evidence_admitted: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  hypotheses_proposed: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  hypotheses_rejected: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  investigations_started: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  investigation_trials: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  investigations_interrupted: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  investigations_concluded: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_appraisals: 0 [0-0] | 0 [0-0] | 0 [0-0] | 15 [15-15] | 15 [15-15] | 15 [15-15] | 12 [12-12] | 12 [12-12] | 12 [12-12] | 12 [12-12] | 12 [12-12] | 12 [12-12]
+  affect_valence_final: 0 [0-0] | 0 [0-0] | 0 [0-0] | -0.123 [-0.1233--0.1233] | -0.015 [-0.0154--0.0154] | 0 [-0.0001--0.0001] | -0.308 [-0.3084--0.3084] | -0.345 [-0.3448--0.3448] | -0.35 [-0.35--0.35] | -0.308 [-0.3084--0.3084] | -0.345 [-0.3448--0.3448] | -0.35 [-0.35--0.35]
+  affect_unease_final: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0.137 [0.1371-0.1371] | 0.15 [0.15-0.15] | 0.15 [0.15-0.15] | 0.137 [0.1371-0.1371] | 0.15 [0.15-0.15] | 0.15 [0.15-0.15]
+  affect_control_final: 0 [0-0] | 0 [0-0] | 0 [0-0] | -0.168 [-0.1684--0.1684] | -0.059 [-0.0595--0.0595] | -0.004 [-0.0037--0.0037] | -0.168 [-0.1679--0.1679] | -0.059 [-0.0594--0.0594] | -0.004 [-0.0037--0.0037] | -0.168 [-0.1679--0.1679] | -0.059 [-0.0594--0.0594] | -0.004 [-0.0037--0.0037]
+  biased_goal_selections: 0 [0-0] | 0 [0-0] | 0 [0-0] | 10 [10-10] | 10 [10-10] | 10 [10-10] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 10 [10-10] | 10 [10-10] | 10 [10-10]
+  max_abs_affect_bias: 0 [0-0] | 0 [0-0] | 0 [0-0] | 3.74 [3.74-3.74] | 3.74 [3.74-3.74] | 3.74 [3.74-3.74] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 5.538 [5.538-5.538] | 5.538 [5.538-5.538] | 5.538 [5.538-5.538]
+  priority_decisions: 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11] | 11 [11-11]
+  priority_multi_candidate: 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7] | 7 [7-7]
+  priority_opportunities: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  priority_opportunity_rate: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  priority_changed: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  priority_changed_given_opportunity: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  priority_changed_without_opportunity: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  priority_mean_margin: 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571] | 202.857 [202.8571-202.8571]
+  priority_mean_max_swing: 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571] | 42.857 [42.8571-42.8571]
+  priority_mean_abs_contribution: 0 [0-0] | 0 [0-0] | 0 [0-0] | 1.45 [1.4505-1.4505] | 1.45 [1.4505-1.4505] | 1.45 [1.4505-1.4505] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 1.415 [1.4154-1.4154] | 1.415 [1.4154-1.4154] | 1.415 [1.4154-1.4154]
+  exploration_selections: 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8] | 8 [8-8]
+  exploration_scored_choices: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_multi_candidate: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_opportunities: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_opportunity_rate: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_changed: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_changed_given_opportunity: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_changed_without_opportunity: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_mean_margin: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  exploration_mean_tolerance: 1 [1-1] | 1 [1-1] | 1 [1-1] | 1.001 [1.0006-1.0006] | 1.001 [1.0006-1.0006] | 1.001 [1.0006-1.0006] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1.007 [1.0074-1.0074] | 1.007 [1.0074-1.0074] | 1.007 [1.0074-1.0074]
+  affect_tonic_updates: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 21 [21-21] | 51 [51-51] | 131 [131-131] | 21 [21-21] | 51 [51-51] | 131 [131-131]
+  affect_control_near_bound_fraction: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_control_saturation_episodes: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_control_longest_saturation_ticks: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_control_ticks_to_settle_after_last_push: 0 [0-0] | 0 [0-0] | 0 [0-0] | 14420 [14420-14420] | 14420 [14420-14420] | 14420 [14420-14420] | 14370 [14370-14370] | 14370 [14370-14370] | 14370 [14370-14370] | 14370 [14370-14370] | 14370 [14370-14370] | 14370 [14370-14370]
+  affect_control_input_positive: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35] | 0.35 [0.35-0.35]
+  affect_control_input_negative: 0 [0-0] | 0 [0-0] | 0 [0-0] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58] | -0.58 [-0.58--0.58]
+  affect_control_tonic_time_fraction: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_control_tonic_offset_mean: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_unease_near_bound_fraction: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_unease_saturation_episodes: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_unease_longest_saturation_ticks: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_unease_ticks_to_settle_after_last_push: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1]
+  affect_unease_input_positive: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0.05 [0.05-0.05] | 0.05 [0.05-0.05] | 0.05 [0.05-0.05] | 0.05 [0.05-0.05] | 0.05 [0.05-0.05] | 0.05 [0.05-0.05]
+  affect_unease_input_negative: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_unease_tonic_time_fraction: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1]
+  affect_unease_tonic_offset_mean: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0.114 [0.1137-0.1137] | 0.141 [0.1413-0.1413] | 0.147 [0.1471-0.1471] | 0.114 [0.1137-0.1137] | 0.141 [0.1413-0.1413] | 0.147 [0.1471-0.1471]
+  affect_valence_near_bound_fraction: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_valence_saturation_episodes: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_valence_longest_saturation_ticks: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_valence_ticks_to_settle_after_last_push: 0 [0-0] | 0 [0-0] | 0 [0-0] | 7210 [7210-7210] | 7210 [7210-7210] | 7210 [7210-7210] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1] | -1 [-1--1]
+  affect_valence_input_positive: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45] | 0.45 [0.45-0.45]
+  affect_valence_input_negative: 0 [0-0] | 0 [0-0] | 0 [0-0] | -0.68 [-0.68--0.68] | -0.68 [-0.68--0.68] | -0.68 [-0.68--0.68] | -0.76 [-0.76--0.76] | -0.76 [-0.76--0.76] | -0.76 [-0.76--0.76] | -0.76 [-0.76--0.76] | -0.76 [-0.76--0.76] | -0.76 [-0.76--0.76]
+  affect_valence_tonic_time_fraction: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1] | 1 [1-1]
+  affect_valence_tonic_offset_mean: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | -0.265 [-0.2652--0.2652] | -0.33 [-0.3298--0.3298] | -0.343 [-0.3433--0.3433] | -0.265 [-0.2652--0.2652] | -0.33 [-0.3298--0.3298] | -0.343 [-0.3433--0.3433]
+  affect_identical_appraisal_records: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_moments_with_several_appraisals: 0 [0-0] | 0 [0-0] | 0 [0-0] | 5 [5-5] | 5 [5-5] | 5 [5-5] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2] | 2 [2-2]
+  affect_threat_appraisals: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]
+  affect_min_ticks_between_threat_appraisals: 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0] | 0 [0-0]

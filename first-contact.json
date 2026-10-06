@@ -1,0 +1,1870 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "7b50782c-c93b-4307-bece-df0fe355af6c",
+  "personId": "ada",
+  "sessionId": "390fe34c-68ff-4aed-bc5e-37cbf2dde2aa",
+  "worldId": "person-test-world-1",
+  "tick": 16498,
+  "timestamp": "2026-09-15T17:14:10.003Z",
+  "type": "Observation",
+  "observationVersion": 1,
+  "trainingContext": "minecraft_peaceful",
+  "vitals": {
+    "health": 20,
+    "food": 20,
+    "saturation": 5,
+    "air": 300,
+    "armor": 0,
+    "statusEffects": [],
+    "alive": true
+  },
+  "environment": {
+    "position": {
+      "x": -218,
+      "y": 66,
+      "z": 164
+    },
+    "dimension": "overworld",
+    "dayPhase": "night",
+    "timeOfDay": 16498,
+    "weather": "clear",
+    "lightLevel": 4,
+    "biome": "unknown"
+  },
+  "inventory": {
+    "items": [],
+    "categories": {
+      "food": 0,
+      "raw_food": 0,
+      "cooked_food": 0,
+      "fuel": 0,
+      "wood": 0,
+      "stone": 0,
+      "coal": 0,
+      "tools": 0,
+      "weapons": 0,
+      "armor": 0,
+      "building_materials": 0
+    },
+    "freeSlots": 36
+  },
+  "permissions": {
+    "harvest": true,
+    "mine": true,
+    "build": true,
+    "huntPassive": true,
+    "depositOwned": true,
+    "withdrawOwned": true,
+    "withdrawExisting": true,
+    "craft": true,
+    "consume": true
+  },
+  "affordances": {
+    "diggableGround": true,
+    "shelterSite": true,
+    "storageSite": true
+  },
+  "nearby": {
+    "resources": [
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 63,
+          "z": 164
+        },
+        "distance": 3.1622776601683795,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 63,
+          "z": 165
+        },
+        "distance": 3.3166247903554003,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 63,
+          "z": 164
+        },
+        "distance": 3.6055512754639896,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 63,
+          "z": 166
+        },
+        "distance": 3.741657386773941,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 63,
+          "z": 165
+        },
+        "distance": 3.741657386773941,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 4,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 4.123105625617661,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 4.123105625617661,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 4.123105625617661,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 4.123105625617661,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 63,
+          "z": 166
+        },
+        "distance": 4.123105625617661,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 4.242640687119285,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 4.242640687119285,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 4.242640687119285,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 4.242640687119285,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 63,
+          "z": 164
+        },
+        "distance": 4.242640687119286,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 63,
+          "z": 167
+        },
+        "distance": 4.358898943540673,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 63,
+          "z": 163
+        },
+        "distance": 4.358898943540673,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 63,
+          "z": 165
+        },
+        "distance": 4.358898943540673,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -220,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 4.47213595499958,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 162
+        },
+        "distance": 4.47213595499958,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 166
+        },
+        "distance": 4.47213595499958,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 4.47213595499958,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -220,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -220,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 162
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 166
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 162
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 166
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 4.58257569495584,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 63,
+          "z": 167
+        },
+        "distance": 4.69041575982343,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 63,
+          "z": 166
+        },
+        "distance": 4.69041575982343,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -220,
+          "y": 62,
+          "z": 162
+        },
+        "distance": 4.898979485566356,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -220,
+          "y": 62,
+          "z": 166
+        },
+        "distance": 4.898979485566356,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 62,
+          "z": 162
+        },
+        "distance": 4.898979485566356,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -216,
+          "y": 62,
+          "z": 166
+        },
+        "distance": 4.898979485566356,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -222,
+          "y": 63,
+          "z": 164
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -221,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 61,
+          "z": 164
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 161
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 62,
+          "z": 167
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 62,
+          "z": 164
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -214,
+          "y": 63,
+          "z": 164
+        },
+        "distance": 5,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -221,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -221,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 61,
+          "z": 164
+        },
+        "distance": 5.099019513592785,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 161
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 62,
+          "z": 167
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -218,
+          "y": 61,
+          "z": 163
+        },
+        "distance": 5.099019513592785,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -218,
+          "y": 61,
+          "z": 165
+        },
+        "distance": 5.099019513592785,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 61,
+          "z": 164
+        },
+        "distance": 5.099019513592785,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 161
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 62,
+          "z": 167
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 63,
+          "z": 168
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 62,
+          "z": 163
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 62,
+          "z": 165
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -214,
+          "y": 63,
+          "z": 163
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -214,
+          "y": 63,
+          "z": 165
+        },
+        "distance": 5.0990195135927845,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "coal",
+        "name": "coal_ore",
+        "position": {
+          "x": -219,
+          "y": 61,
+          "z": 163
+        },
+        "distance": 5.196152422706632,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -219,
+          "y": 61,
+          "z": 165
+        },
+        "distance": 5.196152422706632,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 61,
+          "z": 163
+        },
+        "distance": 5.196152422706632,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -217,
+          "y": 61,
+          "z": 165
+        },
+        "distance": 5.196152422706632,
+        "harvestPermitted": true
+      },
+      {
+        "kind": "stone",
+        "name": "stone",
+        "position": {
+          "x": -215,
+          "y": 63,
+          "z": 167
+        },
+        "distance": 5.196152422706632,
+        "harvestPermitted": true
+      }
+    ],
+    "hostiles": [],
+    "passiveAnimals": [
+      {
+        "entityId": 7,
+        "name": "pig",
+        "position": {
+          "x": -142,
+          "y": 64,
+          "z": 127
+        },
+        "distance": 84.55175929571188,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 8,
+        "name": "pig",
+        "position": {
+          "x": -151,
+          "y": 64,
+          "z": 118
+        },
+        "distance": 81.29575634681062,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 9,
+        "name": "pig",
+        "position": {
+          "x": -152,
+          "y": 64,
+          "z": 120
+        },
+        "distance": 79.3473376995095,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 10,
+        "name": "cow",
+        "position": {
+          "x": -145,
+          "y": 64,
+          "z": 117
+        },
+        "distance": 86.84468895678077,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 11,
+        "name": "cow",
+        "position": {
+          "x": -123,
+          "y": 64,
+          "z": 100
+        },
+        "distance": 114.564392373896,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 12,
+        "name": "cow",
+        "position": {
+          "x": -146,
+          "y": 64,
+          "z": 120
+        },
+        "distance": 84.40379138403678,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 13,
+        "name": "cow",
+        "position": {
+          "x": -130,
+          "y": 64,
+          "z": 114
+        },
+        "distance": 101.2324058787501,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 19,
+        "name": "sheep",
+        "position": {
+          "x": -196,
+          "y": 64,
+          "z": 33
+        },
+        "distance": 132.84953895290718,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 28,
+        "name": "sheep",
+        "position": {
+          "x": -202,
+          "y": 64,
+          "z": 35
+        },
+        "distance": 130.00384609695206,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 29,
+        "name": "sheep",
+        "position": {
+          "x": -201,
+          "y": 64,
+          "z": 34
+        },
+        "distance": 131.12208052040663,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 30,
+        "name": "cow",
+        "position": {
+          "x": -207,
+          "y": 65,
+          "z": 46
+        },
+        "distance": 118.51582172857765,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 31,
+        "name": "pig",
+        "position": {
+          "x": -139,
+          "y": 64,
+          "z": 128
+        },
+        "distance": 86.83893136145792,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 48,
+        "name": "sheep",
+        "position": {
+          "x": -155,
+          "y": 64,
+          "z": 156
+        },
+        "distance": 63.53739056650029,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 49,
+        "name": "sheep",
+        "position": {
+          "x": -150,
+          "y": 64,
+          "z": 147
+        },
+        "distance": 70.12132343303283,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 50,
+        "name": "sheep",
+        "position": {
+          "x": -160,
+          "y": 64,
+          "z": 147
+        },
+        "distance": 60.47313453096341,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 51,
+        "name": "sheep",
+        "position": {
+          "x": -143,
+          "y": 64,
+          "z": 161
+        },
+        "distance": 75.08661665037253,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 68,
+        "name": "chicken",
+        "position": {
+          "x": -213,
+          "y": 68,
+          "z": 203
+        },
+        "distance": 39.370039370059054,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 69,
+        "name": "chicken",
+        "position": {
+          "x": -202,
+          "y": 67,
+          "z": 197
+        },
+        "distance": 36.68787265568829,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 71,
+        "name": "chicken",
+        "position": {
+          "x": -236,
+          "y": 64,
+          "z": 73
+        },
+        "distance": 92.78469701410896,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 72,
+        "name": "chicken",
+        "position": {
+          "x": -239,
+          "y": 64,
+          "z": 75
+        },
+        "distance": 91.46584061823299,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 84,
+        "name": "chicken",
+        "position": {
+          "x": -195,
+          "y": 67,
+          "z": 181
+        },
+        "distance": 28.618176042508367,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 85,
+        "name": "chicken",
+        "position": {
+          "x": -189,
+          "y": 67,
+          "z": 184
+        },
+        "distance": 35.24202037341219,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 88,
+        "name": "chicken",
+        "position": {
+          "x": -255,
+          "y": 64,
+          "z": 44
+        },
+        "distance": 125.59060474414477,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 89,
+        "name": "chicken",
+        "position": {
+          "x": -259,
+          "y": 64,
+          "z": 41
+        },
+        "distance": 129.6688088940436,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 93,
+        "name": "sheep",
+        "position": {
+          "x": -170,
+          "y": 67,
+          "z": 196
+        },
+        "distance": 57.69748694700663,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 94,
+        "name": "sheep",
+        "position": {
+          "x": -167,
+          "y": 65,
+          "z": 208
+        },
+        "distance": 67.36467917239716,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 96,
+        "name": "pig",
+        "position": {
+          "x": -260,
+          "y": 75,
+          "z": 186
+        },
+        "distance": 48.25971404805462,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 97,
+        "name": "pig",
+        "position": {
+          "x": -261,
+          "y": 74,
+          "z": 187
+        },
+        "distance": 49.41659640242335,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 98,
+        "name": "pig",
+        "position": {
+          "x": -250,
+          "y": 80,
+          "z": 190
+        },
+        "distance": 43.54308211415448,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 99,
+        "name": "pig",
+        "position": {
+          "x": -249,
+          "y": 80,
+          "z": 187
+        },
+        "distance": 41.060930335295616,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 106,
+        "name": "sheep",
+        "position": {
+          "x": -280,
+          "y": 63,
+          "z": 9
+        },
+        "distance": 166.96706262014672,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 111,
+        "name": "cow",
+        "position": {
+          "x": -125,
+          "y": 63,
+          "z": 227
+        },
+        "distance": 112.36992480196824,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 112,
+        "name": "cow",
+        "position": {
+          "x": -140,
+          "y": 64,
+          "z": 210
+        },
+        "distance": 90.57593499379402,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 113,
+        "name": "cow",
+        "position": {
+          "x": -136,
+          "y": 64,
+          "z": 214
+        },
+        "distance": 96.06247966818263,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 114,
+        "name": "cow",
+        "position": {
+          "x": -139,
+          "y": 64,
+          "z": 210
+        },
+        "distance": 91.43850392476902,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 115,
+        "name": "pig",
+        "position": {
+          "x": -222,
+          "y": 65,
+          "z": 223
+        },
+        "distance": 59.14389233048499,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 116,
+        "name": "pig",
+        "position": {
+          "x": -229,
+          "y": 68,
+          "z": 206
+        },
+        "distance": 43.46262762420146,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": false
+      },
+      {
+        "entityId": 117,
+        "name": "chicken",
+        "position": {
+          "x": -283,
+          "y": 67,
+          "z": 116
+        },
+        "distance": 80.8084154033477,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 118,
+        "name": "chicken",
+        "position": {
+          "x": -291,
+          "y": 68,
+          "z": 118
+        },
+        "distance": 86.30758946929292,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 119,
+        "name": "pig",
+        "position": {
+          "x": -232,
+          "y": 65,
+          "z": 226
+        },
+        "distance": 63.56886030125127,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 120,
+        "name": "pig",
+        "position": {
+          "x": -232,
+          "y": 65,
+          "z": 225
+        },
+        "distance": 62.593929418115295,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 121,
+        "name": "sheep",
+        "position": {
+          "x": -231,
+          "y": 65,
+          "z": 224
+        },
+        "distance": 61.400325732035,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 122,
+        "name": "cow",
+        "position": {
+          "x": -226,
+          "y": 65,
+          "z": 224
+        },
+        "distance": 60.53924347066125,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 123,
+        "name": "cow",
+        "position": {
+          "x": -227,
+          "y": 65,
+          "z": 224
+        },
+        "distance": 60.67948582511226,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 124,
+        "name": "sheep",
+        "position": {
+          "x": -215,
+          "y": 64,
+          "z": 233
+        },
+        "distance": 69.09413868049879,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 125,
+        "name": "sheep",
+        "position": {
+          "x": -223,
+          "y": 65,
+          "z": 225
+        },
+        "distance": 61.212743771211564,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 126,
+        "name": "sheep",
+        "position": {
+          "x": -229,
+          "y": 64,
+          "z": 231
+        },
+        "distance": 67.92643079096678,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 136,
+        "name": "pig",
+        "position": {
+          "x": -183,
+          "y": 80,
+          "z": 258
+        },
+        "distance": 101.2768482921936,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 137,
+        "name": "sheep",
+        "position": {
+          "x": -236,
+          "y": 64,
+          "z": 247
+        },
+        "distance": 84.95292814258964,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 138,
+        "name": "sheep",
+        "position": {
+          "x": -235,
+          "y": 64,
+          "z": 248
+        },
+        "distance": 85.72630868059116,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 139,
+        "name": "sheep",
+        "position": {
+          "x": -230,
+          "y": 63,
+          "z": 261
+        },
+        "distance": 97.78547949465708,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 140,
+        "name": "sheep",
+        "position": {
+          "x": -233,
+          "y": 64,
+          "z": 248
+        },
+        "distance": 85.35221145348257,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 141,
+        "name": "chicken",
+        "position": {
+          "x": -299,
+          "y": 66,
+          "z": 245
+        },
+        "distance": 114.5512985522207,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 142,
+        "name": "chicken",
+        "position": {
+          "x": -297,
+          "y": 66,
+          "z": 245
+        },
+        "distance": 113.14592347937243,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 143,
+        "name": "chicken",
+        "position": {
+          "x": -306,
+          "y": 67,
+          "z": 240
+        },
+        "distance": 116.2798348812037,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 144,
+        "name": "chicken",
+        "position": {
+          "x": -306,
+          "y": 67,
+          "z": 239
+        },
+        "distance": 115.62871615649809,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 268,
+        "name": "cow",
+        "position": {
+          "x": -326,
+          "y": 64,
+          "z": 9
+        },
+        "distance": 188.92591140444443,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 269,
+        "name": "cow",
+        "position": {
+          "x": -330,
+          "y": 62,
+          "z": 10
+        },
+        "distance": 190.46259475288056,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 281,
+        "name": "cow",
+        "position": {
+          "x": -336,
+          "y": 66,
+          "z": 253
+        },
+        "distance": 147.80054127099808,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 282,
+        "name": "cow",
+        "position": {
+          "x": -335,
+          "y": 66,
+          "z": 253
+        },
+        "distance": 147.0034013211939,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 290,
+        "name": "sheep",
+        "position": {
+          "x": -165,
+          "y": 77,
+          "z": 263
+        },
+        "distance": 112.83173312503888,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 291,
+        "name": "sheep",
+        "position": {
+          "x": -165,
+          "y": 76,
+          "z": 268
+        },
+        "distance": 117.15374513859982,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 292,
+        "name": "sheep",
+        "position": {
+          "x": -161,
+          "y": 77,
+          "z": 262
+        },
+        "distance": 113.90346790155249,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 293,
+        "name": "sheep",
+        "position": {
+          "x": -169,
+          "y": 76,
+          "z": 270
+        },
+        "distance": 117.20494870098275,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 295,
+        "name": "pig",
+        "position": {
+          "x": -269,
+          "y": 65,
+          "z": 267
+        },
+        "distance": 114.93911431710268,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 296,
+        "name": "pig",
+        "position": {
+          "x": -259,
+          "y": 66,
+          "z": 261
+        },
+        "distance": 105.30906893520614,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 297,
+        "name": "pig",
+        "position": {
+          "x": -252,
+          "y": 66,
+          "z": 254
+        },
+        "distance": 96.20810776644555,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 298,
+        "name": "pig",
+        "position": {
+          "x": -264,
+          "y": 65,
+          "z": 257
+        },
+        "distance": 103.75933692926145,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 315,
+        "name": "pig",
+        "position": {
+          "x": -326,
+          "y": 67,
+          "z": 260
+        },
+        "distance": 144.50259513240584,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 316,
+        "name": "pig",
+        "position": {
+          "x": -329,
+          "y": 67,
+          "z": 260
+        },
+        "distance": 146.75830470538966,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 317,
+        "name": "pig",
+        "position": {
+          "x": -325,
+          "y": 66,
+          "z": 256
+        },
+        "distance": 141.1134295522577,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 318,
+        "name": "pig",
+        "position": {
+          "x": -328,
+          "y": 67,
+          "z": 260
+        },
+        "distance": 146.00342461736986,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 408,
+        "name": "pig",
+        "position": {
+          "x": -300,
+          "y": 67,
+          "z": 319
+        },
+        "distance": 175.35677916750183,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 418,
+        "name": "sheep",
+        "position": {
+          "x": -333,
+          "y": 65,
+          "z": 164
+        },
+        "distance": 115.00434774390054,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 427,
+        "name": "pig",
+        "position": {
+          "x": -344,
+          "y": 68,
+          "z": 282
+        },
+        "distance": 172.63835031649253,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 467,
+        "name": "pig",
+        "position": {
+          "x": -362,
+          "y": 63,
+          "z": 240
+        },
+        "distance": 162.8526941748278,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 475,
+        "name": "sheep",
+        "position": {
+          "x": -373,
+          "y": 63,
+          "z": 199
+        },
+        "distance": 158.93080255255742,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 476,
+        "name": "sheep",
+        "position": {
+          "x": -370,
+          "y": 63,
+          "z": 193
+        },
+        "distance": 154.77079827926195,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 505,
+        "name": "pig",
+        "position": {
+          "x": -210,
+          "y": 66,
+          "z": 324
+        },
+        "distance": 160.1998751560063,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      },
+      {
+        "entityId": 508,
+        "name": "pig",
+        "position": {
+          "x": -216,
+          "y": 67,
+          "z": 323
+        },
+        "distance": 159.01572249309189,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      }
+    ],
+    "players": [
+      {
+        "entityId": 155,
+        "name": "player",
+        "position": {
+          "x": -221,
+          "y": 89,
+          "z": 150
+        },
+        "distance": 27.09243436828813,
+        "named": false,
+        "tamed": false,
+        "protectedTarget": true
+      }
+    ],
+    "containers": [],
+    "workstations": [],
+    "hazards": []
+  },
+  "home": {
+    "activeHome": {
+      "homeId": "home_primary",
+      "position": {
+        "x": -218,
+        "y": 66,
+        "z": 164
+      }
+    },
+    "homeDistance": 0,
+    "shelterState": "none",
+    "ownedStorage": [],
+    "bedKnown": false,
+    "foodReserve": 0,
+    "fuelReserve": 0
+  },
+  "navigation": {
+    "routeStatus": "idle",
+    "pathRisk": "low",
+    "stuckState": "free",
+    "returnPathKnown": true,
+    "lastSafePosition": {
+      "x": -218,
+      "y": 66,
+      "z": 164
+    }
+  },
+  "cognition": {
+    "activeGoal": null,
+    "activeRoutine": null,
+    "activeSkill": null,
+    "suspendedGoals": []
+  },
+  "previousOutcome": null
+}

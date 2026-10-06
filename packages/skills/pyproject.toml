@@ -14,7 +14,7 @@ build-backend = "hatchling.build"
 packages = ["python/person_skills"]
 
 [tool.hatch.build.targets.wheel.force-include]
-"specs" = "person_skills/specs"
+"schema" = "person_skills/schema"
 
 [tool.uv.sources]
 person-protocol = { workspace = true }

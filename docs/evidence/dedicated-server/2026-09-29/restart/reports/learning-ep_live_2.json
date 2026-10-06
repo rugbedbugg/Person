@@ -1,0 +1,777 @@
+{
+  "schema_version": 1,
+  "episode_id": "ep_live_2",
+  "learning_mode": "off",
+  "training_context": "minecraft_normal",
+  "policy_revision": 0,
+  "restore_notes": [],
+  "selections": [
+    {
+      "routine_id": "r_46630eeb628a9f95",
+      "routine_name": "secure_shelter__gather_wood_build_basic_shelter",
+      "learned_or_fallback": "fallback",
+      "confidence": 0.5,
+      "reason_codes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "shadow_routine_id": null
+    },
+    {
+      "routine_id": "r_1dfb80ad5d3e39bc",
+      "routine_name": "secure_shelter__gather_wood_build_basic_shelter",
+      "learned_or_fallback": "fallback",
+      "confidence": 0.5,
+      "reason_codes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "shadow_routine_id": null
+    },
+    {
+      "routine_id": "r_33fa6ab1022940be",
+      "routine_name": "secure_shelter__repair_shelter",
+      "learned_or_fallback": "fallback",
+      "confidence": 0.5,
+      "reason_codes": [
+        "learning_off",
+        "fallback_policy",
+        "lowest_risk_feasible_plan"
+      ],
+      "shadow_routine_id": null
+    }
+  ],
+  "fallback_rate": 1.0,
+  "safety_overrides": {},
+  "prediction_error": {
+    "recorded": 8,
+    "severities": {
+      "inverted": 5,
+      "major": 2,
+      "unobserved": 1
+    },
+    "worst": [
+      {
+        "decision_id": "ff751d38-b327-5c54-a8ec-9905fcf1f724",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_seek_evidence",
+        "goal_id": "goal_secure_shelter",
+        "requested_skill": "look",
+        "executed_skill": "look",
+        "status": "SUCCESS",
+        "emergency": false,
+        "elapsed_ticks": 0,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "looked",
+            "op": "=",
+            "value": 1
+          }
+        ],
+        "observed": [
+          {
+            "fact": "looked",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          }
+        ],
+        "unexplained": [],
+        "severity": "inverted",
+        "evidence_refs": [
+          "272b45bb-4810-42d2-a238-6986593be263"
+        ]
+      },
+      {
+        "decision_id": "a5bd86ff-756f-57ba-80dc-5147b24ab2ad",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_seek_evidence",
+        "goal_id": "goal_secure_shelter",
+        "requested_skill": "look",
+        "executed_skill": "look",
+        "status": "SUCCESS",
+        "emergency": false,
+        "elapsed_ticks": 0,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "looked",
+            "op": "=",
+            "value": 1
+          }
+        ],
+        "observed": [
+          {
+            "fact": "looked",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          }
+        ],
+        "unexplained": [],
+        "severity": "inverted",
+        "evidence_refs": [
+          "66dcc842-2e7e-4e67-b686-f5f196eef561"
+        ]
+      },
+      {
+        "decision_id": "a7fdc33c-5f00-5bf8-9123-c37dc969882c",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_1dfb80ad5d3e39bc",
+        "goal_id": "goal_secure_shelter",
+        "requested_skill": "build_basic_shelter",
+        "executed_skill": "build_basic_shelter",
+        "status": "FAILED",
+        "emergency": false,
+        "elapsed_ticks": 260,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "building_materials",
+            "op": "-=",
+            "value": 25
+          },
+          {
+            "fact": "shelter_complete",
+            "op": "=",
+            "value": 1
+          },
+          {
+            "fact": "sheltered",
+            "op": "=",
+            "value": 1
+          },
+          {
+            "fact": "at_home",
+            "op": "=",
+            "value": 1
+          }
+        ],
+        "observed": [
+          {
+            "fact": "building_materials",
+            "before": 26.0,
+            "predicted": 1.0,
+            "observed": 20.0,
+            "error": 19.0,
+            "severity": "major"
+          },
+          {
+            "fact": "shelter_complete",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          },
+          {
+            "fact": "sheltered",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          },
+          {
+            "fact": "at_home",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          }
+        ],
+        "unexplained": [
+          {
+            "fact": "fuel",
+            "before": 26.0,
+            "observed": 20.0
+          },
+          {
+            "fact": "wood",
+            "before": 26.0,
+            "observed": 20.0
+          }
+        ],
+        "severity": "inverted",
+        "evidence_refs": [
+          "79493f2f-3577-40f1-9938-3c955d28923b"
+        ]
+      },
+      {
+        "decision_id": "996a5d5c-638a-5fcc-b36a-834b76f5957d",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_33fa6ab1022940be",
+        "goal_id": "goal_secure_shelter",
+        "requested_skill": "repair_shelter",
+        "executed_skill": "repair_shelter",
+        "status": "FAILED",
+        "emergency": false,
+        "elapsed_ticks": 20,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "shelter_complete",
+            "op": "=",
+            "value": 1
+          },
+          {
+            "fact": "sheltered",
+            "op": "=",
+            "value": 1
+          }
+        ],
+        "observed": [
+          {
+            "fact": "shelter_complete",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          },
+          {
+            "fact": "sheltered",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          }
+        ],
+        "unexplained": [],
+        "severity": "inverted",
+        "evidence_refs": [
+          "0410c0c0-feba-4827-8620-bc247ae1a386"
+        ]
+      },
+      {
+        "decision_id": "4be73600-9bd9-598d-a83a-21be273c6e7c",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_seek_evidence",
+        "goal_id": "goal_establish_tools",
+        "requested_skill": "look",
+        "executed_skill": "look",
+        "status": "SUCCESS",
+        "emergency": false,
+        "elapsed_ticks": 0,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "looked",
+            "op": "=",
+            "value": 1
+          }
+        ],
+        "observed": [
+          {
+            "fact": "looked",
+            "before": 0.0,
+            "predicted": 1.0,
+            "observed": 0.0,
+            "error": -1.0,
+            "severity": "inverted"
+          }
+        ],
+        "unexplained": [],
+        "severity": "inverted",
+        "evidence_refs": [
+          "a2336ede-b8b4-491d-b348-3f2cdfb48d4a"
+        ]
+      },
+      {
+        "decision_id": "0e1a7561-dd04-5f15-a940-837abc1d9a82",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_46630eeb628a9f95",
+        "goal_id": "goal_secure_shelter",
+        "requested_skill": "gather_wood",
+        "executed_skill": "gather_wood",
+        "status": "SUCCESS",
+        "emergency": false,
+        "elapsed_ticks": 900,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "wood",
+            "op": "+=",
+            "value": 32
+          },
+          {
+            "fact": "building_materials",
+            "op": "+=",
+            "value": 32
+          },
+          {
+            "fact": "fuel",
+            "op": "+=",
+            "value": 32
+          }
+        ],
+        "observed": [
+          {
+            "fact": "wood",
+            "before": 15.0,
+            "predicted": 47.0,
+            "observed": 22.0,
+            "error": -25.0,
+            "severity": "major"
+          },
+          {
+            "fact": "building_materials",
+            "before": 15.0,
+            "predicted": 47.0,
+            "observed": 22.0,
+            "error": -25.0,
+            "severity": "major"
+          },
+          {
+            "fact": "fuel",
+            "before": 15.0,
+            "predicted": 47.0,
+            "observed": 22.0,
+            "error": -25.0,
+            "severity": "major"
+          }
+        ],
+        "unexplained": [],
+        "severity": "major",
+        "evidence_refs": [
+          "83c91643-019a-4434-8c8b-b9aff89a6ef2"
+        ]
+      },
+      {
+        "decision_id": "402d3f83-e627-5a94-9d56-0fb904c617ed",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_1dfb80ad5d3e39bc",
+        "goal_id": "goal_secure_shelter",
+        "requested_skill": "gather_wood",
+        "executed_skill": "gather_wood",
+        "status": "SUCCESS",
+        "emergency": false,
+        "elapsed_ticks": 500,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "wood",
+            "op": "+=",
+            "value": 8
+          },
+          {
+            "fact": "building_materials",
+            "op": "+=",
+            "value": 8
+          },
+          {
+            "fact": "fuel",
+            "op": "+=",
+            "value": 8
+          }
+        ],
+        "observed": [
+          {
+            "fact": "wood",
+            "before": 22.0,
+            "predicted": 30.0,
+            "observed": 26.0,
+            "error": -4.0,
+            "severity": "major"
+          },
+          {
+            "fact": "building_materials",
+            "before": 22.0,
+            "predicted": 30.0,
+            "observed": 26.0,
+            "error": -4.0,
+            "severity": "major"
+          },
+          {
+            "fact": "fuel",
+            "before": 22.0,
+            "predicted": 30.0,
+            "observed": 26.0,
+            "error": -4.0,
+            "severity": "major"
+          }
+        ],
+        "unexplained": [],
+        "severity": "major",
+        "evidence_refs": [
+          "8ea0cac5-3710-4a11-adaa-0693929d58cb"
+        ]
+      },
+      {
+        "decision_id": "e9871053-50a0-50d2-9dea-ce8f043e368a",
+        "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+        "routine_id": "r_seek_evidence",
+        "goal_id": "goal_establish_tools",
+        "requested_skill": "look",
+        "executed_skill": "look",
+        "status": "SUCCESS",
+        "emergency": false,
+        "elapsed_ticks": 0,
+        "health_cost": 0.0,
+        "expected": [
+          {
+            "fact": "looked",
+            "op": "=",
+            "value": 1
+          }
+        ],
+        "observed": [],
+        "unexplained": [],
+        "severity": "unobserved",
+        "reason": "no observation followed the outcome",
+        "evidence_refs": [
+          "b25f724a-1429-440b-a055-dca2b21147ab"
+        ]
+      }
+    ]
+  },
+  "emergencies": {},
+  "outcomes": [
+    {
+      "requested_skill": "look",
+      "executed_skill": "look",
+      "status": "SUCCESS",
+      "requested_status": "SUCCESS",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 0,
+      "expected_effects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "effects": [
+        "looked"
+      ]
+    },
+    {
+      "requested_skill": "look",
+      "executed_skill": "look",
+      "status": "SUCCESS",
+      "requested_status": "SUCCESS",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 0,
+      "expected_effects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "effects": [
+        "looked"
+      ]
+    },
+    {
+      "requested_skill": "gather_wood",
+      "executed_skill": "gather_wood",
+      "status": "SUCCESS",
+      "requested_status": "SUCCESS",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 900,
+      "expected_effects": [
+        {
+          "fact": "wood",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 32
+        },
+        {
+          "fact": "fuel",
+          "op": "+=",
+          "value": 32
+        }
+      ],
+      "effects": [
+        "wood_increased"
+      ]
+    },
+    {
+      "requested_skill": "gather_wood",
+      "executed_skill": "gather_wood",
+      "status": "SUCCESS",
+      "requested_status": "SUCCESS",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 500,
+      "expected_effects": [
+        {
+          "fact": "wood",
+          "op": "+=",
+          "value": 8
+        },
+        {
+          "fact": "building_materials",
+          "op": "+=",
+          "value": 8
+        },
+        {
+          "fact": "fuel",
+          "op": "+=",
+          "value": 8
+        }
+      ],
+      "effects": [
+        "wood_increased"
+      ]
+    },
+    {
+      "requested_skill": "build_basic_shelter",
+      "executed_skill": "build_basic_shelter",
+      "status": "FAILED",
+      "requested_status": "FAILED",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 260,
+      "expected_effects": [
+        {
+          "fact": "building_materials",
+          "op": "-=",
+          "value": 25
+        },
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "at_home",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "effects": []
+    },
+    {
+      "requested_skill": "repair_shelter",
+      "executed_skill": "repair_shelter",
+      "status": "FAILED",
+      "requested_status": "FAILED",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 20,
+      "expected_effects": [
+        {
+          "fact": "shelter_complete",
+          "op": "=",
+          "value": 1
+        },
+        {
+          "fact": "sheltered",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "effects": []
+    },
+    {
+      "requested_skill": "look",
+      "executed_skill": "look",
+      "status": "SUCCESS",
+      "requested_status": "SUCCESS",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 0,
+      "expected_effects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "effects": [
+        "looked"
+      ]
+    },
+    {
+      "requested_skill": "look",
+      "executed_skill": "look",
+      "status": "SUCCESS",
+      "requested_status": "SUCCESS",
+      "emergency": false,
+      "health_cost": 0,
+      "elapsed_ticks": 0,
+      "expected_effects": [
+        {
+          "fact": "looked",
+          "op": "=",
+          "value": 1
+        }
+      ],
+      "effects": [
+        "looked"
+      ]
+    }
+  ],
+  "goal_history": [
+    {
+      "tick": 8679,
+      "goal_id": "goal_secure_shelter",
+      "event": "queued"
+    },
+    {
+      "tick": 8679,
+      "goal_id": "goal_establish_tools",
+      "event": "queued"
+    },
+    {
+      "tick": 8679,
+      "goal_id": "goal_establish_storage",
+      "event": "queued"
+    },
+    {
+      "tick": 10419,
+      "goal_id": "goal_secure_shelter",
+      "event": "blocked"
+    }
+  ],
+  "goal_resumptions": {},
+  "routine_statistics": [
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "routine_id": "r_46630eeb628a9f95",
+      "attempts": 2,
+      "successes": 0,
+      "failures": 2,
+      "posterior_mean": 0.25,
+      "posterior_lower": 0.056351
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "routine_id": "r_e902660ed4a7198f",
+      "attempts": 1,
+      "successes": 0,
+      "failures": 0,
+      "posterior_mean": 0.5,
+      "posterior_lower": 0.211325
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "routine_id": "r_1dfb80ad5d3e39bc",
+      "attempts": 1,
+      "successes": 0,
+      "failures": 1,
+      "posterior_mean": 0.333333,
+      "posterior_lower": 0.097631
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "routine_id": "r_33fa6ab1022940be",
+      "attempts": 1,
+      "successes": 0,
+      "failures": 1,
+      "posterior_mean": 0.333333,
+      "posterior_lower": 0.097631
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "routine_id": "r_46630eeb628a9f95",
+      "attempts": 1,
+      "successes": 0,
+      "failures": 1,
+      "posterior_mean": 0.333333,
+      "posterior_lower": 0.097631
+    }
+  ],
+  "skill_statistics": [
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "skill_id": "craft_basic_tools",
+      "attempts": 1,
+      "successes": 1,
+      "failures": 0,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "skill_id": "gather_wood",
+      "attempts": 2,
+      "successes": 1,
+      "failures": 1,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_none.fs_none",
+      "skill_id": "look",
+      "attempts": 2,
+      "successes": 2,
+      "failures": 0,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "skill_id": "build_basic_shelter",
+      "attempts": 1,
+      "successes": 0,
+      "failures": 1,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "skill_id": "craft_basic_tools",
+      "attempts": 3,
+      "successes": 3,
+      "failures": 0,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "skill_id": "gather_wood",
+      "attempts": 2,
+      "successes": 2,
+      "failures": 0,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "skill_id": "look",
+      "attempts": 4,
+      "successes": 4,
+      "failures": 0,
+      "preemptions": 0
+    },
+    {
+      "training_context": "minecraft_normal",
+      "context_id": "h_healthy.f_full.d_day.t_none.hm_unknown.tt_wood.fs_none",
+      "skill_id": "repair_shelter",
+      "attempts": 1,
+      "successes": 0,
+      "failures": 1,
+      "preemptions": 0
+    }
+  ]
+}

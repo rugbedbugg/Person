@@ -7,6 +7,8 @@ members = [
     "person",
     "person-cognition",
     "person-config",
+    "person-epistemics",
+    "person-minecraft",
     "person-persistence",
     "person-planner",
     "person-policy",
@@ -191,6 +193,8 @@ source = { editable = "." }
 dependencies = [
     { name = "person-cognition" },
     { name = "person-config" },
+    { name = "person-epistemics" },
+    { name = "person-minecraft" },
     { name = "person-persistence" },
     { name = "person-planner" },
     { name = "person-policy" },
@@ -210,6 +214,8 @@ dev = [
 requires-dist = [
     { name = "person-cognition", editable = "apps/cognition" },
     { name = "person-config", editable = "packages/config" },
+    { name = "person-epistemics", editable = "packages/epistemics" },
+    { name = "person-minecraft", editable = "environments/minecraft" },
     { name = "person-persistence", editable = "packages/persistence" },
     { name = "person-planner", editable = "packages/planner" },
     { name = "person-policy", editable = "packages/policy" },
@@ -231,6 +237,7 @@ version = "0.1.0"
 source = { editable = "apps/cognition" }
 dependencies = [
     { name = "person-config" },
+    { name = "person-epistemics" },
     { name = "person-persistence" },
     { name = "person-planner" },
     { name = "person-policy" },
@@ -241,6 +248,7 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "person-config", editable = "packages/config" },
+    { name = "person-epistemics", editable = "packages/epistemics" },
     { name = "person-persistence", editable = "packages/persistence" },
     { name = "person-planner", editable = "packages/planner" },
     { name = "person-policy", editable = "packages/policy" },
@@ -264,32 +272,65 @@ requires-dist = [
 ]
 
 [[package]]
+name = "person-epistemics"
+version = "0.1.0"
+source = { editable = "packages/epistemics" }
+
+[[package]]
+name = "person-minecraft"
+version = "0.1.0"
+source = { editable = "environments/minecraft" }
+dependencies = [
+    { name = "person-cognition" },
+    { name = "person-epistemics" },
+    { name = "person-protocol" },
+    { name = "person-skills" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "person-cognition", editable = "apps/cognition" },
+    { name = "person-epistemics", editable = "packages/epistemics" },
+    { name = "person-protocol", editable = "packages/protocol" },
+    { name = "person-skills", editable = "packages/skills" },
+]
+
+[[package]]
 name = "person-persistence"
 version = "0.1.0"
 source = { editable = "packages/persistence" }
 dependencies = [
+    { name = "person-epistemics" },
     { name = "person-protocol" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "person-protocol", editable = "packages/protocol" }]
+requires-dist = [
+    { name = "person-epistemics", editable = "packages/epistemics" },
+    { name = "person-protocol", editable = "packages/protocol" },
+]
 
 [[package]]
 name = "person-planner"
 version = "0.1.0"
 source = { editable = "packages/planner" }
 dependencies = [
+    { name = "person-epistemics" },
     { name = "person-skills" },
 ]
 
 [package.metadata]
-requires-dist = [{ name = "person-skills", editable = "packages/skills" }]
+requires-dist = [
+    { name = "person-epistemics", editable = "packages/epistemics" },
+    { name = "person-skills", editable = "packages/skills" },
+]
 
 [[package]]
 name = "person-policy"
 version = "0.1.0"
 source = { editable = "packages/policy" }
 dependencies = [
+    { name = "person-epistemics" },
     { name = "person-persistence" },
     { name = "person-planner" },
     { name = "person-skills" },
@@ -297,6 +338,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "person-epistemics", editable = "packages/epistemics" },
     { name = "person-persistence", editable = "packages/persistence" },
     { name = "person-planner", editable = "packages/planner" },
     { name = "person-skills", editable = "packages/skills" },

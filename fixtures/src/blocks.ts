@@ -74,6 +74,16 @@ export const HOSTILES = new Set([
   "stray",
 ]);
 export const RANGED_HOSTILES = new Set(["skeleton", "stray"]);
+/** Mobs that only become dangerous once Person has taken damage. */
+export const NEUTRALS = new Set([
+  "wolf",
+  "polar_bear",
+  "llama",
+  "panda",
+  "bee",
+  "iron_golem",
+]);
+
 export const PASSIVE_ANIMALS: Readonly<
   Record<string, { drop: string; health: number }>
 > = Object.freeze({

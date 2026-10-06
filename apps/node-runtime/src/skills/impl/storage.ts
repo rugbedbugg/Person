@@ -1,4 +1,3 @@
-import { distance, positionKey, type Position } from "#config";
 import type { ItemStack } from "#protocol";
 import {
   SkillFailure,
@@ -10,6 +9,7 @@ import { isCoal, isEdible, isLog, isStone } from "../materials.ts";
 import { approach } from "../navigate.ts";
 import { placementSite } from "./crafting.ts";
 import type { ContainerView } from "../../embodiment/types.ts";
+import { distance, positionKey, type Position } from "#minecraft";
 
 type Category = "food" | "wood" | "stone" | "coal" | "any";
 
@@ -25,7 +25,7 @@ const MATCHERS: Record<Category, (name: string) => boolean> = {
 function ownedContainers(context: SkillContext): ContainerView[] {
   const origin = context.snapshot().position;
   const known = new Set(
-    context.memory.ownedStorage.map((record) => positionKey(record.position)),
+    context.ledger.ownedStorage.map((record) => positionKey(record.position)),
   );
   return context
     .snapshot()
@@ -70,7 +70,7 @@ export const placeOwnedChest: SkillImplementation = async (context) => {
   await approach(context, site);
   context.checkpoint();
   await context.embodiment.place(site, "chest");
-  const record = context.memory.recordStorage(
+  const record = context.ledger.recordStorage(
     site,
     `place_owned_chest@tick:${context.snapshot().tick}`,
     context.snapshot().dimension,
@@ -134,7 +134,7 @@ export const depositOwnedStorage: SkillImplementation = async (context) => {
       "FAILED",
       "The container accepted nothing",
     );
-  const record = context.memory.storageAt(container.position);
+  const record = context.ledger.storageAt(container.position);
   if (record) record.lastVerified = new Date().toISOString();
   context.effect("surplus_stored");
   context.note("container_transfer", {
@@ -173,7 +173,9 @@ export const withdrawOwnedStorage: SkillImplementation = async (context) => {
   await approach(context, container.position);
   context.checkpoint();
   const matcher = MATCHERS[category] ?? MATCHERS.any;
-  const live = context.embodiment.containerAt(container.position);
+  // The cached view is empty until something has been transferred, so the
+  // contents have to be read from the container itself before choosing.
+  const live = await context.embodiment.inspectContainer(container.position);
   const wanted: ItemStack[] = (live?.contents ?? [])
     .filter((item) => matcher(item.name))
     .map((item) => ({ name: item.name, count: Math.min(amount, item.count) }));
@@ -222,7 +224,7 @@ export const lootPermittedContainer: SkillImplementation = async (context) => {
 
   await approach(context, container.position);
   context.checkpoint();
-  const live = context.embodiment.containerAt(container.position);
+  const live = await context.embodiment.inspectContainer(container.position);
   const wanted: ItemStack[] = (live?.contents ?? []).map((item) => ({
     name: item.name,
     count: Math.min(amount, item.count),

@@ -1,0 +1,17 @@
+emergency overrides: [('suffocation', 'restore_air'), ('suffocation', 'restore_air')]
+flee ever executed: False
+restore_air outcomes: [('SUCCESS', 40, ['air_restored']), ('SUCCESS', 40, ['air_restored'])]
+'\\btp\\b' in memory: False
+'teleport' in memory: False
+'console' in memory: False
+'operator' in memory: False
+'glass' in memory: False
+'\\"x\\":' in memory: False
+'coordinates' in memory: False
+'water_column' in memory: False
+'pathfinder' in memory: False
+'nearest' in memory: True
+'target' in memory: False
+memory kinds: ['acted', 'endangered', 'perceived', 'searched']
+endangered details: [{'trigger': 'suffocation', 'response': 'restore_air'}, {'trigger': 'suffocation', 'response': 'restore_air'}]
+chain intact: True

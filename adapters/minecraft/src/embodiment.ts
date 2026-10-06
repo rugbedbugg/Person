@@ -3,13 +3,6 @@ import { setTimeout as delay } from "node:timers/promises";
 import mineflayer from "mineflayer";
 import pathfinderPackage from "mineflayer-pathfinder";
 import vec3Package from "vec3";
-import {
-  contains,
-  distance,
-  positionKey,
-  type PersonConfig,
-  type Position,
-} from "#config";
 import type { ItemStack } from "#protocol";
 import {
   DisconnectedError,
@@ -22,25 +15,104 @@ import {
   type EntityView,
   type FindBlocksQuery,
   type MoveOptions,
+  type GazeDirection,
   type PhysicalGuard,
   type WorldSnapshot,
-  preferredWood,
-  recipesFor,
+  stepGaze,
+  PERCEPTION,
+  gatherResources,
 } from "#node-runtime";
 import {
+  ARMOR_POINTS,
+  ARMOR_SLOTS,
   FUEL_BURN,
   HAZARD_BLOCKS,
-  HOSTILE_MOBS,
-  PASSIVE_MOBS,
-  RANGED_MOBS,
-  TAMEABLE_MOBS,
   blockKind,
+  resolveBiome,
 } from "./registry.ts";
+import { classifyEntity, isNamed } from "./classify.ts";
+import {
+  classifyConnectError,
+  classifyKick,
+  classifyReadiness,
+  type ConnectionContext,
+} from "./diagnose.ts";
+import { createGuardedMovements } from "./movements.ts";
+import {
+  contains,
+  distance,
+  positionKey,
+  type MinecraftConfig,
+  type Position,
+} from "#minecraft";
 
-const { pathfinder, Movements, goals } = pathfinderPackage;
+const { pathfinder, goals } = pathfinderPackage;
 const { Vec3 } = vec3Package;
 
 type Bot = ReturnType<typeof mineflayer.createBot>;
+
+/** The parts of a prismarine container window this adapter uses. */
+interface ContainerWindow {
+  containerItems: () => { name: string; count: number }[];
+  deposit: (
+    type: number,
+    metadata: number | null,
+    count: number,
+  ) => Promise<void>;
+  withdraw: (
+    type: number,
+    metadata: number | null,
+    count: number,
+  ) => Promise<void>;
+  close: () => void;
+}
+
+/**
+ * Mineflayer reports some ordinary situations by throwing a plain Error with a
+ * human sentence. Mapping the ones Person can actually act on keeps them from
+ * arriving as `unexpected_error`, which tells the learner nothing.
+ */
+function containerFailure(error: unknown): EmbodimentError {
+  const message = (error as Error).message ?? String(error);
+  if (/inventory is full/i.test(message))
+    return new EmbodimentError("inventory_full", message);
+  if (/not enough items|does not have/i.test(message))
+    return new EmbodimentError("missing_item", message);
+  if (/window|open|closed/i.test(message))
+    return new EmbodimentError("container_unavailable", message);
+  return new EmbodimentError("container_transfer_failed", message);
+}
+
+/** How long to wait for the world around a fresh spawn to become usable. */
+const READINESS_TIMEOUT_MS = 30000;
+
+/** A furnace takes ten seconds an item in 1.16.1. */
+const SMELT_TICKS_PER_ITEM = 200;
+const SMELT_GRACE_MS = 8000;
+
+/** How long a neutral mob stays a threat after Person last lost health. */
+const DAMAGE_MEMORY_TICKS = 200;
+
+/** Minecraft account names. Mixed case and digits are ordinary. */
+const USERNAME = /^[A-Za-z0-9_]{1,16}$/;
+const UUID =
+  /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+
+/**
+ * Identity is reported only in a shape the protocol can carry.
+ *
+ * A name that does not fit is dropped rather than trimmed or rewritten: a
+ * mangled account name is a worse answer than no account name, and the UUID
+ * beside it still tells two people apart.
+ */
+const identity = (value: unknown): string | null =>
+  typeof value === "string" && USERNAME.test(value) ? value : null;
+
+const entityUuid = (value: unknown): string | null =>
+  typeof value === "string" && UUID.test(value) ? value.toLowerCase() : null;
+
+/** How long a clean quit is given before the socket is taken down by force. */
+const DISCONNECT_GRACE_MS = 2000;
 
 const vec = (p: Position): InstanceType<typeof Vec3> => new Vec3(p.x, p.y, p.z);
 const point = (v: { x: number; y: number; z: number }): Position => ({
@@ -71,7 +143,7 @@ export interface MineflayerOptions {
  */
 export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
   readonly kind = "mineflayer" as const;
-  readonly #config: PersonConfig;
+  readonly #config: MinecraftConfig;
   readonly #createBot: typeof mineflayer.createBot;
   readonly #connectTimeoutMs: number;
   readonly #ownedStorage = new Map<string, string>();
@@ -82,8 +154,17 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
   #lastSafePosition: Position | null = null;
   #stuck = false;
   #startTick = 0;
+  #lastDamageTick: number | null = null;
+  #lastHealth: number | null = null;
+  /**
+   * Which client is current (ADR 0017). Every connection, and every explicit
+   * disconnect, starts a new generation, and a client's listeners act only
+   * while theirs is current. So a retired client's late `end` or `error`
+   * cannot mark its replacement disconnected, whatever order events arrive in.
+   */
+  #generation = 0;
 
-  constructor(config: PersonConfig, options: MineflayerOptions = {}) {
+  constructor(config: MinecraftConfig, options: MineflayerOptions = {}) {
     super();
     this.#config = config;
     this.#createBot = options.createBot ?? mineflayer.createBot;
@@ -111,6 +192,11 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         "Minecraft embodiment needs server and bot config",
       );
 
+    // A reconnection retires the previous client before its replacement
+    // exists.
+    if (this.#bot) await this.disconnect();
+    const generation = ++this.#generation;
+    const current = (): boolean => generation === this.#generation;
     const bot = this.#createBot({
       host: server.host,
       port: server.port,
@@ -124,29 +210,104 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     });
     this.#bot = bot;
     bot.loadPlugin(pathfinder);
+    const context: ConnectionContext = {
+      host: server.host,
+      port: server.port,
+      version: server.version,
+      username: botConfig.username,
+    };
+
+    // Before the bot spawns, a failure is the only evidence there is. It is
+    // captured here and classified, rather than being allowed to time out as
+    // an anonymous "did not spawn".
+    let loginFailure: EmbodimentError | null = null;
+    const failed = new Promise<never>((_resolve, reject) => {
+      const fail = (failure: EmbodimentError): void => {
+        loginFailure ??= failure;
+        if (current()) this.#connected = false;
+        reject(failure);
+      };
+      bot.once("kicked", (reason: unknown) =>
+        fail(classifyKick(reason, context)),
+      );
+      bot.once("error", (error: unknown) =>
+        fail(classifyConnectError(error, context)),
+      );
+      bot.once("end", (reason: unknown) =>
+        fail(
+          new EmbodimentError(
+            "connection_closed",
+            `The connection to ${context.host}:${context.port} closed before Person spawned${
+              reason ? `: ${String(reason).slice(0, 120)}` : ""
+            }`,
+            "The world may have been closed, or the port belongs to a session that has ended.",
+          ),
+        ),
+      );
+    });
+    // Swallow the rejection if the race is won by the spawn; the listeners
+    // above stay installed as the long-lived handlers below.
+    failed.catch(() => {});
+
     bot.on("kicked", (reason: unknown) => {
+      if (!current()) return;
       this.#connected = false;
       this.emit("fatal", `server_kicked: ${String(reason).slice(0, 200)}`);
     });
     bot.on("error", (error: Error) => {
+      if (!current()) return;
       this.#connected = false;
       this.emit("fatal", `connection_error: ${error.message}`);
     });
     bot.on("end", () => {
+      if (!current()) return;
       this.#connected = false;
       this.emit("fatal", "disconnected");
     });
-
-    const spawned = once(bot, "spawn");
-    const timer = delay(this.#connectTimeoutMs).then(() => {
-      throw new EmbodimentError(
-        "connect_timeout",
-        "Minecraft did not spawn the bot in time",
-      );
+    bot.on("health", () => {
+      if (!current()) return;
+      const health = bot.health ?? 0;
+      if (this.#lastHealth !== null && health < this.#lastHealth)
+        this.#lastDamageTick = Number(bot.time.age ?? 0);
+      this.#lastHealth = health;
     });
-    await Promise.race([spawned, timer]);
+
+    // Mineflayer emits `spawn` only for a living body. A player who left the
+    // world dead rejoins at the death screen, with a `death` and no `spawn`;
+    // that is still a connection, to a body the runtime must deal with.
+    const settled = new AbortController();
+    const spawned = once(bot, "spawn", { signal: settled.signal });
+    const joinedDead = once(bot, "death", { signal: settled.signal });
+    let spawnTimer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<never>((_resolve, reject) => {
+      spawnTimer = setTimeout(
+        () =>
+          reject(
+            new EmbodimentError(
+              "spawn_timeout",
+              `${context.host}:${context.port} accepted the connection but Person never spawned within ${this.#connectTimeoutMs}ms`,
+              "The server is reachable, so this is a login or world-loading problem rather than a wrong port.",
+            ),
+          ),
+        this.#connectTimeoutMs,
+      );
+      // Deliberately not unref'd: this timer is the only thing that turns a
+      // server which accepts the socket and then says nothing into a
+      // diagnosable failure. It is cleared as soon as the race settles.
+    });
+    try {
+      await Promise.race([spawned, joinedDead, failed, timedOut]);
+    } finally {
+      if (spawnTimer) clearTimeout(spawnTimer);
+      settled.abort();
+    }
     await bot.waitForChunksToLoad();
-    if (bot.time.age === null) await once(bot, "time");
+    await this.#awaitReadiness();
+    this.#assertWorldRules();
+    if (!current())
+      throw new DisconnectedError(
+        "The connection was replaced before it became ready",
+      );
 
     if (bot.username.toLowerCase() !== botConfig.username.toLowerCase())
       throw new EmbodimentError(
@@ -166,50 +327,211 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     this.#lastSafePosition = here;
   }
 
+  /**
+   * Minecraft's respawn (ADR 0017, I3), which only the runtime asks for.
+   *
+   * The body is back only when the server has spawned it and the world around
+   * it is as ready as at a first connection, never merely because the request
+   * was sent. A lost connection, a server that never answers, or a respawn
+   * outside the exploration area is refused, so the runtime reports no
+   * respawn that did not happen.
+   */
+  async respawn(): Promise<void> {
+    const bot = this.bot;
+    if (!this.#connected)
+      throw new DisconnectedError("The Minecraft client is not connected");
+    if ((bot.health ?? 0) > 0) return;
+    const generation = this.#generation;
+    const settled = new AbortController();
+    const spawned = once(bot, "spawn", { signal: settled.signal });
+    const lost = once(bot, "end", { signal: settled.signal }).then(() => {
+      throw new DisconnectedError("The connection closed during a respawn");
+    });
+    let timer: NodeJS.Timeout | undefined;
+    const timedOut = new Promise<never>((_resolve, reject) => {
+      timer = setTimeout(
+        () =>
+          reject(
+            new EmbodimentError(
+              "spawn_timeout",
+              `The server did not respawn Person within ${this.#connectTimeoutMs}ms`,
+            ),
+          ),
+        this.#connectTimeoutMs,
+      );
+    });
+    try {
+      bot.respawn();
+      await Promise.race([spawned, lost, timedOut]);
+    } finally {
+      if (timer) clearTimeout(timer);
+      settled.abort();
+    }
+    await bot.waitForChunksToLoad();
+    await this.#awaitReadiness();
+    this.#assertWorldRules();
+    if (generation !== this.#generation || !this.#connected)
+      throw new DisconnectedError("The connection was lost during a respawn");
+    const here = point(bot.entity.position);
+    if (!contains(this.#config.world.exploration, here))
+      throw new EmbodimentError(
+        "spawn_outside_bounds",
+        `Respawned at ${positionKey(here)}, outside the configured exploration area`,
+      );
+    // A new body: nothing it was doing, and no harm it remembers.
+    bot.pathfinder?.setGoal(null);
+    this.#stuck = false;
+    this.#lastDamageTick = null;
+    this.#lastSafePosition = here;
+  }
+
+  /**
+   * Connected is not the same as ready.
+   *
+   * A spawn packet arrives well before the world around Person is usable:
+   * chunks may still be decoding, the clock may not have ticked, the inventory
+   * window may be empty because it has not been sent. Acting in that window
+   * produces observations that are wrong in ways nothing downstream can
+   * detect, so readiness is checked explicitly and bounded.
+   */
+  async #awaitReadiness(): Promise<void> {
+    const bot = this.bot;
+    const deadline = Date.now() + READINESS_TIMEOUT_MS;
+    const missing = (): string[] => {
+      const gaps: string[] = [];
+      if (!bot.entity) gaps.push("entity");
+      else {
+        const here = point(bot.entity.position);
+        if (!Number.isFinite(here.x) || !Number.isFinite(here.y))
+          gaps.push("position");
+        else {
+          if (!bot.blockAt(vec(here))) gaps.push("chunk_at_feet");
+          if (!bot.blockAt(vec({ ...here, y: here.y - 1 })))
+            gaps.push("chunk_below");
+        }
+      }
+      if (bot.time?.age === null || bot.time?.age === undefined)
+        gaps.push("world_clock");
+      if (!bot.inventory) gaps.push("inventory");
+      if (bot.health === undefined || bot.food === undefined)
+        gaps.push("vitals");
+      if (!bot.game?.dimension) gaps.push("dimension");
+      return gaps;
+    };
+
+    let gaps = missing();
+    while (gaps.length > 0 && Date.now() < deadline) {
+      await delay(250);
+      gaps = missing();
+    }
+    if (gaps.length > 0) throw classifyReadiness(gaps, READINESS_TIMEOUT_MS);
+    this.#lastHealth = bot.health ?? null;
+  }
+
+  /**
+   * Refuses to act in a world whose rules make the run meaningless.
+   *
+   * Surviving in creative mode is not surviving, a frozen clock removes the
+   * day cycle the goal provider reasons about, and the Nether is not a world
+   * any of these skills were written for. All three are cheap to check and
+   * expensive to discover halfway through an episode.
+   */
+  #assertWorldRules(): void {
+    const bot = this.bot;
+    const dimension = this.#dimension();
+    if (dimension !== "overworld")
+      throw new EmbodimentError(
+        "unsupported_dimension",
+        `Person only operates in the overworld; the server reports ${dimension}`,
+      );
+    const mode = String(bot.game?.gameMode ?? "unknown");
+    if (mode !== "survival")
+      throw new EmbodimentError(
+        "unsupported_game_mode",
+        `Person only operates in survival; the server reports ${mode}`,
+      );
+    if (bot.time?.doDaylightCycle === false)
+      throw new EmbodimentError(
+        "daylight_cycle_disabled",
+        "The daylight cycle is frozen, so day phase and night safety are meaningless",
+      );
+    const difficulty = String(bot.game?.difficulty ?? "unknown");
+    const expectPeaceful = this.#config.environment.difficulty === "peaceful";
+    if (expectPeaceful && difficulty !== "peaceful")
+      throw new EmbodimentError(
+        "difficulty_mismatch",
+        `environment.difficulty is peaceful but the server difficulty is ${difficulty}`,
+      );
+    if (!expectPeaceful && difficulty === "peaceful")
+      throw new EmbodimentError(
+        "difficulty_mismatch",
+        "environment.difficulty expects hostiles but the server difficulty is peaceful",
+      );
+  }
+
   #configureMovement(): void {
     const bot = this.bot;
-    const movements = new Movements(bot);
-    movements.canDig = false;
-    movements.allow1by1towers = false;
-    movements.allowParkour = false;
-    movements.allowSprinting = true;
-    movements.canOpenDoors = false;
-    movements.scafoldingBlocks = [];
-    movements.maxDropDown = 2;
-    movements.allowFreeMotion = false;
-    for (const name of HAZARD_BLOCKS) {
-      const id = bot.registry.blocksByName[name]?.id;
-      if (id !== undefined) movements.blocksToAvoid.add(id);
-    }
-    // The guard is consulted for every step the planner considers, so a route
-    // cannot drift into a protected area while replanning around an obstacle.
-    movements.exclusionAreasStep.push(
-      (block: { position?: Position } | Position) => {
-        const position =
-          "position" in block && block.position
-            ? block.position
-            : (block as Position);
-        return this.#guard?.canEnter(point(position)) === false ? 100 : 0;
-      },
-    );
-    movements.exclusionAreasBreak.push(() => 100);
-    movements.exclusionAreasPlace.push(() => 100);
-    for (const name of HOSTILE_MOBS) movements.entitiesToAvoid.add(name);
+    // The movement policy, including the protected-region veto, lives in
+    // movements.ts so the same configuration the live body uses is the one the
+    // containment tests exercise.
+    const movements = createGuardedMovements(bot, () => this.#guard);
     bot.pathfinder.setMovements(movements);
     bot.pathfinder.thinkTimeout = 4000;
     bot.pathfinder.tickTimeout = 20;
     (bot.pathfinder as unknown as { searchRadius?: number }).searchRadius = 96;
   }
 
+  /**
+   * Ends the session and leaves nothing behind that can hold the process open.
+   *
+   * This used to quit, wait two hundred milliseconds and then end again, and
+   * the second end is why a failed `person observe` needed Ctrl-C. In
+   * `minecraft-protocol`, `Client.end` arms a thirty-second `closeTimer` that
+   * destroys the socket if it has not closed on its own, and the handler that
+   * clears that timer runs exactly once: on the first close, after which it
+   * sets `ended` and removes its own listeners. So whenever the server's close
+   * arrived inside those two hundred milliseconds, which on a LAN world it
+   * usually does, the second end armed a timer nothing would ever clear, and
+   * an otherwise finished command sat there for thirty seconds.
+   *
+   * Now the client is ended once, the close is awaited with a bound, and
+   * whatever is left is cleared explicitly. A command that has said what went
+   * wrong must be able to exit.
+   */
   async disconnect(): Promise<void> {
     this.#connected = false;
+    // Whatever the retired client says from now on is about nothing.
+    this.#generation++;
     const bot = this.#bot;
     this.#bot = null;
     if (!bot) return;
     bot.pathfinder?.setGoal(null);
+    const client = bot._client as
+      | {
+          ended?: boolean;
+          closeTimer?: NodeJS.Timeout;
+          socket?: { destroy?: () => void };
+        }
+      | undefined;
+    const closed =
+      client && client.ended !== true
+        ? once(bot, "end").then(
+            () => undefined,
+            () => undefined,
+          )
+        : Promise.resolve();
     bot.quit?.("Person session finished");
-    await delay(200);
-    bot.end?.();
+    await Promise.race([closed, delay(DISCONNECT_GRACE_MS)]);
+    if (client?.closeTimer) clearTimeout(client.closeTimer);
+    if (client?.ended === true) {
+      // Mineflayer has already run its own shutdown, physics loop included, so
+      // nothing here is still listening for a reason. An empty error handler
+      // stays behind because a socket can still fail while it is closing, and
+      // an EventEmitter with no error listener turns that into a crash.
+      bot.removeAllListeners();
+      bot.on("error", () => {});
+    }
+    client?.socket?.destroy?.();
   }
 
   // ----------------------------------------------------------------- reading
@@ -264,6 +586,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     const self = bot.entity?.id;
     const here = bot.entity?.position;
     if (!here) return [];
+    const origin = point(here);
     const views: EntityView[] = [];
     for (const entity of Object.values(bot.entities) as unknown as Record<
       string,
@@ -273,35 +596,141 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         id: number;
         name?: string;
         username?: string;
+        uuid?: string;
         type?: string;
-        position: { x: number; y: number; z: number };
-        metadata?: unknown[];
+        kind?: string;
+        position?: { x: number; y: number; z: number };
+        metadata?: unknown;
       };
       if (record.id === self) continue;
-      const name = record.name ?? record.username ?? "unknown";
-      const isPlayer = record.type === "player";
-      const villager = name === "villager" || name === "wandering_trader";
-      const named = Boolean(
-        (record.metadata ?? []).some(
-          (entry) => typeof entry === "string" && entry.length > 0,
-        ),
-      );
-      const tamed = TAMEABLE_MOBS.has(name);
+      if (!record.position) continue;
+      const rawName = record.name ?? record.username ?? "unknown";
+      // Every player entity in Minecraft is named "player". Identity comes
+      // from the account name mineflayer took from the player list and the
+      // UUID the server sent with the spawn packet, not from the display name,
+      // and never from the entity id, which is a handle for this session only.
+      const username = identity(record.username);
+      const uuid = entityUuid(record.uuid);
+      // `kind` is the minecraft-data entity category. It widens hostility
+      // detection; it can never widen what Person is allowed to attack.
+      const facts = classifyEntity(rawName, record.type, record.kind);
+      const named = isNamed(record.metadata);
+      const position = point(record.position);
       views.push({
         entityId: record.id,
-        name: isPlayer ? "player" : name,
-        position: point(record.position),
-        distance: distance(point(here), point(record.position)),
-        hostile: HOSTILE_MOBS.has(name),
-        passive: PASSIVE_MOBS.has(name) && !tamed,
-        player: isPlayer,
-        villager,
+        name: facts.name,
+        username,
+        uuid,
+        position,
+        distance: distance(origin, position),
+        hostile: facts.hostile,
+        neutral: facts.neutral,
+        passive: facts.huntableSpecies,
+        player: facts.player,
+        villager: facts.villager,
         named,
-        tamed,
-        ranged: RANGED_MOBS.has(name),
+        tamed: facts.tameable,
+        ranged: facts.ranged,
       });
     }
     return views;
+  }
+
+  /** The dimension mineflayer reports, normalised to the protocol enum. */
+  #dimension(): WorldSnapshot["dimension"] {
+    const reported = String(this.#bot?.game?.dimension ?? "overworld").replace(
+      "minecraft:",
+      "",
+    );
+    if (reported === "the_nether" || reported === "nether") return "nether";
+    if (reported === "the_end" || reported === "end") return "end";
+    return "overworld";
+  }
+
+  #biomeAt(position: Position): string {
+    const bot = this.#bot;
+    if (!bot) return "unknown";
+    return resolveBiome(bot.registry, bot.blockAt(vec(position)));
+  }
+
+  /**
+   * Light where Person is standing.
+   *
+   * Real light is what decides whether hostiles spawn on top of you. Falling
+   * back to a time-of-day guess is only honest when the server has not sent
+   * light data for the block yet.
+   */
+  #lightAt(position: Position, timeOfDay: number): number {
+    const block = this.#bot?.blockAt(vec({ ...position, y: position.y + 1 }));
+    const light = block?.light;
+    const skyLight = block?.skyLight;
+    const observed = Math.max(
+      typeof light === "number" ? light : 0,
+      typeof skyLight === "number" && timeOfDay < 12000 ? skyLight : 0,
+    );
+    if (observed > 0) return Math.min(15, observed);
+    return timeOfDay < 12000 ? 15 : 4;
+  }
+
+  /** Solid, diggable ground beside Person, at head or foot height. */
+  #diggableGround(here: Position): boolean {
+    const diggable = new Set(["dirt", "grass", "stone", "cobblestone"]);
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as [number, number][])
+      for (const dy of [0, 1]) {
+        const block = this.blockAt({
+          x: here.x + dx,
+          y: here.y + dy,
+          z: here.z + dz,
+        });
+        if (block && block.solid && diggable.has(block.kind)) return true;
+      }
+    return false;
+  }
+
+  /** Armour points from the equipped pieces, which mineflayer does not total. */
+  #armorPoints(): number {
+    const slots = this.#bot?.inventory?.slots;
+    if (!Array.isArray(slots)) return 0;
+    let points = 0;
+    for (const index of ARMOR_SLOTS) {
+      const item = slots[index] as { name?: string } | null | undefined;
+      if (item?.name) points += ARMOR_POINTS[item.name] ?? 0;
+    }
+    return Math.min(20, points);
+  }
+
+  #statusEffects(): WorldSnapshot["statusEffects"] {
+    const effects = this.#bot?.entity?.effects;
+    if (!effects || typeof effects !== "object") return [];
+    const registry = this.#bot?.registry;
+    const out: WorldSnapshot["statusEffects"] = [];
+    for (const [id, effect] of Object.entries(
+      effects as unknown as Record<string, unknown>,
+    )) {
+      const record = effect as { amplifier?: number; duration?: number } | null;
+      if (!record) continue;
+      const name = registry?.effects?.[Number(id)]?.name;
+      const normalised =
+        typeof name === "string"
+          ? name.toLowerCase().replace(/[^a-z0-9_]/g, "_")
+          : `effect_${id}`;
+      out.push({
+        name: /^[a-z][a-z0-9_]*$/.test(normalised)
+          ? normalised
+          : `effect_${id}`,
+        amplifier: Math.max(
+          0,
+          Math.min(255, Math.floor(record.amplifier ?? 0)),
+        ),
+        remainingTicks: Math.max(0, Math.floor(record.duration ?? 0)),
+      });
+    }
+    return out.slice(0, 32);
   }
 
   snapshot(): WorldSnapshot {
@@ -315,6 +744,8 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         biome: "unknown",
         lightLevel: 0,
         position: this.#lastSafePosition ?? this.#config.world.home,
+        yaw: 0,
+        pitch: 0,
         health: 0,
         food: 0,
         saturation: 0,
@@ -329,8 +760,11 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         resources: [],
         hazards: [],
         stuck: false,
+        diggableGround: false,
         lastSafePosition: this.#lastSafePosition,
         connected: false,
+        recentlyDamaged: false,
+        lastDamageTick: this.#lastDamageTick,
       };
     }
     const here = point(bot.entity.position);
@@ -340,25 +774,29 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         name: item.name,
         count: item.count,
       }));
+    // One search per resource category rather than one search for all of
+    // them. A combined nearest-N search standing on stone returns nothing but
+    // stone, which is what the first live observation did: fifty-five stone
+    // blocks, nine coal, and not one of the trees in sight.
     const resources = this.#connected
-      ? this.findBlocks({
-          kinds: ["wood", "stone", "coal_ore", "plant_food", "leaves"],
-          maxDistance: 48,
-          limit: 64,
-        })
+      ? gatherResources(
+          (kinds, maxDistance, limit) =>
+            this.findBlocks({ kinds, maxDistance, limit }),
+          here,
+        )
       : [];
     const hazards = this.#connected
       ? this.findBlocks({
           kinds: ["lava", "fire", "water", "cactus"],
-          maxDistance: 12,
-          limit: 32,
+          maxDistance: PERCEPTION.hazards.searchRadius,
+          limit: PERCEPTION.hazards.total,
         })
       : [];
     const containers = this.#connected
       ? this.findBlocks({
           kinds: ["chest", "furnace"],
-          maxDistance: 32,
-          limit: 16,
+          maxDistance: PERCEPTION.containers.searchRadius,
+          limit: PERCEPTION.containers.total,
         })
           .map((block) => this.containerAt(block.position))
           .filter((container): container is ContainerView => container !== null)
@@ -373,26 +811,36 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
           ? "thunder"
           : "rain"
         : "clear",
-      dimension: "overworld",
-      biome: "unknown",
-      lightLevel: timeOfDay < 12000 ? 15 : 4,
+      dimension: this.#dimension(),
+      biome: this.#biomeAt(here),
+      lightLevel: this.#lightAt(here, timeOfDay),
       position: here,
+      yaw: Number(bot.entity.yaw ?? 0),
+      pitch: Number(bot.entity.pitch ?? 0),
       health: bot.health ?? 0,
       food: bot.food ?? 0,
       saturation: bot.foodSaturation ?? 0,
       air: bot.oxygenLevel === undefined ? 300 : bot.oxygenLevel * 15,
-      armor: 0,
+      armor: this.#armorPoints(),
       alive: (bot.health ?? 0) > 0,
-      statusEffects: [],
+      statusEffects: this.#statusEffects(),
       inventory,
-      freeSlots: Math.max(0, 36 - inventory.length),
+      // The window knows how many slots are actually free. Counting stacks
+      // over-reports capacity as soon as any stack is partially filled.
+      freeSlots:
+        bot.inventory.emptySlotCount?.() ?? Math.max(0, 36 - inventory.length),
       entities: this.#entities(),
       containers,
       resources,
       hazards,
       stuck: this.#stuck,
+      diggableGround: this.#diggableGround(here),
       lastSafePosition: this.#lastSafePosition,
       connected: this.#connected,
+      recentlyDamaged:
+        this.#lastDamageTick !== null &&
+        Number(bot.time.age ?? 0) - this.#lastDamageTick <= DAMAGE_MEMORY_TICKS,
+      lastDamageTick: this.#lastDamageTick,
     };
     if (
       snapshot.alive &&
@@ -420,6 +868,41 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
       );
   }
 
+  /**
+   * Swims straight up by holding jump (ADR 0019), until the head is in
+   * breathable space, the budget is spent, or the body dies or is lost.
+   * Whether it got there is for the caller to see; this only strokes.
+   */
+  async ascend(options: { maxTicks: number }): Promise<void> {
+    const bot = this.bot;
+    if (!this.#connected) throw new DisconnectedError();
+    const generation = this.#generation;
+    const deadline = Date.now() + Math.max(50, options.maxTicks * 50);
+    const headInAir = (): boolean => {
+      const head = point(bot.entity.position);
+      const block = this.blockAt({ ...head, y: head.y + 1 });
+      return (
+        block !== null &&
+        !block.solid &&
+        block.kind !== "water" &&
+        block.kind !== "lava"
+      );
+    };
+    bot.pathfinder?.setGoal(null);
+    try {
+      bot.setControlState("jump", true);
+      while (Date.now() < deadline && !headInAir()) {
+        if (generation !== this.#generation || !this.#connected)
+          throw new DisconnectedError();
+        if ((bot.health ?? 0) <= 0)
+          throw new EmbodimentError("died", "Person died while swimming");
+        await delay(50);
+      }
+    } finally {
+      if (generation === this.#generation) bot.setControlState("jump", false);
+    }
+  }
+
   async moveTo(target: Position, options: MoveOptions = {}): Promise<void> {
     const bot = this.bot;
     if (!this.#connected) throw new DisconnectedError();
@@ -435,6 +918,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
 
     let timer: NodeJS.Timeout | undefined;
     let onReset: ((reason: string) => void) | undefined;
+    let onDeath: (() => void) | undefined;
     try {
       const failure = new Promise<never>((_resolve, reject) => {
         onReset = (reason: string) => {
@@ -442,6 +926,11 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
             reject(new EmbodimentError("navigation_stuck", "Navigation stuck"));
         };
         bot.on("path_reset", onReset);
+        // A dead body goes nowhere: stop at once rather than letting the
+        // pathfinder run out its timeout on it (E3 live rehearsal).
+        onDeath = () =>
+          reject(new EmbodimentError("died", "Person died while moving"));
+        bot.on("death", onDeath);
         timer = setTimeout(
           () =>
             reject(
@@ -468,6 +957,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     } finally {
       if (timer) clearTimeout(timer);
       if (onReset) bot.off("path_reset", onReset);
+      if (onDeath) bot.off("death", onDeath);
     }
   }
 
@@ -644,14 +1134,21 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
   ): Promise<CraftResult> {
     const bot = this.bot;
     if (!this.#connected) throw new DisconnectedError();
-    const recipes = recipesFor(preferredWood(this.snapshot().inventory));
-    const contract = recipes[item];
-    if (!contract)
-      throw new EmbodimentError("no_recipe", `No Person recipe for ${item}`);
+    const id = bot.registry.itemsByName[item]?.id;
+    if (id === undefined)
+      throw new EmbodimentError("no_recipe", `Unknown item ${item}`);
+
+    // The server registry decides whether a table is needed, not this file.
+    // recipesFor filters by what Person is actually carrying, so any recipe it
+    // returns can be made right now.
     let table = null;
-    if (contract.requiresTable) {
+    let recipe = bot.recipesFor(id, null, times, null)[0];
+    if (!recipe) {
       if (!tablePosition)
-        throw new EmbodimentError("no_crafting_table", `${item} needs a table`);
+        throw new EmbodimentError(
+          "no_crafting_table",
+          `${item} cannot be crafted without a table, and none was given`,
+        );
       table = bot.blockAt(vec(tablePosition));
       if (!table || table.name !== "crafting_table")
         throw new EmbodimentError(
@@ -663,22 +1160,35 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
           "unowned_table",
           "Person may only use a table it placed",
         );
+      recipe = bot.recipesFor(id, null, times, table)[0];
     }
-    const id = bot.registry.itemsByName[item]?.id;
-    if (id === undefined)
-      throw new EmbodimentError("no_recipe", `Unknown item ${item}`);
-    const recipe = bot.recipesFor(id, null, 1, table)[0];
     if (!recipe)
-      throw new EmbodimentError("no_recipe", `Recipe unavailable: ${item}`);
+      throw new EmbodimentError(
+        "missing_materials",
+        `No craftable recipe for ${item} right now`,
+      );
+
     const before = this.#tally();
-    await bot.craft(recipe, times, table ?? undefined);
+    try {
+      await bot.craft(recipe, times, table ?? undefined);
+    } catch (error) {
+      throw new EmbodimentError("craft_failed", (error as Error).message);
+    }
+    const produced = this.#gained(before);
+    // A craft that produced nothing is a failure however quietly the server
+    // reported it. Returning success here would be a false completion.
+    if (!produced.some((stack) => stack.name === item))
+      throw new EmbodimentError(
+        "craft_unconfirmed",
+        `The server produced no ${item}`,
+      );
     const after = this.#tally();
     const consumed: ItemStack[] = [];
     for (const [name, count] of before) {
       const delta = count - (after.get(name) ?? 0);
       if (delta > 0) consumed.push({ name, count: delta });
     }
-    return { produced: this.#gained(before), consumed };
+    return { produced, consumed };
   }
 
   async smelt(
@@ -702,31 +1212,49 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
 
     const before = this.#tally();
     const furnace = await bot.openFurnace(block);
+    let taken = 0;
     try {
       const fuel = bot.inventory
         .items()
-        .find((item: { name: string }) => item.name in FUEL_BURN);
+        .find((candidate: { name: string }) => candidate.name in FUEL_BURN);
       if (!fuel) throw new EmbodimentError("no_fuel", "No fuel available");
       const perUnit = FUEL_BURN[fuel.name] ?? 1;
       const fuelNeeded = Math.max(1, Math.ceil(times / perUnit));
       await furnace.putFuel(fuel.type, null, Math.min(fuelNeeded, fuel.count));
       const raw = bot.inventory
         .items()
-        .find((item: { name: string }) => item.name === input);
+        .find((candidate: { name: string }) => candidate.name === input);
       if (!raw)
         throw new EmbodimentError("missing_materials", `No ${input} to smelt`);
       const runs = Math.min(times, raw.count);
       await furnace.putInput(raw.type, null, runs);
-      // Ten seconds of furnace time per item, plus a margin for server lag.
-      for (let waited = 0; waited < runs * 12000 + 4000; waited += 500) {
+
+      // Smelting takes ten seconds an item. Waiting for the whole batch and
+      // then giving up empty-handed would throw away food that is already
+      // cooked, so output is collected as it appears.
+      const deadline =
+        Date.now() + runs * SMELT_TICKS_PER_ITEM * 50 + SMELT_GRACE_MS;
+      while (Date.now() < deadline && taken < runs) {
         await delay(500);
-        if (furnace.outputItem()?.count === runs) break;
+        const output = furnace.outputItem();
+        if (!output) continue;
+        await furnace.takeOutput();
+        taken += output.count;
       }
-      if (furnace.outputItem()) await furnace.takeOutput();
+      const remaining = furnace.outputItem();
+      if (remaining) {
+        await furnace.takeOutput();
+        taken += remaining.count;
+      }
     } finally {
       furnace.close();
     }
     await delay(200);
+    if (taken === 0)
+      throw new EmbodimentError(
+        "smelt_unconfirmed",
+        "The furnace produced nothing in time",
+      );
     const after = this.#tally();
     const consumed: ItemStack[] = [];
     for (const [name, count] of before) {
@@ -774,6 +1302,51 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
     await delay(650);
   }
 
+  /**
+   * Opens a container and reads what is actually in it.
+   *
+   * The cached view returned by `containerAt` starts empty, so deciding what
+   * to withdraw from it would always conclude "nothing". Against a real server
+   * the contents only exist once the window is open.
+   */
+  async inspectContainer(position: Position): Promise<ContainerView | null> {
+    const cached = this.containerAt(position);
+    if (!cached) return null;
+    const bot = this.bot;
+    const block = bot.blockAt(vec(position));
+    if (!block) return null;
+    const window = await this.#openContainer(block);
+    try {
+      const contents = this.#readContainer(window);
+      this.#containerContents.set(positionKey(position), contents);
+      return { ...cached, contents };
+    } finally {
+      window.close();
+    }
+  }
+
+  async #openContainer(block: unknown): Promise<ContainerWindow> {
+    try {
+      return (await this.bot.openContainer(
+        block as never,
+      )) as unknown as ContainerWindow;
+    } catch (error) {
+      throw new EmbodimentError(
+        "container_unavailable",
+        (error as Error).message,
+      );
+    }
+  }
+
+  #readContainer(window: ContainerWindow): ItemStack[] {
+    const totals = new Map<string, number>();
+    for (const item of window.containerItems())
+      totals.set(item.name, (totals.get(item.name) ?? 0) + item.count);
+    return [...totals]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
   async deposit(position: Position, items: ItemStack[]): Promise<ItemStack[]> {
     const storageId = this.#ownedStorage.get(positionKey(position));
     if (!storageId)
@@ -788,7 +1361,7 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         "no_container",
         "No container at that position",
       );
-    const chest = await bot.openContainer(block);
+    const window = await this.#openContainer(block);
     const moved: ItemStack[] = [];
     try {
       for (const item of items) {
@@ -804,20 +1377,23 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
           );
         const amount = Math.min(item.count, held);
         if (amount <= 0) continue;
-        await chest.deposit(type, null, amount);
+        try {
+          await window.deposit(type, null, amount);
+        } catch (error) {
+          // A container that fills up mid-transfer is an ordinary outcome, and
+          // whatever already moved still moved.
+          const failure = containerFailure(error);
+          if (moved.length === 0) throw failure;
+          break;
+        }
         moved.push({ name: item.name, count: amount });
       }
       this.#containerContents.set(
         positionKey(position),
-        (chest.containerItems() as { name: string; count: number }[]).map(
-          (item) => ({
-            name: item.name,
-            count: item.count,
-          }),
-        ),
+        this.#readContainer(window),
       );
     } finally {
-      chest.close();
+      window.close();
     }
     return moved;
   }
@@ -830,35 +1406,56 @@ export class MineflayerEmbodiment extends EventEmitter implements Embodiment {
         "no_container",
         "No container at that position",
       );
-    const chest = await bot.openContainer(block);
+    const window = await this.#openContainer(block);
     const moved: ItemStack[] = [];
     try {
       for (const item of items) {
         const type = bot.registry.itemsByName[item.name]?.id;
         if (type === undefined) continue;
-        const available = (
-          chest.containerItems() as { name: string; count: number }[]
-        )
+        const available = window
+          .containerItems()
           .filter((candidate) => candidate.name === item.name)
           .reduce((total, candidate) => total + candidate.count, 0);
         const amount = Math.min(item.count, available);
         if (amount <= 0) continue;
-        await chest.withdraw(type, null, amount);
+        try {
+          await window.withdraw(type, null, amount);
+        } catch (error) {
+          const failure = containerFailure(error);
+          if (moved.length === 0) throw failure;
+          break;
+        }
         moved.push({ name: item.name, count: amount });
       }
       this.#containerContents.set(
         positionKey(position),
-        (chest.containerItems() as { name: string; count: number }[]).map(
-          (item) => ({
-            name: item.name,
-            count: item.count,
-          }),
-        ),
+        this.#readContainer(window),
       );
     } finally {
-      chest.close();
+      window.close();
     }
     return moved;
+  }
+
+  /**
+   * One bounded step of deliberate gaze.
+   *
+   * `bot.look` is Mineflayer's supported orientation call and it resolves once
+   * the server has been told, so awaiting it is what makes "turn, then look"
+   * an ordering rather than a hope. The yaw and pitch it takes are computed
+   * here, on the trusted side; nothing above this method ever sees an angle.
+   */
+  async look(direction: GazeDirection): Promise<void> {
+    const bot = this.bot;
+    if (!this.#connected) throw new DisconnectedError();
+    const next = stepGaze(
+      {
+        yaw: Number(bot.entity.yaw ?? 0),
+        pitch: Number(bot.entity.pitch ?? 0),
+      },
+      direction,
+    );
+    await bot.look(next.yaw, next.pitch, false);
   }
 
   async waitTicks(ticks: number): Promise<void> {

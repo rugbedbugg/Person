@@ -50,6 +50,10 @@
           "type": "null"
         }
       ]
+    },
+    "lifeStatus": {
+      "enum": ["alive", "awaiting_respawn"],
+      "description": "ADR 0017, I3, engineering-facing: whether the Person reconstructed from evidence is alive or died and awaits a respawn the runtime must perform. A terminated Person never reaches CognitionReady."
     }
   }
 }

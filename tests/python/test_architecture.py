@@ -4,8 +4,10 @@ from __future__ import annotations
 
 import ast
 import importlib.metadata
+import io
 import json
 import re
+import tokenize
 import tomllib
 from pathlib import Path
 
@@ -102,7 +104,7 @@ def test_cognition_never_evaluates_generated_code() -> None:
 
 
 def test_the_evidence_journal_is_append_only() -> None:
-    from person_persistence import EvidenceJournal
+    from person_persistence import EventJournal
 
     source = (REPOSITORY / "packages/persistence/python/person_persistence/journal.py").read_text(
         encoding="utf-8"
@@ -110,7 +112,7 @@ def test_the_evidence_journal_is_append_only() -> None:
     assert '"a"' in source, "the journal must open its segments in append mode"
     assert '"w"' not in source, "the journal must never open a segment for writing"
     for forbidden in ("update", "delete", "remove", "rewrite", "truncate"):
-        assert forbidden not in dir(EvidenceJournal)
+        assert forbidden not in dir(EventJournal)
 
 
 def test_learning_is_off_by_default_everywhere() -> None:
@@ -130,13 +132,12 @@ def test_learning_is_off_by_default_everywhere() -> None:
 def test_future_providers_refuse_to_pretend_they_work() -> None:
     from person_cognition.future_providers import FUTURE_PROVIDERS, NotYetImplemented
 
+    # Memory (ADR 0007), projects (ADR 0009) and affect (ADR 0010) left this
+    # list when they were built; the singleton world model left when
+    # prediction became plural (ADR 0028). The rest remain.
     assert set(FUTURE_PROVIDERS) == {
-        "MemoryProvider",
-        "WorldModelProvider",
-        "AffectProvider",
         "LanguageProvider",
         "SocialProvider",
-        "ProjectProvider",
         "ExplorationProvider",
     }
     for _name, factory in FUTURE_PROVIDERS.items():
@@ -148,6 +149,19 @@ def test_future_providers_refuse_to_pretend_they_work() -> None:
         )
         with pytest.raises(NotYetImplemented):
             getattr(provider, method)(*[{}] * _arity(provider, method))
+
+
+def test_no_placeholder_outlives_the_capability_it_reserved() -> None:
+    from person_cognition import future_providers
+
+    for name in ("MemoryProvider", "AffectProvider", "ProjectProvider", "WorldModelProvider"):
+        assert not hasattr(future_providers, name), f"{name} is implemented, not future"
+    loop = (REPOSITORY / "apps/cognition/python/person_cognition/loop.py").read_text(
+        encoding="utf-8"
+    )
+    assert "future_providers" not in loop, "the loop runs on implementations only"
+    for module in (".affect", ".projects", ".memory"):
+        assert f"from {module} import" in loop, f"the loop uses {module[1:]} itself"
 
 
 def _arity(provider: object, method: str) -> int:
@@ -177,3 +191,206 @@ def test_no_required_scope_placeholders_remain_in_cognition() -> None:
         source = path.read_text(encoding="utf-8")
         match = marker.search(source)
         assert match is None, f"{path.relative_to(REPOSITORY)} contains {match.group(0)}"
+
+
+def test_memory_cannot_read_the_journal_for_itself() -> None:
+    # The memory store is fed events by the evidence store's replay, and reads
+    # only the ones Person encoded. If the memory package could open the
+    # journal it could recall anything in it (ADR 0003 rule 1, ADR 0007).
+    forbidden = {"EventJournal", "EventStore", "SnapshotStore", "open", "read_text"}
+    package = REPOSITORY / "apps/cognition/python/person_cognition/memory"
+    for path in package.rglob("*.py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            name = (
+                node.id
+                if isinstance(node, ast.Name)
+                else node.attr
+                if isinstance(node, ast.Attribute)
+                else node.name
+                if isinstance(node, ast.alias)
+                else None
+            )
+            assert name not in forbidden, f"{path.relative_to(REPOSITORY)} uses {name}"
+
+
+def test_no_arbitrary_query_interface_to_memory_exists() -> None:
+    for path in python_sources():
+        source = path.read_text(encoding="utf-8")
+        assert "def retrieve(" not in source, f"{path.relative_to(REPOSITORY)} defines retrieve"
+
+
+def test_the_spatial_model_reads_no_absolute_or_ledger_state() -> None:
+    # Person's sense of place is integrated from felt motion (ADR 0008). The
+    # package must not be able to see a coordinate, a heading, the runtime's
+    # home distance, or the journal, whatever the observation happens to hold.
+    cognition = REPOSITORY / "apps/cognition/python/person_cognition"
+    # Projects are anchored to places in the same model and are held to the
+    # same rule (Phase D).
+    sources = [
+        *(cognition / "spatial").rglob("*.py"),
+        cognition / "projects.py",
+        cognition / "affect.py",
+        # Learned effect beliefs come from felt outcomes only (ADR 0011).
+        cognition / "effect_learning.py",
+        # Hypotheses and experiments speak only Person's vocabulary (ADR
+        # 0012). The quarantine module is the one place that names what is
+        # privileged, so that the gate can recognise it.
+        *(
+            path
+            for path in (cognition / "hypotheses").rglob("*.py")
+            if path.name != "quarantine.py"
+        ),
+    ]
+    forbidden = {
+        "homeDistance",
+        "yaw",
+        "pitch",
+        "position",
+        "WorldSnapshot",
+        "EventJournal",
+        "EventStore",
+        "SnapshotStore",
+        "open",
+        "read_text",
+    }
+    for path in sources:
+        source = path.read_text(encoding="utf-8")
+        # Identifiers and string literals, which is where a field would be
+        # read; prose in comments and docstrings may name what is excluded.
+        tokens = tokenize.generate_tokens(io.StringIO(source).readline)
+        for token in tokens:
+            if token.type == tokenize.NAME:
+                words = {token.string}
+            elif token.type == tokenize.STRING and len(token.string) < 40:
+                words = set(re.findall(r"\w+", token.string))
+            else:
+                continue
+            leaked = words & forbidden
+            assert not leaked, f"{path.relative_to(REPOSITORY)} uses {sorted(leaked)}"
+
+
+def test_the_loop_reaches_places_only_through_its_spatial_sense() -> None:
+    source = (REPOSITORY / "apps/cognition/python/person_cognition/loop.py").read_text(
+        encoding="utf-8"
+    )
+    for forbidden in ("spatial_map.places(", "spatial_map._places", ".estimate = "):
+        assert forbidden not in source, f"the loop must not edit the map: {forbidden}"
+
+
+def test_no_cognition_code_reads_a_home_distance() -> None:
+    # C8: the observation carries no distance to home, and nothing on the
+    # cognition side may look for one. Whether Person is home is its belief.
+    for path in python_sources():
+        source = path.read_text(encoding="utf-8")
+        for token in tokenize.generate_tokens(io.StringIO(source).readline):
+            # A field lookup is a short literal; prose may name what is gone.
+            short = token.type == tokenize.STRING and len(token.string) < 40
+            if short and "homeDistance" in token.string:
+                raise AssertionError(f"{path.relative_to(REPOSITORY)} reads homeDistance")
+
+
+HYPOTHESES = REPOSITORY / "apps/cognition/python/person_cognition/hypotheses"
+
+
+def _code(path: Path) -> str:
+    """Source without comments and docstrings: prose may name what is excluded."""
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        body = getattr(node, "body", None)
+        if (
+            isinstance(body, list)
+            and body
+            and isinstance(body[0], ast.Expr)
+            and isinstance(body[0].value, ast.Constant)
+            and isinstance(body[0].value.value, str)
+        ):
+            body[0] = ast.Pass()
+    return ast.unparse(tree)
+
+
+def test_experiments_act_only_through_the_ordinary_goal_boundary() -> None:
+    # An experiment is a goal. Nothing in the package can emit a message,
+    # touch a body or reach the runtime; the loop sends what the planner and
+    # policy chose, as for any goal.
+    for path in HYPOTHESES.rglob("*.py"):
+        code = _code(path)
+        for forbidden in (
+            "_send",
+            "encode_frame",
+            "SkillInvocation",
+            "embodiment",
+            "Embodiment",
+            "mineflayer",
+            "subprocess",
+            "socket",
+        ):
+            assert forbidden not in code, f"{path.name} uses {forbidden}"
+
+
+def test_a_hypothesis_holds_no_executable_predicate() -> None:
+    tree = ast.parse((HYPOTHESES / "hypothesis.py").read_text(encoding="utf-8"))
+    for node in ast.walk(tree):
+        assert not isinstance(node, ast.Lambda), "no predicate hides in a hypothesis"
+        if isinstance(node, ast.AnnAssign):
+            assert "Callable" not in ast.unparse(node.annotation)
+
+
+def test_a_proposer_sees_only_the_bounded_reasoning_context() -> None:
+    generation = _code(HYPOTHESES / "generation.py")
+    # The language model's whole input is the context, serialised.
+    calls = re.findall(r"self\._complete\((.*)\)", generation)
+    assert calls == ["json.dumps(context.to_json(), sort_keys=True)"], calls
+    assert re.search(r"def propose\(self, context: ReasoningContext\)", generation)
+
+
+def test_proposal_text_cannot_move_a_belief() -> None:
+    # The gate builds a hypothesis with empty evidence; only journalled
+    # trials, through the book, ever update one.
+    generation = _code(HYPOTHESES / "generation.py")
+    for forbidden in (".updated(", "Cell(", "cells=", "followed", "lifecycle="):
+        assert forbidden not in generation, forbidden
+    book = _code(HYPOTHESES / "book.py")
+    assert book.count(".updated(") == 1
+
+
+def test_no_hypothesis_is_ever_declared_knowledge() -> None:
+    # The one `knowledge=` the loop may write is the DecisionState's initial
+    # knowledge, built from the skill contracts and nothing else (ADR 0026);
+    # `test_knowledge_is_initial_until_an_explicit_promotion_exists` holds that.
+    pattern = re.compile(
+        r"\bknowledge\w*\s*=(?!\s*Knowledge\(skills=self\.registry, facts=self\.registry\.facts\))"
+        r"|\bknown\s*=\s*True|standing\s*=\s*['\"]true"
+    )
+    sources = [
+        *HYPOTHESES.rglob("*.py"),
+        REPOSITORY / "apps/cognition/python/person_cognition/loop.py",
+    ]
+    for path in sources:
+        match = pattern.search(_code(path))
+        assert match is None, f"{path.name}: {match.group(0) if match else ''}"
+
+
+def test_hidden_hunger_mechanics_never_reach_cognition() -> None:
+    # ADR 0014: a player is not shown saturation or exhaustion, and neither is
+    # Person. They are not in the observation, so nothing in cognition (its
+    # memory, its affect, its evidence) can hold them.
+    core = json.loads(
+        (REPOSITORY / "packages/protocol/schemas/observation.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    assert "vitals" not in core["properties"], "vitals are an environment's payload (ADR 0025)"
+    schema = json.loads(
+        (REPOSITORY / "environments/minecraft/schemas/observation-payload.schema.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    vitals = schema["properties"]["vitals"]["properties"]
+    assert "saturation" not in vitals and "exhaustion" not in vitals
+    assert "air" not in vitals, "breath is felt in bubbles, not as the air counter"
+    for root in [*COGNITION_ROOTS, REPOSITORY / "environments/minecraft/python"]:
+        for path in root.rglob("*.py"):
+            text = path.read_text(encoding="utf-8").lower()
+            for word in ("saturation", "exhaustion"):
+                assert word not in text, f"{path.name} mentions {word}"

@@ -1,0 +1,140 @@
+# Architectural Decision Records (ADRs)
+
+**Purpose:** Document significant architectural decisions for Person, with context, alternatives, and consequences.
+
+---
+
+## When to Create an ADR
+
+Create an ADR for any decision that:
+
+- Changes the trust boundary (Node/Python relationship, protocol schemas, safety hierarchy)
+- Modifies safety semantics (protected areas, permissions, emergency triggers)
+- Alters SkillSpec schema or skill library composition
+- Changes evidence format, learning semantics, or persistence model
+- Adds/removes a runtime process or package
+- Changes the persistent state model (what survives restart)
+- Introduces multi-Person architecture
+
+Do **not** create ADRs for:
+
+- Bug fixes within established boundaries
+- Test additions
+- Documentation updates
+- Refactoring that preserves public interfaces
+
+---
+
+## ADR Lifecycle
+
+```
+Proposed → [Discussion] → Accepted → Implemented
+                ↓
+            Deferred (intentionally not decided)
+                ↓
+            Superseded (replaced by later ADR)
+```
+
+---
+
+## ADR Format
+
+Use `ADR-TEMPLATE.md`. Each ADR must include:
+
+| Section                 | Required?                                   |
+| ----------------------- | ------------------------------------------- |
+| Status                  | Yes (Proposed/Accepted/Superseded/Deferred) |
+| Context                 | Yes                                         |
+| Decision                | Yes                                         |
+| Consequences            | Yes                                         |
+| Alternatives Considered | Yes                                         |
+| Revisit Conditions      | Yes                                         |
+| Relevant Commits/Docs   | Yes                                         |
+
+---
+
+## Index
+
+| ADR                                                        | Title                                                                       | Status                             | Date       |
+| ---------------------------------------------------------- | --------------------------------------------------------------------------- | ---------------------------------- | ---------- |
+| [0001](0001-baritone-motor-backend.md)                     | Baritone as the planned primary motor backend                               | Accepted (direction) / Deferred    | 2026-09-22 |
+| [0002](0002-perception-firewall.md)                        | The perception firewall                                                     | Accepted (rule) / Deferred (model) | 2026-09-22 |
+| [0003](0003-memory-firewall.md)                            | The memory firewall                                                         | Accepted (rule) / model: ADR 0007  | 2026-09-22 |
+| [0004](0004-external-awareness-and-research-boundary.md)   | External awareness and the research boundary                                | Accepted (rule) / Deferred         | 2026-09-22 |
+| [0005](0005-cognitive-autonomy-vs-capability-authority.md) | Cognitive autonomy is not environmental authority                           | Accepted                           | 2026-09-22 |
+| [0006](0006-two-clock-lifecycle.md)                        | The two-clock lifecycle                                                     | Accepted / partially implemented   | 2026-09-22 |
+| [0007](0007-episodic-memory-and-bounded-recall.md)         | Episodic memory and bounded recall                                          | Accepted                           | 2026-09-24 |
+| [0008](0008-self-motion-and-cognitive-places.md)           | Self-motion and cognitive places                                            | Accepted                           | 2026-09-25 |
+| [0009](0009-persistent-projects.md)                        | Projects as persistent cognitive commitments                                | Accepted                           | 2026-09-25 |
+| [0010](0010-affect-foundation.md)                          | Affect as a bounded bias on cognition                                       | Accepted                           | 2026-09-25 |
+| [0011](0011-learned-effect-reliability.md)                 | Learned reliability of skill effects                                        | Accepted                           | 2026-09-26 |
+| [0012](0012-causal-hypotheses-and-experiments.md)          | Causal hypotheses and controlled experiments                                | Accepted                           | 2026-09-26 |
+| [0013](0013-affect-modes-and-experiments.md)               | Affect modes and a reproducible experiment harness                          | Accepted                           | 2026-09-29 |
+| [0014](0014-interoceptive-affect.md)                       | Interoceptive affect, phasic and tonic                                      | Accepted                           | 2026-09-29 |
+| [0015](0015-one-contact-range-and-bounded-progress.md)     | One contact range and bounded simulated progress under runtime control      | Accepted                           | 2026-09-30 |
+| [0016](0016-fixture-hostiles-obey-walls.md)                | Fixture hostiles obey walls                                                 | Accepted                           | 2026-09-30 |
+| [0017](0017-identity-continuity-and-lifetime.md)           | Identity, continuity and operational lifetime                               | Accepted                           | 2026-09-30 |
+| [0018](0018-first-ada-readiness-and-canonical-history.md)  | First-Ada readiness and canonical history                                   | Accepted                           | 2026-09-30 |
+| [0019](0019-air-deprivation-emergency-response.md)         | Air-deprivation emergency response                                          | Accepted                           | 2026-09-30 |
+| [0020](0020-hybrid-cognition-and-deliberation.md)          | Hybrid cognition: Person-owned structure, replaceable deliberation          | Accepted                           | 2026-09-30 |
+| [0021](0021-metareasoning-and-deliberation-arbitration.md) | Metareasoning: when Person deliberates, and what a deliberation may change  | Accepted                           | 2026-10-01 |
+| [0022](0022-evidence-backed-procedural-cognition.md)       | Evidence-backed procedural cognition: the habit lifecycle                   | Accepted                           | 2026-10-01 |
+| [0023](0023-affective-metareasoning.md)                    | Affective metareasoning                                                     | Accepted                           | 2026-10-01 |
+| [0024](0024-cognitive-backend-evaluation.md)               | Cognitive backend evaluation and initial-provider selection                 | Accepted                           | 2026-10-01 |
+| [0025](0025-person-core-and-environment-profiles.md)       | Person's core, environment profiles and experience contexts                 | Proposed                           | 2026-10-03 |
+| [0026](0026-epistemic-state-and-the-decision-boundary.md)  | Epistemic state: percepts, beliefs, self-state and the decision boundary    | Proposed                           | 2026-10-03 |
+| [0027](0027-canonical-events-and-epistemic-evidence.md)    | Canonical events are not epistemic evidence                                 | Proposed                           | 2026-10-03 |
+| [0028](0028-predictive-models-are-plural.md)               | Predictive models are plural; the singleton world-model provider is retired | Proposed                           | 2026-10-03 |
+| [0029](0029-architecture-lives-in-docs-and-tests.md)       | Architectural rules live in the specification, ADRs and tests               | Proposed                           | 2026-10-03 |
+
+ADRs 0001 to 0006 were written during the Phase 0 canonical architecture
+reconciliation (`docs/PERSON_SPEC.md`, frozen 2026-09-22) and changed no
+production code when written. Since then 0002's structural firewall and first
+vision model (PRs #4, #5) and 0006's experienced-time clock have been built;
+0001 and 0004 have not started. ADRs 0007 to 0012 were each written with the
+phase that implemented them and accepted by the operator.
+
+---
+
+## Process
+
+1. **Create ADR** from template: `cp docs/decisions/ADR-TEMPLATE.md docs/decisions/000N-title.md`
+2. **Fill in** all sections with evidence-based reasoning
+3. **Discuss** in PR — both maintainers must approve for architectural-boundary ADRs
+4. **Merge** → status becomes `Accepted`
+5. **Implement** (may happen before or after merge)
+6. **Update** `docs/CURRENT_STATE.md`, `TRACEABILITY.md` and the invariants table in `docs/ARCHITECTURE.md` as needed (ADR 0029)
+7. **If superseded later:** Create new ADR, mark old as `Superseded`, link both
+
+---
+
+## Retroactive ADRs
+
+**Do not manufacture retroactive ADRs from memory.** Only create historical ADRs if:
+
+- The decision is clearly evidenced by existing documentation, AND
+- The implementation/commit history clearly shows the decision point
+
+Otherwise, document the ADR process and use it going forward. The commit history (`docs/PROJECT_HISTORY.md`) serves as the historical record for pre-ADR decisions.
+
+---
+
+## Key Historical Decisions (Pre-ADR, Documented in PROJECT_HISTORY.md)
+
+| Decision                                                                                                          | Evidence                                                                                              | Commit              |
+| ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- | ------------------- |
+| Two-process architecture (Node parent, Python cognition)                                                          | `docs/ARCHITECTURE.md`, `IMPLEMENTATION_REPORT.md`                                                    | `6b99830`           |
+| Trust boundary: Python proposes, Node decides                                                                     | `AGENTS.md`, `docs/SAFETY.md`, `TRACEABILITY.md`                                                      | `6b99830`           |
+| Protocol `shroud-learning-v2` with canonical JSON Schemas (superseded by `person-v3`, ADR 0025)                   | `packages/protocol/`, `docs/PROTOCOL.md`                                                              | `6b99830`           |
+| Embodiment port with two implementations (Mineflayer + Fixture)                                                   | `apps/node-runtime/src/embodiment/types.ts`, `fixtures/src/`                                          | `6b99830`           |
+| Safety kernel L0–L4 hierarchy, pure function of snapshot                                                          | `apps/node-runtime/src/safety/safety-kernel.ts`, `docs/SAFETY.md`                                     | `6b99830`           |
+| 21 skills with typed SkillSpec contracts                                                                          | `packages/skills/specs/` (now `environments/minecraft/skills/`), `docs/SKILLS.md`                     | `6b99830`           |
+| Evidence: append-only JSONL journal + atomic snapshots                                                            | `packages/persistence/`, `docs/LEARNING.md`                                                           | `6b99830`           |
+| Training-context separation (fixture/live evidence never merges; superseded in part by experience keys, ADR 0025) | `packages/persistence/`, `docs/LEARNING.md`                                                           | `6b99830`           |
+| Legacy Shroud V1 discarded (Q-table, 7 actions, epsilon-greedy)                                                   | `IMPLEMENTATION_REPORT.md` "Rewritten or discarded"                                                   | `6b99830`           |
+| No SQLite — JSONL journal + snapshots instead                                                                     | `IMPLEMENTATION_REPORT.md` "Architectural deviations"                                                 | `6b99830`           |
+| Adapter audit against installed libraries (no live server)                                                        | `REALITY_VALIDATION.md`, `IMPLEMENTATION_REPORT.md` Milestone 1                                       | `d557275`–`2d2b48f` |
+| LAN port as runtime override (never written to config)                                                            | `packages/config/ts/override.ts` (now `environments/minecraft/ts/override.ts`), `docs/LAN_TESTING.md` | `062f7fe`           |
+| Single-skill validation harness (shared dispatch path)                                                            | `apps/node-runtime/src/skills/dispatch.ts`, `docs/LAN_TESTING.md`                                     | `b692153`           |
+
+These are **recorded for reference**, not as formal ADRs. Future decisions use the ADR process.

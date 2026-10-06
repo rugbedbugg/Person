@@ -1,0 +1,168 @@
+{
+  "protocolVersion": "shroud-learning-v2",
+  "messageId": "dc452145-cc89-42d2-9e47-bae4ef5d700b",
+  "personId": "ada",
+  "sessionId": "d82abaf4-9fad-4111-b79b-8afc4f5c2355",
+  "worldId": "person-dedicated-1",
+  "tick": 948,
+  "timestamp": "2026-09-29T11:21:21.611Z",
+  "type": "Observation",
+  "observationVersion": 7,
+  "trainingContext": "minecraft_normal",
+  "selfMotion": {
+    "continuity": "start",
+    "translation": {
+      "direction": "unknown",
+      "band": "unknown",
+      "distance": null
+    },
+    "rotation": "unknown",
+    "vertical": "unknown"
+  },
+  "vitals": {
+    "health": 20,
+    "food": 20,
+    "saturation": 5,
+    "air": 300,
+    "armor": 0,
+    "statusEffects": [],
+    "alive": true
+  },
+  "environment": {
+    "dimension": "overworld",
+    "dayPhase": "day",
+    "timeOfDay": 1163,
+    "weather": "clear",
+    "lightLevel": 15,
+    "biome": "forest"
+  },
+  "inventory": {
+    "items": [],
+    "categories": {
+      "food": 0,
+      "raw_food": 0,
+      "cooked_food": 0,
+      "fuel": 0,
+      "wood": 0,
+      "stone": 0,
+      "coal": 0,
+      "tools": 0,
+      "weapons": 0,
+      "armor": 0,
+      "building_materials": 0
+    },
+    "freeSlots": 36
+  },
+  "permissions": {
+    "harvest": true,
+    "mine": true,
+    "build": true,
+    "huntPassive": true,
+    "depositOwned": true,
+    "withdrawOwned": true,
+    "withdrawExisting": true,
+    "craft": true,
+    "consume": true
+  },
+  "affordances": {
+    "diggableGround": false,
+    "shelterSite": false,
+    "storageSite": false
+  },
+  "nearby": {
+    "resources": [
+      {
+        "kind": "plant_food",
+        "bearing": "right",
+        "elevation": "level",
+        "rangeBand": "reach",
+        "distance": 4,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      },
+      {
+        "kind": "plant_food",
+        "bearing": "right",
+        "elevation": "level",
+        "rangeBand": "reach",
+        "distance": 4.5,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      },
+      {
+        "kind": "plant_food",
+        "bearing": "right",
+        "elevation": "below",
+        "rangeBand": "reach",
+        "distance": 4,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      },
+      {
+        "kind": "plant_food",
+        "bearing": "right",
+        "elevation": "below",
+        "rangeBand": "reach",
+        "distance": 4.5,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      },
+      {
+        "kind": "wood",
+        "bearing": "left",
+        "elevation": "level",
+        "rangeBand": "near",
+        "distance": 6,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      },
+      {
+        "kind": "wood",
+        "bearing": "left",
+        "elevation": "level",
+        "rangeBand": "near",
+        "distance": 6.5,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      },
+      {
+        "kind": "wood",
+        "bearing": "left",
+        "elevation": "level",
+        "rangeBand": "near",
+        "distance": 6,
+        "detail": "peripheral",
+        "harvestPermitted": true
+      }
+    ],
+    "hostiles": [],
+    "passiveAnimals": [],
+    "players": [],
+    "containers": [],
+    "workstations": [],
+    "hazards": []
+  },
+  "home": {
+    "activeHome": {
+      "homeId": "home_primary"
+    },
+    "shelterState": "none",
+    "ownedStorage": [],
+    "bedKnown": false,
+    "foodReserve": 0,
+    "fuelReserve": 0
+  },
+  "navigation": {
+    "routeStatus": "idle",
+    "pathRisk": "low",
+    "stuckState": "free",
+    "returnPathKnown": true
+  },
+  "cognition": {
+    "activeGoal": null,
+    "activeRoutine": null,
+    "activeSkill": null,
+    "suspendedGoals": []
+  },
+  "previousOutcome": null
+}

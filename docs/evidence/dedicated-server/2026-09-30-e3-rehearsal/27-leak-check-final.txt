@@ -1,0 +1,18 @@
+{'person_founded': 1, 'session_started': 3, 'session_ended': 3, 'person_died': 5, 'person_respawned': 5, 'person_terminated': 0, 'world_availability_changed': 5, 'episode_started': 3, 'episode_ended': 3}
+persons: ['validation-000']
+'(?<!s)kill' in Person-facing records: False
+'kick' in Person-facing records: False
+'console' in Person-facing records: False
+'operator' in Person-facing records: False
+'stimulus' in Person-facing records: False
+'fell out' in Person-facing records: False
+'skeleton\\"? ?(shot|killed)' in Person-facing records: False
+'\\"x\\":' in Person-facing records: False
+'coordinates' in Person-facing records: False
+'cause' in Person-facing records: False
+'\\bop\\b' in Person-facing records: False
+death memory detail keys: [('food_before', 'goal', 'health_before', 'outcome', 'project', 'threat_in_view')]
+person_died payload keys: [('affect', 'experienced_tick', 'terminal')]
+sessions: [('minutes', None, None), ('minutes', True, 'clean_end'), ('minutes', True, 'clean_end')]
+world changes: ['available/connected', 'available/connected', 'unavailable/connection_lost', 'available/reconnected', 'available/connected']
+evidence chain intact: True

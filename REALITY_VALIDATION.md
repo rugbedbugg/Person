@@ -1,0 +1,1083 @@
+# Reality validation
+
+Milestone 1. Date: 2026-09-15.
+
+## The headline, stated plainly
+
+**No Minecraft server was reachable from the environment this work was done
+in.** There is no Java process on the machine, nothing listening on the
+configured LAN port, and no way to open a world from here. Every claim below
+that involves a live server is therefore marked "not run", and none of them
+should be read as validated.
+
+What was done instead is the part of reality validation that does not need a
+server: the Mineflayer adapter was audited line by line against the installed
+`mineflayer` 4.39.0, `mineflayer-pathfinder` 2.4.5 and `minecraft-data` 1.16.1
+sources, and the defects that audit found were fixed and covered by tests that
+run the adapter against a double built on Minecraft's own data tables.
+
+That audit found a defect that would have crashed Person on its first contact
+with any real server, and five more that would have produced wrong behaviour.
+None of them were visible to the fixture tests, which is exactly the gap this
+milestone exists to close. The remaining gap, the one only a server can close,
+is listed at the end and is still open.
+
+> **Update, later the same day.** A LAN world was opened and Person connected
+> to it. This headline is kept exactly as it was written, because it is the
+> honest record of what Milestone 1 could and could not claim. What happened on
+> first contact is recorded in [First contact](#first-contact) at the end.
+
+## Environment
+
+|                                       |                                                  |
+| ------------------------------------- | ------------------------------------------------ |
+| Minecraft server                      | none available; **no live validation performed** |
+| Target version                        | Java Edition 1.16.1                              |
+| Node                                  | 22.23.2 (pinned), 24.20.0 (host default)         |
+| Python                                | 3.12.14                                          |
+| mineflayer                            | 4.39.0                                           |
+| mineflayer-pathfinder                 | 2.4.5                                            |
+| minecraft-data                        | 3.116.0, 1.16.1 tables                           |
+| prismarine-block / prismarine-windows | 1.23.0 / 2.10.0                                  |
+| Difficulty, LAN configuration         | not applicable; see `docs/LAN_TESTING.md`        |
+| Mods or plugins                       | none                                             |
+
+## How the adapter was checked without a server
+
+Three independent methods, none of which is a substitute for running the thing:
+
+1. **Source audit.** Every Mineflayer call the adapter makes was checked against
+   the installed library source: the field it reads, the shape it gets back, and
+   the failure it can throw. Findings below cite the file that settled them.
+2. **Authoritative data.** Recipes, entity categories, block bounding boxes and
+   item ids come from the real `minecraft-data` 1.16.1 tables rather than from
+   the adapter's assumptions. The nine recipes Person uses were verified against
+   those tables, including which of them require a crafting table.
+3. **A conformance double.** `tests/support/mineflayer-double.ts` presents the
+   API shapes the audit established, backed by real `minecraft-data` and
+   `prismarine-recipe`. Twenty-seven tests run the adapter against it. Where the
+   double and the real client differ, the double is wrong and the tests are
+   worth less; that risk is stated in the blockers.
+
+To check the tests were worth anything, the original metadata defect was
+reintroduced deliberately: five tests failed. They were then restored.
+
+## Observation validation
+
+`person observe --config <file>` connects, normalises one observation,
+validates it against the protocol schema and stops. It is the smallest thing
+that can be done against a live server. `person compare <reference> <actual>`
+diffs a capture against a reference and flags fields that look like defaults
+nothing ever wrote.
+
+Running the pair against the fixture found three fields that were structurally
+valid and semantically empty:
+
+| Field                    | Was                    | Now                                                                                 |
+| ------------------------ | ---------------------- | ----------------------------------------------------------------------------------- |
+| `vitals.armor`           | hard-coded `0`         | summed from the equipped armour slots, using 1.16.1 armour values                   |
+| `environment.biome`      | hard-coded `"unknown"` | read from the block Person is standing on                                           |
+| `environment.lightLevel` | guessed from the clock | read from block light, falling back to the clock only when the server has sent none |
+
+`dimension` was hard-coded to `"overworld"` and is now read from
+`bot.game.dimension`, with the `minecraft:` prefix stripped as mineflayer
+already does.
+
+Every other observation field was traced to a real source. The comparison tool
+retains its list of suspicious defaults, so the same check can be run against a
+real capture the moment one exists.
+
+## Findings
+
+Six defects, none of which the fixture tests could have revealed. Each is
+described with the evidence that settled it.
+
+### 1. Entity metadata is an object, not an array (fatal)
+
+`lib/plugins/entities.js:936` parses metadata with
+`entityMetadata[key] = value`, producing a sparse object keyed by metadata
+index. The adapter called `.some()` on it. Against any real server the first
+entity carrying metadata would have thrown `TypeError: metadata.some is not a
+function` inside the observation builder, taking the observation, the decision
+and the episode with it.
+
+Fixed by reading index 2, which carries the optional custom name in 1.16.1,
+and handling the string, chat-component and absent cases.
+
+### 2. Named animals were never detected (safety)
+
+The same code scanned for any string anywhere in metadata, which is not where a
+custom name lives and would not have matched one. The permission gate refuses
+named animals, so the gate was correct and the input to it was not: a named cow
+was a legal hunting target.
+
+Fixed with the same change. A custom-name value of an unrecognised shape is now
+treated as named, because the cost of being wrong in that direction is a missed
+meal and the cost of the other is killing something that belonged to somebody.
+
+### 3. Hostile classification missed mobs the registry files as unknown
+
+The adapter used a hand-written set. Checked against `minecraft-data` 1.16.1,
+the registry has a "Hostile mobs" category of thirty-two entries, and files
+`hoglin`, `zoglin`, `piglin`, `zombified_piglin`, `bee` and `fox` under
+"UNKNOWN". Hoglins and zoglins attack on sight and were not in the adapter's
+set, so the safety kernel would not have fled from them.
+
+Fixed by taking hostility from the registry category plus an explicit list of
+hostile-on-sight mobs the registry does not categorise. The huntable set stays a
+short explicit allowlist that no data source can widen.
+
+### 4. Neutral mobs were invisible to the safety kernel
+
+Wolves, polar bears, bees and iron golems are "Passive mobs" by category and
+perfectly capable of killing an unarmoured player once provoked. Treating them
+as hostile on sight would leave Person fleeing from a llama indefinitely;
+ignoring them leaves it standing still while a wolf pack kills it.
+
+Fixed by adding a `neutral` classification and a `recentlyDamaged` signal
+derived from the health event. A neutral mob becomes a threat only once Person
+has actually taken damage, which is the honest signal the world provides.
+
+### 5. The first withdrawal from any container always failed
+
+`containerAt` returns a cached view that starts empty. The withdrawal skills
+read it to decide what to take, concluded "nothing", and threw
+`empty_container` from a chest that was full. Against a real server the
+contents only exist once the window is open.
+
+Fixed by adding `inspectContainer` to the embodiment port, implemented by both
+bodies, and using it in `withdraw_owned_storage` and
+`loot_permitted_container`. Mineflayer's plain `Error("Unable to withdraw, Bot
+inventory is full.")` is now mapped to an `inventory_full` reason instead of
+arriving as `unexpected_error`.
+
+### 6. Crafting could fail on its own bookkeeping
+
+The adapter looked the recipe up in Person's static table keyed by the wood
+species it currently held the most of. When the planner had chosen oak planks
+and the inventory had since tilted towards birch, the lookup missed and the
+craft failed with "No Person recipe".
+
+Fixed by asking the server which recipes are possible, which is also the
+authority on whether a table is required: `recipesFor(id, null, n, null)` returns
+only table-free recipes that current inventory can actually make. The static
+table remains for the planner and the fixture, and was verified against the real
+1.16.1 tables for all nine recipes, table requirements included.
+
+### Smaller corrections found in the same pass
+
+- `freeSlots` was `36 - stacks`, which over-reports capacity as soon as any
+  stack is partially filled. Now `bot.inventory.emptySlotCount()`.
+- A craft that produced nothing, and a smelt that produced nothing, both
+  returned success. Both now fail explicitly.
+- Smelting waited for the whole batch before taking any output, throwing away
+  food that was already cooked if it timed out. It now collects output as it
+  appears.
+- Connection assumed that a spawn packet meant a usable world. It now waits
+  explicitly for the entity, a valid position, loaded chunks under and around
+  Person, the world clock, the inventory, vitals and the dimension, with a
+  thirty-second bound and no reconnect loop.
+- Game mode, dimension, difficulty and the daylight cycle are now validated at
+  connect. Surviving in creative is not surviving, and a frozen clock makes the
+  day phase the goal provider reasons about meaningless.
+- `dig_in` could be chosen on flat open ground where no refuge can be dug. The
+  snapshot now reports whether there is diggable ground, and the kernel chooses
+  fleeing over digging when there is not.
+
+## Skill matrix
+
+Status vocabulary, used strictly:
+
+- **Fixture**: exercised end to end in the deterministic fixture world.
+- **Adapter**: the Mineflayer code path this skill depends on is exercised
+  against the conformance double, which uses real Minecraft data tables.
+- **Live**: run against a Minecraft server. **Nothing in this matrix is marked
+  live.** Two skills have since been run live through `person skill-test`;
+  see [First live skill execution](#first-live-skill-execution). This matrix is
+  kept as the Milestone 1 record and is not retrofitted.
+
+| Skill                       | Fixture | Adapter                                   | Bugs found                                                               | Fix                                                         | Remaining caveat                                                            |
+| --------------------------- | ------- | ----------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `flee`                      | pass    | partial: `moveTo` guard, `attack`         | neutral mobs invisible; threat set inconsistent between kernel and skill | shared `kernel.threats()`; `neutral` plus `recentlyDamaged` | clearance targets tuned against a fixture whose mobs move deterministically |
+| `dig_in`                    | pass    | `dig`, `place`                            | chosen where no refuge can be dug                                        | snapshot reports diggable ground; kernel prefers fleeing    | never tested against real terrain or suffocation risk                       |
+| `wait_safely`               | pass    | `waitTicks`                               | none                                                                     | none                                                        | interruption proven in fixture only                                         |
+| `return_home`               | pass    | `moveTo` guard, `dig`, `place`            | none new                                                                 | none                                                        | pathfinder behaviour on real terrain unknown                                |
+| `gather_plant_food`         | pass    | `findBlocks`, `moveTo`, `dig`             | none new                                                                 | none                                                        | drop collection unverified against a real server                            |
+| `hunt_safe_passive_animals` | pass    | entity classification, `attack`           | named animals undetected; metadata crash                                 | see findings 1, 2, 3, 4                                     | real mob flight and drop scatter unverified                                 |
+| `cook_food`                 | pass    | `smelt`                                   | partial output discarded; empty smelt returned success                   | collect as ready; fail when nothing cooked                  | real furnace timing unverified                                              |
+| `eat_to_target`             | pass    | `consume`                                 | contract claimed one item consumed                                       | corrected to three, with a documented residual error        | see prediction error below                                                  |
+| `gather_wood`               | pass    | `findBlocks`, `moveTo`, `dig`, tool equip | none new                                                                 | none                                                        | tool durability unmodelled                                                  |
+| `mine_stone`                | pass    | same as above                             | none new                                                                 | none                                                        | needs exposed stone; no dig-down skill                                      |
+| `mine_coal`                 | pass    | same as above                             | none new                                                                 | none                                                        | same                                                                        |
+| `craft_basic_tools`         | pass    | `craft`, `place`                          | wood-species recipe lookup; silent empty craft                           | server-authoritative recipes; explicit failure              | table placement site unverified on real terrain                             |
+| `craft_stone_tools`         | pass    | `craft`                                   | same                                                                     | same                                                        | same                                                                        |
+| `craft_furnace`             | pass    | `craft`, `place`                          | same                                                                     | same                                                        | same                                                                        |
+| `craft_chest`               | pass    | `craft`                                   | same                                                                     | same                                                        | same                                                                        |
+| `build_basic_shelter`       | pass    | `place`, `blockAt`                        | none new                                                                 | none                                                        | placement refusals and irregular terrain unverified                         |
+| `repair_shelter`            | pass    | `place`, `blockAt`                        | none new                                                                 | none                                                        | same                                                                        |
+| `place_owned_chest`         | pass    | `place`, provenance                       | none new                                                                 | none                                                        | real container entity behaviour unverified                                  |
+| `deposit_owned_storage`     | pass    | `deposit` refusal                         | full-container mid-transfer lost progress                                | partial progress kept, errors mapped                        | slot handling against a real window unverified                              |
+| `withdraw_owned_storage`    | pass    | `inspectContainer`, `withdraw`            | first withdrawal always failed                                           | `inspectContainer`                                          | same                                                                        |
+| `loot_permitted_container`  | pass    | `inspectContainer`, `withdraw`            | same                                                                     | same                                                        | takes up to `amount` of every type it finds                                 |
+
+Every row's Live column was "not run" when this matrix was written, and the
+matrix is left that way deliberately. `wait_safely` and `return_home` have since
+been live-validated; the current per-skill live status is in
+[First live skill execution](#first-live-skill-execution) and in
+`docs/CURRENT_STATE.md`.
+
+## Information seeking (fixture only)
+
+Added 2026-09-23. **TESTED IN FIXTURE. Not live-validated. Not
+conformance-tested:** the Mineflayer double has no `bot.look`.
+
+What the fixture establishes, through the real runtime, dispatch path and
+cognition process (`tests/integration/information-seeking.test.ts`):
+
+- a tree behind Person is not treated as absent: Person glances, each glance an
+  ordinary validated `look` skill, and acts once the tree is recognised;
+- with no wood in the world, every search ends within its budget of eight
+  glances, concludes `not_found_in_bounded_search`, and nothing claims absence;
+- wood beyond the range of vision, or behind an opaque wall, leaves every
+  requested skill and parameter identical to a world with no wood at all.
+
+A defect this work exposed: left and right bearings in the observation were
+mirrored since Phase 3. Fixed in the shared observation builder and covered in
+fixture. Whether a live body agrees rests on the Mineflayer adapter using the
+same yaw convention as the fixture, which is read from the code, not tested.
+
+The smallest live check that would close the bearing half of that gap needs no
+new tooling: in a disposable 1.16.1 LAN world, place a single log about eight
+blocks to Person's right, run `person observe`, and confirm the log is reported
+`right` or `ahead_right` and peripheral. Exercising a directed glance live
+needs more than exists: `person skill-test` runs a skill with its default
+parameters, which for `look` is `forward`, so a directed `look` can only be
+observed live inside a `person run` episode today.
+
+## Memory (fixture only)
+
+Added 2026-09-24 (ADR 0007). **TESTED IN FIXTURE. Not live-validated.** No
+new body behaviour is involved: memory lives entirely in cognition and is fed
+by messages the runtime already sends. The peripheral-ownership repair
+(PR #7), which gates what memory can be formed from, is also fixture-only.
+
+What the fixture establishes (`apps/cognition/tests/test_memory.py`,
+`tests/integration/memory.test.ts`):
+
+- wood behind a wall or beyond the range of vision never becomes a memory of
+  wood; what Person remembers instead is a search that concluded
+  `not_found_in_bounded_search`;
+- every encoded detail is from a fixed whitelist, and no coordinate, entity
+  handle, UUID, yaw or pitch appears in any memory;
+- memories survive a restart with their provenance, a restarted Person starts
+  with nothing in mind, and each recall returns at most three memories, and
+  only when a cue asks;
+- with tree A in view and a nearer tree B behind Person, the motor fells B
+  (C4), and memory records "saw wood" and "cut wood" with no link between them.
+
+Recall changes no decision yet. The smallest live checkpoint needs no new
+tooling: run two short `person run` episodes against the same evidence
+directory in a disposable 1.16.1 LAN world, then read the journal and confirm
+that `memory_encoded` records carry only whitelisted details and that the
+second session's `memory_recalled` records name memories from the first. That
+has not been done.
+
+## Self-motion and places (fixture only)
+
+Added 2026-09-25 (ADR 0008). **TESTED IN FIXTURE. Not live-validated. Not
+conformance-tested:** the Mineflayer double does not move a body the way a
+server does.
+
+What the fixture establishes (`tests/observation/self-motion.test.ts`,
+`apps/cognition/tests/test_spatial.py`, `tests/integration/spatial.test.ts`):
+
+- standing still, walking ahead, sideways and diagonal steps, turning on the
+  spot, a push, a fall and a jump no walking explains each produce the
+  expected coarse `selfMotion`, with nothing absolute in it;
+- integrated motion drifts: a square walk returns near the start with more
+  doubt than it began with, and nothing narrows the doubt;
+- the same scenario placed 1000 blocks along X produces identical decisions,
+  places, estimates, searches and memories (normalised for identifiers);
+  injecting an X-dependent term into the sense makes that test fail;
+- a search at a place Person believes it has returned to is shorter and still
+  concludes only `not_found_in_bounded_search`.
+
+What rests on reading code rather than a test: that the live adapter's `yaw`
+follows the same convention as the fixture's, so that "left" is felt as left.
+The smallest live checkpoint needs no new tooling: in a disposable 1.16.1 LAN
+world, run a short `person run` in which `gather_wood` walks the bot, and
+compare the journal's `place_formed` estimates with where the bot visibly
+went. That has not been done.
+
+## Projects (fixture only)
+
+Added 2026-09-25 (ADR 0009). **TESTED IN FIXTURE. Not live-validated.**
+Projects live entirely in cognition and add no body behaviour.
+
+What the fixture establishes (`apps/cognition/tests/test_projects.py`,
+`tests/integration/projects.test.ts`): a calm Person with a home it built
+takes up improving it; hunger interrupts the project, which resumes when the
+hunger passes; an unfinished project survives a restart and is re-examined
+before it is pursued; one the world already satisfied is closed; one blocked
+repeatedly is abandoned; and the same life placed 1000 blocks along X yields
+identical project records and decisions.
+
+The smallest live checkpoint: a short `person run` in a disposable 1.16.1 LAN
+world after Person has built its shelter, then read the journal for
+`project_started` and `project_changed`. That has not been done.
+
+## Affect (fixture only)
+
+Added 2026-09-25 (ADR 0010). **TESTED IN FIXTURE. Not live-validated.**
+Affect lives entirely in cognition and adds no body behaviour.
+
+What the fixture establishes (`apps/cognition/tests/test_affect.py`,
+`tests/integration/affect.test.ts`): lava in view raises unease; the same
+lava behind an opaque wall leaves affect identical to a world with no lava;
+the same life 1000 blocks along X gives identical affect records; harm felt
+through health is appraised; success and repeated failure move affect in
+opposite directions; affect decays in experienced time and survives a
+restart; the priority bias stays within ±25, is never applied to urgent
+goals, adds no goal, and different histories change which of two near-tied
+goals is chosen; unease lowers exploration tolerance and calm restores it.
+
+The smallest live checkpoint: a short `person run` in a disposable 1.16.1 LAN
+world with a hostile briefly in view, then read the journal's
+`affect_appraised` records. That has not been done.
+
+## Learned effect reliability (fixture only)
+
+Added 2026-09-26 (ADR 0011). **TESTED IN FIXTURE. Not live-validated.**
+
+What the fixture establishes (`apps/cognition/tests/test_effect_learning.py`,
+`tests/integration/effect-learning.test.ts`): genuine attempts judged on felt
+effects support or contradict a skill's contract; refusals, kernel takeovers,
+preemptions, missing prerequisites and unobserved outcomes teach nothing;
+beliefs never reach certainty from one outcome, reverse under contrary
+evidence, and keep strength apart from estimate; `off` learns nothing,
+`shadow` learns only into a table no decision can see, `supervised` learns
+into the active table, whose bounded term can change a close routine choice
+and never makes a refused option win; beliefs survive restart; routine
+statistics, memory and affect are untouched. In supervised learning, hidden
+lava behind a wall and a +1000 X shift leave the learned evidence identical.
+Four mutations (a capability denial counted as failure, reported success
+trusted over felt effect, one failure forcing zero, shadow beliefs exposed to
+the planner) each make a test fail.
+
+The smallest live checkpoint: a short supervised `person run` in a
+disposable 1.16.1 LAN world in which Person gathers wood, then read the
+journal's `effect_evidence` records against what visibly happened. That has
+not been done.
+
+## Causal hypotheses and experiments (fixture only)
+
+Added 2026-09-26 (ADR 0012). **TESTED IN FIXTURE. Not live-validated.**
+
+What the fixture establishes (`apps/cognition/tests/test_causal_learning.py`,
+`tests/integration/causal-learning.test.ts`): in a fixture world with a rule
+Person is never told (berry bushes give nothing while it rains), Person,
+gathering berries in the rain and then in clear weather, proposes the typed
+hypothesis that rain makes gathering less likely to yield berries, runs an
+experiment whose trials are ordinary `INVESTIGATE` goals in both weathers,
+and ends with the hypothesis `supported` and controlled; a +1000 X shift and
+hidden lava behind a wall leave every causal record identical; a world
+without the rule decides identically until the first outcome differs; with
+learning `off` nothing is hypothesised or investigated. In the cognition
+suite: privileged, invented, ungrounded, unfalsifiable and self-certifying
+proposals, including a language model's, are quarantined; a model's proposal
+starts with no evidence; premises are not evidence; one trial is not
+certainty; correlation alone never settles a hypothesis and weighs less than
+intervention; later evidence reverses a conclusion; refusals, takeovers and a
+condition that changes mid-trial teach nothing; experiments are bounded,
+interrupted by urgent needs and resumed; `shadow` changes no decision; a
+supported hypothesis can change a close routine choice when its condition
+holds, and only then. Mutations (a model's confidence seeding evidence,
+observation weighted like intervention, correlation settling standing, a
+refusal counted as failure, ungrounded proposals admitted, a mid-trial
+condition change ignored) each make a test fail.
+
+The smallest live checkpoint would need a hidden or custom mechanic on a live
+server, which vanilla 1.16.1 does not offer; a supervised run in which Person
+gathers in changing weather could only check that the records are honest,
+not that a real rule is discovered. That has not been done.
+
+## Safety validation
+
+Proven in the fixture and against the double:
+
+| Rule                                                                             | Where                                                                                                                                                                           |
+| -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Protected-area harvest denial                                                    | `tests/safety/permissions.test.ts`                                                                                                                                              |
+| Protected-area build denial, at the interaction                                  | same                                                                                                                                                                            |
+| Protected-area movement denial                                                   | `tests/safety/protected-routes.test.ts`                                                                                                                                         |
+| A legal start and a legal destination with an illegal straight line between them | same: a detour is found, and every step of it is legal                                                                                                                          |
+| No legal detour means refusal, with Person not moved part of the way             | same                                                                                                                                                                            |
+| Replanning cannot cross a protected area                                         | same: the guard is installed as pathfinder's step-exclusion function, which the search consults on every node of every re-plan; the test calls it directly and asserts the cost |
+| Breaking and placing along a route refused outright                              | same                                                                                                                                                                            |
+| Existing-container deposit denial                                                | permissions, storage and conformance suites, plus the configuration schema                                                                                                      |
+| Owned-container deposit and withdrawal                                           | storage and conformance suites                                                                                                                                                  |
+| Villager, named-animal and tamed-animal protection                               | permissions and conformance suites                                                                                                                                              |
+| Player combat denial                                                             | permissions suite, plus a schema constant with one legal value                                                                                                                  |
+| Hostile emergency preemption, with attribution to what ran                       | `tests/safety/attribution.test.ts`                                                                                                                                              |
+| Refuge chosen only where a refuge can exist                                      | `tests/safety/kernel.test.ts`                                                                                                                                                   |
+
+**None of this has been proven against a Minecraft server.** The mechanisms are
+the same ones a server would exercise, and the pathfinder exclusion test checks
+the actual integration point rather than a reimplementation of it, but the
+server has not had a chance to disagree.
+
+## Tick budget findings
+
+Timing is now measured by wrapping the embodiment port, so every skill is
+instrumented without any skill having to remember to be. Each outcome carries
+navigation, interaction and waiting ticks, the budget it was given, and the
+pressure it put on that budget; the episode report aggregates per skill.
+
+From a twelve-decision fixture episode:
+
+| Skill                 | Budget | Mean | Max | Pressure | Navigation | Interaction |
+| --------------------- | ------ | ---- | --- | -------- | ---------- | ----------- |
+| `eat_to_target`       | 400    | 192  | 192 | 0.48     | 0          | 192         |
+| `flee`                | 600    | 138  | 212 | 0.35     | 138        | 0           |
+| `gather_wood`         | 2400   | 452  | 452 | 0.19     | 68         | 384         |
+| `craft_stone_tools`   | 1200   | 204  | 204 | 0.17     | 180        | 24          |
+| `mine_stone`          | 3000   | 404  | 404 | 0.13     | 20         | 384         |
+| `build_basic_shelter` | 3600   | 198  | 198 | 0.06     | 48         | 150         |
+| `craft_basic_tools`   | 1200   | 14   | 14  | 0.01     | 0          | 14          |
+
+**No budget was changed on the strength of these numbers, and none should be.**
+The fixture's tick costs are invented: four ticks a step, twelve a dig. What
+transfers is the instrument, not the measurements. When a real world is
+available, the same table will say something meaningful, and the decision rule
+is already written down: a budget is only revised when the measurement shows
+the budget is the reason, rather than navigation, target selection, latency or
+completion evidence being wrong.
+
+## Prediction error findings
+
+Prediction error compares each skill contract's declared effects against the
+symbolic state the next observation reports. It is recorded as append-only
+evidence under a compatibly widened schema, summarised in both reports, and
+readable with `person inspect predictions`. It changes no policy: the statistics
+reducer has no case for it, and a test replays a journal with and without the
+records and asserts the statistics are identical.
+
+It paid for itself immediately. From an eleven-prediction fixture episode:
+
+```
+recorded=11 none=9 major=1 inverted=1
+
+major eat_to_target:
+  food_level  predicted 18  observed 19
+  edible_food predicted  5  observed  0
+
+inverted craft_basic_tools:
+  planks         predicted 8  observed 0
+  wooden_pickaxe predicted 1  observed 0
+  tool_tier      predicted 1  observed 0
+```
+
+Two different things, correctly distinguished:
+
+- The `craft_basic_tools` record is a **failed skill**, preempted by a hostile
+  and then failing outright. The contract was right and the world did not
+  cooperate. Prediction error is not the same as skill failure, and the record
+  reflects a real failure rather than a modelling defect.
+- The `eat_to_target` record is a **wrong contract**. Eating to a target
+  consumes several items, not one, and the spec said one. Corrected to three,
+  with `food_level` now scaling with the requested target. The residual error
+  remains and is a known limitation: the number of items eaten depends on the
+  deficit and the food's value, which the effect language cannot express, so the
+  contract carries a central estimate and the instrument keeps reporting the
+  gap. Tuning the number until the error disappeared would be fitting one
+  food type and lying about the rest.
+
+## Planner audit
+
+Representative outputs were inspected for the six goals the milestone names.
+One real defect and two acceptable oddities.
+
+**Defect, fixed.** Plan cost ignored parameter magnitude, so every
+parameterisation of a plan tied. The planner offered four copies of one strategy
+differing only in how absurd the number was, the deterministic policy picked
+arbitrarily among them, and the evidence for one strategy was split across four
+routine identities. Cooking two items began by hunting twelve animals.
+
+Cost now scales with the magnitude of a scaling parameter. Cooking now hunts
+three animals and mines eight stone, and a genuinely different second strategy
+appears: mine coal for fuel instead of gathering wood. Six regression tests
+cover it.
+
+**Acceptable.** Building a shelter is offered as a way to satisfy "be at home",
+because building one truthfully ends with Person at home. It is an absurd way to
+get home and is ranked last by cost. Removing the effect to tidy the candidate
+list would make the contract lie, so it stays and the ordering handles it.
+
+**Checked and sound.** No plan repeats a step without reason; plans use
+materials Person already holds rather than gathering more; an unreachable goal
+produces no plan rather than a fantasy one.
+
+## Deterministic survival
+
+Not attempted against Minecraft.
+
+In the fixture, with learning off, Person secures food, builds a shelter,
+crafts wooden then stone tools, places owned storage, deposits and withdraws,
+cooks, and survives an injected hostile with the emergency correctly attributed
+to `flee`. That was true before this milestone and remains true; it says
+nothing about Minecraft.
+
+## Shadow and supervised learning
+
+Not attempted. Stage F requires deterministic survival to be credible in a real
+world first, and it has not been run in one. Shadow-mode behaviour remains
+covered by unit tests: the learner proposes, the record is kept, the fallback
+executes.
+
+## Remaining blockers
+
+Every one of these needs a person to open a world. They are listed in the order
+`docs/LAN_TESTING.md` walks them.
+
+1. **No server.** Connection, authentication, spawn validation, the readiness
+   checks and clean shutdown are untested against a real client. _Closed:_ two
+   live observations (2026-09-15, 2026-09-16) and three live skill validations
+   (2026-09-16) exercised all of it, including clean shutdown.
+2. **The conformance double is a model of the API, not the API.** It was built
+   from the library source and real data tables, so it is a good model, and it
+   is still a model. Anywhere it is wrong, the tests that depend on it are
+   worth less than they look.
+3. **Pathfinder on real terrain.** Route quality, path resets, and how often
+   the exclusion function turns a reachable destination into an unreachable one
+   are unknown. This is the single most likely source of skill failures.
+   _Partly addressed:_ two `return_home` runs crossed real terrain successfully,
+   one of them 26 blocks with a height change. Two samples in one world in
+   daylight. The blocker stands.
+4. **Server-side placement.** The adapter retries and then fails explicitly, but
+   the timing was never exercised against a server that can refuse.
+5. **Furnace timing and container windows.** Both are written against the
+   documented API with generous margins and have never seen real latency.
+6. **Real mob behaviour.** Whether the flee clearances and the neutral-mob
+   damage window are adequate is unknown.
+7. **Tick budgets.** Meaningless until measured in a world where a tick is a
+   tick.
+8. **Death and respawn.** Death ends the episode; the recovery path does not
+   exist and has not been designed.
+
+## Pre-LAN readiness patch
+
+Added after the audit above, before the first live run.
+
+**The LAN port is runtime information.** Minecraft assigns a new one every time
+a world is opened, so `--port` and `--host` override the configuration file for
+one invocation on every connecting command, and are never written back. A
+changed port never means editing a file.
+
+**Connection failures are classified.** A refused connection used to sit until
+the spawn timeout and then report that Person "did not spawn". It now races the
+spawn against the error, kick and close events and names what happened:
+`connection_refused`, `host_unresolved`, `host_unreachable`,
+`connection_timed_out`, `connection_reset`, `connection_closed`,
+`protocol_mismatch`, `identity_conflict`, `authentication_refused`,
+`login_refused`, `server_kicked`, `spawn_timeout`, `chunk_data_unavailable`,
+`world_not_ready`, plus the world-rule refusals already in place. Each carries
+an operator hint.
+
+**`person observe` is proven to only look.** A test wraps the body, records
+every call and asserts none of the twelve physical operations is among them,
+that position, inventory, health and world tick are unchanged, that no journal,
+snapshot or episode report is written, and that the command disconnects before
+returning even if the disconnect hangs.
+
+**`person status` reports what Person is doing, from outside.** The runtime
+writes a status file atomically; the command reads it. Nothing connects, and an
+architecture test asserts nothing on the decision path or in cognition can read
+it back.
+
+**Operator intervention is declared, not detected.** `--operator-intervention`
+writes a marker into the episode events and the status file, so a debug session
+cannot later be mistaken for a counted acceptance run.
+
+None of this is live validation. It is the instrumentation the first live run
+will be judged with.
+
+## What a reader should take from this
+
+The body is meaningfully better than it was: a defect that would have crashed
+on first contact is gone, two safety-relevant classification errors are fixed,
+and three silent-success paths now fail honestly. The instruments the next
+milestone needs, observation capture, comparison, prediction error and timing,
+exist and are already finding things.
+
+Person has still never been in Minecraft.
+
+**That changed on 2026-09-15, a few hours after the above was written.** The
+next section records it.
+
+## First contact
+
+The first live connection to Minecraft Java 1.16.1 over LAN. Person joined a
+disposable Peaceful world as `PersonAda`, non-OP, using `person observe` with
+the LAN port supplied by `--port`.
+
+### What worked, first time
+
+- The connection was established and the identity check passed.
+- Person spawned inside the configured exploration bounds.
+- Readiness held: chunks, clock, inventory, vitals and dimension all arrived
+  before anything was read.
+- One Observation was captured and it was **valid against the protocol schema**
+  with no diagnostics.
+- The configured home was reported correctly, at distance zero.
+- The world rules check accepted the world: survival, Peaceful, daylight cycle
+  running, Overworld.
+- Person disconnected cleanly and the command exited.
+
+The capture is kept as `first-contact.json`. `person observe` joining for a few
+seconds and leaving is the designed behaviour and has not been changed.
+
+### What the first real observation exposed
+
+Four defects, none of which any fixture test could have found, because in each
+case the fixture or the double was the thing that was wrong.
+
+**1. `biome` was `"unknown"` in a loaded Overworld chunk.** Not a chunk
+problem. `prismarine-block` builds its `Biome` class with
+`require('prismarine-biome')(registry.version)`, passing a Version object where
+`prismarine-biome` only accepts a version _string_; it therefore treats the
+Version as a registry, finds no biome table on it, and returns its empty
+placeholder for every id. `block.biome.name` is unconditionally `""` with these
+versions, and the adapter's identifier check turned that into `"unknown"`. The
+numeric id beside it was correct all along. Biome is now resolved from that id
+against `bot.registry`, which is `minecraft-data`'s table on 1.16.1 and the
+server's dimension codec on the versions that send one. The Mineflayer double
+used to return `{ name: "forest" }`, a shape the real library never produces,
+which is precisely why a green test suite let this through; it now returns the
+same nameless biome the real library does.
+
+**2. The human player was reported as `"player"`.** Correct, and useless.
+Minecraft names every player entity `player`; identity lives in the account
+name and the UUID. Entity records now carry `username` and `uuid` as additive
+optional protocol fields, so two people can no longer collapse into one
+identity. Nothing social was built on top of this: the point is that the
+observation is now semantically capable of supporting it.
+
+**3. Perception was saturated.** The observation held exactly 64 resource
+entries: 55 stone and 9 coal, because a single nearest-N search standing on
+stone returns stone. Every tree in sight was invisible to cognition, and the
+planner's `reachable_wood` fact was consequently zero in a world full of wood.
+Resources are now gathered per category and balanced: a guaranteed quota each,
+a small shared overflow budget, the same hard ceiling as before. The list is
+usually shorter than it was and always more informative.
+
+**4. Passive entity sensing was noise.** 80 animals, 70 of them outside the
+configured exploration area, some 190 blocks away, none of them usable. The
+observation now reports only animals inside the region Person may actually
+enter and within reach of it, nearest first, bounded. This is a perception
+decision and deliberately not a safety one: the runtime's snapshot still holds
+every entity the body can see, and the permission gate still refuses the
+out-of-region ones for their own reason.
+
+### The failed run before the successful one
+
+The first attempt spawned outside the configured exploration area and reported
+`spawn_outside_bounds`. That refusal is correct and is unchanged. What was
+wrong is that the command then held the terminal for thirty seconds and was
+killed by hand.
+
+The cause was in `disconnect`, which quit the session and then ended the client
+a second time two hundred milliseconds later. In `minecraft-protocol`,
+`Client.end` arms a thirty-second `closeTimer` that destroys the socket if it
+has not closed on its own, and the handler that clears that timer runs exactly
+once, on the first close, after which it sets `ended` and removes its own
+listeners. Whenever the server's close arrived inside those two hundred
+milliseconds, which on a LAN world it usually does, the second end armed a
+timer nothing would ever clear. The successful run and the failed run differed
+only in who won that race.
+
+The client is now ended once, the close is awaited with a bound, the timer is
+cleared explicitly and the socket is destroyed if the server never answers. A
+regression test runs the entire failure in a child process and waits for it:
+with the old code that child takes 31.5 seconds, with the fix it exits
+immediately.
+
+### Live re-validation: pending
+
+**Resolved on 2026-09-16 by a second live observation. The section after this
+one records it. What follows is what was true when the four fixes were made.**
+
+No Minecraft server was reachable while these four fixes were made. No Java
+process is running and nothing is listening on a Minecraft port. The fixes are
+implemented against the real installed libraries and covered by conformance
+tests that use `prismarine-registry`, `prismarine-chunk` and `prismarine-block`
+for 1.16.1 directly, but **none of them has been seen working against
+Minecraft**. The next live action is a second `person observe`, and the things
+to check in its output are: `biome` is a real biome name, the operator appears
+under their own account name, `resources` shows a mix of categories rather than
+one, and `passiveAnimals` is a short list of animals that are actually nearby.
+
+## Second contact
+
+The second live `person observe` against the same Minecraft Java 1.16.1 LAN
+world, run by the operator on 2026-09-16. It is the run that checked the four
+first-contact corrections against Minecraft rather than against a double.
+
+Reported from that run:
+
+| Field           | Value                                     |
+| --------------- | ----------------------------------------- |
+| biome           | `plains`                                  |
+| player username | `Shroud`                                  |
+| player uuid     | `1ed03c15-b62c-33e4-8e93-cd19bc1d57e3`    |
+| resources       | stone 28, coal 12, plant_food 12, wood 12 |
+| passive animals | 8                                         |
+| position        | -218,66,164                               |
+| home distance   | 0                                         |
+| learning        | off                                       |
+
+All four corrections hold against Minecraft:
+
+- biome resolves to a real biome name from the registry rather than `unknown`;
+- the human appears under an account name and a stable UUID, not as `player`;
+- resource perception is balanced across categories instead of saturated by
+  whatever Person happens to be standing on;
+- passive animals are the ones actually nearby and inside the usable region.
+
+The observation lifecycle, spawn readiness, schema validity, configured home
+and learning-off state all held as well. This closes the observation milestone.
+It is not revisited below unless a later stage exposes a regression in it.
+
+## Single-skill live validation
+
+The stage after observation, and the first one where Person acts. One skill at
+a time, chosen by a human, run through the same safety kernel and the same
+executor an autonomous run uses.
+
+`person skill-test` exists for this. It builds one `SkillInvocation` from a
+skill that is already in the library and hands it to the shared dispatch path;
+it does not call a skill implementation, and there is no argument that can
+describe an action the library does not already contain. It takes an
+observation before and after, compares the skill's declared effects against
+them using the cognition package's own prediction-error comparison, and writes
+one report under `runs/validation/skill-tests/`.
+
+It changes nothing the learner knows. The evidence store is fingerprinted
+before and after the run and the result is in the report, so "learning
+unchanged" is a measurement rather than an assurance.
+
+### Intended order
+
+1. `wait_safely`
+2. `return_home`
+3. basic gathering
+4. crafting
+5. mining
+6. placement and building
+7. containers
+8. hunting
+
+Only the first two are prepared. Nothing below `return_home` has been started.
+
+### Status
+
+| Skill           | Fixture end to end   | Live Minecraft             |
+| --------------- | -------------------- | -------------------------- |
+| `wait_safely`   | passing              | **live-validated**, 1 run  |
+| `return_home`   | passing              | **live-validated**, 2 runs |
+| everything else | see the skill matrix | **not run**                |
+
+The paragraph that stood here said no server was reachable while the harness
+was built, and that both runs were the operator's to make. They were made, on
+2026-09-16, and the section below is the record. Nothing further down the
+intended order has been started.
+
+```
+node apps/cli/src/bin/person.ts skill-test \
+  --config examples/person-test-world-1.toml --port <PORT> --skill wait_safely
+
+node apps/cli/src/bin/person.ts skill-test \
+  --config examples/person-test-world-1.toml --port <PORT> --skill return_home \
+  --operator-setup
+```
+
+For `return_home`, position Person 8 to 12 blocks from the configured home
+(-218,66,164) during the setup pause, using your own Minecraft controls. Person
+has no teleport capability and the CLI exposes none: the setup phase exists
+precisely so that moving Person is something a human does and declares, and the
+run is recorded as operator-contaminated when it happens.
+
+### First live skill execution
+
+Three runs against the same Minecraft Java 1.16.1 LAN world used for the two
+observation contacts, on 2026-09-16, through `person skill-test`. These are the
+first times Person has physically acted in Minecraft.
+
+| Run                | `wait_safely`          | `return_home` (1)         | `return_home` (2)         |
+| ------------------ | ---------------------- | ------------------------- | ------------------------- |
+| test id            | `st_mu3w5z9d_78158279` | `st_mu3wadax_6a72c352`    | `st_mu3wii0a_c0010f88`    |
+| started (UTC)      | 09:21:45               | 09:25:10                  | 09:31:29                  |
+| embodiment         | `minecraft`            | `minecraft`               | `minecraft`               |
+| training context   | `minecraft_peaceful`   | `minecraft_peaceful`      | `minecraft_peaceful`      |
+| parameters         | `ticks=600`            | `max_distance=128`        | `max_distance=128`        |
+| safety verdict     | ACCEPT, L1             | ACCEPT, L1                | ACCEPT, L1                |
+| requested          | `wait_safely`          | `return_home`             | `return_home`             |
+| executed           | `wait_safely`          | `return_home`             | `return_home`             |
+| terminal status    | SUCCESS                | SUCCESS                   | SUCCESS                   |
+| skill ticks        | 1210 waiting           | 60 navigation             | 100 navigation            |
+| budget pressure    | 0.10 of 12000          | 0.03 of 2400              | 0.04 of 2400              |
+| start → end        | -218,66,164 (unmoved)  | -208,66,164 → -218,66,164 | -206,68,187 → -218,66,165 |
+| home distance      | 0 → 0                  | 10.0 → 0.0                | 26.0 → 1.0                |
+| declared effect    | `rested`               | `at_home`                 | `at_home`                 |
+| comparison verdict | not observable         | **match**                 | **match**                 |
+| operator setup     | none                   | yes, declared             | yes, declared             |
+| learning digest    | unchanged              | unchanged                 | unchanged                 |
+| policy revision    | 0 → 0                  | 0 → 0                     | 0 → 0                     |
+| disconnect         | clean                  | clean                     | clean                     |
+
+What this establishes, and only this:
+
+- The whole path works against a real server. A `SkillInvocation` was built from
+  a registered spec, validated by the kernel, executed by the runner through the
+  Mineflayer body, and attributed. Requested and executed agree in all three
+  runs, so no substitution occurred and none was hidden.
+- **`mineflayer-pathfinder` moved Person across real terrain**, twice, including
+  a 26-block route with a height change, ending adjacent to home. That was the
+  single largest open risk in the blocker list and it is now smaller, for two
+  routes, in one world, in daylight, on Peaceful.
+- The effect comparison ran live and agreed with the world. `at_home` was
+  predicted and observed; `rested` was correctly reported as something an
+  observation cannot carry rather than as a failure.
+- **Learning did not change.** The evidence directory fingerprint is byte-identical
+  before and after each run, and the policy revision did not move. That is the
+  measurement the harness exists to produce, not an assurance.
+- Both bounded disconnects were clean, so the exit-hang regression fixed before
+  first contact stayed fixed under a skill that actually does something.
+
+What it does not establish: anything about the other nineteen skills, anything
+about hostile behaviour (the world is Peaceful), anything about night, anything
+about a route the pathfinder cannot find, and anything about tick budgets, which
+remain unrevised and should be. Two navigation samples are two samples.
+
+**Provenance, stated plainly.** The evidence for the table above is the three
+validation reports written by `person skill-test` under
+`runs/validation/skill-tests/`, named
+`person-test-world-1-ada-<skill>-<testId>.json`. `runs/` is in `.gitignore`, so
+those originals are local to the operator's machine and are not in the
+repository history. They were read directly during the 2026-09-22
+reconciliation; each declares `embodiment: minecraft`, `minecraftVersion:
+1.16.1`, real world positions consistent with the second-contact capture, and
+`skillLibraryRevision: a1b54cd15bc0535c`, which matches the revision the current
+skill library computes today.
+
+**Tracked copies exist.** `docs/evidence/skill-tests/` holds all three
+reports, redacted of one local-filesystem-path field and otherwise byte-for-byte
+identical to the originals, with each tracked file's original SHA-256 recorded
+in `docs/evidence/skill-tests/README.md` so the redaction is checkable rather
+than trusted. A reader without access to the operator's machine now has the
+full reports, not just this summary.
+
+### Operator contamination in these runs
+
+Both `return_home` runs are marked `operatorSetup: true` with
+`operatorIntervention.reason` "operator positioned Person for a skill validation
+run". Person did not walk 26 blocks from home on its own; a human moved it there
+so there would be somewhere to return from. That is declared in the report
+rather than detected, which is the only mechanism available and the correct one.
+Neither run may be counted as evidence about how Person comes to be away from
+home.
+
+The `wait_safely` run has no setup and no intervention.
+
+### What is still pending
+
+The intended order continues, and nothing below `return_home` has been started:
+
+| Stage                     | Status      |
+| ------------------------- | ----------- |
+| 1. `wait_safely`          | live PASS   |
+| 2. `return_home`          | live PASS   |
+| 3. basic gathering        | **pending** |
+| 4. crafting               | **pending** |
+| 5. mining                 | **pending** |
+| 6. placement and building | **pending** |
+| 7. containers             | **pending** |
+| 8. hunting                | **pending** |
+
+### A presentation defect these runs exposed
+
+The terminal summary prints `duration 100 ticks, 56039ms` on one line. The two
+numbers measure different things: 100 is the skill's own measured tick count,
+and 56039 ms is wall clock from connect to disconnect, which includes a
+45-second operator setup pause during which nothing was measured. Reading them
+as one figure makes Person look roughly five hundred times slower than it is.
+
+This is a labelling fault in the summary, not a timing-model fault: the report
+itself records `timeline` and `elapsedTicks` as separate fields, correctly. It
+is recorded here because it is the kind of defect that quietly becomes a wrong
+number in a later document.
+
+### A telemetry gap these runs exposed
+
+`person status --follow` repeats the last cached status while a skill runs
+rather than publishing intermediate positions, so a live navigation cannot be
+watched from outside while it happens. That is understood and is a future
+telemetry improvement, not a correctness bug: the report written at the end is
+complete and correct.
+
+## Live checkpoint, 2026-09-29: not run
+
+> **Update, later the same day.** The operator authorized local test
+> infrastructure and accepted the Minecraft EULA for a local research server,
+> and the six checks were run against a dedicated server: see
+> [Dedicated-server validation](#dedicated-server-validation-2026-09-29). The
+> text below is kept as it was written.
+
+After the documentation synchronisation (PR #16), the smallest modern live
+check was due against the current head: observation version 7 through
+Mineflayer, gaze turning the real body, a visible versus an occluded threat,
+the kernel's independence from cognition, no coordinate, yaw or entity handle
+reaching cognition, and a memory and affect restart. **None of it was run.**
+
+The exact blocker, as found on the development machine at 2026-09-29 12:00
++05:30:
+
+- No Java process was running and nothing was listening for Minecraft. No LAN
+  world was open.
+- A Minecraft 1.16.1 client and the saves `Person Test World #1` and
+  `Person Test World #2` are installed, but a single-player world is opened to
+  LAN from the client's own menu, which needs a person at the game.
+- No dedicated server jar is present. Fetching one means accepting Mojang's
+  EULA, which is the operator's to accept, not an agent's.
+
+So the newest live evidence is still the three skill-test runs of 2026-09-16,
+at `observationVersion` 1. The checkpoint's six checks remain the next live
+step; `docs/LAN_TESTING.md` has the procedure, starting with `person observe`.
+
+## Dedicated-server validation, 2026-09-29
+
+**This is dedicated-server validation, recorded apart from the LAN runs of
+2026-09-15 and 2026-09-16.** It ran against a local Minecraft Java 1.16.1
+dedicated server, not a single-player world opened to LAN.
+
+### Environment
+
+|                      |                                                                                                                                                                                                                  |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Server               | official Mojang 1.16.1 `server.jar`, SHA-1 `a412fd69db1f81db3f511c1463fd304675244077`, 37,968,964 bytes, SHA-256 `2782d547724bc3ffc0ef6e97b2790e75c1df89241f9d4645b58c706f5e6c935b`                              |
+| Log4j mitigation     | Mojang `log4j2_112-116.xml`, SHA-1 `02937d122c86ce73319ef9975b58896fc1b491d1`, SHA-256 `29534615b561487bccd3f2ec859b172bc642096cef4f8606754ead7eca5050dd`, passed as `-Dlog4j.configurationFile` on every launch |
+| Java                 | Temurin 1.8.0_504                                                                                                                                                                                                |
+| EULA                 | accepted by the operator on 2026-09-29                                                                                                                                                                           |
+| Binding              | `server-ip=127.0.0.1`, port 25565; no port forwarding, no firewall change                                                                                                                                        |
+| Accounts             | `online-mode=false`; whitelist of one, `PersonAda`; `max-players=1`                                                                                                                                              |
+| Game                 | survival (forced), difficulty easy, no operators, command blocks off                                                                                                                                             |
+| World                | `person-dedicated-1`, seed 20260929, generated fresh under `runs/servers/`                                                                                                                                       |
+| Operator world setup | from the server console: weather cycle off, clear weather, mob spawning off, patrol and trader spawning off, insomnia off. The daylight cycle stayed on: the runtime refuses a frozen one.                       |
+| Training context     | `minecraft_normal`                                                                                                                                                                                               |
+
+Server state lives only under `runs/servers/`, apart from `~/.minecraft`.
+The tooling is `scripts/dedicated-server/` and `scripts/dedicated-checkpoint.ts`;
+the evidence, with hashes, is `docs/evidence/dedicated-server/2026-09-29/`.
+Every command that connected was marked operator-contaminated, because the
+world was prepared from the console. Nothing from the console or the server
+reached cognition except through the ordinary `Observation`.
+
+### The six checks
+
+| #   | Check                                      | Result | How                                                                                                                                                                                                                                                                                                                                                                                                              |
+| --- | ------------------------------------------ | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | Observation v7 through Mineflayer          | PASS   | `person observe`: schema-valid, `observationVersion` 7                                                                                                                                                                                                                                                                                                                                                           |
+| 2   | Gaze physically turns the real body        | PASS   | probe: two `look left` steps moved the server's own reading of PersonAda's yaw from 0 to -90 degrees, two `look right` steps back to 0; `person skill-test --skill look_around` ran through the validator, kernel and dispatch: ACCEPT, SUCCESS, requested and executed identical                                                                                                                                |
+| 3   | Visible versus occluded or behind threat   | PASS   | probe, a summoned zombie with no AI: 5 blocks ahead, perceived (central, `ahead`); 5 blocks behind, not perceived; inside a closed stone box 6 blocks ahead, not perceived                                                                                                                                                                                                                                       |
+| 4   | The kernel is independent of cognition     | PASS   | in all three placements the kernel, reading the privileged snapshot, rated the threat `immediate`; after cleanup, `none`                                                                                                                                                                                                                                                                                         |
+| 5   | No coordinates, yaw or entity handles leak | PASS   | every observation (the `observe` capture and the four probe observations) scanned for `position`, `x`, `y`, `z`, `yaw`, `pitch`, `heading`, `entityId`, `uuid`, `username`, `homeDistance`, `lastSafePosition`: none                                                                                                                                                                                             |
+| 6   | Memory and affect survive a restart        | PASS   | two autonomous episodes of 8 decisions, one evidence directory: `episode_ended` at 4080 experienced ticks, the second episode starting at 4080; no break in the evidence chain; the second episode's first appraisal began at valence 0.1903, the first episode's 0.1907 after 20 experienced ticks of decay; it recalled two memories the first episode encoded and recognised a place the first episode formed |
+
+### First live autonomous episodes
+
+Check 6 made the first autonomous episodes Person has run against Minecraft:
+two, of eight decisions each, learning off. All 16 proposals were accepted by
+the kernel; no emergency, no health lost. Person looked for and gathered wood
+(one `gather_wood` timed out at 108% of its 2400-tick budget), crafted a
+crafting table, a wooden axe and a wooden pickaxe, and failed to build and
+then to repair a shelter. One rotten flesh in its inventory came from a probe
+zombie killed during cleanup: an operator artifact, not an outcome of Person's.
+
+### Defects this checkpoint exposed
+
+- **Live episode reports record 0 elapsed ticks.** The runtime read the end
+  tick after disconnecting, and a disconnected Mineflayer body falls back to
+  its start tick. Fixed in `6f7e567`, with a test.
+- **`skill-test` counts `surveyed` as a mismatch.** `look_around` declares
+  `surveyed`, which no observation can carry, so the comparison should report
+  it as not observable. Report-only; recorded, not yet fixed.
+- **The `observe` summary prints `undefined` for peripheral percepts.** They
+  correctly carry no name; the terminal renderer does not allow for that.
+  Display-only; recorded, not yet fixed.
+
+### What this does not establish
+
+Everything in the matrix above was run once, in one world, by day, on easy,
+with natural spawning off. It says nothing about night, natural mobs, other
+terrain or long episodes, and it is not LAN validation.
+
+## R2 live spot-check, 2026-09-29 (dedicated server)
+
+After the R2 fixture acceptance, a small live check on the same local 1.16.1
+dedicated server, recorded apart from the LAN runs. Observation v8 passed
+live (breath in bubbles, no saturation). Hunger reached affect live, weakly:
+an operator-applied Hunger effect took food from 18 to 17, and a hunger onset
+and continuous hunger pressure followed. Health vulnerability, R2 harm, breath
+and threat exposure were **not** exercised live. The check also exposed a
+goal-provider inconsistency (`SECURE_FOOD` proposed while already complete at
+food 16 and 17). Evidence: `docs/evidence/dedicated-server/2026-09-29-r2/`.
+
+## E3 live rehearsal, 2026-09-30 (dedicated server)
+
+**Dedicated-server infrastructure validation with a validation identity,
+recorded apart from the LAN runs.** `validation-000` ("Rehearsal") was
+founded, preflighted and embodied on a new throwaway level
+(`validation-e3-rehearsal`, seed drawn once at random) of the same local
+1.16.1 server, bound to 127.0.0.1, whitelist of one (`PersonRehearsal`), no
+operators. Person-000 does not exist and was not involved. Full record,
+hashes and the final root: `docs/evidence/dedicated-server/2026-09-30-e3-rehearsal/`.
+
+- **Exercised once each, all passing:** founding exactly once; preflight for
+  the founding and every embodiment; three sessions with clean restarts that
+  learned their gap; a console `kick` survived by the same running cognition
+  through the real Mineflayer reconnection, with no stale-client effect;
+  console `kill`s and two natural deaths, each respawned through Mineflayer
+  within 0.4 s in the same identity and session; a rejoin to a body left dead;
+  clean shutdowns; read-only reconstruction (5 deaths, 5 respawns, 1024
+  events, chain intact). No cause, coordinates or console provenance reached
+  any Person-facing record.
+- **Defect found and fixed (PR #36):** a death during the final decision's
+  skill went unreported, and skills ran on a dead body for up to 2 min 21 s.
+  Only the affected check was repeated, at `17a62a0`: a `kill` mid-skill now
+  ends the skill as `DEATH` in 0.62 s and is recorded in its own session.
+  The lineage's third death is recorded one session late, as lived.
+- **Open finding:** a drowning. The L0 `suffocation` emergency answers with
+  `flee`, which does not surface. Recorded for the first-Ada readiness
+  review; it needs a safety-semantics ADR.
+- One run of each is infrastructure validation, not a behavioural result.
+
+## ADR 0019 air check, 2026-09-30 (dedicated server)
+
+**Targeted infrastructure validation with a validation identity**, after the
+suffocation fix (PR #38, revision `d4b3beb`). `validation-001` ("AirCheck",
+account `PersonAirCheck`, whitelisted alone, no operators) was founded and
+embodied on the throwaway E3 world; the console built a sealed water tank
+with an air pocket and teleported the body under water. Twice the kernel's
+`suffocation` emergency ran `restore_air`, never `flee`, and both escapes
+reached air in 40 ticks, with breath then recovering; no death, and nothing
+privileged in memory. Restoring air does not leave deep water, so the
+emergency recurred about every 15 s while the body stayed in the tank; that
+is an open observation for the readiness review. Record:
+`docs/evidence/dedicated-server/2026-09-30-adr0019-air-check/`.
+
+## Affect experiments (fixture only)
+
+The first affect experiments (ADR 0013) ran on 2026-09-29 in the fixture
+world: affect off, record-only and active on ten world seeds, with the learner
+off and supervised. Results, and what they do and do not show, are in
+`docs/evidence/experiments/README.md`. They are TESTED IN FIXTURE and are not
+live evidence of anything.

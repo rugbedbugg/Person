@@ -7,6 +7,24 @@ tiny: a speculative abstraction that guesses wrong is worse than no abstraction.
 
 Any attempt to use one raises, rather than returning a plausible-looking empty
 result that could be mistaken for a working implementation.
+
+Memory used to be reserved here, as `MemoryProvider.retrieve(query, limit)`.
+It is implemented now, in `person_cognition.memory`, and deliberately not with
+that signature: an arbitrary query with a caller-chosen limit is the database
+access ADR 0003 forbids. Recall takes a typed `Cue` (ADR 0007).
+
+Affect and projects left for the same reason: they are implemented, in
+`person_cognition.affect` (ADR 0010) and `person_cognition.projects` (ADR
+0009), and neither took the shape reserved for it. A placeholder that outlives
+its implementation is a false claim that the capability does not exist.
+
+The singleton `WorldModelProvider` left too (ADR 0028). It reserved one
+object to observe, predict, update and answer queries about "the world", a
+shape that merged prediction with belief and history and named nothing it
+would be evidence for. Prediction is plural and implemented:
+`person_epistemics.PredictiveModel`, whose first implementation is the
+declared-effect model in `person_cognition.predictors`. Beliefs are
+`person_epistemics.BeliefState`; history is the canonical event journal.
 """
 
 from __future__ import annotations
@@ -22,41 +40,6 @@ class NotYetImplemented(NotImplementedError):
             f"{provider} is a future interface; it is scheduled for {milestone} "
             "and has no implementation in this milestone."
         )
-
-
-@runtime_checkable
-class MemoryProvider(Protocol):
-    """Working, episodic, semantic, spatial and autobiographical memory."""
-
-    def store(self, record: dict[str, Any]) -> str: ...
-
-    def retrieve(self, query: dict[str, Any], limit: int) -> list[dict[str, Any]]: ...
-
-    def consolidate(self) -> int: ...
-
-    def forget_or_decay(self, now_tick: int) -> int: ...
-
-
-@runtime_checkable
-class WorldModelProvider(Protocol):
-    """Descriptive world state plus predictive and causal beliefs."""
-
-    def observe(self, event: dict[str, Any]) -> None: ...
-
-    def predict(
-        self, state: dict[str, float], candidate_action: dict[str, Any]
-    ) -> dict[str, Any]: ...
-
-    def update(self, prediction: dict[str, Any], outcome: dict[str, Any]) -> None: ...
-
-    def query(self, belief: str) -> dict[str, Any] | None: ...
-
-
-@runtime_checkable
-class AffectProvider(Protocol):
-    """Appraisal and persistent computational affect."""
-
-    def update(self, event: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]: ...
 
 
 @runtime_checkable
@@ -78,58 +61,10 @@ class SocialProvider(Protocol):
 
 
 @runtime_checkable
-class ProjectProvider(Protocol):
-    """Long-term projects with milestones and suspended state."""
-
-    def active_projects(self) -> list[dict[str, Any]]: ...
-
-    def advance(self, project_id: str, outcome: dict[str, Any]) -> None: ...
-
-
-@runtime_checkable
 class ExplorationProvider(Protocol):
     """Epistemic exploration: what is worth finding out, and how safely."""
 
     def propose_experiment(self, state: dict[str, float]) -> dict[str, Any] | None: ...
-
-
-class UnimplementedMemoryProvider:
-    milestone = "Phase 7, memory and consolidation"
-
-    def store(self, record: dict[str, Any]) -> str:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-    def retrieve(self, query: dict[str, Any], limit: int) -> list[dict[str, Any]]:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-    def consolidate(self) -> int:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-    def forget_or_decay(self, now_tick: int) -> int:
-        raise NotYetImplemented("MemoryProvider", self.milestone)
-
-
-class UnimplementedWorldModelProvider:
-    milestone = "Phase 6, persistent and predictive world"
-
-    def observe(self, event: dict[str, Any]) -> None:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-    def predict(self, state: dict[str, float], candidate_action: dict[str, Any]) -> dict[str, Any]:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-    def update(self, prediction: dict[str, Any], outcome: dict[str, Any]) -> None:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-    def query(self, belief: str) -> dict[str, Any] | None:
-        raise NotYetImplemented("WorldModelProvider", self.milestone)
-
-
-class UnimplementedAffectProvider:
-    milestone = "Phase 10, affect"
-
-    def update(self, event: dict[str, Any], state: dict[str, Any]) -> dict[str, Any]:
-        raise NotYetImplemented("AffectProvider", self.milestone)
 
 
 class UnimplementedLanguageProvider:
@@ -152,16 +87,6 @@ class UnimplementedSocialProvider:
         raise NotYetImplemented("SocialProvider", self.milestone)
 
 
-class UnimplementedProjectProvider:
-    milestone = "Phase 11, autonomous projects"
-
-    def active_projects(self) -> list[dict[str, Any]]:
-        raise NotYetImplemented("ProjectProvider", self.milestone)
-
-    def advance(self, project_id: str, outcome: dict[str, Any]) -> None:
-        raise NotYetImplemented("ProjectProvider", self.milestone)
-
-
 class UnimplementedExplorationProvider:
     milestone = "Phase 6, active experimentation"
 
@@ -170,11 +95,7 @@ class UnimplementedExplorationProvider:
 
 
 FUTURE_PROVIDERS = {
-    "MemoryProvider": UnimplementedMemoryProvider,
-    "WorldModelProvider": UnimplementedWorldModelProvider,
-    "AffectProvider": UnimplementedAffectProvider,
     "LanguageProvider": UnimplementedLanguageProvider,
     "SocialProvider": UnimplementedSocialProvider,
-    "ProjectProvider": UnimplementedProjectProvider,
     "ExplorationProvider": UnimplementedExplorationProvider,
 }

@@ -1,0 +1,55 @@
+{
+  "candidates": [
+    {
+      "base_priority": 320.0,
+      "character": "outgoing",
+      "goal_id": "goal_establish_tools",
+      "goal_type": "ESTABLISH_TOOLS"
+    },
+    {
+      "base_priority": 300.0,
+      "character": "protective",
+      "goal_id": "goal_project_1",
+      "goal_type": "ESTABLISH_STORAGE"
+    },
+    {
+      "base_priority": 220,
+      "character": "protective",
+      "goal_id": "goal_establish_storage",
+      "goal_type": "ESTABLISH_STORAGE"
+    }
+  ],
+  "class": "B",
+  "formula": {
+    "project": 300.0,
+    "tools": 320.0
+  },
+  "project_goal": {
+    "base_priority": 300.0,
+    "character": "protective",
+    "goal_id": "goal_project_1",
+    "goal_type": "ESTABLISH_STORAGE"
+  },
+  "result": "PASS",
+  "separation": 20.0,
+  "swing": 50.0,
+  "third_goals": [
+    {
+      "base_priority": 220,
+      "character": "protective",
+      "goal_id": "goal_establish_storage",
+      "goal_type": "ESTABLISH_STORAGE"
+    }
+  ],
+  "tools_goal": {
+    "base_priority": 320.0,
+    "character": "outgoing",
+    "goal_id": "goal_establish_tools",
+    "goal_type": "ESTABLISH_TOOLS"
+  },
+  "why": null,
+  "witness_sets": [
+    "home.shelterState = complete",
+    "home relation = at_home, home place known"
+  ]
+}

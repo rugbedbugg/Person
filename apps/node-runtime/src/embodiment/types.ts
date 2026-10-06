@@ -1,4 +1,6 @@
-import type { ItemStack, Position } from "#protocol";
+import type { ItemStack } from "#protocol";
+import type { GazeDirection } from "./gaze.ts";
+import { type Position } from "#minecraft";
 
 /**
  * The embodiment port.
@@ -46,10 +48,28 @@ export interface BlockView {
 
 export interface EntityView {
   entityId: number;
+  /**
+   * The species name, or literally "player" for a person.
+   *
+   * Minecraft reports every player entity under the same name, so this field
+   * says what something is and never who it is. Identity lives in `username`
+   * and `uuid`.
+   */
   name: string;
+  /** The account name, when the client knows one. Players only. */
+  username: string | null;
+  /** The server's stable entity UUID, when one was sent. */
+  uuid: string | null;
   position: Position;
   distance: number;
+  /** Attacks without provocation. */
   hostile: boolean;
+  /**
+   * Harmless until provoked, lethal afterwards: wolves, polar bears, bees,
+   * iron golems. Treated as a threat only once Person has taken damage, which
+   * is the only honest signal available that one has turned on you.
+   */
+  neutral: boolean;
   passive: boolean;
   player: boolean;
   villager: boolean;
@@ -80,6 +100,16 @@ export interface WorldSnapshot {
   biome: string;
   lightLevel: number;
   position: Position;
+  /**
+   * Where Person is looking, in radians, using Mineflayer's convention: the
+   * view direction is `(-sin(yaw)cos(pitch), sin(pitch), -cos(yaw)cos(pitch))`.
+   *
+   * This is privileged motor state. The perception layer reads it to decide
+   * what Person can see; it never crosses to cognition, because knowing your
+   * own exact heading to the radian is not something a body reports to a mind.
+   */
+  yaw: number;
+  pitch: number;
   health: number;
   food: number;
   saturation: number;
@@ -95,8 +125,20 @@ export interface WorldSnapshot {
   resources: BlockView[];
   hazards: BlockView[];
   stuck: boolean;
+  /**
+   * Whether there is solid, diggable ground beside Person right now.
+   *
+   * The safety kernel needs this to choose between running and digging in. On
+   * flat open terrain there is no wall to tunnel into, and sending Person to
+   * dig a refuge that cannot exist wastes the one chance it had to run.
+   */
+  diggableGround: boolean;
   lastSafePosition: Position | null;
   connected: boolean;
+  /** True when Person lost health recently enough for a neutral mob to count. */
+  recentlyDamaged: boolean;
+  /** World tick of the last health loss, or null if none observed. */
+  lastDamageTick: number | null;
 }
 
 export interface FindBlocksQuery {
@@ -117,10 +159,19 @@ export interface CraftResult {
 
 export class EmbodimentError extends Error {
   readonly reason: string;
-  constructor(reason: string, message?: string) {
+  /**
+   * What an operator should try next.
+   *
+   * The first live connection is the hardest one to diagnose, because nothing
+   * downstream has run yet. A reason code tells a program what happened; the
+   * hint tells a person what to do about it.
+   */
+  readonly hint: string | null;
+  constructor(reason: string, message?: string, hint?: string) {
     super(message ?? reason);
     this.name = "EmbodimentError";
     this.reason = reason;
+    this.hint = hint ?? null;
   }
 }
 
@@ -154,6 +205,14 @@ export interface Embodiment {
   findBlocks(query: FindBlocksQuery): BlockView[];
   findEntities(): EntityView[];
   containerAt(position: Position): ContainerView | null;
+  /**
+   * Reads a container's live contents, opening it if necessary.
+   *
+   * `containerAt` returns a cached view, which is empty until something has
+   * been transferred. Deciding what to withdraw needs the real contents, and
+   * against a real server the only way to learn them is to open the window.
+   */
+  inspectContainer(position: Position): Promise<ContainerView | null>;
   moveTo(position: Position, options?: MoveOptions): Promise<void>;
   dig(position: Position): Promise<ItemStack[]>;
   place(position: Position, item: string): Promise<void>;
@@ -171,7 +230,43 @@ export interface Embodiment {
   attack(entityId: number): Promise<void>;
   deposit(position: Position, items: ItemStack[]): Promise<ItemStack[]>;
   withdraw(position: Position, items: ItemStack[]): Promise<ItemStack[]>;
+  /**
+   * Points Person's senses one bounded step in a direction.
+   *
+   * The only way anything above the body changes where Person is looking. It
+   * takes a word rather than an angle, so no caller needs an absolute heading
+   * to aim, and cognition could not issue one if it tried: the direction is
+   * the whole vocabulary.
+   *
+   * Locomotion also turns Person, and that is not this. Walking somewhere
+   * leaves Person facing along its route as a side effect; calling this is
+   * Person deciding to look.
+   */
+  look(direction: GazeDirection): Promise<void>;
   waitTicks(ticks: number): Promise<void>;
+  /**
+   * Simulated bodies only: let the world move on by one tick.
+   *
+   * A real server's clock runs whether or not Person acts. A simulated one
+   * advances only inside actions, so an attempt that takes no time and changes
+   * nothing would stop its world, and a Person that proposed it again would
+   * find everything exactly as it was, forever. Dispatch calls this after such
+   * an attempt. It is a guarantee of progress, not a model of reaction time.
+   */
+  passTick?(): void;
+  /**
+   * Brings a dead body back as the same Person (ADR 0017, I3), for bodies
+   * that can: Minecraft's respawn. The runtime calls it only for a
+   * respawn-configured death, and reports it; cognition never asks for it.
+   */
+  respawn?(): Promise<void>;
+  /**
+   * Swims straight up (ADR 0019), for bodies that can: at most `maxTicks`,
+   * stopping as soon as the head is in breathable space, the way up is
+   * blocked, or the body dies or is disconnected. Only the air-restoring
+   * emergency uses it.
+   */
+  ascend?(options: { maxTicks: number }): Promise<void>;
   /** Registers a Person-placed container so its provenance is tracked. */
   registerOwnedStorage(position: Position, storageId: string): void;
 }

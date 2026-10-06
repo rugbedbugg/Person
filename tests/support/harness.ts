@@ -2,19 +2,23 @@ import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateConfig, type PersonConfig, type Position } from "#config";
 import { FixtureWorld, type FixtureWorldDefinition } from "#fixture-world";
 import {
   PermissionGate,
   ProtectedAreas,
   SafetyKernel,
   SkillRunner,
-  WorldMemory,
+  PlacementLedger,
   InvocationValidator,
   type ExecutionResult,
   type PhysicalGuard,
 } from "#node-runtime";
 import { skillRegistry } from "#skills";
+import {
+  validateMinecraftConfig,
+  type MinecraftConfig,
+  type Position,
+} from "#minecraft";
 
 export const REPOSITORY = fileURLToPath(new URL("../../", import.meta.url));
 
@@ -25,22 +29,22 @@ export function temporaryDirectory(prefix = "person-test-"): string {
 export interface HarnessOptions {
   world?: Partial<FixtureWorldDefinition>;
   worldFile?: string;
-  config?: Partial<PersonConfig>;
-  protectedAreas?: PersonConfig["world"]["protectedAreas"];
+  config?: Partial<MinecraftConfig>;
+  protectedAreas?: MinecraftConfig["world"]["protectedAreas"];
   home?: Position;
   outputDirectory?: string;
 }
 
-export function baseConfig(options: HarnessOptions = {}): PersonConfig {
+export function baseConfig(options: HarnessOptions = {}): MinecraftConfig {
   const home = options.home ?? { x: 0, y: 64, z: 0 };
-  return validateConfig(
+  return validateMinecraftConfig(
     {
-      configVersion: 2,
+      configVersion: 3,
       personId: "ada",
       worldId: "test-world",
+      environment: { kind: "minecraft" },
       runtime: {
         embodiment: "fixture",
-        trainingContext: "fixture",
         outputDirectory: options.outputDirectory ?? temporaryDirectory(),
         rngSeed: 1,
         maxDecisions: 20,
@@ -88,8 +92,8 @@ export function baseConfig(options: HarnessOptions = {}): PersonConfig {
 
 export interface Harness {
   world: FixtureWorld;
-  config: PersonConfig;
-  memory: WorldMemory;
+  config: MinecraftConfig;
+  ledger: PlacementLedger;
   permissions: PermissionGate;
   kernel: SafetyKernel;
   validator: InvocationValidator;
@@ -108,7 +112,7 @@ export async function harness(options: HarnessOptions = {}): Promise<Harness> {
     ? FixtureWorld.fromFile(path.join(REPOSITORY, options.worldFile))
     : new FixtureWorld(options.world ?? {});
   const registry = skillRegistry();
-  const memory = new WorldMemory(
+  const ledger = new PlacementLedger(
     config.worldId,
     config.personId,
     config.world.home,
@@ -133,13 +137,13 @@ export async function harness(options: HarnessOptions = {}): Promise<Harness> {
     permissions,
     kernel,
     registry,
-    memory,
+    ledger,
   });
 
   return {
     world,
     config,
-    memory,
+    ledger,
     permissions,
     kernel,
     validator,

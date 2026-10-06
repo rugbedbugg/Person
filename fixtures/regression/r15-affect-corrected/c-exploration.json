@@ -1,0 +1,2230 @@
+{
+  "scenario": {
+    "world": "fixtures/worlds/benchmarks/development/c-exploration.json",
+    "seed": 1,
+    "affectMode": "active",
+    "learningMode": "supervised",
+    "maxExperiencedTicks": 6000,
+    "maxDecisions": 5000
+  },
+  "recordedAt": "fix/zero-time-interruption, b155c7d plus the already-satisfied-goal fix (ADR 0015 branch), 2026-09-30",
+  "note": "CORRECTED R1.5 semantics: the canonical regression baseline. Recorded after GoalStack stopped queuing goals already satisfied, which removed phantom goal_complete_secure_food appraisals at food 16 and 17. Decisions are identical to the historical references in ../r15-affect/ (recorded at 5548bbd, before the fix); the bridge between them is pinned by tests/integration/r15-reference.test.ts.",
+  "trace": [
+    {
+      "tick": 0,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_4b48ef885aff609a",
+      "requestedSkill": "gather_plant_food",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 6
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_plant_food",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 52,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_4b48ef885aff609a",
+      "requestedSkill": "eat_to_target",
+      "requestedParameters": {
+        "target_food": 18
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "eat_to_target",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 212,
+      "goalId": "goal_secure_shelter",
+      "goalType": "SECURE_SHELTER",
+      "routineId": "r_f19cc2109d8b9f18",
+      "requestedSkill": "build_basic_shelter",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "build_basic_shelter",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 370,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 372,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 374,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 376,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 378,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 380,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 382,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 384,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 386,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 986,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 988,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 990,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 992,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 994,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 996,
+      "goalId": "goal_project_1",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1596,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1598,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1600,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1602,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1604,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1606,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1608,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "right"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1610,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1612,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "right"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 1614,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2214,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2216,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2218,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2220,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2222,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2822,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2824,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2826,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2828,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2830,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 2832,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3432,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_f602666d56b2db49",
+      "requestedSkill": "eat_to_target",
+      "requestedParameters": {
+        "target_food": 18
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "eat_to_target",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3464,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3466,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3468,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 3470,
+      "goalId": "goal_project_2",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4070,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4072,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4074,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4076,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4078,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4678,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4680,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_4b48ef885aff609a",
+      "requestedSkill": "gather_plant_food",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 6
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_plant_food",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4732,
+      "goalId": "goal_secure_food",
+      "goalType": "SECURE_FOOD",
+      "routineId": "r_4b48ef885aff609a",
+      "requestedSkill": "eat_to_target",
+      "requestedParameters": {
+        "target_food": 18
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "eat_to_target",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4796,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4798,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4800,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4802,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4804,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_seek_evidence",
+      "requestedSkill": "look",
+      "requestedParameters": {
+        "direction": "left"
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "look",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4806,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_2b5a9b51e79473b7",
+      "requestedSkill": "gather_wood",
+      "requestedParameters": {
+        "max_distance": 48,
+        "target_amount": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "gather_wood",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 4950,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_2b5a9b51e79473b7",
+      "requestedSkill": "craft_chest",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "craft_chest",
+      "status": "FAILED"
+    },
+    {
+      "tick": 4964,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_6d9cbf8e0752d44d",
+      "requestedSkill": "craft_chest",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "craft_chest",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5004,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_6d9cbf8e0752d44d",
+      "requestedSkill": "return_home",
+      "requestedParameters": {
+        "max_distance": 128
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "return_home",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5028,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_d105c3cf2914d45b",
+      "requestedSkill": "return_home",
+      "requestedParameters": {
+        "max_distance": 128
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "return_home",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5028,
+      "goalId": "goal_establish_storage",
+      "goalType": "ESTABLISH_STORAGE",
+      "routineId": "r_d105c3cf2914d45b",
+      "requestedSkill": "place_owned_chest",
+      "requestedParameters": {},
+      "validation": "ACCEPT",
+      "executedSkill": "place_owned_chest",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5034,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5044,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 5044,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 5044,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_b4ea0c59f3659a0d",
+      "requestedSkill": "deposit_owned_storage",
+      "requestedParameters": {
+        "category": "any",
+        "keep": 8
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "deposit_owned_storage",
+      "status": "FAILED"
+    },
+    {
+      "tick": 5044,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    },
+    {
+      "tick": 5644,
+      "goalId": "goal_maintain_reserves",
+      "goalType": "MAINTAIN_RESERVES",
+      "routineId": "r_idle_wait",
+      "requestedSkill": "wait_safely",
+      "requestedParameters": {
+        "ticks": 600
+      },
+      "validation": "ACCEPT",
+      "executedSkill": "wait_safely",
+      "status": "SUCCESS"
+    }
+  ],
+  "affect": [
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0,
+        "unease": 0,
+        "control": 0
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "experienced_tick": 0
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.0497,
+        "unease": 0,
+        "control": 0.0499
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.0997,
+        "unease": 0,
+        "control": 0.0999
+      },
+      "experienced_tick": 52
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.0979,
+        "unease": 0,
+        "control": 0.099
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.1979,
+        "unease": 0,
+        "control": 0.149
+      },
+      "experienced_tick": 212
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": 0.1979,
+        "unease": 0,
+        "control": 0.149
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.2479,
+        "unease": 0,
+        "control": 0.199
+      },
+      "experienced_tick": 212
+    },
+    {
+      "trigger": "goal_complete_secure_shelter",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": 0.2434,
+        "unease": 0,
+        "control": 0.1972
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": 0.3434,
+        "unease": 0,
+        "control": 0.2472
+      },
+      "experienced_tick": 370
+    },
+    {
+      "trigger": "project_progressed_improve_home",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": 0.3434,
+        "unease": 0,
+        "control": 0.2472
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.03
+      },
+      "after": {
+        "valence": 0.3934,
+        "unease": 0,
+        "control": 0.2772
+      },
+      "experienced_tick": 370
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.3926,
+        "unease": 0,
+        "control": 0.2772
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 0.3426,
+        "unease": 0,
+        "control": 0.2772
+      },
+      "experienced_tick": 386
+    },
+    {
+      "trigger": "goal_blocked_establish_storage",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.3197,
+        "unease": 0,
+        "control": 0.2678
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.2197,
+        "unease": 0,
+        "control": 0.2178
+      },
+      "experienced_tick": 986
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": 0.2192,
+        "unease": 0,
+        "control": 0.2178
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": 0.1692,
+        "unease": 0,
+        "control": 0.2178
+      },
+      "experienced_tick": 996
+    },
+    {
+      "trigger": "goal_blocked_establish_storage",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.1579,
+        "unease": 0,
+        "control": 0.2104
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": 0.0579,
+        "unease": 0,
+        "control": 0.1604
+      },
+      "experienced_tick": 1596
+    },
+    {
+      "trigger": "project_abandoned_improve_home",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": 0.0579,
+        "unease": 0,
+        "control": 0.1604
+      },
+      "delta": {
+        "valence": -0.12,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": -0.0621,
+        "unease": 0,
+        "control": 0.0804
+      },
+      "experienced_tick": 1596
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": -0.0621,
+        "unease": 0,
+        "control": 0.0804
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.1121,
+        "unease": 0,
+        "control": 0.0804
+      },
+      "experienced_tick": 1614
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.1046,
+        "unease": 0,
+        "control": 0.0777
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.2046,
+        "unease": 0,
+        "control": 0.0277
+      },
+      "experienced_tick": 2214
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": -0.2046,
+        "unease": 0,
+        "control": 0.0277
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.2546,
+        "unease": 0,
+        "control": 0.0277
+      },
+      "experienced_tick": 2222
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.2376,
+        "unease": 0,
+        "control": 0.0268
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.3376,
+        "unease": 0,
+        "control": -0.0232
+      },
+      "experienced_tick": 2822
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": -0.3371,
+        "unease": 0,
+        "control": -0.0232
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.3871,
+        "unease": 0,
+        "control": -0.0232
+      },
+      "experienced_tick": 2832
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.3612,
+        "unease": 0,
+        "control": -0.0224
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.4612,
+        "unease": 0,
+        "control": -0.0724
+      },
+      "experienced_tick": 3432
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.4612,
+        "unease": 0,
+        "control": -0.0724
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.4112,
+        "unease": 0,
+        "control": -0.0224
+      },
+      "experienced_tick": 3432
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": -0.4097,
+        "unease": 0,
+        "control": -0.0224
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.3097,
+        "unease": 0,
+        "control": 0.0276
+      },
+      "experienced_tick": 3464
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": -0.3094,
+        "unease": 0,
+        "control": 0.0276
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.3594,
+        "unease": 0,
+        "control": 0.0276
+      },
+      "experienced_tick": 3470
+    },
+    {
+      "trigger": "goal_blocked_secure_food",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.3353,
+        "unease": 0,
+        "control": 0.0267
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.4353,
+        "unease": 0,
+        "control": -0.0233
+      },
+      "experienced_tick": 4070
+    },
+    {
+      "trigger": "project_abandoned_secure_food_supply",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.4353,
+        "unease": 0,
+        "control": -0.0233
+      },
+      "delta": {
+        "valence": -0.12,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": -0.5553,
+        "unease": 0,
+        "control": -0.1033
+      },
+      "experienced_tick": 4070
+    },
+    {
+      "trigger": "search_unfound",
+      "components": {
+        "goal_congruence": -0.5
+      },
+      "before": {
+        "valence": -0.5549,
+        "unease": 0,
+        "control": -0.1033
+      },
+      "delta": {
+        "valence": -0.05,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.6049,
+        "unease": 0,
+        "control": -0.1033
+      },
+      "experienced_tick": 4078
+    },
+    {
+      "trigger": "goal_blocked_establish_storage",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.5644,
+        "unease": 0,
+        "control": -0.0998
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.6644,
+        "unease": 0,
+        "control": -0.1498
+      },
+      "experienced_tick": 4678
+    },
+    {
+      "trigger": "search_found",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": -0.6642,
+        "unease": 0,
+        "control": -0.1498
+      },
+      "delta": {
+        "valence": 0.03,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.6342,
+        "unease": 0,
+        "control": -0.1498
+      },
+      "experienced_tick": 4680
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.6342,
+        "unease": 0,
+        "control": -0.1498
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.5842,
+        "unease": 0,
+        "control": -0.0998
+      },
+      "experienced_tick": 4680
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.5807,
+        "unease": 0,
+        "control": -0.0995
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.5307,
+        "unease": 0,
+        "control": -0.0495
+      },
+      "experienced_tick": 4732
+    },
+    {
+      "trigger": "goal_complete_secure_food",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": -0.5268,
+        "unease": 0,
+        "control": -0.0493
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.4268,
+        "unease": 0,
+        "control": 0.0007
+      },
+      "experienced_tick": 4796
+    },
+    {
+      "trigger": "search_found",
+      "components": {
+        "goal_congruence": 0.5
+      },
+      "before": {
+        "valence": -0.4263,
+        "unease": 0,
+        "control": 0.0007
+      },
+      "delta": {
+        "valence": 0.03,
+        "unease": 0,
+        "control": 0
+      },
+      "after": {
+        "valence": -0.3963,
+        "unease": 0,
+        "control": 0.0007
+      },
+      "experienced_tick": 4806
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.3963,
+        "unease": 0,
+        "control": 0.0007
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.3463,
+        "unease": 0,
+        "control": 0.0507
+      },
+      "experienced_tick": 4806
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": -0.3406,
+        "unease": 0,
+        "control": 0.0503
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": -0.4206,
+        "unease": 0,
+        "control": -0.0297
+      },
+      "experienced_tick": 4950
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.4199,
+        "unease": 0,
+        "control": -0.0297
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.3699,
+        "unease": 0,
+        "control": 0.0203
+      },
+      "experienced_tick": 4964
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.3682,
+        "unease": 0,
+        "control": 0.0203
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.3182,
+        "unease": 0,
+        "control": 0.0703
+      },
+      "experienced_tick": 5004
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.3173,
+        "unease": 0,
+        "control": 0.0702
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.2673,
+        "unease": 0,
+        "control": 0.1202
+      },
+      "experienced_tick": 5028
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.2673,
+        "unease": 0,
+        "control": 0.1202
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.2173,
+        "unease": 0,
+        "control": 0.1702
+      },
+      "experienced_tick": 5028
+    },
+    {
+      "trigger": "goal_complete_establish_storage",
+      "components": {
+        "goal_congruence": 1
+      },
+      "before": {
+        "valence": -0.2171,
+        "unease": 0,
+        "control": 0.1701
+      },
+      "delta": {
+        "valence": 0.1,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.1171,
+        "unease": 0,
+        "control": 0.2201
+      },
+      "experienced_tick": 5034
+    },
+    {
+      "trigger": "action_succeeded",
+      "components": {
+        "success": 1
+      },
+      "before": {
+        "valence": -0.1171,
+        "unease": 0,
+        "control": 0.2201
+      },
+      "delta": {
+        "valence": 0.05,
+        "unease": 0,
+        "control": 0.05
+      },
+      "after": {
+        "valence": -0.0671,
+        "unease": 0,
+        "control": 0.2701
+      },
+      "experienced_tick": 5034
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": -0.067,
+        "unease": 0,
+        "control": 0.2699
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": -0.147,
+        "unease": 0,
+        "control": 0.1899
+      },
+      "experienced_tick": 5044
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": -0.147,
+        "unease": 0,
+        "control": 0.1899
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": -0.227,
+        "unease": 0,
+        "control": 0.1099
+      },
+      "experienced_tick": 5044
+    },
+    {
+      "trigger": "action_failed",
+      "components": {
+        "success": -1
+      },
+      "before": {
+        "valence": -0.227,
+        "unease": 0,
+        "control": 0.1099
+      },
+      "delta": {
+        "valence": -0.08,
+        "unease": 0,
+        "control": -0.08
+      },
+      "after": {
+        "valence": -0.307,
+        "unease": 0,
+        "control": 0.0299
+      },
+      "experienced_tick": 5044
+    },
+    {
+      "trigger": "goal_blocked_maintain_reserves",
+      "components": {
+        "goal_congruence": -1
+      },
+      "before": {
+        "valence": -0.307,
+        "unease": 0,
+        "control": 0.0299
+      },
+      "delta": {
+        "valence": -0.1,
+        "unease": 0,
+        "control": -0.05
+      },
+      "after": {
+        "valence": -0.407,
+        "unease": 0,
+        "control": -0.0201
+      },
+      "experienced_tick": 5044
+    }
+  ],
+  "priorities": [
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 640,
+      "affect_bias": 0,
+      "priority": 640
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 640,
+      "affect_bias": 1.245,
+      "priority": 641.245
+    },
+    {
+      "goal_id": "goal_secure_shelter",
+      "base_priority": 400,
+      "affect_bias": -1.238,
+      "priority": 398.762
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -2.465,
+      "priority": 297.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -3.465,
+      "priority": 296.535
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -3.347,
+      "priority": 216.653
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -2.723,
+      "priority": 297.277
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -2.723,
+      "priority": 297.277
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -2.723,
+      "priority": 297.277
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -2.723,
+      "priority": 297.277
+    },
+    {
+      "goal_id": "goal_project_1",
+      "base_priority": 300,
+      "affect_bias": -2.723,
+      "priority": 297.277
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -2.63,
+      "priority": 217.37
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": 0.229,
+      "priority": 300.229
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -0.336,
+      "priority": 299.664
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -2.211,
+      "priority": 297.789
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -2.211,
+      "priority": 297.789
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -2.211,
+      "priority": 297.789
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -2.211,
+      "priority": 297.789
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.335,
+      "priority": 219.665
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -4.509,
+      "priority": 295.491
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -4.507,
+      "priority": 295.493
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -4.506,
+      "priority": 295.494
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -4.505,
+      "priority": 295.495
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -4.504,
+      "priority": 295.496
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": -4.795,
+      "priority": 495.205
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -5.401,
+      "priority": 294.599
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -3.525,
+      "priority": 296.475
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -3.524,
+      "priority": 296.476
+    },
+    {
+      "goal_id": "goal_project_2",
+      "base_priority": 300,
+      "affect_bias": -3.522,
+      "priority": 296.478
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.334,
+      "priority": 219.666
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": 1.291,
+      "priority": 221.291
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": 1.291,
+      "priority": 221.291
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": 1.291,
+      "priority": 221.291
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": 1.291,
+      "priority": 221.291
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": -8.303,
+      "priority": 491.697
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": -10.175,
+      "priority": 489.825
+    },
+    {
+      "goal_id": "goal_secure_food",
+      "base_priority": 500,
+      "affect_bias": -8.502,
+      "priority": 491.498
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": 0.616,
+      "priority": 220.616
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.009,
+      "priority": 219.991
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.009,
+      "priority": 219.991
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.009,
+      "priority": 219.991
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.009,
+      "priority": 219.991
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.009,
+      "priority": 219.991
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.629,
+      "priority": 219.371
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": 0.371,
+      "priority": 220.371
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.254,
+      "priority": 219.746
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -0.877,
+      "priority": 219.123
+    },
+    {
+      "goal_id": "goal_establish_storage",
+      "base_priority": 220,
+      "affect_bias": -1.502,
+      "priority": 218.498
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -2.126,
+      "priority": 177.874
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -3.374,
+      "priority": 176.626
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -2.374,
+      "priority": 177.626
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 180,
+      "affect_bias": -1.374,
+      "priority": 178.626
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10,
+      "affect_bias": 0,
+      "priority": 10
+    },
+    {
+      "goal_id": "goal_maintain_reserves",
+      "base_priority": 10,
+      "affect_bias": 0,
+      "priority": 10
+    }
+  ]
+}

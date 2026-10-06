@@ -1,0 +1,145 @@
+{
+  "description": "The Minecraft skill vocabulary: what a Minecraft SkillSpec may name as its category, its required permissions and its completion evidence, the bounds on its cost limits, and how each planning fact may be used. Owned by the Minecraft environment profile (ADR 0025); the generic skill registry validates specs against it.",
+  "categories": [
+    "emergency",
+    "food",
+    "resources",
+    "crafting",
+    "shelter",
+    "storage",
+    "perception"
+  ],
+  "permissions": [
+    "harvest_resource",
+    "mine_resource",
+    "build",
+    "hunt_passive_animal",
+    "place_owned_storage",
+    "deposit_owned_storage",
+    "withdraw_owned_storage",
+    "withdraw_existing_container",
+    "emergency_dig",
+    "craft",
+    "consume"
+  ],
+  "completionEvidence": [
+    "inventory_delta",
+    "harvested_blocks",
+    "placed_blocks",
+    "crafted_items",
+    "smelted_items",
+    "position_reached",
+    "threat_clearance",
+    "vitals_delta",
+    "container_transfer",
+    "shelter_verified",
+    "elapsed_ticks"
+  ],
+  "limits": {
+    "maxTicks": 72000,
+    "maxDistance": 256,
+    "minHealth": 20
+  },
+  "factClasses": {
+    "evidence": [
+      "permitted_container_nearby",
+      "reachable_animal",
+      "reachable_coal",
+      "reachable_plant_food",
+      "reachable_stone",
+      "reachable_wood"
+    ],
+    "tracked": [
+      "at_home",
+      "building_materials",
+      "chest_item",
+      "coal",
+      "cooked_food",
+      "crafting_table",
+      "edible_food",
+      "fuel",
+      "furnace_placed",
+      "owned_storage_available",
+      "planks",
+      "plant_food",
+      "raw_food",
+      "safe",
+      "shelter_complete",
+      "sheltered",
+      "stone",
+      "stone_axe",
+      "stone_pickaxe",
+      "tool_tier",
+      "wood",
+      "wooden_axe",
+      "wooden_pickaxe"
+    ],
+    "evaluable": [
+      "building_materials",
+      "chest_item",
+      "coal",
+      "cooked_food",
+      "edible_food",
+      "food_level",
+      "fuel",
+      "health_level",
+      "inventory_space",
+      "planks",
+      "plant_food",
+      "raw_food",
+      "safe",
+      "stone",
+      "stone_axe",
+      "stone_pickaxe",
+      "tool_tier",
+      "wood",
+      "wooden_axe",
+      "wooden_pickaxe"
+    ],
+    "unobservable": [
+      "at_home",
+      "looted",
+      "rested",
+      "sheltered",
+      "stored_surplus",
+      "withdrawn"
+    ],
+    "action": ["looted", "rested", "stored_surplus", "withdrawn"]
+  },
+  "failures": {
+    "notAttempted": [
+      "container_full",
+      "empty_container",
+      "invalid_direction",
+      "invalid_parameter",
+      "inventory_full",
+      "missing_materials",
+      "missing_tool",
+      "no_diggable_ground",
+      "no_furnace",
+      "no_owned_storage",
+      "no_permitted_container",
+      "no_permitted_target",
+      "no_placement_site",
+      "no_route",
+      "no_safe_route",
+      "nothing_to_deposit",
+      "obstructed_site",
+      "protected_area",
+      "unreachable_home",
+      "unreachable_resource",
+      "unreachable_target"
+    ]
+  },
+  "planning": {
+    "plannableEmergency": ["eat_to_target", "return_home"],
+    "recovery": ["wait_safely"]
+  },
+  "unremarkable": ["look", "look_around", "wait_safely"],
+  "roles": {
+    "idle": "wait_safely",
+    "look": "look",
+    "buildsHome": "build_basic_shelter",
+    "goesHome": "return_home"
+  }
+}

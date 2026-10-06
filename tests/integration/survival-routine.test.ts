@@ -76,9 +76,9 @@ test("a complete survival routine runs end to end against the fixture", async ()
   const snapshot = bench.world.snapshot();
   assert.ok(snapshot.food >= 16, "Person should be fed");
   assert.ok(snapshot.alive);
-  assert.equal(bench.memory.home.shelterState, "complete");
-  assert.equal(bench.memory.ownedStorage.length, 1);
-  const storage = bench.memory.ownedStorage[0];
+  assert.equal(bench.ledger.home.shelterState, "complete");
+  assert.equal(bench.ledger.ownedStorage.length, 1);
+  const storage = bench.ledger.ownedStorage[0];
   assert.ok(storage);
   assert.equal(storage.createdByPerson, "ada");
   assert.ok(
@@ -86,8 +86,8 @@ test("a complete survival routine runs end to end against the fixture", async ()
     "the owned container still exists",
   );
   assert.ok(
-    bench.memory.furnacePosition,
-    "the furnace is remembered as an owned workstation",
+    bench.ledger.furnacePosition,
+    "the furnace is recorded as an owned workstation",
   );
 });
 

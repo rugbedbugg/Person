@@ -1,19 +1,41 @@
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
+import { ConfigError, readConfigDocument } from "#config";
 import {
-  ConfigError,
-  LegacyCheckpointError,
-  assertNotLegacyCheckpoint,
-  isLegacyConfig,
-  loadConfig,
-  migrateConfig,
-  type PersonConfig,
-} from "#config";
-import { PersonRuntime, summariseEpisode } from "#node-runtime";
+  PersonRuntime,
+  readStatus,
+  renderStatus,
+  statusPath,
+  summariseEpisode,
+} from "#node-runtime";
 import { skillRegistry } from "#skills";
 import { PROTOCOL_VERSION } from "#protocol";
 import { EvidenceInspector } from "./inspect.ts";
 import { createEmbodiment } from "./embodiment.ts";
+import {
+  captureObservation,
+  compareObservations,
+  renderFindings,
+  renderObservation,
+  resolveBase,
+} from "./observe.ts";
+import {
+  LegacyCheckpointError,
+  assertNotLegacyCheckpoint,
+  describeConnection,
+  isLegacyConfig,
+  loadMinecraftConfig,
+  migrateConfig,
+  upgradeConfigDocument,
+  withConnectionOverride,
+  type ConnectionOverride,
+  type MinecraftConfig,
+  experienceOf,
+  describeExperience,
+} from "#minecraft";
+
+export { skillTestCommand } from "./skill-test.ts";
+export type { SkillTestOptions, SkillTestResult } from "./skill-test.ts";
 
 export interface CommandResult {
   code: number;
@@ -25,28 +47,43 @@ export interface RunOptions {
   learningMode?: "off" | "shadow" | "supervised";
   json: boolean;
   episodeId?: string;
+  connection?: ConnectionOverride;
+  operatorIntervention?: { reason?: string };
 }
 
 function withLearningMode(
-  config: PersonConfig,
+  config: MinecraftConfig,
   mode?: RunOptions["learningMode"],
-): PersonConfig {
+): MinecraftConfig {
   if (!mode || mode === config.learning.mode) return config;
   return { ...config, learning: { ...config.learning, mode } };
 }
 
 export async function runCommand(options: RunOptions): Promise<CommandResult> {
-  const base = loadConfig(options.configPath);
-  const config = withLearningMode(base, options.learningMode);
+  const base = loadMinecraftConfig(options.configPath);
+  // The LAN port is runtime information, not configuration: Minecraft picks a
+  // new one every time a world is opened. The override applies to this
+  // invocation and is never written back.
+  const config = withConnectionOverride(
+    withLearningMode(base, options.learningMode),
+    options.connection ?? {},
+  );
   const embodiment = await createEmbodiment(
     config,
     path.dirname(path.resolve(options.configPath)),
   );
+  if (!options.json && config.runtime.embodiment === "mineflayer")
+    process.stderr.write(
+      `person: connecting to ${describeConnection(config, options.connection ?? {})}\n`,
+    );
   const runtime = new PersonRuntime({
     config,
     embodiment,
     cwd: process.cwd(),
     ...(options.episodeId ? { episodeId: options.episodeId } : {}),
+    ...(options.operatorIntervention
+      ? { operatorIntervention: options.operatorIntervention }
+      : {}),
     onDiagnostic: (kind, detail) => {
       if (!options.json)
         process.stderr.write(`person: ${kind} ${JSON.stringify(detail)}\n`);
@@ -58,6 +95,203 @@ export async function runCommand(options: RunOptions): Promise<CommandResult> {
     output: options.json
       ? `${JSON.stringify(report, null, 2)}\n`
       : `${summariseEpisode(report)}\n`,
+  };
+}
+
+/**
+ * Connects, takes one observation, and stops.
+ *
+ * The smallest thing that can be done against a live server, and therefore the
+ * right first thing to do against one.
+ */
+export interface ObserveOptions {
+  configPath: string;
+  json: boolean;
+  outputFile?: string;
+  connection?: ConnectionOverride;
+  operatorIntervention?: { reason?: string };
+}
+
+/**
+ * Connects, takes one observation, and stops.
+ *
+ * The smallest thing that can be done against a live server, and therefore the
+ * right first thing to do against one. It runs no skill, writes no learning
+ * update, and disconnects before returning.
+ */
+export async function observeCommand(
+  options: ObserveOptions,
+): Promise<CommandResult> {
+  const config = withConnectionOverride(
+    loadMinecraftConfig(options.configPath),
+    options.connection ?? {},
+  );
+  const identity = describeConnection(config, options.connection ?? {});
+  if (!options.json && config.runtime.embodiment === "mineflayer")
+    process.stderr.write(`person: connecting to ${identity}\n`);
+
+  let captured;
+  try {
+    captured = await captureObservation(
+      config,
+      resolveBase(options.configPath),
+      {
+        operatorIntervention: options.operatorIntervention,
+      },
+    );
+  } catch (error) {
+    // The first live connection is the least diagnosable moment in the system.
+    // Whatever the adapter worked out about the failure is reported verbatim
+    // rather than collapsed into "failed to connect".
+    const failure = error as {
+      reason?: string;
+      hint?: string | null;
+      message?: string;
+    };
+    const reason = failure.reason ?? "unknown_error";
+    if (options.json)
+      return {
+        code: 1,
+        output: `${JSON.stringify(
+          {
+            connected: false,
+            reason,
+            message: failure.message ?? String(error),
+            hint: failure.hint ?? null,
+            target: identity,
+          },
+          null,
+          2,
+        )}\n`,
+      };
+    return {
+      code: 1,
+      output:
+        `Could not observe ${identity}\n` +
+        `  reason: ${reason}\n` +
+        `  detail: ${failure.message ?? String(error)}\n` +
+        (failure.hint ? `  try:    ${failure.hint}\n` : ""),
+    };
+  }
+
+  if (options.outputFile)
+    writeFileSync(
+      path.resolve(options.outputFile),
+      `${JSON.stringify(captured.observation, null, 2)}\n`,
+      { mode: 0o600 },
+    );
+  if (options.json)
+    return {
+      code: captured.valid ? 0 : 1,
+      output: `${JSON.stringify(
+        {
+          connected: true,
+          valid: captured.valid,
+          diagnostics: captured.diagnostics,
+          observation: captured.observation,
+        },
+        null,
+        2,
+      )}\n`,
+    };
+  const header = captured.valid
+    ? `Connected to ${identity}\nObservation is valid against the protocol schema.`
+    : `Connected to ${identity}\nObservation FAILS the protocol schema:\n  ${captured.diagnostics.join("\n  ")}`;
+  const written = options.outputFile
+    ? `\nFull normalised observation written to ${path.resolve(options.outputFile)}`
+    : "\nRe-run with --json or --out <file> for the full normalised observation.";
+  return {
+    code: captured.valid ? 0 : 1,
+    output: `${header}\n${renderObservation(captured.observation)}${written}\n`,
+  };
+}
+
+/**
+ * Reports what Person is doing, from the outside.
+ *
+ * Read-only by construction: the runtime writes a status file and this reads
+ * it. Nothing here connects to Minecraft, so watching Person can never change
+ * what Person does, and the last known state survives the run that produced it.
+ */
+export function statusCommand(
+  config: MinecraftConfig,
+  json: boolean,
+): CommandResult {
+  const file = statusPath(
+    config.runtime.outputDirectory,
+    config.worldId,
+    config.personId,
+  );
+  const status = readStatus(file);
+  if (!status)
+    return {
+      code: 1,
+      output: json
+        ? `${JSON.stringify({ found: false, file }, null, 2)}\n`
+        : `No status recorded yet at ${file}\nRun person observe or person run first.\n`,
+    };
+  return {
+    code: 0,
+    output: json
+      ? `${JSON.stringify(status, null, 2)}\n`
+      : `${renderStatus(status)}\n`,
+  };
+}
+
+/** Reprints the status whenever the runtime writes a new one. */
+export async function followStatus(
+  config: MinecraftConfig,
+  json: boolean,
+  intervalMs: number,
+  write: (text: string) => void,
+  shouldContinue: () => boolean,
+): Promise<number> {
+  const file = statusPath(
+    config.runtime.outputDirectory,
+    config.worldId,
+    config.personId,
+  );
+  let last = "";
+  while (shouldContinue()) {
+    const status = readStatus(file);
+    const rendered = status
+      ? json
+        ? `${JSON.stringify(status)}\n`
+        : `${renderStatus(status)}\n`
+      : `waiting for ${file}\n`;
+    if (rendered !== last) {
+      write(rendered);
+      last = rendered;
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  return 0;
+}
+
+/**
+ * Compares a reference observation with one taken somewhere else.
+ *
+ * Two different worlds differ in their contents; that is not news. What this
+ * looks for is a field the real body cannot populate, or a value that is
+ * really a default nothing ever wrote.
+ */
+export function compareCommand(
+  referencePath: string,
+  actualPath: string,
+  json: boolean,
+): CommandResult {
+  const reference: unknown = JSON.parse(
+    readFileSync(path.resolve(referencePath), "utf8"),
+  );
+  const actual: unknown = JSON.parse(
+    readFileSync(path.resolve(actualPath), "utf8"),
+  );
+  const result = compareObservations(reference, actual);
+  return {
+    code: result.structural > 0 ? 1 : 0,
+    output: json
+      ? `${JSON.stringify(result, null, 2)}\n`
+      : `${renderFindings(result)}\n`,
   };
 }
 
@@ -93,20 +327,29 @@ export function validateCommand(
     return {
       code: 0,
       output:
-        `Migrated from ${result.fromVersion} to configVersion 2.\n${notes}\n\n` +
+        `Migrated from ${result.fromVersion} to configVersion 3.\n${notes}\n\n` +
         `${JSON.stringify(result.config, null, 2)}\n`,
     };
   }
 
   try {
-    const config = loadConfig(absolute);
+    const config = loadMinecraftConfig(absolute);
     const registry = skillRegistry();
+    // An older document is read as the current version in memory, never
+    // rewritten; --migrate shows what that reading changed.
+    const upgrade = migrate
+      ? upgradeConfigDocument(readConfigDocument(absolute).document).notes
+      : [];
+    const upgraded = upgrade.length
+      ? `${upgrade.map((note) => `  - ${note}`).join("\n")}\n`
+      : "";
     return {
       code: 0,
       output:
+        upgraded +
         `Configuration valid: ${absolute}\n` +
         `  person=${config.personId} world=${config.worldId}\n` +
-        `  embodiment=${config.runtime.embodiment} trainingContext=${config.runtime.trainingContext}\n` +
+        `  embodiment=${config.runtime.embodiment} experience=${describeExperience(experienceOf(config))}\n` +
         `  learning=${config.learning.mode} (learning never enables itself)\n` +
         `  protocol=${PROTOCOL_VERSION} skills=${registry.ids.length} libraryRevision=${registry.revision}\n` +
         `  existing containers: withdraw=${config.permissions.containers.existing.withdraw} deposit=${config.permissions.containers.existing.deposit}\n` +
@@ -124,10 +367,15 @@ export function inspectCommand(
   configPath: string | undefined,
   json: boolean,
 ): CommandResult {
-  if (what !== "evidence" && what !== "skills" && what !== "config")
+  if (
+    what !== "evidence" &&
+    what !== "skills" &&
+    what !== "config" &&
+    what !== "predictions"
+  )
     return {
       code: 2,
-      output: `Unknown inspect target ${what}. Try: evidence, skills, config.\n`,
+      output: `Unknown inspect target ${what}. Try: evidence, skills, config, predictions.\n`,
     };
 
   if (what === "skills") {
@@ -156,12 +404,33 @@ export function inspectCommand(
 
   if (!configPath)
     return { code: 2, output: "--config is required for this inspection.\n" };
-  const config = loadConfig(configPath);
+  const config = loadMinecraftConfig(configPath);
   if (what === "config")
     return { code: 0, output: `${JSON.stringify(config, null, 2)}\n` };
 
   const inspector = new EvidenceInspector(config.learning.evidenceDirectory);
   const summary = inspector.summarise();
+  if (what === "predictions")
+    return {
+      code: 0,
+      output: json
+        ? `${JSON.stringify(summary.predictionError, null, 2)}\n`
+        : `Prediction error in ${summary.directory}\n  recorded=${summary.predictionError.recorded} ${Object.entries(
+            summary.predictionError.severities,
+          )
+            .map(([severity, count]) => `${severity}=${count}`)
+            .join(" ")}\n${summary.predictionError.worst
+            .map(
+              (entry) =>
+                `  ${entry.severity} ${entry.skill}: ${entry.facts
+                  .map(
+                    (fact) =>
+                      `${fact.fact} predicted ${fact.predicted} observed ${fact.observed}`,
+                  )
+                  .join("; ")}`,
+            )
+            .join("\n")}\n`,
+    };
   return {
     code: 0,
     output: json

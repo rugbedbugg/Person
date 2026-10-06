@@ -1,4 +1,4 @@
-import { distance, type Position } from "#config";
+import type { BlockView } from "../../embodiment/types.ts";
 import {
   SkillFailure,
   itemCount,
@@ -12,6 +12,7 @@ import {
   sealShelterEntrance,
   shelterIsSealed,
 } from "../shelter-access.ts";
+import { distance, type Position } from "#minecraft";
 
 const DIRECTIONS: [number, number][] = [
   [1, 0],
@@ -28,9 +29,7 @@ const hostileClearance = (
   context: SkillContext,
   position: Position,
 ): number => {
-  const hostiles = context
-    .snapshot()
-    .entities.filter((entity) => entity.hostile);
+  const hostiles = context.kernel.threats(context.snapshot());
   if (hostiles.length === 0) return Number.POSITIVE_INFINITY;
   return Math.min(
     ...hostiles.map((entity) => distance(position, entity.position)),
@@ -62,7 +61,7 @@ export const flee: SkillImplementation = async (context) => {
   for (let attempt = 0; attempt < 8; attempt++) {
     context.checkpoint();
     const snapshot = context.snapshot();
-    const hostiles = snapshot.entities.filter((entity) => entity.hostile);
+    const hostiles = context.kernel.threats(snapshot);
     if (
       hostileClearance(context, snapshot.position) >= clearance &&
       !standingHazard(context)
@@ -151,8 +150,8 @@ export const flee: SkillImplementation = async (context) => {
 export const digIn: SkillImplementation = async (context) => {
   const snapshot = context.snapshot();
   const depth = context.number("depth");
-  const threat = snapshot.entities
-    .filter((entity) => entity.hostile)
+  const threat = context.kernel
+    .threats(snapshot)
     .sort((a, b) => a.distance - b.distance)[0];
   const feet = snapshot.position;
   const dx = threat
@@ -214,7 +213,7 @@ export const digIn: SkillImplementation = async (context) => {
   if (material && context.permissions.mayBuild(cover).allowed) {
     try {
       await context.embodiment.place(cover, material);
-      context.memory.recordPlacement(cover);
+      context.ledger.recordPlacement(cover);
       context.note("placed_blocks", { sealed_with: material });
     } catch {
       // An unsealed refuge is still better than standing in the open.
@@ -236,9 +235,11 @@ export const waitSafely: SkillImplementation = async (context) => {
   while (waited < total) {
     context.checkpoint();
     const snapshot = context.snapshot();
-    if (
-      snapshot.entities.some((entity) => entity.hostile && entity.distance <= 8)
-    )
+    // The kernel's contact range, not a margin of this skill's own. A hostile
+    // the kernel does not count as immediate is no reason to stop waiting: a
+    // wait refused on privileged knowledge the kernel does not act on tells
+    // Person nothing, and Person would only propose it again.
+    if (context.kernel.threatState(snapshot) === "immediate")
       throw new SkillFailure(
         "threat_appeared",
         "INTERRUPTED",
@@ -287,8 +288,110 @@ export const returnHome: SkillImplementation = async (context) => {
   });
 };
 
+/** A head in this block can breathe: nothing solid, and no fluid. */
+const breathable = (block: BlockView | null): boolean =>
+  block !== null &&
+  !block.solid &&
+  block.kind !== "water" &&
+  block.kind !== "lava";
+
+const above = (position: Position, dy: number): Position => ({
+  ...position,
+  y: position.y + dy,
+});
+
+/**
+ * Where a head can next breathe, from local blocks only (ADR 0019): the first
+ * breathable block over an unobstructed water column, straight up first and
+ * then the columns around. Returns where the feet must be, or null.
+ */
+function nearestAir(
+  context: SkillContext,
+  feet: Position,
+  reach: number,
+): Position | null {
+  let best: { feet: Position; cost: number } | null = null;
+  for (const [dx, dz] of [[0, 0] as [number, number], ...DIRECTIONS])
+    for (const radius of dx === 0 && dz === 0 ? [0] : [1, 2]) {
+      const column = {
+        x: feet.x + dx * radius,
+        y: feet.y,
+        z: feet.z + dz * radius,
+      };
+      for (let dy = 1; dy <= reach; dy++) {
+        const block = context.embodiment.blockAt(above(column, dy));
+        if (!block || block.solid) break;
+        if (breathable(block)) {
+          const cost = dy + Math.abs(dx * radius) + Math.abs(dz * radius);
+          if (!best || cost < best.cost)
+            best = { feet: above(column, dy - 1), cost };
+          break;
+        }
+      }
+    }
+  return best ? best.feet : null;
+}
+
+/**
+ * Air deprivation restores air (ADR 0019). An emergency motor response, not a
+ * decision: it reaches the nearest breathable space it can see locally,
+ * swimming straight up where the way is open, within three bounded attempts,
+ * and it never digs. None of the geometry it reads leaves the runtime.
+ */
+export const restoreAir: SkillImplementation = async (context) => {
+  const reach = context.number("max_rise");
+  const headClear = (): boolean => {
+    const feet = context.snapshot().position;
+    return breathable(context.embodiment.blockAt(above(feet, 1)));
+  };
+  for (let attempt = 0; attempt < 3; attempt++) {
+    context.checkpoint();
+    if (headClear()) {
+      context.effect("air_restored");
+      context.note("position_reached", { attempts: attempt });
+      return;
+    }
+    const feet = context.snapshot().position;
+    const target = nearestAir(context, feet, reach);
+    if (!target) {
+      // Failing at once would let the kernel start the same emergency again
+      // in no time at all: hold for one bounded stroke first, so an air
+      // emergency with no way out is one emergency a stroke, never a loop.
+      await context.embodiment.waitTicks(40);
+      throw new SkillFailure(
+        "no_reachable_air",
+        "FAILED",
+        "No breathable space within local reach",
+      );
+    }
+    try {
+      if (
+        target.x === feet.x &&
+        target.z === feet.z &&
+        context.embodiment.ascend
+      )
+        await context.embodiment.ascend({ maxTicks: 100 });
+      else await context.embodiment.moveTo(target, { maxTicks: 100 });
+    } catch {
+      // A blocked stroke is not the end: the next attempt looks again.
+    }
+  }
+  context.checkpoint();
+  if (headClear()) {
+    context.effect("air_restored");
+    context.note("position_reached", { attempts: 3 });
+    return;
+  }
+  throw new SkillFailure(
+    "no_reachable_air",
+    "FAILED",
+    "Breathable space was not reached",
+  );
+};
+
 export const emergencySkills: Record<string, SkillImplementation> = {
   flee,
+  restore_air: restoreAir,
   dig_in: digIn,
   wait_safely: waitSafely,
   return_home: returnHome,

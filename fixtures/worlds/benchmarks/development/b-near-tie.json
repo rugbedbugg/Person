@@ -1,0 +1,61 @@
+{
+  "name": "bench-b-near-tie",
+  "seed": 1,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "forest",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "spawnYaw": 0.0,
+  "vitals": {
+    "health": 20,
+    "air": 300,
+    "armor": 0,
+    "food": 20,
+    "saturation": 5
+  },
+  "inventory": [
+    {
+      "name": "wooden_pickaxe",
+      "count": 1
+    },
+    {
+      "name": "oak_planks",
+      "count": 64
+    },
+    {
+      "name": "oak_log",
+      "count": 8
+    }
+  ],
+  "blocks": [],
+  "clusters": [
+    {
+      "name": "oak_log",
+      "center": {
+        "x": 10,
+        "y": 64,
+        "z": -8
+      },
+      "count": 30,
+      "spread": 3
+    },
+    {
+      "name": "sweet_berry_bush",
+      "center": {
+        "x": -6,
+        "y": 64,
+        "z": 5
+      },
+      "count": 12,
+      "spread": 2
+    }
+  ],
+  "entities": [],
+  "containers": [],
+  "events": []
+}

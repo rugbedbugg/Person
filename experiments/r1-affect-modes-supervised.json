@@ -1,0 +1,14 @@
+{
+  "name": "r1-affect-modes-supervised",
+  "description": "R1 (ADR 0013) with the learner in supervised mode, where affect's second consumption point, exploration tolerance, and the learned terms are all live. Each run starts with no evidence.",
+  "world": "../fixtures/worlds/vertical-slice.json",
+  "config": "../examples/fixture.toml",
+  "seeds": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+  "conditions": [
+    { "id": "P0", "affectMode": "off" },
+    { "id": "P1", "affectMode": "record_only" },
+    { "id": "P2", "affectMode": "active" }
+  ],
+  "maxDecisions": 60,
+  "learningMode": "supervised"
+}

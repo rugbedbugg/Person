@@ -14,6 +14,9 @@ import {
 import { approach, permittedResources } from "../navigate.ts";
 import type { BlockKind } from "../../embodiment/types.ts";
 
+/** Consecutive digs that gained nothing before a harvest gives up. */
+const FRUITLESS_LIMIT = 2;
+
 interface HarvestOptions {
   kinds: BlockKind[];
   matches: (name: string) => boolean;
@@ -41,8 +44,11 @@ async function harvest(
   const before = held();
   const failed = new Set<string>();
   let harvested = 0;
+  // Digging that produces nothing, twice running, is not going to start
+  // producing: stop rather than strip everything in range for no gain.
+  let fruitless = 0;
 
-  while (held() - before < options.target) {
+  while (held() - before < options.target && fruitless < FRUITLESS_LIMIT) {
     context.checkpoint();
     const candidates = permittedResources(
       context,
@@ -68,8 +74,10 @@ async function harvest(
           "INVALIDATED",
           `Harvest denied: ${verdict.reason}`,
         );
+      const holding = held();
       const drops = await context.embodiment.dig(block.position);
       harvested += 1;
+      fruitless = held() > holding ? 0 : fruitless + 1;
       context.note("harvested_blocks", {
         block: block.name,
         drops: drops.length,
@@ -84,11 +92,17 @@ async function harvest(
   const gained = held() - before;
   if (gained <= 0) {
     if (harvested > 0)
-      throw new SkillFailure(
-        "inventory_full",
-        "FAILED",
-        "Harvested blocks produced no items",
-      );
+      throw context.snapshot().freeSlots === 0
+        ? new SkillFailure(
+            "inventory_full",
+            "FAILED",
+            "Harvested blocks produced no items",
+          )
+        : new SkillFailure(
+            "no_yield",
+            "FAILED",
+            "Harvested blocks yielded nothing",
+          );
     throw new SkillFailure(
       "unreachable_resource",
       "UNREACHABLE",

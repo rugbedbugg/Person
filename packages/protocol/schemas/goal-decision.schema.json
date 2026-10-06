@@ -58,7 +58,8 @@
             "ESTABLISH_TOOLS",
             "ESTABLISH_STORAGE",
             "RECOVER_HOME",
-            "MAINTAIN_RESERVES"
+            "MAINTAIN_RESERVES",
+            "INVESTIGATE"
           ]
         },
         "priority": {
@@ -72,7 +73,9 @@
             "emergency",
             "maintenance",
             "self_generated",
-            "operator"
+            "operator",
+            "deliberation",
+            "habit"
           ]
         },
         "createdAtTick": {

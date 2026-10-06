@@ -1,0 +1,2070 @@
+{
+  "schemaVersion": 1,
+  "testId": "st_mu3wadax_6a72c352",
+  "startedAt": "2026-09-16T09:25:10.226Z",
+  "finishedAt": "2026-09-16T09:26:37.193Z",
+  "personId": "ada",
+  "worldId": "person-test-world-1",
+  "sessionId": "ef5fadd1-5bf7-4740-967a-b65becf5dbaf",
+  "embodiment": "minecraft",
+  "minecraftVersion": "1.16.1",
+  "trainingContext": "minecraft_peaceful",
+  "protocolVersion": "shroud-learning-v2",
+  "skillLibraryRevision": "a1b54cd15bc0535c",
+  "requestedSkill": "return_home",
+  "requestedParameters": {
+    "max_distance": 128
+  },
+  "requestedLimits": {
+    "maxTicks": 2400,
+    "maxDistance": 256,
+    "minHealth": 4
+  },
+  "invocation": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "94ebc1bd-f4c0-46dd-a0d9-0fbf396e07f1",
+    "personId": "ada",
+    "sessionId": "ef5fadd1-5bf7-4740-967a-b65becf5dbaf",
+    "worldId": "person-test-world-1",
+    "tick": 35080,
+    "timestamp": "2026-09-16T09:26:32.853Z",
+    "type": "SkillInvocation",
+    "decisionId": "5776c1af-8839-4549-ad76-7548ff0e4394",
+    "goalId": "validation",
+    "routineId": "skill_test",
+    "routineStepIndex": 0,
+    "skillId": "return_home",
+    "skillVersion": 1,
+    "parameters": {
+      "max_distance": 128
+    },
+    "limits": {
+      "maxTicks": 2400,
+      "maxDistance": 256,
+      "minHealth": 4
+    }
+  },
+  "safety": {
+    "decision": "ACCEPT",
+    "level": "L1",
+    "reasonCodes": [],
+    "executedSkill": "return_home",
+    "executedParameters": {
+      "max_distance": 128
+    },
+    "executedLimits": {
+      "maxTicks": 2400,
+      "maxDistance": 256,
+      "minHealth": 4
+    },
+    "emergency": null
+  },
+  "actualSkill": "return_home",
+  "operatorSetup": true,
+  "operatorIntervention": {
+    "flagged": true,
+    "reason": "operator positioned Person for a skill validation run"
+  },
+  "timeline": {
+    "connectedAt": "2026-09-16T09:25:13.063Z",
+    "setupStartedAt": "2026-09-16T09:25:13.379Z",
+    "setupCompletedAt": "2026-09-16T09:26:31.909Z",
+    "skillStartedAt": "2026-09-16T09:26:32.854Z",
+    "skillFinishedAt": "2026-09-16T09:26:35.742Z",
+    "disconnectedAt": "2026-09-16T09:26:36.439Z",
+    "elapsedMs": 86967
+  },
+  "preObservation": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "9d5cfd43-ea2e-4dbd-8da5-94af61ee711d",
+    "personId": "ada",
+    "sessionId": "ef5fadd1-5bf7-4740-967a-b65becf5dbaf",
+    "worldId": "person-test-world-1",
+    "tick": 35080,
+    "timestamp": "2026-09-16T09:26:32.298Z",
+    "type": "Observation",
+    "observationVersion": 1,
+    "trainingContext": "minecraft_peaceful",
+    "vitals": {
+      "health": 20,
+      "food": 20,
+      "saturation": 0,
+      "air": 300,
+      "armor": 0,
+      "statusEffects": [],
+      "alive": true
+    },
+    "environment": {
+      "position": {
+        "x": -208,
+        "y": 66,
+        "z": 164
+      },
+      "dimension": "overworld",
+      "dayPhase": "dusk",
+      "timeOfDay": 11080,
+      "weather": "clear",
+      "lightLevel": 15,
+      "biome": "plains"
+    },
+    "inventory": {
+      "items": [],
+      "categories": {
+        "food": 0,
+        "raw_food": 0,
+        "cooked_food": 0,
+        "fuel": 0,
+        "wood": 0,
+        "stone": 0,
+        "coal": 0,
+        "tools": 0,
+        "weapons": 0,
+        "armor": 0,
+        "building_materials": 0
+      },
+      "freeSlots": 36
+    },
+    "permissions": {
+      "harvest": true,
+      "mine": true,
+      "build": true,
+      "huntPassive": true,
+      "depositOwned": true,
+      "withdrawOwned": true,
+      "withdrawExisting": true,
+      "craft": true,
+      "consume": true
+    },
+    "affordances": {
+      "diggableGround": true,
+      "shelterSite": true,
+      "storageSite": true
+    },
+    "nearby": {
+      "resources": [
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 64,
+            "z": 164
+          },
+          "distance": 2,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 164
+          },
+          "distance": 3,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 163
+          },
+          "distance": 3.1622776601683795,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 165
+          },
+          "distance": 3.1622776601683795,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -206,
+            "y": 63,
+            "z": 164
+          },
+          "distance": 3.6055512754639896,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 162
+          },
+          "distance": 3.6055512754639896,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 166
+          },
+          "distance": 3.6055512754639896,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -206,
+            "y": 63,
+            "z": 165
+          },
+          "distance": 3.741657386773941,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -207,
+            "y": 63,
+            "z": 166
+          },
+          "distance": 3.741657386773941,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -207,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "andesite",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -207,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.242640687119285,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -207,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.242640687119285,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 161
+          },
+          "distance": 4.242640687119286,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 63,
+            "z": 167
+          },
+          "distance": 4.242640687119286,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -207,
+            "y": 63,
+            "z": 167
+          },
+          "distance": 4.358898943540673,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "andesite",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "andesite",
+          "position": {
+            "x": -207,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -207,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.898979485566356,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 4.898979485566356,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 61,
+            "z": 164
+          },
+          "distance": 5,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "andesite",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 161
+          },
+          "distance": 5,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -208,
+            "y": 62,
+            "z": 167
+          },
+          "distance": 5,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -205,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 5.0990195135927845,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 69,
+            "z": 162
+          },
+          "distance": 5.385164807134504,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -205,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 5.385164807134504,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 167
+          },
+          "distance": 5.385164807134504,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -206,
+            "y": 61,
+            "z": 165
+          },
+          "distance": 5.477225575051662,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -206,
+            "y": 61,
+            "z": 166
+          },
+          "distance": 5.7445626465380295,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 69,
+            "z": 161
+          },
+          "distance": 5.830951894845301,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -205,
+            "y": 62,
+            "z": 167
+          },
+          "distance": 5.830951894845301,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -205,
+            "y": 61,
+            "z": 165
+          },
+          "distance": 5.916079783099616,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 70,
+            "z": 162
+          },
+          "distance": 6,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -206,
+            "y": 62,
+            "z": 168
+          },
+          "distance": 6,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -208,
+            "y": 60,
+            "z": 163
+          },
+          "distance": 6.0827625302982185,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 69,
+            "z": 162
+          },
+          "distance": 6.164414002968977,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -205,
+            "y": 61,
+            "z": 166
+          },
+          "distance": 6.164414002968977,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 69,
+            "z": 160
+          },
+          "distance": 6.4031242374328485,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 70,
+            "z": 161
+          },
+          "distance": 6.4031242374328485,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 69,
+            "z": 161
+          },
+          "distance": 6.557438524302,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 70,
+            "z": 162
+          },
+          "distance": 6.708203932499369,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 70,
+            "z": 160
+          },
+          "distance": 6.928203230275509,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -202,
+            "y": 69,
+            "z": 162
+          },
+          "distance": 7,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 69,
+            "z": 160
+          },
+          "distance": 7.0710678118654755,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 70,
+            "z": 161
+          },
+          "distance": 7.0710678118654755,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 67,
+            "z": 160
+          },
+          "distance": 7.280109889280518,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 68,
+            "z": 160
+          },
+          "distance": 7.483314773547882,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 69,
+            "z": 160
+          },
+          "distance": 7.810249675906654,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 70,
+            "z": 160
+          },
+          "distance": 8.246211251235321,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 71,
+            "z": 160
+          },
+          "distance": 8.774964387392123,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -196,
+            "y": 67,
+            "z": 195
+          },
+          "distance": 33.25657829663178,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -196,
+            "y": 68,
+            "z": 195
+          },
+          "distance": 33.301651610693426,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -196,
+            "y": 69,
+            "z": 195
+          },
+          "distance": 33.37663853655727,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -196,
+            "y": 70,
+            "z": 195
+          },
+          "distance": 33.481338085566414,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 82,
+            "z": 169
+          },
+          "distance": 39.71145930332956,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 83,
+            "z": 165
+          },
+          "distance": 39.82461550347975,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -245,
+            "y": 81,
+            "z": 161
+          },
+          "distance": 40.0374824383352,
+          "harvestPermitted": true
+        }
+      ],
+      "hostiles": [],
+      "passiveAnimals": [
+        {
+          "entityId": 6,
+          "name": "chicken",
+          "position": {
+            "x": -203,
+            "y": 68,
+            "z": 186
+          },
+          "distance": 22.649503305812246,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "2b7b7de0-c067-4960-b7b1-7b8d5af36775"
+        },
+        {
+          "entityId": 10,
+          "name": "chicken",
+          "position": {
+            "x": -196,
+            "y": 67,
+            "z": 190
+          },
+          "distance": 28.653097563788805,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "0c5f60ed-480f-42ae-9ca6-46385de8f7e2"
+        },
+        {
+          "entityId": 8,
+          "name": "chicken",
+          "position": {
+            "x": -180,
+            "y": 65,
+            "z": 188
+          },
+          "distance": 36.89173349139344,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "2245a5ca-0ed2-454b-9770-94cfd97ba7e8"
+        },
+        {
+          "entityId": 12,
+          "name": "pig",
+          "position": {
+            "x": -210,
+            "y": 68,
+            "z": 201
+          },
+          "distance": 37.107950630558946,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "305ec0ac-97e6-4e78-b3f3-e8ed433293ab"
+        },
+        {
+          "entityId": 19,
+          "name": "pig",
+          "position": {
+            "x": -247,
+            "y": 80,
+            "z": 186
+          },
+          "distance": 46.914816422959596,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "91ca8863-feb3-4e6c-89d8-b6d365d94bf5"
+        }
+      ],
+      "players": [
+        {
+          "entityId": 183,
+          "name": "player",
+          "position": {
+            "x": -213,
+            "y": 68,
+            "z": 178
+          },
+          "distance": 15,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": true,
+          "username": "Shroud",
+          "uuid": "1ed03c15-b62c-33e4-8e93-cd19bc1d57e3"
+        }
+      ],
+      "containers": [],
+      "workstations": [],
+      "hazards": []
+    },
+    "home": {
+      "activeHome": {
+        "homeId": "home_primary",
+        "position": {
+          "x": -218,
+          "y": 66,
+          "z": 164
+        }
+      },
+      "homeDistance": 10,
+      "shelterState": "none",
+      "ownedStorage": [],
+      "bedKnown": false,
+      "foodReserve": 0,
+      "fuelReserve": 0
+    },
+    "navigation": {
+      "routeStatus": "idle",
+      "pathRisk": "low",
+      "stuckState": "free",
+      "returnPathKnown": true,
+      "lastSafePosition": {
+        "x": -208,
+        "y": 66,
+        "z": 164
+      }
+    },
+    "cognition": {
+      "activeGoal": null,
+      "activeRoutine": null,
+      "activeSkill": null,
+      "suspendedGoals": []
+    },
+    "previousOutcome": null
+  },
+  "preObservationValid": true,
+  "postObservation": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "da921c0b-def5-408e-a140-4dee1b7790af",
+    "personId": "ada",
+    "sessionId": "ef5fadd1-5bf7-4740-967a-b65becf5dbaf",
+    "worldId": "person-test-world-1",
+    "tick": 35140,
+    "timestamp": "2026-09-16T09:26:36.395Z",
+    "type": "Observation",
+    "observationVersion": 1,
+    "trainingContext": "minecraft_peaceful",
+    "vitals": {
+      "health": 20,
+      "food": 20,
+      "saturation": 0,
+      "air": 300,
+      "armor": 0,
+      "statusEffects": [],
+      "alive": true
+    },
+    "environment": {
+      "position": {
+        "x": -218,
+        "y": 66,
+        "z": 164
+      },
+      "dimension": "overworld",
+      "dayPhase": "dusk",
+      "timeOfDay": 11140,
+      "weather": "clear",
+      "lightLevel": 15,
+      "biome": "plains"
+    },
+    "inventory": {
+      "items": [],
+      "categories": {
+        "food": 0,
+        "raw_food": 0,
+        "cooked_food": 0,
+        "fuel": 0,
+        "wood": 0,
+        "stone": 0,
+        "coal": 0,
+        "tools": 0,
+        "weapons": 0,
+        "armor": 0,
+        "building_materials": 0
+      },
+      "freeSlots": 36
+    },
+    "permissions": {
+      "harvest": true,
+      "mine": true,
+      "build": true,
+      "huntPassive": true,
+      "depositOwned": true,
+      "withdrawOwned": true,
+      "withdrawExisting": true,
+      "craft": true,
+      "consume": true
+    },
+    "affordances": {
+      "diggableGround": true,
+      "shelterSite": true,
+      "storageSite": true
+    },
+    "nearby": {
+      "resources": [
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 63,
+            "z": 164
+          },
+          "distance": 3.1622776601683795,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 63,
+            "z": 165
+          },
+          "distance": 3.3166247903554003,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 63,
+            "z": 164
+          },
+          "distance": 3.6055512754639896,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 63,
+            "z": 165
+          },
+          "distance": 3.741657386773941,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 63,
+            "z": 166
+          },
+          "distance": 3.741657386773941,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -218,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 63,
+            "z": 166
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -218,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -218,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -219,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4.123105625617661,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.242640687119285,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.242640687119285,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -219,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.242640687119285,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -219,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.242640687119285,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -215,
+            "y": 63,
+            "z": 164
+          },
+          "distance": 4.242640687119286,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -215,
+            "y": 63,
+            "z": 163
+          },
+          "distance": 4.358898943540673,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -215,
+            "y": 63,
+            "z": 165
+          },
+          "distance": 4.358898943540673,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 63,
+            "z": 167
+          },
+          "distance": 4.358898943540673,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -218,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -218,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -220,
+            "y": 62,
+            "z": 164
+          },
+          "distance": 4.47213595499958,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -217,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -219,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -219,
+            "y": 62,
+            "z": 166
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -220,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -220,
+            "y": 62,
+            "z": 165
+          },
+          "distance": 4.58257569495584,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -215,
+            "y": 63,
+            "z": 166
+          },
+          "distance": 4.69041575982343,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "stone",
+          "name": "stone",
+          "position": {
+            "x": -216,
+            "y": 63,
+            "z": 167
+          },
+          "distance": 4.69041575982343,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -220,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 4.898979485566356,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -221,
+            "y": 62,
+            "z": 163
+          },
+          "distance": 5.0990195135927845,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -218,
+            "y": 61,
+            "z": 163
+          },
+          "distance": 5.099019513592785,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -219,
+            "y": 61,
+            "z": 163
+          },
+          "distance": 5.196152422706632,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -221,
+            "y": 62,
+            "z": 162
+          },
+          "distance": 5.385164807134504,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -218,
+            "y": 61,
+            "z": 162
+          },
+          "distance": 5.385164807134505,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "coal",
+          "name": "coal_ore",
+          "position": {
+            "x": -219,
+            "y": 61,
+            "z": 162
+          },
+          "distance": 5.477225575051662,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 69,
+            "z": 162
+          },
+          "distance": 14.45683229480096,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 69,
+            "z": 161
+          },
+          "distance": 14.628738838327791,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 70,
+            "z": 162
+          },
+          "distance": 14.696938456699067,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 69,
+            "z": 160
+          },
+          "distance": 14.866068747318506,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 70,
+            "z": 161
+          },
+          "distance": 14.866068747318506,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -204,
+            "y": 70,
+            "z": 160
+          },
+          "distance": 15.0996688705415,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 69,
+            "z": 162
+          },
+          "distance": 15.42724862054151,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 69,
+            "z": 161
+          },
+          "distance": 15.588457268119898,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 70,
+            "z": 162
+          },
+          "distance": 15.652475842498529,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 69,
+            "z": 160
+          },
+          "distance": 15.811388300841898,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 70,
+            "z": 161
+          },
+          "distance": 15.811388300841898,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "plant_food",
+          "name": "oak_leaves",
+          "position": {
+            "x": -203,
+            "y": 70,
+            "z": 160
+          },
+          "distance": 16.0312195418814,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 67,
+            "z": 160
+          },
+          "distance": 16.522711641858304,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 68,
+            "z": 160
+          },
+          "distance": 16.61324772583615,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 69,
+            "z": 160
+          },
+          "distance": 16.76305461424021,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 70,
+            "z": 160
+          },
+          "distance": 16.97056274847714,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -202,
+            "y": 71,
+            "z": 160
+          },
+          "distance": 17.233687939614086,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 82,
+            "z": 169
+          },
+          "distance": 30.93541659651604,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -245,
+            "y": 81,
+            "z": 161
+          },
+          "distance": 31.032241298365804,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 83,
+            "z": 165
+          },
+          "distance": 31.080540535840107,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 83,
+            "z": 169
+          },
+          "distance": 31.464265445104544,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -245,
+            "y": 82,
+            "z": 161
+          },
+          "distance": 31.52776554086889,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 84,
+            "z": 165
+          },
+          "distance": 31.638584039112747,
+          "harvestPermitted": true
+        },
+        {
+          "kind": "wood",
+          "name": "oak_log",
+          "position": {
+            "x": -244,
+            "y": 84,
+            "z": 169
+          },
+          "distance": 32.01562118716424,
+          "harvestPermitted": true
+        }
+      ],
+      "hostiles": [],
+      "passiveAnimals": [
+        {
+          "entityId": 6,
+          "name": "chicken",
+          "position": {
+            "x": -200,
+            "y": 68,
+            "z": 181
+          },
+          "distance": 24.839484696748443,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "2b7b7de0-c067-4960-b7b1-7b8d5af36775"
+        },
+        {
+          "entityId": 10,
+          "name": "chicken",
+          "position": {
+            "x": -196,
+            "y": 67,
+            "z": 190
+          },
+          "distance": 34.07345007480164,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "0c5f60ed-480f-42ae-9ca6-46385de8f7e2"
+        },
+        {
+          "entityId": 12,
+          "name": "pig",
+          "position": {
+            "x": -210,
+            "y": 69,
+            "z": 198
+          },
+          "distance": 35.05709628591621,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "305ec0ac-97e6-4e78-b3f3-e8ed433293ab"
+        },
+        {
+          "entityId": 19,
+          "name": "pig",
+          "position": {
+            "x": -247,
+            "y": 80,
+            "z": 186
+          },
+          "distance": 39,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "91ca8863-feb3-4e6c-89d8-b6d365d94bf5"
+        },
+        {
+          "entityId": 18,
+          "name": "pig",
+          "position": {
+            "x": -259,
+            "y": 83,
+            "z": 169
+          },
+          "distance": 44.66542286825458,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "0202e446-126a-4a00-9650-b11966202895"
+        },
+        {
+          "entityId": 8,
+          "name": "chicken",
+          "position": {
+            "x": -180,
+            "y": 65,
+            "z": 188
+          },
+          "distance": 44.955533585978046,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": false,
+          "uuid": "2245a5ca-0ed2-454b-9770-94cfd97ba7e8"
+        }
+      ],
+      "players": [
+        {
+          "entityId": 183,
+          "name": "player",
+          "position": {
+            "x": -212,
+            "y": 68,
+            "z": 176
+          },
+          "distance": 13.564659966250534,
+          "named": false,
+          "tamed": false,
+          "protectedTarget": true,
+          "username": "Shroud",
+          "uuid": "1ed03c15-b62c-33e4-8e93-cd19bc1d57e3"
+        }
+      ],
+      "containers": [],
+      "workstations": [],
+      "hazards": []
+    },
+    "home": {
+      "activeHome": {
+        "homeId": "home_primary",
+        "position": {
+          "x": -218,
+          "y": 66,
+          "z": 164
+        }
+      },
+      "homeDistance": 0,
+      "shelterState": "none",
+      "ownedStorage": [],
+      "bedKnown": false,
+      "foodReserve": 0,
+      "fuelReserve": 0
+    },
+    "navigation": {
+      "routeStatus": "idle",
+      "pathRisk": "low",
+      "stuckState": "free",
+      "returnPathKnown": true,
+      "lastSafePosition": {
+        "x": -218,
+        "y": 66,
+        "z": 164
+      }
+    },
+    "cognition": {
+      "activeGoal": null,
+      "activeRoutine": null,
+      "activeSkill": null,
+      "suspendedGoals": []
+    },
+    "previousOutcome": {
+      "requestedSkill": "return_home",
+      "executedSkill": "return_home",
+      "status": "SUCCESS",
+      "effects": [
+        "arrived_home"
+      ],
+      "healthCost": 0,
+      "resourceCost": [],
+      "elapsedTicks": 60,
+      "interruptReason": null
+    }
+  },
+  "postObservationValid": true,
+  "postObservationReason": null,
+  "outcome": {
+    "protocolVersion": "shroud-learning-v2",
+    "messageId": "c9fc977e-6989-4819-a519-3364b74a69e5",
+    "personId": "ada",
+    "sessionId": "ef5fadd1-5bf7-4740-967a-b65becf5dbaf",
+    "worldId": "person-test-world-1",
+    "tick": 35140,
+    "timestamp": "2026-09-16T09:26:35.741Z",
+    "type": "SkillOutcome",
+    "decisionId": "5776c1af-8839-4549-ad76-7548ff0e4394",
+    "goalId": "validation",
+    "routineId": "skill_test",
+    "contextId": "validation",
+    "requestedSkill": "return_home",
+    "requestedParameters": {
+      "max_distance": 128
+    },
+    "requestedSkillStatus": "SUCCESS",
+    "executedSkill": "return_home",
+    "executedParameters": {
+      "max_distance": 128
+    },
+    "status": "SUCCESS",
+    "emergency": false,
+    "reasonCodes": [],
+    "effects": [
+      "arrived_home"
+    ],
+    "expectedEffects": [
+      {
+        "fact": "at_home",
+        "op": "=",
+        "value": 1
+      }
+    ],
+    "healthBefore": 20,
+    "healthAfter": 20,
+    "foodBefore": 20,
+    "foodAfter": 20,
+    "healthCost": 0,
+    "resourceCost": [],
+    "inventoryDelta": [],
+    "elapsedTicks": 60,
+    "interruptReason": null,
+    "completionEvidence": {
+      "kinds": [
+        "elapsed_ticks",
+        "position_reached"
+      ],
+      "details": {
+        "position_reached_x": -218,
+        "position_reached_y": 66,
+        "position_reached_z": 164,
+        "timing_navigation_ticks": 60,
+        "timing_interaction_ticks": 0,
+        "timing_waiting_ticks": 0,
+        "timing_budget_ticks": 2400,
+        "timing_budget_pressure": 0.025
+      }
+    }
+  },
+  "terminalStatus": "SUCCESS",
+  "requestedSkillStatus": "SUCCESS",
+  "elapsedTicks": 60,
+  "completionEvidence": {
+    "kinds": [
+      "elapsed_ticks",
+      "position_reached"
+    ],
+    "details": {
+      "position_reached_x": -218,
+      "position_reached_y": 66,
+      "position_reached_z": 164,
+      "timing_navigation_ticks": 60,
+      "timing_interaction_ticks": 0,
+      "timing_waiting_ticks": 0,
+      "timing_budget_ticks": 2400,
+      "timing_budget_pressure": 0.025
+    }
+  },
+  "expectedEffects": [
+    {
+      "fact": "at_home",
+      "op": "=",
+      "value": 1
+    }
+  ],
+  "observedEffects": [
+    "arrived_home"
+  ],
+  "effectComparison": {
+    "available": true,
+    "reason": null,
+    "facts": [
+      {
+        "fact": "at_home",
+        "op": "=",
+        "predictedValue": 1,
+        "before": 0,
+        "predicted": 1,
+        "observed": 1,
+        "severity": "none",
+        "verdict": "match"
+      }
+    ],
+    "unexplained": [],
+    "worstSeverity": "none",
+    "matched": 1,
+    "mismatched": 0,
+    "notObservable": 0,
+    "inconclusive": 0
+  },
+  "navigation": {
+    "homePosition": {
+      "x": -218,
+      "y": 66,
+      "z": 164
+    },
+    "startPosition": {
+      "x": -208,
+      "y": 66,
+      "z": 164
+    },
+    "endPosition": {
+      "x": -218,
+      "y": 66,
+      "z": 164
+    },
+    "homeDistanceBefore": 10,
+    "homeDistanceAfter": 0,
+    "routeStatusBefore": "idle",
+    "routeStatusAfter": "idle",
+    "stuckStateBefore": "free",
+    "stuckStateAfter": "free"
+  },
+  "learning": {
+    "mode": "off",
+    "policyRevisionBefore": 0,
+    "policyRevisionAfter": 0,
+    "evidenceBefore": {
+      "directory": "<redacted: local filesystem path>",
+      "exists": false,
+      "files": [],
+      "policyRevision": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb924"
+    },
+    "evidenceAfter": {
+      "directory": "<redacted: local filesystem path>",
+      "exists": false,
+      "files": [],
+      "policyRevision": 0,
+      "digest": "e3b0c44298fc1c149afbf4c8996fb924"
+    },
+    "changed": false
+  },
+  "disconnect": {
+    "status": "clean",
+    "detail": null
+  },
+  "result": "completed",
+  "failure": null
+}

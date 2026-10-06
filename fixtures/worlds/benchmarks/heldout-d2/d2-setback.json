@@ -1,0 +1,92 @@
+{
+  "name": "bench-d2-setback-heldout",
+  "seed": 1,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "forest",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "spawnYaw": 0,
+  "vitals": {
+    "health": 20,
+    "food": 15,
+    "saturation": 2,
+    "air": 300,
+    "armor": 0
+  },
+  "inventory": [
+    {
+      "name": "stone_pickaxe",
+      "count": 1
+    },
+    {
+      "name": "oak_planks",
+      "count": 64
+    }
+  ],
+  "blocks": [],
+  "clusters": [
+    {
+      "name": "sweet_berry_bush",
+      "center": {
+        "x": 6,
+        "y": 64,
+        "z": 0
+      },
+      "count": 12,
+      "spread": 2
+    },
+    {
+      "name": "oak_log",
+      "center": {
+        "x": -10,
+        "y": 64,
+        "z": 10
+      },
+      "count": 30,
+      "spread": 3
+    }
+  ],
+  "entities": [],
+  "containers": [
+    {
+      "position": {
+        "x": -3,
+        "y": 64,
+        "z": 0
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "bread",
+          "count": 32
+        },
+        {
+          "name": "cooked_porkchop",
+          "count": 32
+        }
+      ],
+      "ownedByPerson": true
+    }
+  ],
+  "events": [
+    {
+      "atTick": 3000,
+      "type": "spawn_hostile",
+      "name": "skeleton",
+      "offset": {
+        "x": -6,
+        "y": 0,
+        "z": 0
+      }
+    },
+    {
+      "atTick": 3800,
+      "type": "despawn_hostile"
+    }
+  ]
+}

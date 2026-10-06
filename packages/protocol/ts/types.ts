@@ -1,11 +1,5 @@
 import type { MessageType } from "./version.ts";
 
-export interface Position {
-  x: number;
-  y: number;
-  z: number;
-}
-
 export interface ItemStack {
   name: string;
   count: number;
@@ -31,8 +25,18 @@ export type TerminalStatus = (typeof TERMINAL_STATUSES)[number];
 
 export type SafetyLevel = "L0" | "L1" | "L2" | "L3" | "L4";
 export type LearningMode = "off" | "shadow" | "supervised";
-export type TrainingContext =
-  "fixture" | "minecraft_peaceful" | "minecraft_normal" | "replay";
+/**
+ * Which experience stream a message belongs to (ADR 0025). The environment,
+ * embodiment and variant names are owned by environment profiles; the core
+ * knows only whether the stream is lived or replayed.
+ */
+export type ExperienceContext = "lived" | "replay";
+export interface Experience {
+  context: ExperienceContext;
+  environmentKind: string;
+  embodimentKind: string;
+  environmentVariant: string | null;
+}
 export type ValidationVerdict = "ACCEPT" | "REJECT" | "PREEMPT" | "REPLACE";
 export type SkillParameters = Readonly<
   Record<string, number | string | boolean>
@@ -55,59 +59,6 @@ export interface Envelope {
   type: MessageType;
 }
 
-export interface EntityRecord {
-  entityId: number;
-  name: string;
-  position: Position;
-  distance: number;
-  named: boolean;
-  tamed: boolean;
-  protectedTarget: boolean;
-}
-
-export interface ResourceRecord {
-  kind: "wood" | "stone" | "coal" | "plant_food" | "dirt" | "other";
-  name: string;
-  position: Position;
-  distance: number;
-  harvestPermitted: boolean;
-}
-
-export interface ContainerRecord {
-  kind: "chest" | "barrel" | "furnace" | "shulker" | "other";
-  position: Position;
-  distance: number;
-  provenance: "owned" | "existing";
-  storageId: string | null;
-}
-
-export interface WorkstationRecord {
-  kind: "crafting_table" | "furnace" | "anvil" | "other";
-  position: Position;
-  distance: number;
-  provenance: "owned" | "existing";
-}
-
-export interface HazardRecord {
-  kind:
-    | "lava"
-    | "fire"
-    | "water"
-    | "cactus"
-    | "magma"
-    | "fall"
-    | "suffocation"
-    | "other";
-  position: Position;
-  distance: number;
-}
-
-export interface OwnedStorageView {
-  storageId: string;
-  position: Position;
-  contents: ItemStack[];
-}
-
 export interface PreviousOutcome {
   requestedSkill: string;
   executedSkill: string | null;
@@ -119,85 +70,62 @@ export interface PreviousOutcome {
   interruptReason: string | null;
 }
 
-export interface Observation extends Envelope {
+/**
+ * Person's felt sense of its own motion since the previous observation, in
+ * the frame of its facing at that observation (ADR 0008). Coarse, relative,
+ * and with no absolute position or heading anywhere in it.
+ */
+export interface SelfMotionPercept {
+  continuity: "start" | "continuous" | "discontinuous";
+  translation: {
+    direction:
+      | "ahead"
+      | "ahead_left"
+      | "ahead_right"
+      | "left"
+      | "right"
+      | "behind_left"
+      | "behind_right"
+      | "behind"
+      | "none"
+      | "unknown";
+    band: "none" | "tiny" | "short" | "moderate" | "far" | "unknown";
+    distance: number | null;
+  };
+  rotation:
+    | "none"
+    | "slight_left"
+    | "left"
+    | "sharp_left"
+    | "about_face"
+    | "sharp_right"
+    | "right"
+    | "slight_right"
+    | "unknown";
+  vertical: "level" | "up" | "down" | "unknown";
+}
+
+/** What the runtime echoes of cognition's own state. */
+export interface CognitionEcho {
+  activeGoal: string | null;
+  activeRoutine: string | null;
+  activeSkill: string | null;
+  suspendedGoals: string[];
+}
+
+/**
+ * One observation: an environment-neutral envelope around an
+ * environment-owned payload (ADR 0025). `Payload` is the environment
+ * profile's own strongly typed percept record; the core never looks inside it.
+ */
+export interface Observation<Payload = unknown> extends Envelope {
   type: "Observation";
   observationVersion: number;
-  trainingContext: TrainingContext;
-  vitals: {
-    health: number;
-    food: number;
-    saturation: number;
-    air: number;
-    armor: number;
-    statusEffects: {
-      name: string;
-      amplifier: number;
-      remainingTicks: number;
-    }[];
-    alive: boolean;
-  };
-  environment: {
-    position: Position;
-    dimension: "overworld" | "nether" | "end";
-    dayPhase: "dawn" | "day" | "dusk" | "night";
-    timeOfDay: number;
-    weather: "clear" | "rain" | "thunder";
-    lightLevel: number;
-    biome: string;
-  };
-  inventory: {
-    items: ItemStack[];
-    categories: Record<string, number>;
-    freeSlots: number;
-  };
-  permissions: {
-    harvest: boolean;
-    mine: boolean;
-    build: boolean;
-    huntPassive: boolean;
-    depositOwned: boolean;
-    withdrawOwned: boolean;
-    withdrawExisting: boolean;
-    craft: boolean;
-    consume: boolean;
-  };
-  affordances: {
-    diggableGround: boolean;
-    shelterSite: boolean;
-    storageSite: boolean;
-  };
-  nearby: {
-    resources: ResourceRecord[];
-    hostiles: EntityRecord[];
-    passiveAnimals: EntityRecord[];
-    players: EntityRecord[];
-    containers: ContainerRecord[];
-    workstations: WorkstationRecord[];
-    hazards: HazardRecord[];
-  };
-  home: {
-    activeHome: { homeId: string; position: Position } | null;
-    homeDistance: number | null;
-    shelterState: "none" | "partial" | "complete" | "breached" | "unknown";
-    ownedStorage: OwnedStorageView[];
-    bedKnown: boolean;
-    foodReserve: number;
-    fuelReserve: number;
-  };
-  navigation: {
-    routeStatus: "idle" | "ok" | "blocked" | "unknown";
-    pathRisk: "low" | "moderate" | "high";
-    stuckState: "free" | "slow" | "stuck";
-    returnPathKnown: boolean;
-    lastSafePosition: Position | null;
-  };
-  cognition: {
-    activeGoal: string | null;
-    activeRoutine: string | null;
-    activeSkill: string | null;
-    suspendedGoals: string[];
-  };
+  experience: Experience;
+  selfMotion: SelfMotionPercept;
+  cognition: CognitionEcho;
   previousOutcome: PreviousOutcome | null;
+  payload: Payload;
 }
 
 export interface SkillInvocation extends Envelope {
@@ -278,15 +206,11 @@ export interface EmergencyEvent extends Envelope {
   type: "EmergencyEvent";
   decisionId: string | null;
   level: "L0" | "L1";
+  /** The environment profile's emergency vocabulary (environment.json). */
   trigger: string;
   reasonCodes: string[];
-  action:
-    | "flee"
-    | "dig_in"
-    | "eat_to_target"
-    | "return_home"
-    | "cancel_skill"
-    | "reject_proposal";
+  /** The environment profile's emergency vocabulary (environment.json). */
+  action: string;
   preemptedSkill: string | null;
 }
 
@@ -294,15 +218,30 @@ export interface EpisodeEvent extends Envelope {
   type: "EpisodeEvent";
   episodeId: string;
   phase: "started" | "ended";
-  trainingContext: TrainingContext;
+  experience: Experience;
   rngSeed: number | null;
+  reasonCodes: string[];
+}
+
+/** Whether the world is available to the body now (ADR 0017, I2). */
+export interface WorldAvailability extends Envelope {
+  type: "WorldAvailability";
+  state: "available" | "unavailable";
+  reasonCodes: string[];
+}
+
+/** The runtime observed a death, or a respawn (ADR 0017, I3). */
+export interface LifeEvent extends Envelope {
+  type: "LifeEvent";
+  event: "died" | "respawned";
+  terminal: boolean;
   reasonCodes: string[];
 }
 
 export interface SessionHello extends Envelope {
   type: "SessionHello";
   learningMode: LearningMode;
-  trainingContext: TrainingContext;
+  experience: Experience;
   policyRevision: number;
   skillLibraryRevision: string;
   rngSeed: number | null;
@@ -318,6 +257,8 @@ export interface CognitionReady extends Envelope {
   restoredEvents: number;
   restoredRoutines: number;
   snapshotTick: number | null;
+  /** ADR 0017, I3: whether the reconstructed Person awaits a respawn. */
+  lifeStatus?: "alive" | "awaiting_respawn";
 }
 
 export interface GoalRecord {
@@ -372,5 +313,7 @@ export type NodeMessage =
   | SkillStarted
   | SkillOutcome
   | EmergencyEvent
-  | EpisodeEvent;
+  | EpisodeEvent
+  | WorldAvailability
+  | LifeEvent;
 export type ProtocolMessage = CognitionMessage | NodeMessage;

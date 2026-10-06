@@ -1,0 +1,86 @@
+{
+  "name": "bench-a2-a-wide-margin-heldout",
+  "seed": 1,
+  "startTick": 0,
+  "timeOfDay": 1000,
+  "biome": "forest",
+  "groundLevel": 63,
+  "spawn": {
+    "x": 0,
+    "y": 64,
+    "z": 0
+  },
+  "spawnYaw": 3.141592653589793,
+  "vitals": {
+    "health": 20,
+    "food": 10,
+    "saturation": 0,
+    "air": 300,
+    "armor": 0
+  },
+  "inventory": [
+    {
+      "name": "stone_pickaxe",
+      "count": 1
+    },
+    {
+      "name": "oak_log",
+      "count": 40
+    }
+  ],
+  "blocks": [],
+  "clusters": [
+    {
+      "name": "sweet_berry_bush",
+      "center": {
+        "x": 5,
+        "y": 64,
+        "z": -5
+      },
+      "count": 12,
+      "spread": 2
+    },
+    {
+      "name": "oak_log",
+      "center": {
+        "x": -13,
+        "y": 64,
+        "z": 0
+      },
+      "count": 30,
+      "spread": 3
+    }
+  ],
+  "entities": [
+    {
+      "name": "pig",
+      "position": {
+        "x": 0,
+        "y": 64,
+        "z": -20
+      }
+    }
+  ],
+  "containers": [
+    {
+      "position": {
+        "x": 3,
+        "y": 64,
+        "z": 3
+      },
+      "kind": "chest",
+      "contents": [
+        {
+          "name": "bread",
+          "count": 48
+        },
+        {
+          "name": "cooked_porkchop",
+          "count": 24
+        }
+      ],
+      "ownedByPerson": true
+    }
+  ],
+  "events": []
+}

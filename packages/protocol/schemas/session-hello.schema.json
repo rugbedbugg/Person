@@ -13,7 +13,7 @@
   "required": [
     "type",
     "learningMode",
-    "trainingContext",
+    "experience",
     "policyRevision",
     "skillLibraryRevision",
     "rngSeed",
@@ -27,8 +27,8 @@
     "learningMode": {
       "$ref": "common.schema.json#/$defs/learningMode"
     },
-    "trainingContext": {
-      "$ref": "common.schema.json#/$defs/trainingContext"
+    "experience": {
+      "$ref": "common.schema.json#/$defs/experience"
     },
     "policyRevision": {
       "type": "integer",

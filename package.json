@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Person: a persistent autonomous artificial inhabitant for Minecraft (Node runtime and safety boundary)",
+  "description": "Person: a persistent developmental agent architecture for constructing and revising beliefs through embodied experience; Minecraft is its first environment (Node runtime and safety boundary)",
   "license": "MIT",
   "engines": {
     "node": ">=22.23.2 <23"
@@ -16,6 +16,7 @@
     "#protocol": "./packages/protocol/ts/index.ts",
     "#skills": "./packages/skills/ts/index.ts",
     "#config": "./packages/config/ts/index.ts",
+    "#minecraft": "./environments/minecraft/ts/index.ts",
     "#fixture-world": "./fixtures/src/index.ts",
     "#minecraft-adapter": "./adapters/minecraft/src/index.ts",
     "#node-runtime": "./apps/node-runtime/src/index.ts"
@@ -23,8 +24,8 @@
   "scripts": {
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "build": "tsc -p tsconfig.build.json",
-    "test": "node --test --test-concurrency=1 \"packages/**/*.test.ts\" \"tests/**/*.test.ts\"",
-    "test:unit": "node --test --test-concurrency=1 \"packages/**/*.test.ts\" \"tests/skills/**/*.test.ts\" \"tests/safety/**/*.test.ts\" \"tests/cli/**/*.test.ts\" \"tests/architecture/**/*.test.ts\"",
+    "test": "node --test --test-concurrency=1 \"packages/**/*.test.ts\" \"environments/**/*.test.ts\" \"tests/**/*.test.ts\"",
+    "test:unit": "node --test --test-concurrency=1 \"packages/**/*.test.ts\" \"tests/skills/**/*.test.ts\" \"tests/safety/**/*.test.ts\" \"tests/cli/**/*.test.ts\" \"tests/observation/**/*.test.ts\" \"tests/validation/**/*.test.ts\" \"tests/architecture/**/*.test.ts\" \"tests/adapter/**/*.test.ts\"",
     "test:integration": "node --test --test-concurrency=1 \"tests/integration/**/*.test.ts\"",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

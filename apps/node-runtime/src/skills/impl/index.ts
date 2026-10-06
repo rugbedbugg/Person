@@ -2,6 +2,7 @@ import type { SkillImplementation } from "../execution.ts";
 import { craftingSkills } from "./crafting.ts";
 import { emergencySkills } from "./emergency.ts";
 import { foodSkills } from "./food.ts";
+import { perceptionSkills } from "./perception.ts";
 import { resourceSkills } from "./resources.ts";
 import { shelterSkills } from "./shelter.ts";
 import { storageSkills } from "./storage.ts";
@@ -20,6 +21,7 @@ export const SKILL_IMPLEMENTATIONS: Readonly<
   ...craftingSkills,
   ...shelterSkills,
   ...storageSkills,
+  ...perceptionSkills,
 });
 
 export const implementedSkillIds = (): string[] =>

@@ -1,0 +1,2 @@
+#Accepted by the operator for the local Person 1.16.1 research server on 2026-09-29 (https://www.minecraft.net/eula)
+eula=true

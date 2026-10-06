@@ -1,4 +1,7 @@
-"""Evidence store: append, snapshot, and rebuild after a restart.
+"""Event store: append, snapshot, and rebuild after a restart.
+
+The store of Person's canonical history (ADR 0027); `EvidenceStore` remains
+as an alias from before history and evidence were separated.
 
 Startup is always: load the latest valid snapshot, replay everything recorded
 after it, and reconstruct state from the result. If the snapshot is unusable
@@ -12,15 +15,16 @@ from collections.abc import Iterable, Mapping
 from pathlib import Path
 from typing import Any, Protocol
 
-from .events import EvidenceEvent
-from .journal import EvidenceJournal, JournalCorruption
+from .events import CanonicalEvent
+from .identity import IdentityError
+from .journal import EventJournal, JournalCorruption
 from .snapshot import SnapshotError, SnapshotStore
 
 
-class EvidenceReducer(Protocol):
-    """Anything that can be rebuilt by replaying evidence."""
+class EventReducer(Protocol):
+    """Anything that can be rebuilt by replaying the canonical history."""
 
-    def apply(self, event: EvidenceEvent) -> None: ...
+    def apply(self, event: CanonicalEvent) -> None: ...
 
     def to_json(self) -> dict[str, Any]: ...
 
@@ -58,10 +62,10 @@ class RestoreReport:
         }
 
 
-class EvidenceStore:
+class EventStore:
     def __init__(self, directory: Path, *, snapshot_every: int = 50) -> None:
         self.directory = Path(directory)
-        self.journal = EvidenceJournal(self.directory / "journal")
+        self.journal = EventJournal(self.directory / "journal")
         self.snapshots = SnapshotStore(self.directory / "snapshots")
         self.snapshot_every = max(1, snapshot_every)
         self.last_event_id: str | None = None
@@ -70,10 +74,13 @@ class EvidenceStore:
         self._snapshot_sequence = 0
         self._last_tick = 0
         self._policy_revision = 0
+        #: The Person this root belongs to, once known: its personId and the
+        #: founding record's fingerprint (ADR 0017). None for a legacy root.
+        self.identity: dict[str, Any] | None = None
 
     # --------------------------------------------------------------- restore
 
-    def restore(self, reducer: EvidenceReducer) -> RestoreReport:
+    def restore(self, reducer: EventReducer) -> RestoreReport:
         report = RestoreReport()
         reducer.reset()
         after: str | None = None
@@ -82,10 +89,20 @@ class EvidenceStore:
             snapshot = self.snapshots.latest_valid()
         except SnapshotError as error:  # pragma: no cover - latest_valid swallows these
             report.notes.append(f"snapshot ignored: {error}")
+        if snapshot is not None and snapshot.get("identity") != self.identity:
+            # A snapshot of another Person, or of this root before or after a
+            # different founding: never load it (ADR 0017).
+            raise IdentityError(
+                f"snapshot belongs to {snapshot.get('identity')}, this root to {self.identity}"
+            )
         if snapshot is not None:
             try:
                 reducer.load_json(snapshot["body"])
                 after = snapshot["last_event_id"]
+                # A snapshot at the journal's tail has nothing after it to
+                # replay; the chain must still continue from its last record.
+                self.last_event_id = after
+                self._last_tick = int(snapshot["tick"])
                 report.from_snapshot = True
                 report.snapshot_tick = snapshot["tick"]
                 self._snapshot_sequence = int(snapshot["sequence"])
@@ -95,6 +112,8 @@ class EvidenceStore:
                 report.notes.append(f"snapshot body rejected, rebuilding from evidence: {error}")
                 reducer.reset()
                 after = None
+                self.last_event_id = None
+                self._last_tick = 0
                 self.event_count = 0
 
         try:
@@ -107,6 +126,8 @@ class EvidenceStore:
             report.notes.append(f"snapshot and journal disagree, full rebuild: {error}")
             report.from_snapshot = False
             reducer.reset()
+            self.last_event_id = None
+            self._last_tick = 0
             self.event_count = 0
             replayed = self._replay(reducer, None)
 
@@ -121,7 +142,7 @@ class EvidenceStore:
             report.notes.append(f"ignored {report.duplicate_records} duplicate record(s)")
         return report
 
-    def _replay(self, reducer: EvidenceReducer, after: str | None) -> int:
+    def _replay(self, reducer: EventReducer, after: str | None) -> int:
         replayed = 0
         for event in self.journal.read(after_event_id=after):
             reducer.apply(event)
@@ -134,7 +155,7 @@ class EvidenceStore:
 
     # ---------------------------------------------------------------- append
 
-    def append(self, event: EvidenceEvent, reducer: EvidenceReducer | None = None) -> EvidenceEvent:
+    def append(self, event: CanonicalEvent, reducer: EventReducer | None = None) -> CanonicalEvent:
         self.journal.append(event)
         self.last_event_id = event.event_id
         self._last_tick = event.tick
@@ -148,7 +169,7 @@ class EvidenceStore:
         return event
 
     def append_all(
-        self, events: Iterable[EvidenceEvent], reducer: EvidenceReducer | None = None
+        self, events: Iterable[CanonicalEvent], reducer: EventReducer | None = None
     ) -> int:
         appended = 0
         for event in events:
@@ -156,7 +177,7 @@ class EvidenceStore:
             appended += 1
         return appended
 
-    def write_snapshot(self, reducer: EvidenceReducer) -> Path:
+    def write_snapshot(self, reducer: EventReducer) -> Path:
         self._snapshot_sequence += 1
         self._since_snapshot = 0
         return self.snapshots.write(
@@ -166,8 +187,20 @@ class EvidenceStore:
             tick=self._last_tick,
             policy_revision=self._policy_revision,
             body=reducer.to_json(),
+            identity=self.identity,
         )
+
+    def first_event(self) -> CanonicalEvent | None:
+        """The journal's first record, which for a founded root is its founding."""
+        for event in self.journal.read():
+            return event
+        return None
 
     @property
     def policy_revision(self) -> int:
         return self._policy_revision
+
+
+#: Compatibility names (ADR 0027).
+EvidenceStore = EventStore
+EvidenceReducer = EventReducer

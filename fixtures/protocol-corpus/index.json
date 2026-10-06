@@ -1,6 +1,6 @@
 {
   "description": "Shared protocol conformance corpus. The Node and Python validators must agree on every entry.",
-  "protocolVersion": "shroud-learning-v2",
+  "protocolVersion": "person-v3",
   "valid": [
     "cognition-ready",
     "emergency-event",

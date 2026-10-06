@@ -5,3 +5,4 @@ runs
 uv.lock
 package-lock.json
 docs/PERSON_SPEC.md
+docs/evidence/**/*.json

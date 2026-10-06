@@ -1,4 +1,7 @@
-"""Goals, homeostasis and the goal stack.
+"""Goals, drives and the goal stack: the environment-neutral mechanism.
+
+Which needs exist and which goals they raise belong to the environment
+profile (Minecraft's are `person_minecraft.goals`, ADR 0025).
 
 A goal answers "what should Person accomplish"; a routine answers "how". They
 are separate systems on purpose, so the same need can be met by different
@@ -11,23 +14,18 @@ doing.
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable
 from dataclasses import dataclass, field, replace
-from typing import Any
+from typing import Any, Protocol
 
 from person_skills import Condition
 
 GoalStatus = str
 
-GOAL_TYPES = (
-    "SURVIVE_IMMEDIATE",
-    "SECURE_FOOD",
-    "SECURE_SHELTER",
-    "ESTABLISH_TOOLS",
-    "ESTABLISH_STORAGE",
-    "RECOVER_HOME",
-    "MAINTAIN_RESERVES",
-)
+#: Goal types Person's core owns, whatever the environment: one trial of an
+#: experiment (ADR 0012). An environment profile adds its own (its needs and
+#: projects), and the loop's vocabulary is the union.
+CORE_GOAL_TYPES: tuple[str, ...] = ("INVESTIGATE",)
 
 
 @dataclass(frozen=True, slots=True)
@@ -41,6 +39,14 @@ class Goal:
     completion_condition: tuple[Condition, ...]
     suspension_reason: str | None = None
     reason_codes: tuple[str, ...] = ()
+    #: The priority the drive or project gave it, before affect (ADR 0010).
+    base_priority: float | None = None
+    #: What affect added or took away. `priority` = base + this.
+    affect_bias: float = 0.0
+    #: How the planner may pursue it (ADR 0021/0022): `ordinary`, or
+    #: `recovery` for a temporary remedy goal from a deliberation or a habit,
+    #: which may also use the planner's recovery operators (`wait_safely`).
+    planning_profile: str = "ordinary"
 
     def as_message(self) -> dict[str, Any]:
         return {
@@ -63,152 +69,28 @@ class Goal:
 
 @dataclass(frozen=True, slots=True)
 class Drive:
-    """One homeostatic need and how badly it is unmet, from 0 to 1."""
+    """One homeostatic need and how badly it is unmet, from 0 to 1.
+
+    `name` and `reason` are the environment's own words, and Person's core
+    never branches on them. What the core needs to know about a drive is
+    typed here: whether it is `pressing`, a need that keeps Person from
+    taking up anything voluntary (a project, an investigation) while it is
+    urgent. The environment's homeostasis decides which of its drives those
+    are (Minecraft's: `person_minecraft.goals`, ADR 0025).
+    """
 
     name: str
     urgency: float
     reason: str
+    pressing: bool
 
 
-def homeostasis(observation: dict[str, Any], state: dict[str, float]) -> list[Drive]:
-    """Survival needs, expressed as urgency rather than as actions."""
-    vitals = observation["vitals"]
-    home = observation["home"]
-    environment = observation["environment"]
-    drives: list[Drive] = []
+class GoalProvider(Protocol):
+    """Proposes goals from the decision state, ordered by urgency."""
 
-    drives.append(Drive("health", max(0.0, (20.0 - vitals["health"]) / 20.0), "health_below_full"))
-    drives.append(Drive("food", max(0.0, (20.0 - vitals["food"]) / 20.0), "food_below_full"))
+    name: str
 
-    threat = 0.0
-    for hostile in observation["nearby"]["hostiles"]:
-        threat = max(threat, max(0.0, 1.0 - hostile["distance"] / 16.0))
-    for hazard in observation["nearby"]["hazards"]:
-        threat = max(threat, max(0.0, 1.0 - hazard["distance"] / 4.0))
-    drives.append(Drive("safety", threat, "threat_proximity"))
-
-    night = environment["dayPhase"] in {"dusk", "night"}
-    shelter_gap = 0.0 if state.get("shelter_complete", 0) >= 1 else (1.0 if night else 0.5)
-    drives.append(Drive("shelter", shelter_gap, "shelter_incomplete"))
-
-    tool_gap = max(0.0, (2.0 - state.get("tool_tier", 0)) / 2.0)
-    drives.append(Drive("tool_readiness", tool_gap, "tool_tier_below_stone"))
-
-    drives.append(Drive("fuel", 0.0 if state.get("fuel", 0) >= 4 else 0.5, "fuel_reserve_low"))
-    drives.append(
-        Drive(
-            "food_reserve",
-            0.0 if home["foodReserve"] >= 4 else 0.6,
-            "stored_food_reserve_low",
-        )
-    )
-    capacity = observation["inventory"]["freeSlots"]
-    drives.append(
-        Drive("inventory_capacity", 0.0 if capacity > 4 else 0.7, "inventory_nearly_full")
-    )
-    return drives
-
-
-def _condition(fact: str, value: float) -> Condition:
-    return Condition(fact, ">=", value)
-
-
-class SurvivalGoalProvider:
-    """Deterministic survival goals, ordered by homeostatic urgency."""
-
-    name = "survival"
-
-    def propose(
-        self, observation: dict[str, Any], state: dict[str, float], tick: int
-    ) -> list[Goal]:
-        drives = {drive.name: drive for drive in homeostasis(observation, state)}
-        environment = observation["environment"]
-        home = observation["home"]
-        night = environment["dayPhase"] in {"dusk", "night"}
-        proposals: list[Goal] = []
-
-        def add(
-            goal_type: str,
-            priority: float,
-            conditions: Sequence[Condition],
-            reasons: Sequence[str],
-            source: str = "homeostasis",
-        ) -> None:
-            proposals.append(
-                Goal(
-                    goal_id=f"goal_{goal_type.lower()}",
-                    goal_type=goal_type,
-                    priority=round(min(1000.0, max(0.0, priority)), 3),
-                    source=source,
-                    created_at_tick=tick,
-                    status="QUEUED",
-                    completion_condition=tuple(conditions),
-                    reason_codes=tuple(reasons),
-                )
-            )
-
-        safety = drives["safety"].urgency
-        health = drives["health"].urgency
-        if safety > 0.4 or observation["vitals"]["health"] < 7:
-            add(
-                "SURVIVE_IMMEDIATE",
-                900 + 100 * safety,
-                [_condition("safe", 1)],
-                ["threat_present" if safety > 0.4 else "health_critical"],
-                source="emergency",
-            )
-
-        food_urgency = drives["food"].urgency
-        if observation["vitals"]["food"] < 18:
-            add(
-                "SECURE_FOOD",
-                400 + 400 * food_urgency + 100 * health,
-                [_condition("food_level", 16)],
-                ["food_band_below_full"],
-            )
-
-        if state.get("shelter_complete", 0) < 1:
-            add(
-                "SECURE_SHELTER",
-                350 + (300 if night else 0) + 100 * drives["shelter"].urgency,
-                [_condition("shelter_complete", 1)],
-                ["night_approaching" if night else "shelter_incomplete"],
-            )
-
-        if state.get("tool_tier", 0) < 2:
-            add(
-                "ESTABLISH_TOOLS",
-                260 + 60 * drives["tool_readiness"].urgency,
-                [_condition("tool_tier", 2)],
-                ["tool_tier_below_stone"],
-            )
-
-        if state.get("owned_storage_available", 0) < 1:
-            add(
-                "ESTABLISH_STORAGE",
-                220,
-                [_condition("owned_storage_available", 1)],
-                ["no_owned_storage"],
-            )
-
-        if home["homeDistance"] is not None and home["homeDistance"] > 32 and night:
-            add(
-                "RECOVER_HOME",
-                600,
-                [_condition("at_home", 1)],
-                ["far_from_home_at_night"],
-            )
-
-        if home["foodReserve"] < 4 and state.get("owned_storage_available", 0) >= 1:
-            add(
-                "MAINTAIN_RESERVES",
-                180,
-                [_condition("stored_surplus", 1)],
-                ["stored_food_reserve_low"],
-            )
-
-        proposals.sort(key=lambda goal: (-goal.priority, goal.goal_type))
-        return proposals
+    def propose(self, decision: Any, state: dict[str, float], tick: int) -> list[Goal]: ...
 
 
 @dataclass
@@ -224,8 +106,14 @@ class GoalStack:
     entries: dict[str, Goal] = field(default_factory=dict)
     active_id: str | None = None
     history: list[tuple[int, str, str]] = field(default_factory=list)
+    #: Every event ever noted, so a reader can find the new ones although
+    #: `history` is trimmed.
+    noted: int = 0
+    #: The candidates the last update ranked, best first (research record).
+    ranked: tuple[Goal, ...] = ()
 
     def _note(self, tick: int, goal_id: str, event: str) -> None:
+        self.noted += 1
         self.history.append((tick, goal_id, event))
         if len(self.history) > 512:
             del self.history[:-512]
@@ -252,7 +140,15 @@ class GoalStack:
                     self.active_id = None
                 continue
             if goal_id in proposed:
-                self.entries[goal_id] = replace(goal, priority=proposed[goal_id].priority)
+                fresh = proposed[goal_id]
+                # Priority, and what it is made of, move together: a record
+                # carrying a stale base or affect bias would misstate why.
+                self.entries[goal_id] = replace(
+                    goal,
+                    priority=fresh.priority,
+                    base_priority=fresh.base_priority,
+                    affect_bias=fresh.affect_bias,
+                )
             elif goal.status == "ACTIVE":
                 self.entries[goal_id] = replace(
                     goal, status="SUSPENDED", suspension_reason="no_longer_proposed"
@@ -261,6 +157,10 @@ class GoalStack:
                 self.active_id = None
 
         for goal_id, goal in proposed.items():
+            # A goal already met is not wanted. Queuing it would only complete
+            # it again at the next update: a success nothing achieved.
+            if goal.satisfied_by(state):
+                continue
             existing = self.entries.get(goal_id)
             if existing is None or existing.status in {"COMPLETE", "FAILED", "ABANDONED"}:
                 self.entries[goal_id] = goal
@@ -273,8 +173,11 @@ class GoalStack:
         ]
         if not candidates:
             self.active_id = None
+            self.ranked = ()
             return None
         candidates.sort(key=lambda goal: (-goal.priority, goal.goal_type))
+        # What this choice was made from, for the engineering record.
+        self.ranked = tuple(candidates)
         best = candidates[0]
 
         if self.active_id and self.active_id != best.goal_id:
@@ -294,12 +197,51 @@ class GoalStack:
 
     def block(self, goal_id: str, reason: str, tick: int) -> None:
         goal = self.entries.get(goal_id)
-        if goal is None:
+        # A finished or abandoned goal is not revived by being blocked.
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
             return
+        already = goal.status == "BLOCKED"
         self.entries[goal_id] = replace(goal, status="BLOCKED", suspension_reason=reason)
-        self._note(tick, goal_id, "blocked")
+        # A goal stays blocked until something reopens it. Blocking it again
+        # is not a new event, and recording it as one would let a single
+        # blockage be counted, and appraised, once per observation.
+        if not already:
+            self._note(tick, goal_id, "blocked")
         if self.active_id == goal_id:
             self.active_id = None
+
+    def conclude(self, goal_id: str, tick: int, reason: str) -> None:
+        """A goal that was only ever about one attempt is over, however it went.
+
+        An experiment's trial is for observing, not for getting its outcome:
+        once observed, it is done. Recorded as `concluded`: neither achieved
+        nor blocked.
+        """
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
+            return
+        self.entries[goal_id] = replace(goal, status="COMPLETE", suspension_reason=reason)
+        self._note(tick, goal_id, "concluded")
+        if self.active_id == goal_id:
+            self.active_id = None
+
+    def abandon(self, goal_id: str, tick: int, reason: str) -> None:
+        """A goal Person has given up on. It is never a candidate again."""
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status in {"COMPLETE", "FAILED", "ABANDONED"}:
+            return
+        self.entries[goal_id] = replace(goal, status="ABANDONED", suspension_reason=reason)
+        self._note(tick, goal_id, "abandoned")
+        if self.active_id == goal_id:
+            self.active_id = None
+
+    def reopen(self, goal_id: str, tick: int) -> None:
+        """A blocked goal becomes eligible again, because what blocked it changed."""
+        goal = self.entries.get(goal_id)
+        if goal is None or goal.status != "BLOCKED":
+            return
+        self.entries[goal_id] = replace(goal, status="QUEUED", suspension_reason=None)
+        self._note(tick, goal_id, "reopened")
 
     def as_messages(self) -> list[dict[str, Any]]:
         return [

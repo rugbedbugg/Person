@@ -1,0 +1,2 @@
+  updated   2026-09-30T15:31:05.002Z (1s ago)
+  doing     goal=SECURE_FOOD routine=r_seek_evidence skill=look

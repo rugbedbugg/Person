@@ -1,0 +1,225 @@
+"""The generic planner derives Minecraft strategies from skill contracts, not recipes."""
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+import pytest
+from person_minecraft.offline import facts_from_observation as symbolic_state
+from person_planner import plan_for, relevant_skills, simulate
+from person_planner.search import step_cost
+from person_skills import Condition, skill_registry
+
+REPOSITORY = Path(__file__).resolve().parents[3]
+
+
+@pytest.fixture
+def state() -> dict[str, float]:
+    observation = json.loads(
+        (REPOSITORY / "fixtures/protocol-corpus/valid/observation.json").read_text(encoding="utf-8")
+    )
+    derived = symbolic_state(observation)
+    derived.update({"reachable_stone": 4.0, "reachable_plant_food": 3.0, "reachable_coal": 2.0})
+    return derived
+
+
+def labels(plan) -> list[str]:
+    return [step.label() for step in plan.steps]
+
+
+GOALS = {
+    "food": [Condition("food_level", ">=", 16)],
+    "shelter": [Condition("shelter_complete", ">=", 1)],
+    "tools": [Condition("tool_tier", ">=", 2)],
+    "cooking": [Condition("cooked_food", ">=", 2)],
+    "storage": [Condition("owned_storage_available", ">=", 1)],
+    "reserves": [Condition("stored_surplus", ">=", 1)],
+}
+
+
+@pytest.mark.parametrize("name", sorted(GOALS))
+def test_every_survival_goal_has_a_feasible_plan(state: dict[str, float], name: str) -> None:
+    plans = plan_for(state, GOALS[name], limit=4)
+    assert plans, f"no plan found for {name}"
+    registry = skill_registry()
+    for plan in plans:
+        current = dict(state)
+        for step in plan.steps:
+            spec = registry.get(step.skill_id)
+            assert spec.applicable(current), f"{step.skill_id} precondition failed in {name}"
+            current = simulate(current, [step])
+        assert all(condition.holds(current) for condition in GOALS[name])
+
+
+def test_cooking_plan_derives_the_whole_dependency_chain(state: dict[str, float]) -> None:
+    plans = plan_for(state, GOALS["cooking"], limit=3)
+    assert plans
+    skills = set(plans[0].skill_ids)
+    # Nothing here is a hard-coded cooking recipe: each step is present because
+    # some other step declared it as a precondition.
+    assert "cook_food" in skills
+    assert "craft_furnace" in skills
+    assert "mine_stone" in skills
+    assert "craft_basic_tools" in skills
+    assert {"hunt_safe_passive_animals"} & skills
+
+
+def test_alternative_strategies_are_offered_for_shelter(state: dict[str, float]) -> None:
+    plans = plan_for(state, GOALS["shelter"], limit=4)
+    assert len(plans) >= 2, "learning needs more than one way to reach a goal"
+    first, second = plans[0], plans[1]
+    assert first.skill_ids != second.skill_ids
+    assert first.cost <= second.cost
+
+
+def test_plans_are_minimal(state: dict[str, float]) -> None:
+    registry = skill_registry()
+    for goal in GOALS.values():
+        for plan in plan_for(state, goal, limit=4):
+            for index in range(len(plan.steps)):
+                reduced = plan.steps[:index] + plan.steps[index + 1 :]
+                current = dict(state)
+                feasible = True
+                for step in reduced:
+                    spec = registry.get(step.skill_id)
+                    if not spec.applicable(current):
+                        feasible = False
+                        break
+                    current = simulate(current, [step])
+                assert not (feasible and all(condition.holds(current) for condition in goal)), (
+                    f"{[s.label() for s in plan.steps]} contains a step that does nothing"
+                )
+
+
+def test_planning_is_deterministic(state: dict[str, float]) -> None:
+    for goal in GOALS.values():
+        runs = [[labels(plan) for plan in plan_for(state, goal, limit=4)] for _ in range(3)]
+        assert runs[0] == runs[1] == runs[2]
+
+
+def test_an_already_satisfied_goal_needs_no_plan(state: dict[str, float]) -> None:
+    plans = plan_for(state, [Condition("home_known", ">=", 1)], limit=3)
+    assert plans and plans[0].steps == ()
+
+
+def test_impossible_goals_produce_no_plan(state: dict[str, float]) -> None:
+    barren = dict(state)
+    for fact in (
+        "reachable_wood",
+        "reachable_stone",
+        "reachable_coal",
+        "reachable_plant_food",
+        "reachable_animal",
+        "wood",
+        "building_materials",
+    ):
+        barren[fact] = 0.0
+    assert plan_for(barren, GOALS["shelter"], limit=3) == []
+
+
+def test_relevance_closure_keeps_unrelated_skills_out(state: dict[str, float]) -> None:
+    registry = skill_registry()
+    specs = [registry.get(skill_id) for skill_id in registry.ids]
+    relevant = {spec.id for spec in relevant_skills(GOALS["cooking"], specs)}
+    assert "cook_food" in relevant
+    assert "loot_permitted_container" not in relevant
+    assert "dig_in" not in relevant
+
+
+def test_emergency_reflexes_are_not_planned(state: dict[str, float]) -> None:
+    for goal in GOALS.values():
+        for plan in plan_for(state, goal, limit=4):
+            assert "flee" not in plan.skill_ids
+            assert "dig_in" not in plan.skill_ids
+            assert "wait_safely" not in plan.skill_ids
+
+
+def test_plan_cost_accounts_for_how_much_a_step_asks_for(state: dict[str, float]) -> None:
+    """Gathering thirty-two logs is not the same price as gathering eight.
+
+    Before this was measured, every parameterisation of a plan tied on cost, so
+    the planner offered several copies of one strategy differing only in how
+    absurd the magnitude was, and the evidence for that strategy was split
+    across as many routine identities.
+    """
+    registry = skill_registry()
+    spec = registry.get("gather_wood")
+    small = step_cost(spec, {"target_amount": 8, "max_distance": 48})
+    large = step_cost(spec, {"target_amount": 32, "max_distance": 48})
+    assert large > small
+    assert step_cost(spec) == small, "the default parameters are the baseline"
+
+
+def test_the_cheapest_plan_asks_for_a_sensible_amount(state: dict[str, float]) -> None:
+    state = dict(state)
+    state["reachable_animal"] = 2.0
+    plans = plan_for(state, GOALS["cooking"], limit=3)
+    assert plans
+    hunt = next(step for step in plans[0].steps if step.skill_id == "hunt_safe_passive_animals")
+    assert hunt.parameter_map["target_amount"] == 3, (
+        "cooking two items should not begin by hunting a dozen animals"
+    )
+
+
+def test_alternative_cooking_strategies_differ_in_substance(state: dict[str, float]) -> None:
+    state = dict(state)
+    state["reachable_animal"] = 2.0
+    plans = plan_for(state, GOALS["cooking"], limit=3)
+    assert len(plans) >= 2
+    sequences = {plan.skill_ids for plan in plans}
+    assert len(sequences) >= 2, "the candidates must differ by more than a parameter"
+
+
+def test_a_plan_uses_what_person_already_has(state: dict[str, float]) -> None:
+    stocked = dict(state)
+    stocked.update({"building_materials": 40.0, "wood": 40.0})
+    plans = plan_for(stocked, GOALS["shelter"], limit=3)
+    assert plans[0].skill_ids == ("build_basic_shelter",), (
+        "gathering more of something Person is already carrying is wasted work"
+    )
+
+    fed = dict(state)
+    fed["edible_food"] = 10.0
+    food_plans = plan_for(fed, GOALS["food"], limit=3)
+    assert food_plans[0].skill_ids == ("eat_to_target",)
+
+
+def test_no_plan_repeats_a_step_without_reason(state: dict[str, float]) -> None:
+    for goal in GOALS.values():
+        for plan in plan_for(state, goal, limit=5):
+            counts = {skill: plan.skill_ids.count(skill) for skill in set(plan.skill_ids)}
+            repeated = {skill: count for skill, count in counts.items() if count > 1}
+            assert not repeated, f"{plan.skill_ids} repeats {repeated}"
+
+
+def test_an_expensive_route_to_a_cheap_goal_is_ranked_last(state: dict[str, float]) -> None:
+    """Building a house is a truthful way to end up at home, and a silly one.
+
+    The contract is not wrong, so the effect stays; cost ordering is what keeps
+    it out of the way.
+    """
+    plans = plan_for(state, [Condition("at_home", ">=", 1)], limit=4)
+    assert plans[0].skill_ids == ("return_home",)
+    assert all(plan.cost >= plans[0].cost for plan in plans[1:])
+
+
+def test_rest_is_plannable_only_when_a_caller_asks_and_only_where_it_is_safe(
+    state: dict[str, float],
+) -> None:
+    """`wait_safely` is the kernel's, and the one way to bring about `rested`.
+    A deliberated goal may plan it (ADR 0021, C4.1); ordinary planning,
+    including the idle goal, never does, and its `safe` precondition still
+    decides where."""
+    rest = [Condition("rested", ">=", 1)]
+    safe = {**state, "safe": 1.0, "rested": 0.0}
+    assert all("wait_safely" not in p.skill_ids for p in plan_for(safe, rest))
+    plans = plan_for(safe, rest, limit=3, recovery=("wait_safely",))
+    assert plans and plans[0].skill_ids == ("wait_safely",)
+    unsafe = {**safe, "safe": 0.0}
+    assert all(
+        "wait_safely" not in p.skill_ids for p in plan_for(unsafe, rest, recovery=("wait_safely",))
+    )
+    assert all("flee" not in p.skill_ids for p in plan_for(safe, rest, recovery=("flee",))), (
+        "only declared recovery skills can be opted into"
+    )

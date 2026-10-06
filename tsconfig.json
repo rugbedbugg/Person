@@ -19,6 +19,7 @@
   },
   "include": [
     "packages/**/ts/**/*.ts",
+    "environments/**/ts/**/*.ts",
     "apps/**/src/**/*.ts",
     "adapters/**/src/**/*.ts",
     "fixtures/src/**/*.ts",

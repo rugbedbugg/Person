@@ -1,0 +1,18 @@
+# CODEOWNERS — Conservative Initial Configuration
+#
+# This configuration requests review from both maintainers for all changes.
+# Subsystem ownership will be refined once collaboration patterns stabilize
+# (see docs/OWNERSHIP.md).
+#
+# Pattern: All files require review from both maintainers.
+# This is intentionally broad — narrow it via PR discussion when ready.
+
+* @rugbedbugg @upayanmazumder
+
+# Exceptions: Generated/lock files don't need human review
+package-lock.json -@rugbedbugg -@upayanmazumder
+uv.lock -@rugbedbugg -@upayanmazumder
+dist/ -@rugbedbugg -@upayanmazumder
+node_modules/ -@rugbedbugg -@upayanmazumder
+.runs/ -@rugbedbugg -@upayanmazumder
+*.log -@rugbedbugg -@upayanmazumder

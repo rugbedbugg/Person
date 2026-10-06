@@ -6,8 +6,8 @@ cannot ask to walk forward, turn, or break a block at a coordinate.
 
 Each skill exists in two halves that are checked against each other:
 
-- a **SkillSpec**, canonical JSON in `packages/skills/specs/`, read by the
-  planner and enforced by the runtime;
+- a **SkillSpec**, canonical JSON in `environments/minecraft/skills/`, read
+  by the planner and enforced by the runtime;
 - an **implementation**, TypeScript in
   `apps/node-runtime/src/skills/impl/`, written against the embodiment port.
 
@@ -44,19 +44,28 @@ implementation, or an implementation without a spec, fails the build.
 ```
 
 `preconditions` and `expectedEffects` name facts from
-`packages/skills/specs/facts.json`. Those facts are the planner's whole
+`environments/minecraft/skills/facts.json`. Those facts are the planner's whole
 vocabulary, and the registry refuses a spec that invents one.
+
+The contract's shape is generic and Person-owned
+(`packages/skills/schema/skill-spec.schema.json`): it enumerates no category,
+permission or completion evidence. Those vocabularies, which facts are evidence
+or tracked or evaluable, and the roles skills play (the idle skill, the
+look skill, the skill that builds a home) belong to the environment and are
+declared in `environments/minecraft/skills/vocabulary.json` (ADR 0025). The
+registry validates every spec against both.
 
 ## The library
 
-| Category  | Skills                                                                                             |
-| --------- | -------------------------------------------------------------------------------------------------- |
-| Emergency | `flee`, `dig_in`, `wait_safely`, `return_home`                                                     |
-| Food      | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
-| Resources | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
-| Crafting  | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
-| Shelter   | `build_basic_shelter`, `repair_shelter`                                                            |
-| Storage   | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
+| Category   | Skills                                                                                             |
+| ---------- | -------------------------------------------------------------------------------------------------- |
+| Emergency  | `flee`, `dig_in`, `restore_air`, `wait_safely`, `return_home`                                      |
+| Food       | `gather_plant_food`, `hunt_safe_passive_animals`, `cook_food`, `eat_to_target`                     |
+| Resources  | `gather_wood`, `mine_stone`, `mine_coal`                                                           |
+| Crafting   | `craft_basic_tools`, `craft_stone_tools`, `craft_furnace`, `craft_chest`                           |
+| Shelter    | `build_basic_shelter`, `repair_shelter`                                                            |
+| Storage    | `place_owned_chest`, `deposit_owned_storage`, `withdraw_owned_storage`, `loot_permitted_container` |
+| Perception | `look_around`, `look`                                                                              |
 
 ## One implementation, two bodies
 

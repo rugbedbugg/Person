@@ -1,9 +1,4 @@
-import type {
-  CostLimits,
-  ItemStack,
-  Position,
-  TerminalStatus,
-} from "#protocol";
+import type { CostLimits, ItemStack, TerminalStatus } from "#protocol";
 import type { SkillSpec } from "#skills";
 import type { Embodiment, WorldSnapshot } from "../embodiment/types.ts";
 import type { PermissionGate } from "../safety/permissions.ts";
@@ -11,7 +6,8 @@ import type {
   EmergencyAssessment,
   SafetyKernel,
 } from "../safety/safety-kernel.ts";
-import type { WorldMemory } from "../runtime/world-memory.ts";
+import type { PlacementLedger } from "../runtime/placement-ledger.ts";
+import { type Position } from "#minecraft";
 
 export type EvidenceValue = number | string | boolean | null;
 
@@ -57,7 +53,7 @@ export interface SkillContext {
   readonly embodiment: Embodiment;
   readonly permissions: PermissionGate;
   readonly kernel: SafetyKernel;
-  readonly memory: WorldMemory;
+  readonly ledger: PlacementLedger;
   readonly emergency: boolean;
   snapshot(): WorldSnapshot;
   /** Throws if the kernel, the tick budget or the health floor says stop. */

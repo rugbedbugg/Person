@@ -4,12 +4,15 @@ import { fileURLToPath } from "node:url";
 import { parse as parseToml } from "smol-toml";
 import { Ajv2020 } from "ajv/dist/2020.js";
 import type { ValidateFunction } from "ajv";
-import { contains, intersects } from "./geometry.ts";
-import type { Box, PersonConfig } from "./types.ts";
+import { discoveredEnvironments, environmentManifest } from "#protocol";
+import type { CoreConfig } from "./types.ts";
 
 export const CONFIG_SCHEMA_FILE = fileURLToPath(
   new URL("../schema/person-config.schema.json", import.meta.url),
 );
+
+/** The configuration version this loader writes and validates. */
+export const CONFIG_VERSION = 3;
 
 export class ConfigError extends Error {
   readonly diagnostics: string[];
@@ -24,19 +27,37 @@ export class ConfigError extends Error {
   }
 }
 
-let compiled: ValidateFunction | undefined;
-function schemaValidator(): ValidateFunction {
-  if (!compiled) {
+const compiled = new Map<string, ValidateFunction>();
+
+/**
+ * The schema a document of one environment is checked against: the core
+ * schema and the environment's own, together, with nothing left over that
+ * neither of them owns (ADR 0025).
+ */
+function schemaValidator(kind: string): ValidateFunction {
+  let validate = compiled.get(kind);
+  if (!validate) {
     const ajv = new Ajv2020({
       strict: true,
       allErrors: true,
       allowUnionTypes: true,
     });
-    compiled = ajv.compile(
-      JSON.parse(readFileSync(CONFIG_SCHEMA_FILE, "utf8")) as object,
-    );
+    const core = JSON.parse(readFileSync(CONFIG_SCHEMA_FILE, "utf8")) as {
+      $id: string;
+    };
+    const environment = environmentManifest(kind).configSchema as {
+      $id: string;
+    };
+    ajv.addSchema(core);
+    ajv.addSchema(environment);
+    validate = ajv.compile({
+      type: "object",
+      allOf: [{ $ref: core.$id }, { $ref: environment.$id }],
+      unevaluatedProperties: false,
+    });
+    compiled.set(kind, validate);
   }
-  return compiled;
+  return validate;
 }
 
 const DEFAULTS = {
@@ -45,6 +66,8 @@ const DEFAULTS = {
     maxDecisions: 400,
     maxTicks: 72000,
     decisionIntervalMs: 0,
+    reconnectAttempts: 0,
+    reconnectIntervalMs: 1000,
   },
   learning: {
     evidenceDirectory: "",
@@ -55,22 +78,40 @@ const DEFAULTS = {
   cognition: { startTimeoutMs: 20000, decisionTimeoutMs: 5000 },
 } as const;
 
-const wellFormed = (box: Box): boolean =>
-  box.min.x <= box.max.x && box.min.y <= box.max.y && box.min.z <= box.max.z;
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null && !Array.isArray(value);
 
 /**
- * Validates configuration and applies defaults.
+ * Validates the core of a configuration together with the sections its
+ * environment owns, and applies the core defaults.
  *
- * Schema validation alone is not enough: the safety-relevant invariants are
- * geometric (home inside the exploration bounds, protected areas not
- * overlapping what Person is told to use). Those are checked here, in the
- * runtime that owns physical permission.
+ * Only what is environment-neutral is decided here. The environment's own
+ * semantic checks (Minecraft's world geometry, for one) belong to its profile:
+ * `validateMinecraftConfig` in `#minecraft` runs this and then its own.
  */
 export function validateConfig(
   input: unknown,
   baseDirectory: string = process.cwd(),
-): PersonConfig {
-  const validate = schemaValidator();
+): CoreConfig & Record<string, unknown> {
+  if (!isRecord(input)) throw new ConfigError("Configuration must be a table");
+  if (input["configVersion"] !== CONFIG_VERSION)
+    throw new ConfigError("Configuration does not match the schema", [
+      `/configVersion must be ${CONFIG_VERSION}; an older document is upgraded by its environment's loader`,
+    ]);
+  const environment = input["environment"];
+  const kind =
+    isRecord(environment) && typeof environment["kind"] === "string"
+      ? environment["kind"]
+      : null;
+  if (kind === null)
+    throw new ConfigError("Configuration does not match the schema", [
+      "/environment/kind is required",
+    ]);
+  if (!discoveredEnvironments().has(kind))
+    throw new ConfigError("Configuration names an unknown environment", [
+      `/environment/kind ${JSON.stringify(kind)} is not an installed environment profile`,
+    ]);
+  const validate = schemaValidator(kind);
   if (!validate(input))
     throw new ConfigError(
       "Configuration does not match the schema",
@@ -78,10 +119,8 @@ export function validateConfig(
         (e) => `${e.instancePath || "/"} ${e.message ?? "is invalid"}`,
       ),
     );
-  const raw = input as PersonConfig;
-  const problems: string[] = [];
-
-  const config: PersonConfig = {
+  const raw = input as unknown as CoreConfig & Record<string, unknown>;
+  const config = {
     ...raw,
     runtime: {
       ...DEFAULTS.runtime,
@@ -96,80 +135,24 @@ export function validateConfig(
     raw.learning.evidenceDirectory ??
       path.join(raw.runtime.outputDirectory, "evidence"),
   );
-
-  const { world } = config;
-  if (!wellFormed(world.exploration))
-    problems.push("/world/exploration has reversed bounds");
-  for (const [index, area] of world.resourceAreas.entries()) {
-    if (!wellFormed(area))
-      problems.push(`/world/resourceAreas/${index} has reversed bounds`);
-    if (
-      !contains(world.exploration, area.min) ||
-      !contains(world.exploration, area.max)
-    )
-      problems.push(
-        `/world/resourceAreas/${index} must fit inside the exploration bounds`,
-      );
-  }
-  for (const [index, area] of world.protectedAreas.entries())
-    if (!wellFormed(area))
-      problems.push(`/world/protectedAreas/${index} has reversed bounds`);
-  if (!contains(world.exploration, world.home))
-    problems.push("/world/home must lie inside the exploration bounds");
-
-  const homeFootprint: Box = {
-    min: { x: world.home.x - 2, y: world.home.y - 1, z: world.home.z - 2 },
-    max: { x: world.home.x + 2, y: world.home.y + 3, z: world.home.z + 2 },
-  };
-  for (const [index, area] of world.protectedAreas.entries())
-    if (intersects(area, homeFootprint))
-      problems.push(
-        `/world/protectedAreas/${index} overlaps the home footprint; Person would be unable to build where it is told to live`,
-      );
-
-  if (config.runtime.embodiment === "minecraft") {
-    if (!config.server)
-      problems.push("/server is required when runtime.embodiment is minecraft");
-    if (!config.bot)
-      problems.push("/bot is required when runtime.embodiment is minecraft");
-    if (!config.authorization)
-      problems.push(
-        "/authorization is required when runtime.embodiment is minecraft",
-      );
-    if (config.runtime.trainingContext === "fixture")
-      problems.push(
-        "/runtime/trainingContext must be a minecraft context when runtime.embodiment is minecraft",
-      );
-  } else if (config.runtime.trainingContext.startsWith("minecraft"))
-    problems.push(
-      "/runtime/trainingContext must be fixture or replay when runtime.embodiment is fixture",
-    );
-
-  if (config.permissions.containers.existing.deposit !== false)
-    problems.push("/permissions/containers/existing/deposit must be false");
-
-  if (problems.length)
-    throw new ConfigError("Configuration is not usable", problems);
   return config;
 }
 
-export function parseConfigText(
-  text: string,
-  filename: string,
-  baseDirectory: string,
-): PersonConfig {
-  let parsed: unknown;
+/** Parse a TOML or JSON configuration document without validating it. */
+export function parseConfigDocument(text: string, filename: string): unknown {
   try {
-    parsed = filename.endsWith(".json") ? JSON.parse(text) : parseToml(text);
+    return filename.endsWith(".json") ? JSON.parse(text) : parseToml(text);
   } catch (error) {
     throw new ConfigError(
       `${filename} could not be parsed: ${(error as Error).message}`,
     );
   }
-  return validateConfig(parsed, baseDirectory);
 }
 
-export function loadConfig(filename: string): PersonConfig {
+export function readConfigDocument(filename: string): {
+  document: unknown;
+  absolute: string;
+} {
   const absolute = path.resolve(filename);
   let text: string;
   try {
@@ -179,5 +162,5 @@ export function loadConfig(filename: string): PersonConfig {
       `Cannot read configuration ${absolute}: ${(error as Error).message}`,
     );
   }
-  return parseConfigText(text, absolute, path.dirname(absolute));
+  return { document: parseConfigDocument(text, absolute), absolute };
 }

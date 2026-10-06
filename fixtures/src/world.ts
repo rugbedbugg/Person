@@ -1,5 +1,4 @@
-import { readFileSync } from "node:fs";
-import { distance, positionKey, type Position } from "#config";
+import { appendFileSync, readFileSync } from "node:fs";
 import type { ItemStack } from "#protocol";
 import {
   DisconnectedError,
@@ -14,16 +13,21 @@ import {
   type MoveOptions,
   type PhysicalGuard,
   type WorldSnapshot,
+  type GazeDirection,
+  stepGaze,
+  gatherResources,
   FOOD_VALUE,
   FUEL_VALUE,
   SMELTING,
   isFuel,
   recipesFor,
   preferredWood,
+  lineBlocked,
 } from "#node-runtime";
 import {
   BLOCKS,
   HOSTILES,
+  NEUTRALS,
   PASSIVE_ANIMALS,
   RANGED_HOSTILES,
   definitionOf,
@@ -33,13 +37,17 @@ import {
   type FixtureWorldDefinition,
 } from "./definition.ts";
 import { SeededRandom } from "./rng.ts";
+import { distance, positionKey, type Position } from "#minecraft";
 
 interface FixtureEntityState {
   entityId: number;
   name: string;
+  username: string | null;
+  uuid: string | null;
   position: Position;
   health: number;
   hostile: boolean;
+  neutral: boolean;
   passive: boolean;
   player: boolean;
   villager: boolean;
@@ -50,6 +58,8 @@ interface FixtureEntityState {
 
 const MAX_SLOTS = 36;
 const SCAN_RADIUS = 64;
+/** Mirrors the Mineflayer adapter: how long damage keeps a neutral dangerous. */
+const DAMAGE_MEMORY_TICKS = 200;
 
 /**
  * A deterministic Minecraft-shaped world.
@@ -86,18 +96,32 @@ export class FixtureWorld implements Embodiment {
   #armor: number;
   #weather: "clear" | "rain" | "thunder" = "clear";
   #connected = false;
+  #ascending = false;
+  /** `barren_until_rested`: unrested since the last `unrest`, and for how long it has waited. */
+  #unrested = false;
+  #waited = 0;
+  #resting = false;
+  /** `barren_until_withdrawn`: taken from an owned container since the last `unrest`. */
+  #withdrewSince = false;
+  #withdrawalHelps = true;
+  #restHelps = true;
   #guard: PhysicalGuard | null = null;
   #lastSafePosition: Position | null = null;
-  #lastDamageTick = -1000;
+  /** Facing, in radians, using the same convention as the Minecraft body. */
+  #yaw = 0;
+  #pitch = 0;
+  #lastAttackTick = -1000;
   #firedEvents = new Set<number>();
   #groundLevel: number;
   #snapshotCache: { tick: number; value: WorldSnapshot } | null = null;
+  #lastDamageTick: number | null = null;
 
   constructor(definition: Partial<FixtureWorldDefinition> = {}) {
     this.definition = { ...DEFAULT_DEFINITION, ...definition };
     this.#random = new SeededRandom(this.definition.seed);
     this.#tick = this.definition.startTick;
     this.#position = { ...this.definition.spawn };
+    this.#yaw = this.definition.spawnYaw ?? 0;
     this.#health = this.definition.vitals.health;
     this.#food = this.definition.vitals.food;
     this.#saturation = this.definition.vitals.saturation;
@@ -248,6 +272,19 @@ export class FixtureWorld implements Embodiment {
       .slice(0, query.limit);
   }
 
+  /**
+   * The fixture always knows what is in a container, but the port promises an
+   * asynchronous read because a real server only reveals contents once the
+   * window is open. Both bodies must present the same shape or the skills
+   * would be written against the easier one.
+   */
+  async inspectContainer(position: Position): Promise<ContainerView | null> {
+    const view = this.containerAt(position);
+    if (!view) return null;
+    this.#advance(4);
+    return this.containerAt(position);
+  }
+
   containerAt(position: Position): ContainerView | null {
     const container = this.#containers.get(positionKey(position));
     if (!container) return null;
@@ -285,6 +322,25 @@ export class FixtureWorld implements Embodiment {
 
   // ---------------------------------------------------------------- lifecycle
 
+  /**
+   * Minecraft's respawn, for the fixture (ADR 0017, I3): the same body back
+   * at the world's spawn with full health and food, and, as in survival
+   * without keepInventory, nothing it carried. The world goes on as it was.
+   */
+  async respawn(): Promise<void> {
+    this.#invalidate();
+    this.#health = 20;
+    this.#food = 20;
+    this.#saturation = 5;
+    this.#air = 300;
+    this.#position = { ...this.definition.spawn };
+    this.#yaw = this.definition.spawnYaw ?? 0;
+    this.#inventory.clear();
+    this.#lastDamageTick = null;
+    this.#lastSafePosition = { ...this.#position };
+    this.#advance(0);
+  }
+
   async connect(): Promise<void> {
     this.#connected = true;
     this.#lastSafePosition = { ...this.#position };
@@ -293,22 +349,38 @@ export class FixtureWorld implements Embodiment {
 
   async disconnect(): Promise<void> {
     this.#connected = false;
+    this.#invalidate();
   }
 
-  /** Test hook: simulate the Minecraft connection dropping. */
+  /**
+   * Test hook: simulate the Minecraft connection dropping.
+   *
+   * The cached snapshot has to go with it. A body that still answers "yes, I
+   * am connected" from a snapshot taken a moment earlier would hide the very
+   * thing this hook exists to simulate.
+   */
   dropConnection(): void {
     this.#connected = false;
+    this.#invalidate();
   }
 
   // ---------------------------------------------------------------- time
+
+  passTick(): void {
+    this.#advance(1);
+  }
 
   #advance(ticks: number): void {
     this.#invalidate();
     for (let step = 0; step < Math.max(0, ticks); step++) {
       this.#tick += 1;
+      // Rest is counted a tick at a time, so an `unrest` arriving during a
+      // wait discounts the part of the wait before it.
+      if (this.#resting) this.#waited += 1;
       this.#runEvents();
       this.#stepEntities();
       this.#stepVitals();
+      this.#stepBuoyancy();
     }
     if (ticks === 0) {
       this.#runEvents();
@@ -332,6 +404,28 @@ export class FixtureWorld implements Embodiment {
         this.#setBlock(event.position, "air");
       } else if (event.type === "weather" && event.weather) {
         this.#weather = event.weather;
+      } else if (event.type === "unrest") {
+        this.#unrested = true;
+        this.#waited = 0;
+        this.#withdrewSince = false;
+      } else if (event.type === "withdrawal_stops_helping") {
+        this.#withdrawalHelps = false;
+      } else if (event.type === "rest_stops_helping") {
+        this.#restHelps = false;
+      } else if (event.type === "remove_items") {
+        // Gone from the world: held and stored alike, so a reset problem
+        // cannot be solved from a chest.
+        for (const item of event.items ?? []) {
+          this.#inventory.delete(item);
+          for (const container of this.#containers.values())
+            container.contents.delete(item);
+        }
+      } else if (event.type === "set_vitals" && event.vitals) {
+        if (event.vitals.health !== undefined)
+          this.#health = event.vitals.health;
+        if (event.vitals.food !== undefined) this.#food = event.vitals.food;
+        if (event.vitals.saturation !== undefined)
+          this.#saturation = event.vitals.saturation;
       }
     }
   }
@@ -341,21 +435,116 @@ export class FixtureWorld implements Embodiment {
       if (!entity.hostile) continue;
       const gap = distance(entity.position, this.#position);
       if (gap > 24) continue;
-      if (gap > 1.5 && this.#tick % 6 === 0) {
-        entity.position = {
-          x:
-            entity.position.x + Math.sign(this.#position.x - entity.position.x),
-          y: this.#position.y,
-          z:
-            entity.position.z + Math.sign(this.#position.z - entity.position.z),
-        };
-      }
+      if (gap > 1.5 && this.#tick % 6 === 0) this.#approach(entity);
       const reach = entity.ranged ? 12 : 2.5;
-      if (gap <= reach && this.#tick - this.#lastDamageTick >= 20) {
-        this.#lastDamageTick = this.#tick;
-        this.#health = Math.max(0, this.#health - 2);
+      const ready =
+        gap <= reach && this.#tick - (this.#lastAttackTick ?? -1000) >= 20;
+      const clear = ready && this.#lineOfAttack(entity.position);
+      if (ready && !clear) this.#diagnose("attack_blocked", entity, {});
+      if (clear) {
+        this.#lastAttackTick = this.#tick;
+        this.#damage(2);
       }
     }
+  }
+
+  /**
+   * One step toward Person, only into open space.
+   *
+   * The step is diagonal when both axes differ; if that is blocked it tries
+   * the x step alone, then the z step alone, and otherwise waits. A hostile
+   * needs its feet and head blocks clear. No pathfinding: one that cannot get
+   * closer stays where it is (ADR 0016).
+   */
+  #approach(entity: FixtureEntityState): void {
+    const sx = Math.sign(this.#position.x - entity.position.x);
+    const sz = Math.sign(this.#position.z - entity.position.z);
+    const direct = {
+      x: entity.position.x + sx,
+      y: this.#position.y,
+      z: entity.position.z + sz,
+    };
+    if (!this.#open(direct))
+      this.#diagnose("move_blocked", entity, { into: direct });
+    const steps: [number, number][] = [
+      [sx, sz],
+      [sx, 0],
+      [0, sz],
+    ];
+    for (const [dx, dz] of steps) {
+      if (dx === 0 && dz === 0) continue;
+      const next = {
+        x: entity.position.x + dx,
+        y: this.#position.y,
+        z: entity.position.z + dz,
+      };
+      if (this.#open(next)) {
+        entity.position = next;
+        return;
+      }
+    }
+  }
+
+  /**
+   * Operator-side diagnostics of the hostile physics ADR 0016 changed: each
+   * time a step into a solid block or an attack without a clear line is
+   * refused, a JSON line goes to the file `PERSON_FIXTURE_PHYSICS_LOG` names.
+   * Off unless that variable is set. It never reaches Person, the journal, or
+   * any observation; it exists to attribute a changed trajectory to the
+   * physics change.
+   */
+  #diagnose(
+    kind: "move_blocked" | "attack_blocked",
+    entity: FixtureEntityState,
+    detail: Record<string, unknown>,
+  ): void {
+    const file = process.env["PERSON_FIXTURE_PHYSICS_LOG"];
+    if (!file) return;
+    appendFileSync(
+      file,
+      `${JSON.stringify({
+        tick: this.#tick,
+        kind,
+        hostile: entity.name,
+        at: entity.position,
+        person: this.#position,
+        ...detail,
+      })}\n`,
+    );
+  }
+
+  /** Room for a body: the feet block and the one above are not solid. */
+  #open(position: Position): boolean {
+    const feet = {
+      x: Math.floor(position.x),
+      y: Math.floor(position.y),
+      z: Math.floor(position.z),
+    };
+    const head = { ...feet, y: feet.y + 1 };
+    return !this.blockAt(feet)?.solid && !this.blockAt(head)?.solid;
+  }
+
+  /**
+   * Whether a hostile at `from` can hurt Person: a clear line from its eye to
+   * Person's upper body. The same geometry Person's vision uses for
+   * occlusion, and nothing of what Person perceives (ADR 0016).
+   */
+  #lineOfAttack(from: Position): boolean {
+    const eye = { x: from.x + 0.5, y: from.y + 1.6, z: from.z + 0.5 };
+    const body = {
+      x: Math.floor(this.#position.x),
+      y: Math.floor(this.#position.y) + 1,
+      z: Math.floor(this.#position.z),
+    };
+    return !lineBlocked(eye, body, (position) => this.blockAt(position));
+  }
+
+  /** Every health loss is recorded, so a neutral mob can become a threat. */
+  #damage(amount: number): void {
+    if (amount <= 0) return;
+    this.#invalidate();
+    this.#health = Math.max(0, this.#health - amount);
+    this.#lastDamageTick = this.#tick;
   }
 
   #stepVitals(): void {
@@ -368,11 +557,34 @@ export class FixtureWorld implements Embodiment {
       this.#health = Math.min(20, this.#health + 1);
     const feet = this.blockAt(this.#position);
     if (feet?.hazard && feet.kind === "lava" && this.#tick % 10 === 0)
-      this.#health = Math.max(0, this.#health - 4);
-    if (!this.blockAt(this.#position)?.hazard && this.#air < 300)
+      this.#damage(4);
+    // Under water the body loses a unit of air a tick and, with none left,
+    // two health a second, as Minecraft's does (ADR 0019); with its head out
+    // of the water it breathes again.
+    if (this.#submerged()) {
+      this.#air = Math.max(0, this.#air - 1);
+      if (this.#air === 0 && this.#tick % 20 === 0) this.#damage(2);
+    } else if ((!feet?.hazard || feet.kind === "water") && this.#air < 300)
       this.#air = Math.min(300, this.#air + 10);
     if (this.#health > 0 && this.#threatFree())
       this.#lastSafePosition = { ...this.#position };
+  }
+
+  /**
+   * A body in deep water that is not swimming up sinks, a cell every ten
+   * ticks, as a Mineflayer body does once jump is released (ADR 0021's
+   * canonical case: air restored, and lost again). Only a body already in
+   * water is affected.
+   */
+  #stepBuoyancy(): void {
+    if (this.#ascending || this.#tick % 10 !== 0) return;
+    const feet = definitionOf(this.#nameAt(this.#position));
+    if (feet.kind !== "water") return;
+    const below = { ...this.#position, y: this.#position.y - 1 };
+    const under = definitionOf(this.#nameAt(below));
+    if (under.solid || under.kind !== "water") return;
+    this.#invalidate();
+    this.#position = below;
   }
 
   #threatFree(): boolean {
@@ -397,11 +609,13 @@ export class FixtureWorld implements Embodiment {
 
   #buildSnapshot(): WorldSnapshot {
     const inventory = this.inventory();
-    const resources = this.findBlocks({
-      kinds: ["wood", "stone", "coal_ore", "plant_food", "leaves"],
-      maxDistance: 48,
-      limit: 64,
-    });
+    // The same category-balanced search the Minecraft body runs, so a skill
+    // never sees a richer or poorer world here than it will in Minecraft.
+    const resources = gatherResources(
+      (kinds, maxDistance, limit) =>
+        this.findBlocks({ kinds, maxDistance, limit }),
+      this.#position,
+    );
     const hazards = this.findBlocks({
       kinds: ["lava", "fire", "water", "cactus"],
       maxDistance: 16,
@@ -416,6 +630,8 @@ export class FixtureWorld implements Embodiment {
       lightLevel:
         (this.definition.timeOfDay + this.#tick) % 24000 < 12000 ? 15 : 4,
       position: { ...this.#position },
+      yaw: this.#yaw,
+      pitch: this.#pitch,
       health: this.#health,
       food: this.#food,
       saturation: this.#saturation,
@@ -442,18 +658,47 @@ export class FixtureWorld implements Embodiment {
       resources,
       hazards,
       stuck: false,
+      diggableGround: this.#diggableGround(),
       lastSafePosition: this.#lastSafePosition,
       connected: this.#connected,
+      recentlyDamaged:
+        this.#lastDamageTick !== null &&
+        this.#tick - this.#lastDamageTick <= DAMAGE_MEMORY_TICKS,
+      lastDamageTick: this.#lastDamageTick,
     };
+  }
+
+  /** Mirrors the adapter: solid diggable ground beside Person. */
+  #diggableGround(): boolean {
+    const diggable = new Set(["dirt", "grass", "stone", "cobblestone"]);
+    const here = this.#position;
+    for (const [dx, dz] of [
+      [1, 0],
+      [-1, 0],
+      [0, 1],
+      [0, -1],
+    ] as [number, number][])
+      for (const dy of [0, 1]) {
+        const block = this.blockAt({
+          x: here.x + dx,
+          y: here.y + dy,
+          z: here.z + dz,
+        });
+        if (block && block.solid && diggable.has(block.kind)) return true;
+      }
+    return false;
   }
 
   #view(entity: FixtureEntityState): EntityView {
     return {
       entityId: entity.entityId,
       name: entity.name,
+      username: entity.username,
+      uuid: entity.uuid,
       position: { ...entity.position },
       distance: distance(this.#position, entity.position),
       hostile: entity.hostile,
+      neutral: entity.neutral,
       passive: entity.passive,
       player: entity.player,
       villager: entity.villager,
@@ -478,6 +723,32 @@ export class FixtureWorld implements Embodiment {
 
   #requireConnection(): void {
     if (!this.#connected) throw new DisconnectedError();
+  }
+
+  /** Whether the body's head is under water. */
+  #submerged(): boolean {
+    return (
+      definitionOf(this.#nameAt({ ...this.#position, y: this.#position.y + 1 }))
+        .kind === "water"
+    );
+  }
+
+  /**
+   * A position a submerged body can swim into: nothing solid at feet or head,
+   * water at one of them and no other hazard, and permitted. Only a body
+   * already under water swims, so paths on land are unchanged (ADR 0019).
+   */
+  #swimmable(position: Position): boolean {
+    const feet = definitionOf(this.#nameAt(position));
+    const head = definitionOf(this.#nameAt({ ...position, y: position.y + 1 }));
+    if (feet.solid || head.solid) return false;
+    if (feet.kind !== "water" && head.kind !== "water") return false;
+    if (
+      (feet.hazard && feet.kind !== "water") ||
+      (head.hazard && head.kind !== "water")
+    )
+      return false;
+    return this.#guard ? this.#guard.canEnter(position) : true;
   }
 
   /** A position Person can stand in: clear feet and head, solid floor, permitted. */
@@ -514,7 +785,14 @@ export class FixtureWorld implements Embodiment {
     const frontier: { key: string; estimate: number }[] = [
       { key: startKey, estimate: distance(start, target) },
     ];
+    // A body in water swims, head under or at the surface; on land it walks.
+    const swimming =
+      this.#submerged() ||
+      definitionOf(this.#nameAt(this.#position)).kind === "water";
+    const passable = (position: Position): boolean =>
+      this.#walkable(position) || (swimming && this.#swimmable(position));
     const steps: [number, number][] = [
+      ...(swimming ? [[0, 0] as [number, number]] : []),
       [1, 0],
       [-1, 0],
       [0, 1],
@@ -565,7 +843,8 @@ export class FixtureWorld implements Embodiment {
           const nextCost = walked + 1;
           if ((cost.get(key) ?? Number.POSITIVE_INFINITY) <= nextCost) continue;
           if (distance(next, target) > 160) continue;
-          if (!this.#walkable(next)) continue;
+          if ((dx !== 0 || dz !== 0 || dy !== 0) && !passable(next)) continue;
+          if (dx === 0 && dz === 0 && dy === 0) continue;
           cost.set(key, nextCost);
           cameFrom.set(key, currentKey);
           positions.set(key, next);
@@ -574,6 +853,83 @@ export class FixtureWorld implements Embodiment {
         }
     }
     return null;
+  }
+
+  /**
+   * Turns to look at a position, as `bot.lookAt` does on the Minecraft body.
+   *
+   * Inverts Mineflayer's view-direction convention,
+   * `(-sin(yaw)cos(pitch), sin(pitch), -cos(yaw)cos(pitch))`, so the fixture
+   * and the real client agree about what "facing" means.
+   */
+  face(target: Position): void {
+    const dx = target.x - this.#position.x;
+    const dy = target.y - this.#position.y;
+    const dz = target.z - this.#position.z;
+    const flat = Math.hypot(dx, dz);
+    if (flat === 0 && dy === 0) return;
+    this.#yaw = Math.atan2(-dx, -dz);
+    this.#pitch = Math.atan2(dy, flat);
+    this.#invalidate();
+  }
+
+  /**
+   * One bounded step of deliberate gaze.
+   *
+   * The same semantic contract the Minecraft body implements, so a test that
+   * proves Person can look round a corner here is proving the shape of the
+   * thing that runs live, not a fixture convenience.
+   */
+  async look(direction: GazeDirection): Promise<void> {
+    this.#requireConnection();
+    const next = stepGaze({ yaw: this.#yaw, pitch: this.#pitch }, direction);
+    this.#yaw = next.yaw;
+    this.#pitch = next.pitch;
+    // Turning your head takes a moment, and a survey is several of them.
+    this.#advance(2);
+  }
+
+  /**
+   * Moves Person's body without walking, for tests of what Person feels when
+   * something other than its own legs moves it: a push, a current, a server
+   * correction, a teleport.
+   */
+  teleport(position: Position): void {
+    this.#position = { ...position };
+    this.#invalidate();
+  }
+
+  /** Lets world time pass without Person doing anything. */
+  pass(ticks: number): void {
+    this.#advance(ticks);
+  }
+
+  /** Sets facing directly, for tests that need Person looking nowhere useful. */
+  turn(yaw: number, pitch = 0): void {
+    this.#yaw = yaw;
+    this.#pitch = pitch;
+    this.#invalidate();
+  }
+
+  /** Swims straight up, one cell per stroke, while the head is under water. */
+  async ascend(options: { maxTicks: number }): Promise<void> {
+    this.#requireConnection();
+    let spent = 0;
+    this.#ascending = true;
+    try {
+      while (this.#submerged() && spent < options.maxTicks) {
+        const up = { ...this.#position, y: this.#position.y + 1 };
+        if (!this.#swimmable(up) && !this.#walkable(up)) return;
+        this.#position = up;
+        this.#advance(4);
+        spent += 4;
+        if (this.#health <= 0)
+          throw new EmbodimentError("death", "Died while swimming");
+        if (!this.#connected) throw new DisconnectedError();
+      }
+    } finally {
+      this.#ascending = false;
+    }
   }
 
   async moveTo(position: Position, options: MoveOptions = {}): Promise<void> {
@@ -590,6 +946,9 @@ export class FixtureWorld implements Embodiment {
     let spent = 0;
     for (const step of route) {
       this.#assertEnter(step);
+      // A body faces where it is going. Perception depends on facing, so the
+      // fixture has to turn for the same reasons the Minecraft one does.
+      this.face(step);
       this.#position = step;
       this.#advance(4);
       spent += 4;
@@ -621,7 +980,19 @@ export class FixtureWorld implements Embodiment {
     this.#setBlock(position, "air");
     this.#owned.delete(positionKey(position));
     this.#containers.delete(positionKey(position));
-    const drops = definition.drops.map((drop) => ({ ...drop }));
+    const barren = (this.definition.hiddenRules ?? []).some(
+      (rule) =>
+        rule.blocks.includes(name) &&
+        ((rule.kind === "barren_while_weather" &&
+          rule.weather === this.#weather) ||
+          (rule.kind === "barren_until_rested" &&
+            this.#unrested &&
+            (!this.#restHelps || this.#waited < (rule.restTicks ?? 100))) ||
+          (rule.kind === "barren_until_withdrawn" &&
+            this.#unrested &&
+            (!this.#withdrawalHelps || !this.#withdrewSince))),
+    );
+    const drops = barren ? [] : definition.drops.map((drop) => ({ ...drop }));
     for (const drop of drops) this.#give(drop.name, drop.count);
     this.#advance(12);
     return drops;
@@ -840,13 +1211,20 @@ export class FixtureWorld implements Embodiment {
       this.#give(item.name, available);
       moved.push({ name: item.name, count: available });
     }
+    if (moved.length > 0 && this.#owned.has(positionKey(position)))
+      this.#withdrewSince = true;
     this.#advance(10);
     return moved;
   }
 
   async waitTicks(ticks: number): Promise<void> {
     this.#requireConnection();
-    this.#advance(ticks);
+    this.#resting = true;
+    try {
+      this.#advance(ticks);
+    } finally {
+      this.#resting = false;
+    }
   }
 
   registerOwnedStorage(position: Position, storageId: string): void {
@@ -868,9 +1246,12 @@ export class FixtureWorld implements Embodiment {
     const entity: FixtureEntityState = {
       entityId: this.#nextEntityId++,
       name,
+      username: options.username ?? null,
+      uuid: options.uuid ?? null,
       position: { ...position },
       health: options.health ?? PASSIVE_ANIMALS[name]?.health ?? 20,
       hostile: HOSTILES.has(name),
+      neutral: options.neutral ?? NEUTRALS.has(name),
       passive,
       player: options.player ?? name === "player",
       villager: options.villager ?? name === "villager",

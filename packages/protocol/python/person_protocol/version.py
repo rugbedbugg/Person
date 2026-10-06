@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from typing import Final
 
-PROTOCOL_VERSION: Final = "shroud-learning-v2"
+#: 3: Observation became a core envelope around an environment-owned payload,
+#: and trainingContext became `experience` (ADR 0025).
+PROTOCOL_VERSION: Final = "person-v3"
 
 NODE_MESSAGE_TYPES: Final[tuple[str, ...]] = (
     "SessionHello",
@@ -14,6 +16,8 @@ NODE_MESSAGE_TYPES: Final[tuple[str, ...]] = (
     "SkillOutcome",
     "EmergencyEvent",
     "EpisodeEvent",
+    "WorldAvailability",
+    "LifeEvent",
 )
 
 COGNITION_MESSAGE_TYPES: Final[tuple[str, ...]] = (
@@ -33,6 +37,8 @@ SCHEMA_FILES: Final[dict[str, str]] = {
     "SkillOutcome": "skill-outcome.schema.json",
     "EmergencyEvent": "emergency-event.schema.json",
     "EpisodeEvent": "episode-event.schema.json",
+    "WorldAvailability": "world-availability.schema.json",
+    "LifeEvent": "life-event.schema.json",
     "CognitionReady": "cognition-ready.schema.json",
     "GoalDecision": "goal-decision.schema.json",
     "PolicyDecision": "policy-decision.schema.json",
@@ -52,9 +58,6 @@ TERMINAL_STATUSES: Final[tuple[str, ...]] = (
 )
 
 LEARNING_MODES: Final[tuple[str, ...]] = ("off", "shadow", "supervised")
-TRAINING_CONTEXTS: Final[tuple[str, ...]] = (
-    "fixture",
-    "minecraft_peaceful",
-    "minecraft_normal",
-    "replay",
-)
+#: The epistemic standing of an experience stream (ADR 0025). Environment,
+#: embodiment and variant names belong to environment profiles.
+EXPERIENCE_CONTEXTS: Final[tuple[str, ...]] = ("lived", "replay")

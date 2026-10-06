@@ -24,35 +24,53 @@ export interface ParameterSpec {
   description?: string;
 }
 
-export type SkillCategory =
-  "emergency" | "food" | "resources" | "crafting" | "shelter" | "storage";
+/**
+ * An environment's skill vocabulary (its `skills/vocabulary.json`, ADR 0025):
+ * what its specs may name as a category, a permission or a completion
+ * evidence kind, the bounds on cost limits, and how each planning fact may be
+ * used. The generic registry checks every spec against it.
+ */
+export interface SkillVocabulary {
+  description: string;
+  categories: string[];
+  permissions: string[];
+  completionEvidence: string[];
+  limits: { maxTicks: number; maxDistance: number; minHealth: number };
+  factClasses: {
+    /** Only current perception establishes these; no skill produces them. */
+    evidence: string[];
+    tracked: string[];
+    evaluable: string[];
+    unobservable: string[];
+    action: string[];
+  };
+  failures: { notAttempted: string[] };
+  planning?: { plannableEmergency: string[]; recovery: string[] };
+  unremarkable?: string[];
+  roles?: Record<string, string>;
+}
 
-export type Permission =
-  | "harvest_resource"
-  | "mine_resource"
-  | "build"
-  | "hunt_passive_animal"
-  | "place_owned_storage"
-  | "deposit_owned_storage"
-  | "withdraw_owned_storage"
-  | "withdraw_existing_container"
-  | "emergency_dig"
-  | "craft"
-  | "consume";
-
-export interface SkillSpec {
+/**
+ * One bounded capability. Generic: the category, permission and evidence
+ * vocabularies are type parameters an environment fills in.
+ */
+export interface SkillSpec<
+  Category extends string = string,
+  RequiredPermission extends string = string,
+  Evidence extends string = string,
+> {
   id: string;
   version: number;
-  category: SkillCategory;
+  category: Category;
   summary: string;
   parameters: Record<string, ParameterSpec>;
   preconditions: Condition[];
   expectedEffects: Effect[];
   possibleFailures: string[];
-  requiredPermissions: Permission[];
+  requiredPermissions: RequiredPermission[];
   costLimits: { maxTicks: number; maxDistance: number; minHealth: number };
   interruptionPolicy: "preemptible" | "atomic_step" | "uninterruptible";
-  completionEvidence: string[];
+  completionEvidence: Evidence[];
   risk: number;
   emergency: boolean;
 }

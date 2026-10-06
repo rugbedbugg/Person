@@ -18,6 +18,7 @@ from jsonschema.exceptions import ValidationError
 from referencing import Registry, Resource
 
 from .assets import package_asset_directory
+from .environments import EnvironmentManifest, discovered
 from .version import MESSAGE_TYPES, PROTOCOL_VERSION, SCHEMA_FILES
 
 
@@ -40,13 +41,37 @@ def _describe(error: ValidationError) -> str:
 
 
 class ProtocolValidator:
-    def __init__(self, directory: Path | None = None) -> None:
+    """The core contract, plus the payload and vocabulary of each environment profile.
+
+    An Observation is checked twice: its envelope against the core schema, and
+    its payload against the schema of the environment its `experience` names.
+    An environment that is not installed cannot be observed in.
+    """
+
+    def __init__(
+        self,
+        directory: Path | None = None,
+        environments: Iterable[EnvironmentManifest] | None = None,
+    ) -> None:
         self.directory = directory or schema_directory()
+        manifests = tuple(discovered().values() if environments is None else environments)
         resources = []
         for path in sorted(self.directory.glob("*.schema.json")):
             schema = json.loads(path.read_text(encoding="utf-8"))
             resources.append((path.name, Resource.from_contents(schema)))
+            # Environment schemas refer to the core definitions by their id.
+            resources.append((str(schema["$id"]), Resource.from_contents(schema)))
         registry = Registry().with_resources(resources)
+        self._payloads: dict[str, Draft202012Validator] = {
+            manifest.kind: Draft202012Validator(
+                manifest.payload_schema,
+                registry=registry,
+                format_checker=Draft202012Validator.FORMAT_CHECKER,
+            )
+            for manifest in manifests
+        }
+        self._triggers = frozenset().union(*(m.emergency_triggers for m in manifests))
+        self._actions = frozenset().union(*(m.emergency_actions for m in manifests))
         self._validators: dict[str, Draft202012Validator] = {}
         for message_type in MESSAGE_TYPES:
             filename = SCHEMA_FILES[message_type]
@@ -79,7 +104,27 @@ class ProtocolValidator:
         )
         if errors:
             return False, [_describe(error) for error in errors]
-        return True, []
+        diagnostics = self._environment_diagnostics(message_type, message)
+        return (not diagnostics), diagnostics
+
+    def _environment_diagnostics(self, message_type: str, message: dict[str, Any]) -> list[str]:
+        if message_type == "Observation":
+            kind = message["experience"]["environmentKind"]
+            payload = self._payloads.get(kind)
+            if payload is None:
+                return [f"/experience/environmentKind no installed environment {json.dumps(kind)}"]
+            errors = sorted(
+                payload.iter_errors(message["payload"]), key=lambda e: list(e.absolute_path)
+            )
+            return [f"/payload{_describe(error)}" for error in errors]
+        if message_type == "EmergencyEvent":
+            problems = []
+            if message["trigger"] not in self._triggers:
+                problems.append(f"/trigger {json.dumps(message['trigger'])} is not an emergency")
+            if message["action"] not in self._actions:
+                problems.append(f"/action {json.dumps(message['action'])} is not an emergency")
+            return problems
+        return []
 
     def assert_valid(self, message: Any) -> dict[str, Any]:
         valid, diagnostics = self.validate(message)

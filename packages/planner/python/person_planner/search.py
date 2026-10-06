@@ -29,9 +29,12 @@ BRANCH_LIMIT = 3
 PLANS_PER_OPTION = 3
 PLANS_PER_CALL = 24
 
-#: Emergency reflexes belong to the runtime. Two of them are also ordinary
-#: intentions ("go home", "eat"), so those stay available to the planner.
-PLANNABLE_EMERGENCY_SKILLS = frozenset({"return_home", "eat_to_target"})
+#: Emergency reflexes belong to the runtime. Some are also ordinary intentions
+#: ("go home", "eat"), so those stay available to the planner; and a caller
+#: may make the environment's recovery skills plannable for one goal (a rest
+#: Person decided on, ADR 0021, C4.1), while idling stays the loop's own
+#: fallback. Which skills those are is the environment's skill vocabulary
+#: (`planning.plannableEmergency`, `planning.recovery`, ADR 0025).
 
 
 @dataclass(frozen=True, slots=True)
@@ -97,9 +100,28 @@ def _apply(
     return successor
 
 
-def step_cost(spec: SkillSpec) -> float:
-    """Cheap, safe and quick first. Risk dominates convenience."""
-    return 1.0 + spec.risk * 4.0 + spec.max_ticks / 4000.0
+def step_cost(spec: SkillSpec, parameters: Mapping[str, ParameterValue] | None = None) -> float:
+    """Cheap, safe and quick first. Risk dominates convenience.
+
+    The magnitude of a scaling parameter is part of the cost: gathering
+    thirty-two logs really does take longer than gathering eight. Without this
+    every parameterisation of the same plan ties, and the planner offers four
+    identical strategies that differ only in how absurd the number is, which
+    also splits the evidence for one strategy across four routine identities.
+    """
+    cost = 1.0 + spec.risk * 4.0 + spec.max_ticks / 4000.0
+    if not parameters:
+        return cost
+    defaults = spec.default_parameters()
+    for name in sorted({e.scales_with for e in spec.expected_effects if e.scales_with}):
+        requested = parameters.get(name)
+        default = defaults.get(name)
+        if not isinstance(requested, int | float) or isinstance(requested, bool):
+            continue
+        if not isinstance(default, int | float) or isinstance(default, bool) or default <= 0:
+            continue
+        cost += 0.5 * max(0.0, float(requested) / float(default) - 1.0)
+    return cost
 
 
 def relevant_skills(goal: Sequence[Condition], specs: Sequence[SkillSpec]) -> list[SkillSpec]:
@@ -172,7 +194,7 @@ def _feasible(
 
 
 def _plan_cost(steps: Sequence[PlanStep], registry: SkillRegistry) -> float:
-    return sum(step_cost(registry.get(step.skill_id)) for step in steps)
+    return sum(step_cost(registry.get(step.skill_id), step.parameter_map) for step in steps)
 
 
 def _cheapest_first(
@@ -212,7 +234,7 @@ def _regress(
             options.append(
                 (
                     settles,
-                    step_cost(spec),
+                    step_cost(spec, parameters),
                     spec.id,
                     str(sorted(parameters.items())),
                     spec,
@@ -283,6 +305,7 @@ def plan_for(
     limit: int = 6,
     max_depth: int = MAX_DEPTH,
     allowed_skills: Sequence[str] | None = None,
+    recovery: Sequence[str] = (),
 ) -> list[Plan]:
     """Candidate plans that reach the goal, cheapest first.
 
@@ -293,7 +316,9 @@ def plan_for(
     available = [
         registry.get(skill_id)
         for skill_id in (allowed_skills or registry.ids)
-        if not registry.get(skill_id).emergency or skill_id in PLANNABLE_EMERGENCY_SKILLS
+        if not registry.get(skill_id).emergency
+        or skill_id in registry.vocabulary.plannable_emergency
+        or (skill_id in recovery and skill_id in registry.vocabulary.recovery_skills)
     ]
     specs = relevant_skills(goal, available) or available
     start = dict(state)
@@ -308,7 +333,7 @@ def plan_for(
             continue
         if not _is_minimal(steps, start, goal, registry):
             continue
-        cost = sum(step_cost(registry.get(step.skill_id)) for step in steps)
+        cost = sum(step_cost(registry.get(step.skill_id), step.parameter_map) for step in steps)
         risk = sum(registry.get(step.skill_id).risk for step in steps)
         ticks = sum(registry.get(step.skill_id).max_ticks for step in steps)
         scored.append(Plan(steps=steps, cost=cost, risk=risk, ticks=ticks))

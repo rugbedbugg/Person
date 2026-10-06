@@ -25,6 +25,7 @@ class LearningSummary:
         self.overrides: Counter[str] = Counter()
         self.emergencies: Counter[str] = Counter()
         self.outcomes: list[dict[str, Any]] = []
+        self.predictions: list[dict[str, Any]] = []
 
     def note_selection(self, choice: PolicyChoice) -> None:
         self.selections.append(
@@ -61,6 +62,27 @@ class LearningSummary:
             }
         )
 
+    def note_prediction(self, payload: dict[str, Any]) -> None:
+        self.predictions.append(payload)
+
+    @property
+    def prediction_severities(self) -> dict[str, int]:
+        counts: Counter[str] = Counter()
+        for record in self.predictions:
+            counts[str(record.get("severity", "unobserved"))] += 1
+        return dict(counts)
+
+    @property
+    def worst_predictions(self) -> list[dict[str, Any]]:
+        """The misses a reader should look at first."""
+        ranked = sorted(
+            self.predictions,
+            key=lambda record: {"inverted": 0, "major": 1, "unobserved": 2, "minor": 3}.get(
+                str(record.get("severity")), 4
+            ),
+        )
+        return ranked[:10]
+
     @property
     def fallback_rate(self) -> float:
         if not self.selections:
@@ -75,7 +97,7 @@ class LearningSummary:
         statistics: RoutineStatistics,
         episode_id: str,
         learning_mode: str,
-        training_context: str,
+        experience: str,
         policy_revision: int,
         goals: GoalStack,
         restore_notes: list[str],
@@ -84,12 +106,17 @@ class LearningSummary:
             "schema_version": 1,
             "episode_id": episode_id,
             "learning_mode": learning_mode,
-            "training_context": training_context,
+            "experience": experience,
             "policy_revision": policy_revision,
             "restore_notes": restore_notes,
             "selections": self.selections,
             "fallback_rate": round(self.fallback_rate, 6),
             "safety_overrides": dict(self.overrides),
+            "prediction_error": {
+                "recorded": len(self.predictions),
+                "severities": self.prediction_severities,
+                "worst": self.worst_predictions,
+            },
             "emergencies": dict(self.emergencies),
             "outcomes": self.outcomes,
             "goal_history": [
@@ -99,7 +126,7 @@ class LearningSummary:
             "goal_resumptions": goals.resume_counts(),
             "routine_statistics": [
                 {
-                    "training_context": key[0],
+                    "experience": key[0],
                     "context_id": key[1],
                     "routine_id": key[2],
                     "attempts": counts.attempts,
@@ -112,7 +139,7 @@ class LearningSummary:
             ],
             "skill_statistics": [
                 {
-                    "training_context": key[0],
+                    "experience": key[0],
                     "context_id": key[1],
                     "skill_id": key[2],
                     "attempts": counts.attempts,

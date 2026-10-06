@@ -1,9 +1,14 @@
-import { distance } from "#config";
 import type { WorldSnapshot } from "../embodiment/types.ts";
 import type { PermissionGate } from "./permissions.ts";
+import { distance } from "#minecraft";
 
 export type EmergencyAction =
-  "flee" | "dig_in" | "eat_to_target" | "return_home" | "cancel_skill";
+  | "flee"
+  | "dig_in"
+  | "eat_to_target"
+  | "return_home"
+  | "restore_air"
+  | "cancel_skill";
 
 export interface EmergencyAssessment {
   level: "L0" | "L1";
@@ -84,8 +89,23 @@ export class SafetyKernel {
     this.thresholds = thresholds;
   }
 
+  /**
+   * Everything that counts as a threat right now.
+   *
+   * Hostiles always count. Neutrals, which are most of what actually kills an
+   * unarmoured player in practice, count only once Person has taken damage:
+   * treating a llama as a standing emergency would leave Person unable to do
+   * anything in half the biomes in the game.
+   */
+  threats(snapshot: WorldSnapshot): WorldSnapshot["entities"] {
+    return snapshot.entities.filter(
+      (entity) =>
+        entity.hostile || (entity.neutral && snapshot.recentlyDamaged),
+    );
+  }
+
   threatState(snapshot: WorldSnapshot): ThreatState {
-    const hostiles = snapshot.entities.filter((entity) => entity.hostile);
+    const hostiles = this.threats(snapshot);
     if (
       hostiles.some(
         (e) => e.distance <= this.thresholds.immediateThreatDistance,
@@ -139,11 +159,13 @@ export class SafetyKernel {
         reasonCodes: ["standing_in_hazard", `hazard_${standingHazard.kind}`],
       };
 
+    // Air deprivation restores air (ADR 0019). Fleeing moves sideways, away
+    // from hostiles, and a body under water that only moves sideways drowns.
     if (snapshot.air <= t.lowAir)
       return {
         level: "L0",
         trigger: "suffocation",
-        action: "flee",
+        action: "restore_air",
         reasonCodes: ["air_below_threshold"],
       };
 
@@ -155,7 +177,7 @@ export class SafetyKernel {
         reasonCodes: ["position_outside_permitted_territory"],
       };
 
-    const hostiles = snapshot.entities.filter((entity) => entity.hostile);
+    const hostiles = this.threats(snapshot);
     const immediate = hostiles.filter(
       (e) => e.distance <= t.immediateThreatDistance,
     );
@@ -170,8 +192,14 @@ export class SafetyKernel {
       return {
         level: "L1",
         trigger: "hostile_swarm",
-        action: "dig_in",
-        reasonCodes: [`hostiles_${immediate.length}`],
+        // Digging in only helps where there is something to dig into. On open
+        // ground the refuge cannot be built, and attempting it spends the one
+        // chance Person had to get away.
+        action: snapshot.diggableGround ? "dig_in" : "flee",
+        reasonCodes: [
+          `hostiles_${immediate.length}`,
+          snapshot.diggableGround ? "refuge_available" : "no_refuge_ground",
+        ],
       };
     if (immediate.length > 0)
       return {

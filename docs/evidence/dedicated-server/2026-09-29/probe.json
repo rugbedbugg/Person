@@ -1,0 +1,89 @@
+{
+  "probe": "dedicated-checkpoint",
+  "recordedAt": "2026-09-29T11:23:21.237Z",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 25565,
+    "version": "1.16.1"
+  },
+  "worldId": "person-dedicated-1",
+  "trainingContext": "minecraft_normal",
+  "operatorActions": [
+    "kill @e[tag=person_probe]",
+    "data get entity PersonAda Rotation",
+    "data get entity PersonAda Rotation",
+    "data get entity PersonAda Rotation",
+    "summon zombie -184.5 71 180.5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Tags:[\"person_probe\"]}",
+    "kill @e[tag=person_probe]",
+    "summon zombie -184.5 71 170.5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Tags:[\"person_probe\"]}",
+    "kill @e[tag=person_probe]",
+    "fill -186 71 180 -184 74 182 stone hollow",
+    "summon zombie -184.5 72 181.5 {NoAI:1b,Silent:1b,PersistenceRequired:1b,Tags:[\"person_probe\"]}",
+    "kill @e[tag=person_probe]",
+    "fill -186 71 180 -184 74 182 air",
+    "kill @e[tag=person_probe]"
+  ],
+  "results": {
+    "gaze": {
+      "start": [
+        0,
+        0
+      ],
+      "turned": [
+        -90,
+        0
+      ],
+      "back": [
+        0,
+        0
+      ],
+      "swingDegrees": 90
+    },
+    "threatInView": {
+      "valid": true,
+      "observationVersion": 7,
+      "perceivedHostiles": [
+        {
+          "bearing": "ahead",
+          "elevation": "level",
+          "rangeBand": "near",
+          "distance": 5,
+          "detail": "central",
+          "name": "zombie",
+          "named": false,
+          "tamed": false,
+          "protectedTarget": true
+        }
+      ],
+      "kernelThreat": "immediate",
+      "hostilesInSnapshot": 1,
+      "leaks": []
+    },
+    "threatBehind": {
+      "valid": true,
+      "observationVersion": 7,
+      "perceivedHostiles": [],
+      "kernelThreat": "immediate",
+      "hostilesInSnapshot": 1,
+      "leaks": []
+    },
+    "threatOccluded": {
+      "valid": true,
+      "observationVersion": 7,
+      "perceivedHostiles": [],
+      "kernelThreat": "immediate",
+      "hostilesInSnapshot": 1,
+      "leaks": []
+    },
+    "afterCleanup": {
+      "valid": true,
+      "observationVersion": 7,
+      "perceivedHostiles": [],
+      "kernelThreat": "none",
+      "hostilesInSnapshot": 0,
+      "leaks": []
+    }
+  },
+  "failures": [],
+  "passed": true
+}

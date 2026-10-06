@@ -1,6 +1,6 @@
 # Protocol
 
-Version: `shroud-learning-v2`
+Version: `person-v3` (before it, `shroud-learning-v2`; `migrations/0002-person-v2-to-person-v3.md`)
 
 Every message carries `protocolVersion`, `messageId`, `personId`, `sessionId`,
 `worldId`, `tick`, `timestamp` and `type`. That set is what makes a recorded
@@ -22,15 +22,17 @@ schema change that only one side understands fails the build.
 
 Sent by the runtime:
 
-| Type                 | Meaning                                                                                          |
-| -------------------- | ------------------------------------------------------------------------------------------------ |
-| `SessionHello`       | Session facts: learning mode, training context, evidence directory, seed, skill library revision |
-| `Observation`        | Normalised semantic world state                                                                  |
-| `ValidationDecision` | The authoritative verdict on a proposal                                                          |
-| `SkillStarted`       | Execution has begun, with the starting vitals and inventory                                      |
-| `SkillOutcome`       | What actually happened                                                                           |
-| `EmergencyEvent`     | The kernel acted at L0 or L1                                                                     |
-| `EpisodeEvent`       | Episode started or ended                                                                         |
+| Type                 | Meaning                                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------------------- |
+| `SessionHello`       | Session facts: learning mode, experience key, evidence directory, seed, skill library revision          |
+| `Observation`        | An envelope (experience, self-motion, cognition echo, previous outcome) around the environment payload  |
+| `ValidationDecision` | The authoritative verdict on a proposal                                                                 |
+| `SkillStarted`       | Execution has begun, with the starting vitals and inventory                                             |
+| `SkillOutcome`       | What actually happened                                                                                  |
+| `EmergencyEvent`     | The kernel acted at L0 or L1                                                                            |
+| `EpisodeEvent`       | Episode started or ended                                                                                |
+| `LifeEvent`          | The body died (with whether that is terminal) or was respawned; no cause, place or inventory (ADR 0017) |
+| `WorldAvailability`  | Whether the world is available to the body now: an operational state, not a verdict (ADR 0017)          |
 
 Sent by cognition:
 
@@ -42,6 +44,30 @@ Sent by cognition:
 | `SkillInvocation` | The single physical request cognition can make                   |
 
 The channel drops anything from cognition that is not in the second list.
+
+## Observation: core envelope, environment payload
+
+Observation version 9 (ADR 0025). The core schema
+(`packages/protocol/schemas/observation.schema.json`) owns only the envelope:
+
+| Field                | Meaning                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------- |
+| `observationVersion` | The body contract the observation follows                                             |
+| `experience`         | `{context, environmentKind, embodimentKind, environmentVariant}`; `lived` or `replay` |
+| `selfMotion`         | Coarse relative self-motion since the previous observation (ADR 0008)                 |
+| `cognition`          | What cognition last said it was doing, echoed back                                    |
+| `previousOutcome`    | The last skill outcome, or null                                                       |
+| `payload`            | The environment's own percepts, validated against the schema its manifest names       |
+
+Minecraft's payload (`environments/minecraft/schemas/observation-payload.schema.json`)
+carries `vitals`, `environment`, `inventory`, `permissions`, `affordances`,
+`nearby`, `home` and `navigation`. Both runtimes validate the envelope, then
+the payload against the profile named by `experience.environmentKind`.
+Cognition crosses this boundary once per observation, into a perceptual state
+(ADR 0026); nothing downstream reads the payload again.
+
+`EmergencyEvent` trigger and action vocabularies, likewise, come from the
+environment manifest, not from the core schema.
 
 ## SkillInvocation
 

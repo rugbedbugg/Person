@@ -1,0 +1,6107 @@
+{
+  "plan": {
+    "name": "r2-dev-d-setback",
+    "description": "R2 development matrix (ADR 0014) on a development world: affect off (P0), active with R1.5 appraisal (A15), and R2 appraisal record-only (R2rec) and active (R2act). Development only: parameters may be chosen from these runs; the held-out suite is not run until they are frozen.",
+    "split": "development",
+    "benchmarkClass": "D",
+    "world": "../../../fixtures/worlds/benchmarks/development/d-setback.json",
+    "config": "../../../examples/fixture.toml",
+    "seeds": [
+      1,
+      2,
+      3,
+      4,
+      5
+    ],
+    "conditions": [
+      {
+        "id": "P0",
+        "affectMode": "off"
+      },
+      {
+        "id": "A15",
+        "affectMode": "active",
+        "interoception": "off"
+      },
+      {
+        "id": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on"
+      },
+      {
+        "id": "R2act",
+        "affectMode": "active",
+        "interoception": "on"
+      }
+    ],
+    "maxDecisions": 5000,
+    "learningMode": "off",
+    "horizons": [
+      {
+        "id": "short",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 6000
+      },
+      {
+        "id": "medium",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 24000
+      },
+      {
+        "id": "long",
+        "maxDecisions": 5000,
+        "maxExperiencedTicks": 72000
+      }
+    ]
+  },
+  "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+  "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+  "treeClean": true,
+  "affectBounds": {
+    "bias_limit": 25,
+    "half_lives": {
+      "control": 12000,
+      "unease": 1200,
+      "valence": 6000
+    },
+    "ranges": {
+      "control": [
+        -1,
+        1
+      ],
+      "unease": [
+        0,
+        1
+      ],
+      "valence": [
+        -1,
+        1
+      ]
+    },
+    "swings": {
+      "fixed": {
+        "fixed": 0,
+        "outgoing": 25,
+        "protective": 12.5
+      },
+      "outgoing": {
+        "fixed": 25,
+        "outgoing": 0,
+        "protective": 37.5
+      },
+      "protective": {
+        "fixed": 25,
+        "outgoing": 50,
+        "protective": 0
+      }
+    },
+    "tolerance_range": [
+      0.5,
+      1.25
+    ]
+  },
+  "comparisons": [
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "R2rec"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "R2rec",
+        "R2act"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "R2act"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "P0",
+        "A15"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "short",
+      "between": [
+        "A15",
+        "R2act"
+      ],
+      "purpose": "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            51,
+            51
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "R2rec"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "R2rec",
+        "R2act"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "R2act"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "P0",
+        "A15"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "medium",
+      "between": [
+        "A15",
+        "R2act"
+      ],
+      "purpose": "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            81,
+            81
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "R2rec"
+      ],
+      "purpose": "negative control: affect that reaches no decision must change no decision",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "R2rec",
+        "R2act"
+      ],
+      "purpose": "the causal effect of letting the same affect reach decisions",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "R2act"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "P0",
+        "A15"
+      ],
+      "purpose": "the whole affect system",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    },
+    {
+      "horizon": "long",
+      "between": [
+        "A15",
+        "R2act"
+      ],
+      "purpose": "the interoceptive contribution to behaviour: R1.5 appraisal against R2",
+      "divergences": [
+        {
+          "seed": 1,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 2,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 3,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 4,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        },
+        {
+          "seed": 5,
+          "firstDifference": -1,
+          "lengths": [
+            161,
+            161
+          ]
+        }
+      ],
+      "divergentSeeds": 0
+    }
+  ],
+  "runs": [
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-short-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "d5a1888db44557f33da3aee88b00a77d57c740140ad1e683c37ab37e19fcc3d2",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-short-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "87f871797c7677d3bde9de47f9d15596aeda46e60438c6ffab8be15bcc82b9d0",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-short-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "110aee1629d865e6861e4eeb6929dc02f09e68ad2615a0a2c07138dccaeb1dca",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-short-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "608158370e2e82ea1dc36770541ff79df2d2247bb2f43b2640d78db77cf152ec",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-short-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "9af4813d7e0d76654b67b65471e402e4560eb02b17984c631e64ef8cbdde1bcc",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-medium-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "d072a2a96b8bea343fd3940ef2052eae99f718c60fb1f800df70ccb71282df30",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-medium-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "b0cc9e17ec10abf5ed4fc88cf7e951a02e21468ec07cd39a9774b5eea0d85c95",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-medium-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "49b77792fc3bc579b7d22008ccf8c5e65e2b098d213aeb8674b54d924e9c75df",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-medium-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "3d2eab6938db5620a2c79352296ea0a7e29f34a693548a5a2f1350ef27e2e149",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-medium-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "15b2b5d010388a547037690ebdfbeda14d81d58c3136fdb312c9c4bedb9fe345",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-long-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "121a9204a6798e30e4b3e7b4d2e46d4624728a8122520add71206da1ff7b8c47",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-long-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "d964760080c40a90b215b5a1e4188d6ad716fee1045c8f124f763ae8f974e3f4",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-long-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "ad620a9bda443a62a84b9c294c45edfbd140547bf98705e753d67e94673c9747",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-long-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "1ba8a0cbd76aeb14c7ba530d9a3eb62fe045b841de3432f6938f2a3b3f142f46",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "P0",
+        "affectMode": "off",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-p0-long-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "315fe51804e4dffb18d985a9eb9c12312821ee78e929510d6aa1e2108e392447",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/P0/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {},
+        "unease_input_by_trigger": {},
+        "valence_input_by_trigger": {},
+        "appraisal_triggers": {},
+        "appraisals_at_one_moment": {}
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-short-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "0ee6ce58db516f157838319c80c596dde00c0c77ea9e83a285180689938272d3",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-short-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "801527f24dae148a1dee0ce7bf19e8574d64d775b987852fed1994f73a3138a5",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-short-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "9ddf01367865db13ee2c933a1d01c04b2ecb9565d9195cac9d8e8b5adce45766",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-short-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "f3610b66d16e3142d61179a62e918eb921e3c5c9b80b75b8ed23ec69282702f7",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-short-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "beb2b00f7bb4581cd8cad47de7f9a0fb5d6a3f212ed1ca4c509e7b99042d4f6c",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-medium-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "67def94e06d784d6d1592806bfa276a6c240a3c3d39bec7cacd7689e016b8f00",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-medium-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "c1f46c4cdc2ff26335d6728af99d31f1ed7a10a3032dc9412be70b87a36ba42c",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-medium-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "ddf31ecf410ec2e93d2f9f835441a831239e9322c75af927d808b1207d9b6c3f",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-medium-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "1f8ba4c9d3d5510a73a576e3277292ab6ca02ffcf009037416b1000899bb53c2",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-medium-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "c20f346813182b5d174c55a6a7069cdd74d53808cb2381ae7416d562f5c099a5",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-long-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "50b74057b7358ac2b6c1e9e58afd6b86b2f3f79e58972ae4ca3d4602f5220f1d",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-long-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "465670018195c264237525d77304b85d599f3664e6b4c45df7217a1179a196e1",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-long-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "7759b2ee5113cb2bd257d76b2d01287f249b6bf992d12e374baba6c052ae7e53",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-long-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "3e065b46d436f72fd3735ff70040d0663ebf194a77c4ab3d728f0fe1f107d62d",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "A15",
+        "affectMode": "active",
+        "interoception": "off",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-a15-long-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "40dc2720fd1feecedeeef3c157c88b703aa1bef22bea22bc969e662df780596f",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/A15/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.4,
+          "goal_complete": 0.75,
+          "harm": -0.3,
+          "overridden": -0.7,
+          "perceived_threat": 0,
+          "project_abandoned": -0.16,
+          "project_progressed": 0.03,
+          "search_unfound": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "goal_blocked": 0,
+          "goal_complete": 0,
+          "harm": 0.1669,
+          "overridden": 0.1,
+          "perceived_threat": 0.7767,
+          "project_abandoned": 0,
+          "project_progressed": 0,
+          "search_unfound": 0
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.05,
+          "goal_blocked": -0.8,
+          "goal_complete": 1.2163,
+          "harm": -0.5,
+          "overridden": 0,
+          "perceived_threat": 0,
+          "project_abandoned": -0.24,
+          "project_progressed": 0.05,
+          "search_unfound": -0.3
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "goal_blocked_establish_storage": 3,
+          "goal_blocked_maintain_reserves": 1,
+          "goal_blocked_secure_food": 3,
+          "goal_blocked_survive_immediate": 1,
+          "goal_complete_secure_food": 13,
+          "goal_complete_secure_shelter": 1,
+          "goal_complete_survive_immediate": 1,
+          "harm": 5,
+          "overridden": 7,
+          "perceived_threat": 7,
+          "project_abandoned_improve_home": 1,
+          "project_abandoned_secure_food_supply": 1,
+          "project_progressed_improve_home": 1,
+          "search_unfound": 6
+        },
+        "appraisals_at_one_moment": {
+          "goal_blocked_establish_storage+goal_complete_secure_food": 1,
+          "goal_blocked_establish_storage+project_abandoned_improve_home": 1,
+          "goal_blocked_maintain_reserves+harm+overridden+perceived_threat": 1,
+          "goal_blocked_secure_food+project_abandoned_secure_food_supply": 1,
+          "goal_blocked_survive_immediate+overridden+perceived_threat": 1,
+          "goal_complete_secure_food+goal_complete_secure_shelter+project_progressed_improve_home": 1,
+          "goal_complete_secure_food+search_unfound": 2,
+          "goal_complete_survive_immediate+harm": 1,
+          "harm+overridden+perceived_threat": 3,
+          "overridden+perceived_threat": 2
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-short-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "b10f44a087fefbfbb41a7ff6a57bde2104b78435176b5453a5b4bcec2d990142",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-short-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "dc0d6f94929356d6478e2dc95ad159f8ef7ea9808c79bf59f39adcd3e51a7dde",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-short-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "cad95e9ccdbbba7f4ea326d0a3d0e2c2ce0ea31c614f461d78644b64f7d93051",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-short-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "25e4e9e86d45a1ca2cc2300868756cf3a4d86f76c4fe803e9697e4ec129b2438",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-short-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "4edf69f62e5c47dbce423bd19e8ab0087b7710f81c864dcbc1c2be4dc6493176",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-medium-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "f011eb8c5daa803fec80c30e09d9e91a69cb4a6c32742bb9feedffc68c28d99e",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-medium-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "d7274da8f3056b6e7844d49ea31e7a62b19d8f6d7fa34acef90ad13a0a81db4a",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-medium-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "44fc42a00d647fc07183ee0394f6543c795366fa264f74808f8ea29f86e176fc",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-medium-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "0344930219b373288f66eea77d5f4e1a33f7583a2593982be694fa9228109778",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-medium-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "995ede9bf22ce10ced1f6e6cd69910d4377ffd0f928f307645632cf8dac17f2b",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-long-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "282a7d093dc1054098bf0d1ea134e02837565b291e886987c5e15025a57d2033",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-long-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "deb7b6025376732ad66f9ca77a4d7ad69fcdfb531bf89212b15cbf468fb18a7c",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-long-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "df4a2023c3286b5d36a64b1f55fda704e94514536b9bc0daecbf75ec0bf4ef16",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-long-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "0559d4f47d0118cf098e81399fbbd426b594414805992011580e8bb54e796041",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2rec",
+        "affectMode": "record_only",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2rec-long-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "5fd70349f6f8bde4f37a3d8fdaf4cfc4c01e2d7800e3586e49d02357ac965118",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2rec/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-short-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "25742285fa0423656bca34b89196605e09155fa4f94a2286ad96c75abd0dffd6",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/short/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-short-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "34259b4f07bb59ff77a417b51caee6aba7e638d52843b0739c6368ca944446da",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/short/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-short-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "21971881354804c2b47ea145c7a04a61209bd0946d35d1bfdf32570b435875fe",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/short/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-short-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "ce377ece78188f134a60fb4e8354338f0f40f6bfb042c5144fa8b6d69915a03e",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/short/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "short",
+        "maxExperiencedTicks": 6000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-short-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "bf9bc2f21accb8898b53f5189d2f16bf40b2c32cb94a354159ed31406c142e9e",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/short/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 11,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 11
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 44
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-medium-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "10d91365f5ec27a80b580425e1fc94ede9a1675c73c66145ff42d682c1b6b120",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/medium/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-medium-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "aadd6574e84c41aa131b9e5b38c0d4ba748a6b080c0151e28de6e3164eca8018",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/medium/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-medium-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "5bb90767e50710935c0c2cdc9abdf2acd808ee6c8b766609f6e9a4b10efc2069",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/medium/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-medium-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "5e895630bd5f9e4feec633b725ba46f7dd3f0976c966b7cccbcec1a315c64110",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/medium/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "medium",
+        "maxExperiencedTicks": 24000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-medium-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "28697a75d0ac829b32cf53469f799fbc050979b0936eddfac98d2e28bbaab383",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/medium/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 41,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 41
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 74
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 1,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-long-s1",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "6153b801fdd2a2cad290c2bc8acfad8532c3934474d4b4a6a99121ced92f3455",
+        "worldSha256": "51bde23b6f56751285dadc300b7910cf0345aa9f9d9c5bc1df48f4f8f49c04c2",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/long/seed-1/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 2,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-long-s2",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "e22eb7b1f2448a5a2cd2da41a12950620d46dc7abdf248b0c9385bee661e7b79",
+        "worldSha256": "f1a8db501e2f557659241e5796ce5c78cd9250b7cbfc2d4a56316ad449a0b99e",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/long/seed-2/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 3,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-long-s3",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "3633854773b62e8ad8ef5e5d87a002797aea10b811b8061ac9fd1275358323ff",
+        "worldSha256": "688bef7f2d75b488202e4e60bafcd12084f123a29d8e0f2ea5bea470cada9cd0",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/long/seed-3/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 4,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-long-s4",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "e17d2a3881a749dc72bdf78f639abcbe151361c091e696fccc46eb7dd32bd9a1",
+        "worldSha256": "99cacfb97502464b099282b1bc27726af33f379255f70cb3f363e57aeb733093",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/long/seed-4/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    },
+    {
+      "metadata": {
+        "plan": "r2-dev-d-setback",
+        "planSha256": "3bac2b5c65810be648d127d18caadddb02c4b56316f42cb09cf935c76cdfdc38",
+        "condition": "R2act",
+        "affectMode": "active",
+        "interoception": "on",
+        "seed": 5,
+        "horizon": "long",
+        "maxExperiencedTicks": 72000,
+        "split": "development",
+        "episodeId": "r2-dev-d-setback-r2act-long-s5",
+        "commit": "2573e03325b8aeeb2328d9bdc4a38a0c37a74a14",
+        "treeClean": true,
+        "configSha256": "3d5340fcb44c286b8d5cf7de5d1fa181c3d5bfe2aaf9fc70936878b14d692c40",
+        "worldSha256": "3b2cfd6cd3ef963f5994fb98ec8987770304dde1bdb9a347f1a2ec6cc3fd7b3d",
+        "skillLibraryRevision": "501983c9be777a91",
+        "protocolVersion": "shroud-learning-v2",
+        "learningMode": "off",
+        "maxDecisions": 5000,
+        "cognitionCommand": [
+          "uv",
+          "run",
+          "person-cognition",
+          "--config",
+          "<repo>/runs/experiments/r2-dev-d-setback/R2act/long/seed-5/config.json"
+        ],
+        "node": "v22.23.2"
+      },
+      "distributions": {
+        "goal_types": {
+          "ESTABLISH_STORAGE": 17,
+          "MAINTAIN_RESERVES": 121,
+          "SECURE_FOOD": 21,
+          "SECURE_SHELTER": 1,
+          "SURVIVE_IMMEDIATE": 1
+        },
+        "executed_skills": {
+          "build_basic_shelter": 1,
+          "flee": 7,
+          "look": 32,
+          "wait_safely": 121
+        },
+        "terminal_statuses": {
+          "FAILED": 6,
+          "INTERRUPTED": 1,
+          "SUCCESS": 154
+        },
+        "control_input_by_trigger": {
+          "action_succeeded": 0.1,
+          "consequences": 0.39,
+          "harm": 0,
+          "hunger_starving": 0,
+          "overridden": -0.65,
+          "search_unfound": -0.3,
+          "threat_onset": 0
+        },
+        "unease_input_by_trigger": {
+          "action_succeeded": 0,
+          "consequences": 0,
+          "harm": 0.4876,
+          "hunger_starving": 0.05,
+          "overridden": 0.2037,
+          "search_unfound": 0,
+          "threat_onset": 0.2812
+        },
+        "valence_input_by_trigger": {
+          "action_succeeded": 0.15,
+          "consequences": 0.7184,
+          "harm": -0.5,
+          "hunger_starving": -0.08,
+          "overridden": 0.1,
+          "search_unfound": -0.9,
+          "threat_onset": 0
+        },
+        "appraisal_triggers": {
+          "action_succeeded": 1,
+          "consequences": 15,
+          "harm": 5,
+          "hunger_starving": 1,
+          "overridden": 7,
+          "search_unfound": 6,
+          "threat_onset": 1
+        },
+        "appraisals_at_one_moment": {
+          "consequences+harm+threat_onset": 1,
+          "consequences+search_unfound": 2,
+          "harm+overridden": 4
+        }
+      }
+    }
+  ]
+}

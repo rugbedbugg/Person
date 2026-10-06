@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://person.local/schemas/life-event.schema.json",
+  "title": "LifeEvent",
+  "description": "The trusted runtime observed Person's body die, or brought it back (ADR 0017, I3). Life status is its own axis: not world availability, not a session, not an episode result. It carries no cause, place or inventory: what killed Person is not something Person is told.",
+  "type": "object",
+  "allOf": [
+    {
+      "$ref": "common.schema.json#/$defs/envelope"
+    }
+  ],
+  "unevaluatedProperties": false,
+  "required": ["type", "event", "terminal", "reasonCodes"],
+  "properties": {
+    "type": {
+      "const": "LifeEvent"
+    },
+    "event": {
+      "enum": ["died", "respawned"]
+    },
+    "terminal": {
+      "type": "boolean",
+      "description": "For a death: whether the configured semantics are permadeath. Decided by the runtime, never by cognition. Always false for a respawn."
+    },
+    "reasonCodes": {
+      "$ref": "common.schema.json#/$defs/reasonCodes"
+    }
+  }
+}

@@ -1,0 +1,97 @@
+# Person dedicated research server, 1.16.1, localhost only (operator-authorized 2026-09-29).
+# Engineering infrastructure: nothing here reaches cognition except through the ordinary Observation.
+
+configVersion = 2
+personId = "ada"
+worldId = "person-dedicated-1"
+
+[runtime]
+embodiment = "minecraft"
+trainingContext = "minecraft_normal"
+outputDirectory = "./person-output"
+rngSeed = 20260915
+maxDecisions = 200
+maxTicks = 48000
+decisionIntervalMs = 0
+
+[learning]
+# Keep learning completely disabled for first-contact and initial body validation.
+mode = "off"
+evidenceDirectory = "./person-evidence"
+snapshotEveryEvents = 25
+explorationBonus = 0.15
+minimumSupport = 3
+
+[server]
+host = "127.0.0.1"
+
+port = 25565
+
+version = "1.16.1"
+
+[bot]
+username = "PersonAda"
+auth = "offline"
+
+[authorization]
+worldOwnerApproved = true
+dedicatedIdentity = true
+resourceAreasAreUnowned = true
+naturalDaylightCycle = true
+
+# The dedicated server runs on easy, so hostiles exist (spawning is off; the probe summons one).
+normalDifficulty = true
+
+[affect]
+# ADR 0013: off | record_only | active. Research runs switch it; everything
+# else keeps active, the ADR 0010 behaviour.
+mode = "active"
+
+[cognition]
+command = ["uv", "run", "--project", "<repo>", "person-cognition", "--config", "<repo>/runs/servers/person-1161/person-dedicated.toml"]
+startTimeoutMs = 20000
+decisionTimeoutMs = 5000
+
+[world]
+
+# Replace this with the actual location you want Person to consider home
+# before autonomous survival testing.
+#
+# For the first observe-only run this value is mostly just schema/config state.
+home = { x = -185, y = 71, z = 176 }
+
+# Keep Person geographically constrained during the first live validation.
+# Full vertical range avoids accidental failure if spawn is on elevated terrain.
+exploration = { min = { x = -233, y = 0, z = 128 }, max = { x = -137, y = 255, z = 224 } }
+
+# Natural resources inside the initial test region may be used by Person.
+resourceAreas = [{ min = { x = -233, y = 0, z = 128 }, max = { x = -137, y = 255, z = 224 } }]
+
+# No protected areas for first contact.
+# Add explicit protected regions before destructive/building skill tests if needed.
+protectedAreas = []
+
+[permissions.containers.existing]
+withdraw = true
+deposit = false
+
+[permissions.containers.owned]
+withdraw = true
+deposit = true
+
+[permissions.hunting]
+passiveUnnamedAnimals = true
+namedAnimals = false
+tamedAnimals = false
+
+[permissions.players]
+combat = false
+
+[permissions.villagers]
+harm = false
+
+[permissions.building]
+enabled = true
+
+[permissions.protectedAreas]
+enforcement = "strict"

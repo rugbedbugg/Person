@@ -5,7 +5,11 @@
  * evidence record. A backward-incompatible change must take a new name so old
  * evidence stays interpretable instead of being silently reinterpreted.
  */
-export const PROTOCOL_VERSION = "shroud-learning-v2";
+/**
+ * 3: Observation became a core envelope around an environment-owned payload,
+ * and trainingContext became `experience` (ADR 0025).
+ */
+export const PROTOCOL_VERSION = "person-v3";
 
 /** Message types the Node runtime is allowed to emit. */
 export const NODE_MESSAGE_TYPES = [
@@ -16,6 +20,8 @@ export const NODE_MESSAGE_TYPES = [
   "SkillOutcome",
   "EmergencyEvent",
   "EpisodeEvent",
+  "WorldAvailability",
+  "LifeEvent",
 ] as const;
 
 /** Message types the cognition process is allowed to emit. */
@@ -45,6 +51,8 @@ export const SCHEMA_FILES: Readonly<Record<MessageType, string>> =
     SkillOutcome: "skill-outcome.schema.json",
     EmergencyEvent: "emergency-event.schema.json",
     EpisodeEvent: "episode-event.schema.json",
+    WorldAvailability: "world-availability.schema.json",
+    LifeEvent: "life-event.schema.json",
     CognitionReady: "cognition-ready.schema.json",
     GoalDecision: "goal-decision.schema.json",
     PolicyDecision: "policy-decision.schema.json",

@@ -1,0 +1,143 @@
+[16:49:37] [main/INFO]: Environment: authHost='https://authserver.mojang.com', accountsHost='https://api.mojang.com', sessionHost='https://sessionserver.mojang.com', name='PROD'
+[16:49:38] [main/WARN]: Ambiguity between arguments [teleport, destination] and [teleport, targets] with inputs: [Player, 0123, @e, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[16:49:38] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[16:49:38] [main/WARN]: Ambiguity between arguments [teleport, location] and [teleport, targets] with inputs: [0.1 -0.5 .9, 0 0 0]
+[16:49:38] [main/WARN]: Ambiguity between arguments [teleport, targets] and [teleport, destination] with inputs: [Player, 0123, dd12be42-52a9-4a91-a8a1-11c01849e498]
+[16:49:38] [main/WARN]: Ambiguity between arguments [teleport, targets, location] and [teleport, targets, destination] with inputs: [0.1 -0.5 .9, 0 0 0]
+[16:49:38] [main/INFO]: Reloading ResourceManager: Default
+[16:49:40] [Worker-Main-12/INFO]: Loaded 7 recipes
+[16:49:41] [Worker-Main-12/INFO]: Loaded 927 advancements
+[16:49:43] [Server thread/INFO]: Starting minecraft server version 1.16.1
+[16:49:43] [Server thread/INFO]: Loading properties
+[16:49:43] [Server thread/INFO]: Default game type: SURVIVAL
+[16:49:43] [Server thread/INFO]: Generating keypair
+[16:49:44] [Server thread/INFO]: Starting Minecraft server on 127.0.0.1:25565
+[16:49:44] [Server thread/INFO]: Using epoll channel type
+[16:49:44] [Server thread/WARN]: **** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!
+[16:49:44] [Server thread/WARN]: The server will make no attempt to authenticate usernames. Beware.
+[16:49:44] [Server thread/WARN]: While this makes the game possible to play without internet access, it also opens up the ability for hackers to connect with any username they choose.
+[16:49:44] [Server thread/WARN]: To change this, set "online-mode" to "true" in the server.properties file.
+[16:49:44] [Server thread/INFO]: Preparing level "person-dedicated-1"
+[16:50:00] [Server thread/INFO]: Preparing start region for dimension minecraft:overworld
+[16:50:01] [Worker-Main-9/INFO]: Preparing spawn area: 0%
+[16:50:01] [Worker-Main-10/INFO]: Preparing spawn area: 0%
+[16:50:01] [Worker-Main-10/INFO]: Preparing spawn area: 0%
+[16:50:02] [Worker-Main-14/INFO]: Preparing spawn area: 0%
+[16:50:02] [Worker-Main-10/INFO]: Preparing spawn area: 0%
+[16:50:03] [Worker-Main-11/INFO]: Preparing spawn area: 0%
+[16:50:03] [Worker-Main-8/INFO]: Preparing spawn area: 0%
+[16:50:04] [Worker-Main-13/INFO]: Preparing spawn area: 0%
+[16:50:04] [Worker-Main-11/INFO]: Preparing spawn area: 0%
+[16:50:05] [Worker-Main-13/INFO]: Preparing spawn area: 0%
+[16:50:05] [Worker-Main-10/INFO]: Preparing spawn area: 1%
+[16:50:06] [Worker-Main-14/INFO]: Preparing spawn area: 1%
+[16:50:06] [Worker-Main-9/INFO]: Preparing spawn area: 1%
+[16:50:07] [Worker-Main-9/INFO]: Preparing spawn area: 1%
+[16:50:07] [Worker-Main-13/INFO]: Preparing spawn area: 1%
+[16:50:08] [Worker-Main-9/INFO]: Preparing spawn area: 1%
+[16:50:08] [Worker-Main-14/INFO]: Preparing spawn area: 5%
+[16:50:09] [Worker-Main-9/INFO]: Preparing spawn area: 5%
+[16:50:09] [Worker-Main-9/INFO]: Preparing spawn area: 5%
+[16:50:10] [Worker-Main-15/INFO]: Preparing spawn area: 5%
+[16:50:10] [Worker-Main-11/INFO]: Preparing spawn area: 5%
+[16:50:11] [Worker-Main-9/INFO]: Preparing spawn area: 5%
+[16:50:11] [Worker-Main-9/INFO]: Preparing spawn area: 5%
+[16:50:12] [Worker-Main-8/INFO]: Preparing spawn area: 5%
+[16:50:12] [Worker-Main-8/INFO]: Preparing spawn area: 8%
+[16:50:13] [Worker-Main-13/INFO]: Preparing spawn area: 8%
+[16:50:13] [Worker-Main-13/INFO]: Preparing spawn area: 8%
+[16:50:14] [Worker-Main-8/INFO]: Preparing spawn area: 10%
+[16:50:14] [Worker-Main-9/INFO]: Preparing spawn area: 10%
+[16:50:15] [Worker-Main-14/INFO]: Preparing spawn area: 10%
+[16:50:15] [Worker-Main-9/INFO]: Preparing spawn area: 10%
+[16:50:16] [Worker-Main-8/INFO]: Preparing spawn area: 15%
+[16:50:16] [Worker-Main-13/INFO]: Preparing spawn area: 17%
+[16:50:17] [Worker-Main-10/INFO]: Preparing spawn area: 18%
+[16:50:17] [Worker-Main-11/INFO]: Preparing spawn area: 18%
+[16:50:18] [Worker-Main-11/INFO]: Preparing spawn area: 23%
+[16:50:18] [Worker-Main-14/INFO]: Preparing spawn area: 26%
+[16:50:19] [Worker-Main-13/INFO]: Preparing spawn area: 27%
+[16:50:19] [Worker-Main-14/INFO]: Preparing spawn area: 27%
+[16:50:20] [Worker-Main-10/INFO]: Preparing spawn area: 32%
+[16:50:20] [Worker-Main-13/INFO]: Preparing spawn area: 34%
+[16:50:21] [Worker-Main-15/INFO]: Preparing spawn area: 37%
+[16:50:22] [Worker-Main-13/INFO]: Preparing spawn area: 39%
+[16:50:22] [Worker-Main-11/INFO]: Preparing spawn area: 39%
+[16:50:22] [Worker-Main-10/INFO]: Preparing spawn area: 45%
+[16:50:23] [Worker-Main-14/INFO]: Preparing spawn area: 48%
+[16:50:23] [Worker-Main-8/INFO]: Preparing spawn area: 52%
+[16:50:24] [Worker-Main-9/INFO]: Preparing spawn area: 52%
+[16:50:24] [Worker-Main-13/INFO]: Preparing spawn area: 56%
+[16:50:25] [Worker-Main-14/INFO]: Preparing spawn area: 59%
+[16:50:25] [Worker-Main-14/INFO]: Preparing spawn area: 62%
+[16:50:26] [Worker-Main-15/INFO]: Preparing spawn area: 67%
+[16:50:26] [Worker-Main-10/INFO]: Preparing spawn area: 68%
+[16:50:27] [Worker-Main-9/INFO]: Preparing spawn area: 72%
+[16:50:28] [Worker-Main-10/INFO]: Preparing spawn area: 74%
+[16:50:28] [Worker-Main-9/INFO]: Preparing spawn area: 77%
+[16:50:29] [Worker-Main-15/INFO]: Preparing spawn area: 79%
+[16:50:29] [Worker-Main-13/INFO]: Preparing spawn area: 79%
+[16:50:29] [Worker-Main-11/INFO]: Preparing spawn area: 83%
+[16:50:30] [Worker-Main-13/INFO]: Preparing spawn area: 87%
+[16:50:30] [Worker-Main-8/INFO]: Preparing spawn area: 88%
+[16:50:32] [Worker-Main-14/INFO]: Preparing spawn area: 90%
+[16:50:32] [Worker-Main-8/INFO]: Preparing spawn area: 90%
+[16:50:32] [Worker-Main-8/INFO]: Preparing spawn area: 96%
+[16:50:32] [Worker-Main-10/INFO]: Preparing spawn area: 96%
+[16:50:32] [Server thread/INFO]: Time elapsed: 32174 ms
+[16:50:32] [Server thread/INFO]: Done (48.187s)! For help, type "help"
+[16:50:42] [Server thread/INFO]: Gamerule doDaylightCycle is now set to: false
+[16:50:42] [Server thread/INFO]: Set the time to 1000
+[16:50:43] [Server thread/INFO]: Gamerule doWeatherCycle is now set to: false
+[16:50:43] [Server thread/INFO]: Set the weather to clear
+[16:50:43] [Server thread/INFO]: Gamerule doMobSpawning is now set to: false
+[16:50:44] [Server thread/INFO]: Gamerule doInsomnia is now set to: false
+[16:50:44] [Server thread/INFO]: Gamerule doPatrolSpawning is now set to: false
+[16:50:44] [Server thread/INFO]: Gamerule doTraderSpawning is now set to: false
+[16:51:12] [Server thread/INFO]: Gamerule doDaylightCycle is now set to: true
+[16:51:20] [Server thread/INFO]: PersonAda[/127.0.0.1:59556] logged in with entity id 212 at (-184.5, 71.0, 175.5)
+[16:51:20] [Server thread/INFO]: PersonAda joined the game
+[16:51:22] [Server thread/INFO]: PersonAda lost connection: Disconnected
+[16:51:22] [Server thread/INFO]: PersonAda left the game
+[16:53:04] [Server thread/INFO]: PersonAda[/127.0.0.1:38794] logged in with entity id 214 at (-184.5, 71.0, 175.5)
+[16:53:04] [Server thread/INFO]: PersonAda joined the game
+[16:53:06] [Server thread/INFO]: No entity was found
+[16:53:07] [Server thread/INFO]: PersonAda has the following entity data: [0.0f, 0.0f]
+[16:53:09] [Server thread/INFO]: PersonAda has the following entity data: [-90.0f, 0.0f]
+[16:53:11] [Server thread/INFO]: PersonAda has the following entity data: [0.0f, 0.0f]
+[16:53:12] [Server thread/INFO]: Summoned new Zombie
+[16:53:13] [Server thread/INFO]: Killed Zombie
+[16:53:14] [Server thread/INFO]: Summoned new Zombie
+[16:53:15] [Server thread/INFO]: Killed Zombie
+[16:53:16] [Server thread/INFO]: Successfully filled 34 blocks
+[16:53:17] [Server thread/INFO]: Summoned new Zombie
+[16:53:18] [Server thread/INFO]: Killed Zombie
+[16:53:19] [Server thread/INFO]: Successfully filled 34 blocks
+[16:53:20] [Server thread/INFO]: No entity was found
+[16:53:21] [Server thread/INFO]: PersonAda lost connection: Disconnected
+[16:53:21] [Server thread/INFO]: PersonAda left the game
+[16:53:30] [Server thread/INFO]: PersonAda[/127.0.0.1:38668] logged in with entity id 220 at (-184.5, 71.0, 175.5)
+[16:53:30] [Server thread/INFO]: PersonAda joined the game
+[16:53:34] [Server thread/INFO]: PersonAda lost connection: Disconnected
+[16:53:34] [Server thread/INFO]: PersonAda left the game
+[16:54:01] [Server thread/INFO]: PersonAda[/127.0.0.1:51438] logged in with entity id 221 at (-184.5, 71.0, 175.5)
+[16:54:01] [Server thread/INFO]: PersonAda joined the game
+[16:57:27] [Server thread/INFO]: PersonAda lost connection: Disconnected
+[16:57:27] [Server thread/INFO]: PersonAda left the game
+[16:57:46] [Server thread/INFO]: PersonAda[/127.0.0.1:46836] logged in with entity id 243 at (-184.5000000000001, 78.0, 148.5)
+[16:57:46] [Server thread/INFO]: PersonAda joined the game
+[16:59:15] [Server thread/INFO]: PersonAda lost connection: Disconnected
+[16:59:15] [Server thread/INFO]: PersonAda left the game
+[17:00:11] [Server thread/INFO]: Stopping the server
+[17:00:11] [Server thread/INFO]: Stopping server
+[17:00:11] [Server thread/INFO]: Saving players
+[17:00:11] [Server thread/INFO]: Saving worlds
+[17:00:11] [Server thread/INFO]: Saving chunks for level 'ServerLevel[person-dedicated-1]'/minecraft:overworld
+[17:00:12] [Server thread/INFO]: ThreadedAnvilChunkStorage (person-dedicated-1): All chunks are saved
+[17:00:12] [Server thread/INFO]: Saving chunks for level 'ServerLevel[person-dedicated-1]'/minecraft:the_nether
+[17:00:12] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[17:00:12] [Server thread/INFO]: Saving chunks for level 'ServerLevel[person-dedicated-1]'/minecraft:the_end
+[17:00:12] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved
+[17:00:12] [Server thread/INFO]: ThreadedAnvilChunkStorage (person-dedicated-1): All chunks are saved
+[17:00:12] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM-1): All chunks are saved
+[17:00:12] [Server thread/INFO]: ThreadedAnvilChunkStorage (DIM1): All chunks are saved

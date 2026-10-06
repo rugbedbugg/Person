@@ -11,6 +11,7 @@ dependencies = [
   "person-planner",
   "person-policy",
   "person-persistence",
+  "person-epistemics",
 ]
 
 [project.scripts]
@@ -24,6 +25,7 @@ build-backend = "hatchling.build"
 packages = ["python/person_cognition"]
 
 [tool.uv.sources]
+person-epistemics = { workspace = true }
 person-protocol = { workspace = true }
 person-skills = { workspace = true }
 person-config = { workspace = true }

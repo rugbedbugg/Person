@@ -1,4 +1,3 @@
-import { distance, type Position } from "#config";
 import {
   SkillFailure,
   type SkillContext,
@@ -13,6 +12,7 @@ import {
   tally,
 } from "../materials.ts";
 import { approach } from "../navigate.ts";
+import { distance, type Position } from "#minecraft";
 
 /**
  * Take raw food from unnamed, untamed passive animals only.
@@ -97,11 +97,9 @@ export const huntSafePassiveAnimals: SkillImplementation = async (context) => {
   const gained = rawHeld() - before;
   if (gained <= 0) {
     if (kills > 0)
-      throw new SkillFailure(
-        "inventory_full",
-        "FAILED",
-        "Kills produced no food",
-      );
+      throw context.snapshot().freeSlots === 0
+        ? new SkillFailure("inventory_full", "FAILED", "Kills produced no food")
+        : new SkillFailure("no_yield", "FAILED", "Kills yielded no food");
     throw new SkillFailure(
       "no_permitted_target",
       "UNREACHABLE",
@@ -118,7 +116,7 @@ export const cookFood: SkillImplementation = async (context) => {
   const target = context.number("target_amount");
   const snapshot = context.snapshot();
   const furnace =
-    context.memory.furnacePosition ??
+    context.ledger.furnacePosition ??
     context.embodiment
       .findBlocks({ kinds: ["furnace"], maxDistance: 16, limit: 4 })
       .find((block) => block.ownedByPerson)?.position ??

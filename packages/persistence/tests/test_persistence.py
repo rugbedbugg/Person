@@ -7,19 +7,21 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from person_epistemics import ExperienceKey
 from person_persistence import (
-    EvidenceEvent,
-    EvidenceJournal,
-    EvidenceStore,
+    CanonicalEvent,
+    EventJournal,
+    EventStore,
     JournalCorruption,
     SnapshotStore,
     new_event,
 )
 from person_persistence.demonstrations import DemonstrationError, file_digest, load_manifest
-from person_persistence.events import EvidenceError
+from person_persistence.events import EventRecordError
+from person_persistence.snapshot import SNAPSHOTS_KEPT
 
 
-def make_event(index: int, previous: str | None = None, **payload: Any) -> EvidenceEvent:
+def make_event(index: int, previous: str | None = None, **payload: Any) -> CanonicalEvent:
     return new_event(
         person_id="ada",
         world_id="w",
@@ -28,7 +30,7 @@ def make_event(index: int, previous: str | None = None, **payload: Any) -> Evide
         decision_id=None,
         tick=index,
         policy_revision=1,
-        training_context="fixture",
+        experience=ExperienceKey("minecraft", "fixture"),
         event_type="routine_outcome",
         payload={"routine_id": "r_a", "context_id": "c", "status": "SUCCESS", **payload},
         previous_event_id=previous,
@@ -44,7 +46,7 @@ class Counter:
     def reset(self) -> None:
         self.seen.clear()
 
-    def apply(self, event: EvidenceEvent) -> None:
+    def apply(self, event: CanonicalEvent) -> None:
         self.seen.append(event.event_id)
 
     def to_json(self) -> dict[str, Any]:
@@ -55,7 +57,7 @@ class Counter:
 
 
 def test_records_are_chained_and_readable(tmp_path: Path) -> None:
-    journal = EvidenceJournal(tmp_path)
+    journal = EventJournal(tmp_path)
     previous = None
     for index in range(5):
         event = journal.append(make_event(index, previous))
@@ -67,7 +69,7 @@ def test_records_are_chained_and_readable(tmp_path: Path) -> None:
 
 
 def test_duplicate_records_are_detected_and_ignored(tmp_path: Path) -> None:
-    journal = EvidenceJournal(tmp_path)
+    journal = EventJournal(tmp_path)
     event = journal.append(make_event(1))
     journal.append(event)
     assert len(list(journal.read())) == 1
@@ -75,7 +77,7 @@ def test_duplicate_records_are_detected_and_ignored(tmp_path: Path) -> None:
 
 
 def test_a_corrupt_record_is_an_error_not_a_silent_skip(tmp_path: Path) -> None:
-    journal = EvidenceJournal(tmp_path)
+    journal = EventJournal(tmp_path)
     journal.append(make_event(1))
     segment = journal.segments()[0]
     with segment.open("a", encoding="utf-8") as handle:
@@ -85,7 +87,7 @@ def test_a_corrupt_record_is_an_error_not_a_silent_skip(tmp_path: Path) -> None:
 
 
 def test_a_truncated_tail_is_dropped_and_counted(tmp_path: Path) -> None:
-    journal = EvidenceJournal(tmp_path)
+    journal = EventJournal(tmp_path)
     journal.append(make_event(1))
     journal.append(make_event(2))
     segment = journal.segments()[0]
@@ -97,7 +99,7 @@ def test_a_truncated_tail_is_dropped_and_counted(tmp_path: Path) -> None:
 
 
 def test_unknown_schema_versions_are_refused(tmp_path: Path) -> None:
-    journal = EvidenceJournal(tmp_path)
+    journal = EventJournal(tmp_path)
     journal.append(make_event(1))
     segment = journal.segments()[0]
     document = json.loads(segment.read_text(encoding="utf-8").splitlines()[0])
@@ -107,8 +109,73 @@ def test_unknown_schema_versions_are_refused(tmp_path: Path) -> None:
         handle.write(json.dumps(document) + "\n")
     with pytest.raises(JournalCorruption):
         list(journal.read())
-    with pytest.raises(EvidenceError):
-        EvidenceEvent.from_json(document)
+    with pytest.raises(EventRecordError):
+        CanonicalEvent.from_json(document)
+
+
+def test_older_journals_still_read_and_new_events_cannot_backdate_themselves() -> None:
+    # A record carries both fields here so one document can stand for either
+    # family: pre-v20 records are read by `training_context`, v20 by `experience`.
+    document = {**make_event(1).to_json(), "training_context": "fixture"}
+    for schema in ("person-evidence-v1", "person-evidence-v2"):
+        assert CanonicalEvent.from_json({**document, "schema_version": schema}).tick == 1
+
+    search = {**document, "type": "information_search", "payload": {"phase": "started"}}
+    assert CanonicalEvent.from_json(search).schema_version == "person-event-v20"
+    for schema in ("person-evidence-v3", "person-evidence-v4", "person-evidence-v5"):
+        assert CanonicalEvent.from_json({**search, "schema_version": schema}).tick == 1
+    for schema in ("person-evidence-v1", "person-evidence-v2"):
+        with pytest.raises(EventRecordError):
+            CanonicalEvent.from_json({**search, "schema_version": schema})
+
+    for kind in ("memory_encoded", "memory_recalled"):
+        memory = {**document, "type": kind, "payload": {}}
+        assert CanonicalEvent.from_json(memory).schema_version == "person-event-v20"
+        assert CanonicalEvent.from_json({**memory, "schema_version": "person-evidence-v4"})
+        for schema in ("person-evidence-v1", "person-evidence-v2", "person-evidence-v3"):
+            with pytest.raises(EventRecordError):
+                CanonicalEvent.from_json({**memory, "schema_version": schema})
+
+    learned = {**document, "type": "effect_evidence", "payload": {}}
+    assert CanonicalEvent.from_json(learned).schema_version == "person-event-v20"
+    with pytest.raises(EventRecordError):
+        CanonicalEvent.from_json({**learned, "schema_version": "person-evidence-v7"})
+
+    affect = {**document, "type": "affect_appraised", "payload": {}}
+    assert CanonicalEvent.from_json(affect).schema_version == "person-event-v20"
+    with pytest.raises(EventRecordError):
+        CanonicalEvent.from_json({**affect, "schema_version": "person-evidence-v6"})
+
+    for kind in ("project_started", "project_changed"):
+        project = {**document, "type": kind, "payload": {}}
+        assert CanonicalEvent.from_json(project).schema_version == "person-event-v20"
+        for schema in ("person-evidence-v4", "person-evidence-v5"):
+            with pytest.raises(EventRecordError):
+                CanonicalEvent.from_json({**project, "schema_version": schema})
+
+    for kind in (
+        "causal_trial",
+        "hypothesis_proposed",
+        "hypothesis_rejected",
+        "hypothesis_evidence",
+        "investigation_changed",
+    ):
+        causal = {**document, "type": kind, "payload": {}}
+        assert CanonicalEvent.from_json(causal).schema_version == "person-event-v20"
+        with pytest.raises(EventRecordError):
+            CanonicalEvent.from_json({**causal, "schema_version": "person-evidence-v8"})
+
+    tonic = {**document, "type": "affect_tonic", "payload": {}}
+    assert CanonicalEvent.from_json(tonic).schema_version == "person-event-v20"
+    with pytest.raises(EventRecordError):
+        CanonicalEvent.from_json({**tonic, "schema_version": "person-evidence-v9"})
+
+    for kind in ("place_formed", "place_visited"):
+        place = {**document, "type": kind, "payload": {}}
+        assert CanonicalEvent.from_json(place).schema_version == "person-event-v20"
+        for schema in ("person-evidence-v3", "person-evidence-v4"):
+            with pytest.raises(EventRecordError):
+                CanonicalEvent.from_json({**place, "schema_version": schema})
 
 
 def test_snapshots_are_atomic_and_checksummed(tmp_path: Path) -> None:
@@ -126,7 +193,7 @@ def test_snapshots_are_atomic_and_checksummed(tmp_path: Path) -> None:
 
 
 def test_restart_replays_from_the_snapshot_and_rebuilds_without_one(tmp_path: Path) -> None:
-    store = EvidenceStore(tmp_path, snapshot_every=3)
+    store = EventStore(tmp_path, snapshot_every=3)
     reducer = Counter()
     previous = None
     for index in range(7):
@@ -134,7 +201,7 @@ def test_restart_replays_from_the_snapshot_and_rebuilds_without_one(tmp_path: Pa
         previous = event.event_id
     assert store.snapshots.available(), "a snapshot should have been written"
 
-    restarted = EvidenceStore(tmp_path, snapshot_every=3)
+    restarted = EventStore(tmp_path, snapshot_every=3)
     rebuilt = Counter()
     report = restarted.restore(rebuilt)
     assert report.from_snapshot is True
@@ -143,15 +210,34 @@ def test_restart_replays_from_the_snapshot_and_rebuilds_without_one(tmp_path: Pa
     # Remove every snapshot: the journal alone must rebuild the same state.
     for path in restarted.snapshots.available():
         path.unlink()
-    cold = EvidenceStore(tmp_path, snapshot_every=3)
+    cold = EventStore(tmp_path, snapshot_every=3)
     from_journal = Counter()
     cold_report = cold.restore(from_journal)
     assert cold_report.from_snapshot is False
     assert from_journal.seen == reducer.seen
 
 
+def test_the_chain_continues_after_a_snapshot_taken_at_the_journal_tail(
+    tmp_path: Path,
+) -> None:
+    # An episode's end writes a snapshot after its last record, so the next
+    # process restores from a snapshot with nothing after it to replay. It
+    # must still know which record comes last, or the chain breaks there.
+    store = EventStore(tmp_path, snapshot_every=100)
+    reducer = Counter()
+    previous = None
+    for index in range(4):
+        previous = store.append(make_event(index, previous), reducer).event_id
+    store.write_snapshot(reducer)
+
+    restarted = EventStore(tmp_path, snapshot_every=100)
+    report = restarted.restore(Counter())
+    assert report.from_snapshot is True and report.replayed_events == 0
+    assert restarted.last_event_id == previous
+
+
 def test_a_snapshot_that_disagrees_with_the_journal_forces_a_full_rebuild(tmp_path: Path) -> None:
-    store = EvidenceStore(tmp_path, snapshot_every=100)
+    store = EventStore(tmp_path, snapshot_every=100)
     reducer = Counter()
     previous = None
     for index in range(4):
@@ -165,7 +251,7 @@ def test_a_snapshot_that_disagrees_with_the_journal_forces_a_full_rebuild(tmp_pa
         policy_revision=1,
         body={"seen": ["ghost"]},
     )
-    restarted = EvidenceStore(tmp_path)
+    restarted = EventStore(tmp_path)
     rebuilt = Counter()
     report = restarted.restore(rebuilt)
     assert report.from_snapshot is False
@@ -175,7 +261,7 @@ def test_a_snapshot_that_disagrees_with_the_journal_forces_a_full_rebuild(tmp_pa
 
 def test_the_journal_exposes_no_way_to_change_history() -> None:
     forbidden = {"update", "delete", "remove", "rewrite", "truncate", "overwrite", "edit"}
-    assert forbidden.isdisjoint(dir(EvidenceJournal))
+    assert forbidden.isdisjoint(dir(EventJournal))
 
 
 def test_demonstration_manifests_require_review_and_a_matching_hash(tmp_path: Path) -> None:
@@ -207,3 +293,74 @@ def test_demonstration_manifests_require_review_and_a_matching_hash(tmp_path: Pa
     manifest.write_text(json.dumps(body), encoding="utf-8")
     with pytest.raises(DemonstrationError, match="hash mismatch"):
         load_manifest(manifest)
+
+
+def test_only_the_newest_snapshots_are_kept(tmp_path: Path) -> None:
+    # A long or stuck run used to keep every snapshot: 25 GB for one world in
+    # the R2 held-out D run. Snapshots are derivable, so a few suffice.
+    snapshots = SnapshotStore(tmp_path)
+    for sequence in range(1, 11):
+        snapshots.write(
+            sequence=sequence,
+            last_event_id=None,
+            event_count=sequence,
+            tick=sequence,
+            policy_revision=0,
+            body={"n": sequence},
+        )
+    kept = snapshots.available()
+    assert len(kept) == SNAPSHOTS_KEPT
+    assert [snapshots.read(path)["sequence"] for path in kept] == list(
+        range(11 - SNAPSHOTS_KEPT, 11)
+    )
+
+
+def test_a_damaged_newest_snapshot_falls_back_to_a_kept_older_one(tmp_path: Path) -> None:
+    store = EventStore(tmp_path, snapshot_every=2)
+    reducer = Counter()
+    previous = None
+    for index in range(20):
+        previous = store.append(make_event(index, previous), reducer).event_id
+    kept = store.snapshots.available()
+    assert 1 < len(kept) <= SNAPSHOTS_KEPT
+    kept[-1].write_text("{broken", encoding="utf-8")
+
+    restarted = EventStore(tmp_path, snapshot_every=2)
+    rebuilt = Counter()
+    report = restarted.restore(rebuilt)
+    assert report.from_snapshot is True
+    assert rebuilt.seen == reducer.seen
+
+
+# ------------------------------------------- history is not evidence (ADR 0027)
+
+
+def test_a_legacy_record_is_read_as_the_stream_it_always_meant_and_never_rewritten() -> None:
+    from person_persistence import LEGACY_TRAINING_CONTEXTS
+
+    new = make_event(1).to_json()
+    legacy = {k: v for k, v in new.items() if k != "experience"}
+    for context, stream in LEGACY_TRAINING_CONTEXTS.items():
+        record = {**legacy, "schema_version": "person-evidence-v19", "training_context": context}
+        event = CanonicalEvent.from_json(record)
+        assert event.experience == stream
+        assert event.to_json() == record, "a legacy record re-serialises exactly as read"
+    assert LEGACY_TRAINING_CONTEXTS["replay"].context == "replay"
+    legacy = LEGACY_TRAINING_CONTEXTS
+    assert legacy["fixture"].key != legacy["minecraft_normal"].key
+
+
+def test_a_new_record_states_its_stream_and_cannot_claim_a_legacy_context() -> None:
+    record = make_event(1).to_json()
+    assert record["schema_version"] == "person-event-v20"
+    assert "training_context" not in record
+    with pytest.raises(EventRecordError, match="experience"):
+        CanonicalEvent.from_json({k: v for k, v in record.items() if k != "experience"})
+
+
+def test_the_old_names_remain_importable_for_old_tools() -> None:
+    from person_persistence import EventJournal, EvidenceEvent, EvidenceJournal, EvidenceStore
+
+    assert EvidenceEvent is CanonicalEvent
+    assert EvidenceJournal is EventJournal
+    assert EvidenceStore.__name__ == "EventStore"

@@ -1,6 +1,8 @@
 # 0001: Shroud V1 configuration to Person configVersion 2
 
-Implemented in `packages/config/ts/migrate.ts`, exercised by
+Implemented in `packages/config/ts/migrate.ts` when written; since ADR 0025
+in `environments/minecraft/ts/legacy.ts`, which now produces configVersion 3
+directly (`0002-person-v2-to-person-v3.md`). Exercised by
 `tests/cli/cli.test.ts`.
 
 Run it with:

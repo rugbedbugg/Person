@@ -1,22 +1,85 @@
 # PERSON
 
-## A Persistent Artificial Inhabitant for Minecraft
+## A Persistent Developmental Agent Architecture That Constructs and Revises Beliefs Through Embodied Experience
 
-**Status:** Architecture specification
-**Target:** Minecraft Java Edition 1.16.1 initially
+**Status:** Architecture specification. Canonical source of truth.
+**Architecture reconciled:** 2026-09-22
+**Course-corrected:** 2026-10-03, before Person-000 (Ada): Person's core and its environments separated, and epistemic state made explicit (ADRs 0025 to 0029). The subtitle until then was "A Persistent Artificial Individual Whose Embodied Life Occurs in Minecraft"; Minecraft is now Person's **first controlled environment**, not its definition.
+**First environment:** Minecraft (`environments/minecraft/`)
+**Current live-validation target:** Minecraft Java Edition 1.16.1
+**Planned target:** Minecraft Java Edition 1.16.5, as part of the Baritone motor work (not yet begun)
 **Primary runtime:** Node.js 22 + Python 3.12
-**Initial embodiment:** Mineflayer
+**Current embodiment:** Mineflayer
+**Planned motor backend:** Baritone, behind the perception firewall (not yet begun)
 **Design philosophy:** CPU-first, persistent, interpretable, bounded, modular
 **Research framing:** Open-ended embodied cognitive-agent testbed; AGI-relevant, not an AGI claim
-**Long-term objective:** Artificial inhabitants whose lives continue independently of direct player interaction and improve through persistent experience
+**Long-term objective:** Artificial individuals whose lives continue independently of direct player interaction and improve through persistent experience
+
+### How to read this document
+
+This document is a single canonical description of what Person is **intended
+to become**. It distinguishes intention from implementation inline, using the
+four status tags defined in section 1.1, rather than through a separate
+overriding block:
+
+```text
+CURRENTLY IMPLEMENTED    exists in the source tree today
+PLANNED PERSON V1        part of the frozen canonical Person, not yet built
+FUTURE SUPER-PERSON      a deliberate capability increase, never the default
+FUTURE COMMUNITY         multiple People; not the current target
+```
+
+A claim with no tag is **PLANNED PERSON V1**: intended, not yet built.
+
+| Question                              | Document                 |
+| -------------------------------------- | ------------------------ |
+| What is Person meant to be?            | this file                |
+| What exists in the source tree today?  | `docs/CURRENT_STATE.md`  |
+| How far has any of it been proven?     | `REALITY_VALIDATION.md`  |
+| Why was a particular choice made?      | `docs/decisions/`        |
+| Where does this spec disagree with the code right now? | `docs/CURRENT_STATE.md`, "Known Deviations" |
+
+An earlier draft of this document briefly existed as two layers, a frozen
+"Part 0" laid over older sections it partly superseded. That was reconciled on
+2026-09-22 (`docs/PROJECT_HISTORY.md`, Phase 7): the two layers were merged
+into the single document below. Read it top to bottom.
 
 ---
 
 # 1. Vision
 
+Person is a persistent developmental agent architecture for constructing and
+revising beliefs through embodied experience. Minecraft is its first
+controlled environment. Everything below that is specific to Minecraft is
+specific to that environment, and lives behind its profile (ADR 0025); what
+is Person's own is the architecture that perceives, believes, remembers,
+predicts, decides and learns through whatever body it is given.
+
 Person is not a chatbot connected to Minecraft and not a conventional game bot.
 
-Person is a persistent autonomous inhabitant capable of:
+Person is a persistent artificial individual whose embodied life occurs in
+Minecraft. Person knows:
+
+```text
+that it is artificial
+that Minecraft is a game
+that an external reality exists
+that an external creator/operator exists
+that software enables its existence
+```
+
+Its ordinary **physical** agency is confined to its Minecraft embodiment. Its
+**intellectual** life is not confined to Minecraft: it may reason, learn,
+remember, forget, form beliefs, be uncertain, form interests, pursue projects,
+develop relationships, communicate, perform deliberate research about the
+external world, and eventually remain cognitively active while Minecraft is
+unavailable.
+
+Canonical Person v1 is **human-like and bounded**. Increasing a capability axis
+past human-like boundedness produces a Super-Person configuration (section
+4.1), which is a deliberate experiment, not an upgrade to the default.
+
+Concretely, that persistent artificial individual is capable of:
 
 * maintaining its own survival,
 * learning reusable skills and routines,
@@ -39,7 +102,34 @@ A Person should have:
 
 > a past, a present situation, and intentions for the future.
 
-## 1.1 Research Thesis
+## 1.1 Status Vocabulary
+
+Every claim in this document belongs to exactly one of four classes. Nothing
+below is a statement that something exists.
+
+```text
+CURRENTLY IMPLEMENTED
+    exists in the source tree today
+    docs/CURRENT_STATE.md is the authority on this class,
+    and REALITY_VALIDATION.md on how far it has been proven
+
+PLANNED PERSON V1
+    part of the frozen canonical Person, not yet built
+
+FUTURE SUPER-PERSON
+    a deliberate capability increase over canonical Person,
+    never the default configuration
+
+FUTURE COMMUNITY EXPERIMENT
+    multiple People; not the current implementation target,
+    but must not be made impossible
+```
+
+A section without a marker describes PLANNED PERSON V1.
+
+A claim below is CURRENTLY IMPLEMENTED only where it explicitly says so.
+
+## 1.2 Research Thesis
 
 Person is also a research platform for a narrower and more testable question than "build AGI":
 
@@ -71,7 +161,7 @@ transfer what was learned
 
 The architecture should therefore optimize not only for successful Minecraft behavior, but for **measurable learning, adaptation, transfer, and continuity**.
 
-## 1.2 Scientific Claim Discipline
+## 1.3 Scientific Claim Discipline
 
 Do not describe Person as AGI merely because it becomes capable or autonomous.
 
@@ -179,6 +269,35 @@ turn left
 break block
 ```
 
+This is cognitive autonomy versus environmental authority, and the distinction
+holds all the way down:
+
+```text
+desire
+    ->
+goal
+    ->
+plan
+    ->
+proposed action
+    ->
+CAPABILITY POLICY
+    ->
+allowed physical execution
+```
+
+The runtime may reject a proposed action. A Person may want or plan something
+the runtime does not permit, and that is a normal and expected condition rather
+than a fault in either party. The rejection is represented honestly to Person
+as unavailable or failed: it does not expose hidden security implementation
+details, and it does not lie about having happened.
+
+**CURRENTLY IMPLEMENTED:** this is the oldest invariant in the repository and
+the best-tested one. `SkillInvocation` is a proposal; `ValidationDecision` is
+the verdict; `SkillOutcome` names both the requested and the executed skill,
+and learning credits only what actually ran. See
+`docs/decisions/0005-cognitive-autonomy-vs-capability-authority.md`.
+
 ---
 
 # 4. System Identity
@@ -219,6 +338,69 @@ Each Person has independent:
 
 Infrastructure may be shared.
 
+## 4.1 Capability Axes: Person Versus Super-Person
+
+Canonical Person aims deliberately at human-like boundedness. These axes are
+**independent**:
+
+```text
+reasoning / intelligence
+working-memory capacity
+planning depth
+memory retrieval quality
+perception bandwidth
+mechanical expertise
+reaction latency
+motor precision
+internet access
+self-modification authority
+external agency
+Minecraft command authority
+```
+
+Two rules follow, and they are the entire point of listing the axes:
+
+```text
+increasing intelligence must NOT silently increase perception privileges
+increasing mechanical skill must NOT reveal more world state to cognition
+```
+
+A **FUTURE SUPER-PERSON** experiment raises one or more axes on purpose, names
+which, and records it. Raising an axis by accident, as a side effect of a
+performance improvement or a convenient refactor, is the failure mode this
+section exists to prevent.
+
+Canonical Person should also not always compute an optimal plan. Human-like
+Person has bounded planning, finite attention, uncertainty, satisficing,
+habits, affective influence and occasional reasonable mistakes. Future
+Super-Person profiles may reduce those limitations deliberately.
+
+## 4.2 Frozen, Learned, and Transient State
+
+Three classes of state, eventually distinguished in the implementation:
+
+```text
+FOUNDATIONAL / FROZEN
+    baseline cognitive profile, temperament, capability profile,
+    memory capacity, perception limits, reaction latency
+
+LEARNED
+    routines, skills, relationships, preferences, spatial familiarity,
+    social knowledge, language habits
+
+TRANSIENT
+    health, hunger, affect, arousal, active goals, current context
+```
+
+Changing a frozen configuration parameter is an **experimental intervention**,
+not learning. Profile and configuration hashes should eventually be recorded so
+a run can be reproduced and a behavioural change can be attributed to the right
+cause.
+
+**CURRENTLY IMPLEMENTED:** the skill library revision hash, compared across
+both runtimes at the session handshake, is the first example of this idea. It
+covers the skill library and nothing else.
+
 ---
 
 # 5. Primary Architectural Layers
@@ -241,9 +423,15 @@ Infrastructure may be shared.
 ├─────────────────────────────────────────────┤
 │            Minecraft Executor               │
 ├─────────────────────────────────────────────┤
-│              Mineflayer                     │
+│         Embodiment (Mineflayer now)          │
 └─────────────────────────────────────────────┘
 ```
+
+The bottom row is the current body, not the permanent one: section 6.1 plans a
+Baritone motor layer in that position, with a perception filter (section 8)
+between whatever sits there and everything above the trust boundary. Belief,
+memory and knowledge (sections 24 and 26) are further layers this diagram does
+not draw, between memory and cognition.
 
 The lower layers should continue functioning even if higher layers fail.
 
@@ -303,6 +491,54 @@ stdio framed messages
 
 Avoid network complexity initially.
 
+## 6.1 Embodiment and Motor Backend
+
+Mineflayer is the current real embodiment. It is not assumed to remain the
+long-term primary embodiment.
+
+The planned direction is to evaluate Baritone as the Minecraft motor layer.
+
+```text
+Person cognition
+    ->
+trusted runtime / capability boundary
+    ->
+BaritoneEmbodiment
+    ->
+local IPC / bridge
+    ->
+Java/Fabric or equivalent Minecraft client integration
+    ->
+Baritone public API
+    ->
+Minecraft
+```
+
+Baritone is **motor cortex, not cognition**.
+
+```text
+Person decides WHAT and WHY
+the trusted motor layer handles HOW
+```
+
+Baritone's exact pathfinding and world geometry stay behind the perception
+firewall. Arbitrary Baritone command strings are never exposed to cognition,
+and neither are Minecraft commands.
+
+**Not implemented in this phase.** See `docs/decisions/0001-baritone-motor-backend.md`.
+
+### Minecraft version
+
+```text
+CURRENTLY IMPLEMENTED   Minecraft Java 1.16.1
+PLANNED                 Minecraft Java 1.16.5, as part of the Baritone work
+```
+
+The existing implementation, the conformance data tables and every live
+validation performed so far target 1.16.1. 1.16.5 is the sensible nearby
+compatibility target for the Baritone migration and **has not happened**.
+`docs/CURRENT_STATE.md` continues to say 1.16.1 because that is the truth.
+
 ---
 
 # 7. Versioned Cognitive Contract
@@ -338,11 +574,71 @@ ProjectEvent
 
 The protocol must be backward-incompatible only across explicit major versions.
 
+`tick` and `timestamp` on every message are Person's two clocks: Minecraft time
+and external time. Section 60.2 explains why both are required and what each
+one is for.
+
 ---
 
 # 8. Observation Model
 
-Python receives semantic state rather than raw Minecraft internals.
+Python receives semantic state rather than raw Minecraft internals. This is the
+**perception firewall**: a future motor backend may hold exact client-side
+world state for navigation, and that information must not automatically become
+Person's cognition.
+
+```text
+Minecraft client state
+        |
+        +--> motor backend           exact geometry permitted internally
+        |
+        +--> perception filter
+                 |
+                 --> bounded Person perception
+```
+
+Person should perceive through a computationally cheap human-like Minecraft
+sense model rather than receive every loaded block. The likely eventual design:
+
+```text
+camera pose, yaw, pitch, field of view
+ray or visibility based
+occlusion aware
+bounded range
+semantic aggregation
+near / medium / far
+relative directions
+entity visibility checks
+```
+
+Debug and operator tooling may expose privileged state, through a separate path
+that no cognition process can read.
+
+**CURRENTLY IMPLEMENTED:** the boundary exists, and as of 2026-09-22 the sense
+model above does too. The runtime keeps the unshaped snapshot; the safety
+kernel and the permission gate read that rather than the observation, so
+shaping can never widen what Person is allowed to do. Pose, bounded range,
+occlusion and field of view are implemented, so Person can now fail to see
+something that is in range. Location reaches cognition as a bearing relative to
+facing, an elevation, a range band and an estimated distance; no coordinate
+crosses, which closes the deviation this section used to carry
+(`docs/CURRENT_STATE.md`, "Known Deviations", C1). What is **not** implemented
+is a deliberate inspection capability for coordinates (section 24.4) and any
+attention model beyond a deterministic cap. Person can point its gaze with a
+closed five-word vocabulary, and the planner uses it to look for evidence a
+goal needs before giving the goal up, a bounded search that concludes "not
+found" and never "absent" (`docs/CURRENT_STATE.md`, Known Deviations, C1).
+Only recognised percepts, in central vision, count as evidence to act on.
+
+**CURRENTLY IMPLEMENTED (ADR 0025, ADR 0026):** the observation is a
+Person-core envelope (`observationVersion`, `experience`, `selfMotion`,
+`cognition`, `previousOutcome`) around an environment `payload`. Sections 8.1
+to 8.6 describe the Minecraft payload, which the Minecraft profile owns and
+validates. Cognition crosses into it once per observation, producing a
+perceptual state whose channels say how each percept is known: sensed
+(`nearby`, sky), bodily (`vitals`, `inventory`) or reported by the trusted
+runtime about Person's own situation (`home`, `permissions`, `affordances`,
+`navigation`). Nothing downstream reads the observation again.
 
 ## 8.1 Vitals
 
@@ -404,13 +700,16 @@ structures
 
 ```text
 activeHome
-homeDistance
 shelterIntegrity
 ownedStorage
 bedKnown
 foodReserve
 fuelReserve
 ```
+
+`homeDistance` was removed on 2026-09-25 (C8). How far Person is from home is
+its own belief, from its spatial model (section 24.4, ADR 0008); exact
+physical distance stays with the trusted runtime and operator tooling.
 
 ## 8.6 Navigation State
 
@@ -551,6 +850,50 @@ Evidence:
     harvested_blocks
 ```
 
+## 10.1 Beyond the Finite Library
+
+The finite high-level skill library remains useful and is not being replaced.
+It is nonetheless insufficient for open-ended discovery, because a skill
+library can only contain actions somebody anticipated. The eventual hierarchy:
+
+```text
+AI intention
+    ->
+goal / project
+    ->
+routine / high-level skill
+    ->
+when necessary: compositional physical actions
+    ->
+trusted validation
+    ->
+motor execution
+```
+
+Compositional physical operations that will eventually be needed:
+
+```text
+move near a perceived object
+inspect something
+look toward something
+use held item
+interact with a perceived entity
+place an item relative to a perceived referent
+break a perceived block
+wait
+repeat a bounded action
+```
+
+Every one of these takes a **perceived and validated referent**, never a
+privileged coordinate, a raw object handle or a command string. The referent
+rules are the ones in `docs/SEMANTIC_TARGETING.md`: identifiers are issued by
+the runtime, resolution stays behind the boundary, permission is re-checked
+after resolution, identifiers are stable and provenanced, and the parameter
+stays a scalar.
+
+This capability exists so Person can design experiments and discover Minecraft
+phenomena nobody wrote a skill for. **Not implemented.**
+
 ---
 
 # 11. Initial Skill Library
@@ -671,6 +1014,17 @@ The Safety Kernel belongs entirely to Node.
 
 Python cannot override it.
 
+The kernel enforces two different concerns through one mechanism, and they are
+not the same concern: fleeing lava is **self-preservation**, behaviour Person
+would want if it were choosing; refusing to leave the configured exploration
+box is **experimental containment**, the operator's decision about this run,
+not a fact about Person. Both belong to Node and neither is negotiable, but
+only the first is a property of Person. `docs/SAFETY.md` gives the full
+breakdown, including the third category, shared-world and property policy.
+This is a reframing of what the trigger table below means, not a change to it:
+**no production behaviour differs.** See `docs/CURRENT_STATE.md`, "Known
+Deviations", C2.
+
 Priority:
 
 ```text
@@ -744,6 +1098,25 @@ permissions:
 ```
 
 Protected-area restrictions override all other permissions.
+
+## 14.1 Minecraft Command Authority
+
+```text
+Canonical Person          no privileged commands
+Canonical Super-Person    still no privileged commands by default
+Privileged experiment     explicitly configured typed command capabilities
+Operator                  administrative authority
+```
+
+Knowing that `/tp`, `/give` and `/fill` exist does not imply permission to use
+them. `minecraft_command_authority` is a separate capability axis (section 4.1)
+and is off. There is no generic `execute_command(string)` capability and there
+will not be one: a typed, individually declared, individually validated command
+capability is the only shape a future privileged experiment may take.
+
+**CURRENTLY IMPLEMENTED:** an architecture test asserts that Person has no way
+to issue a server command, and another asserts the embodiment port offers no
+teleport and no coordinate command.
 
 ---
 
@@ -887,6 +1260,12 @@ Project
     progress
     completionCriteria
 ```
+
+**CURRENTLY IMPLEMENTED (ADR 0009, fixture only):** two project kinds,
+`improve_home` and `secure_food_supply`, with purpose, milestones, status,
+reasons, interruptions and a home anchor from Person's own map. They persist
+across restarts and are re-examined before they are resumed. Dependencies,
+required resources and invented projects are not implemented.
 
 Projects may span:
 
@@ -1039,6 +1418,10 @@ Person exploits known safe behavior.
 
 ## 22.1 Active Experimentation
 
+**CURRENTLY IMPLEMENTED (ADR 0012, fixture only):** uncertainty-driven,
+bounded, single-factor experiments on typed hypotheses, run as ordinary
+goals under `supervised` learning.
+
 Exploration should eventually be **epistemic**, not merely random novelty-seeking.
 
 When Person has competing plausible beliefs and is inside the safe envelope, it may choose a bounded action partly for expected information gain.
@@ -1079,6 +1462,74 @@ Experiment:
 The exploration system must never bypass the Safety Kernel to gain information.
 
 Random action entropy is not a research objective. **Useful uncertainty reduction is.**
+
+## 22.2 Provenance of Knowledge
+
+Person must eventually be able to discover world mechanics empirically:
+
+```text
+notice an unexpected effect
+form a hypothesis
+design a bounded experiment
+vary one factor
+compare outcomes
+update confidence
+form generalized knowledge
+```
+
+Known Minecraft exploits are useful demonstrations but are **not** evidence of
+independent discovery, because a foundation model may already contain them. A
+rigorous discovery experiment needs hidden or custom mechanics, or a controlled
+knowledge restriction.
+
+Knowledge provenance classes must remain distinct. The names may change; the
+distinctions may not:
+
+```text
+INITIAL_KNOWLEDGE
+PERSONAL_OBSERVATION
+PERSONAL_EXPERIMENT
+INFERENCE
+TAUGHT_BY_PERSON
+TAUGHT_BY_OPERATOR
+EXTERNAL_WEB
+```
+
+Person should be able to distinguish, and to say:
+
+```text
+I discovered this.
+I inferred this.
+Partha taught me this.
+I learned this from another Person.
+I read this online.
+I already knew this.
+```
+
+**CURRENTLY IMPLEMENTED:** one adjacent distinction, the training context on
+every statistic, which keeps fixture evidence from standing in for Minecraft
+evidence. That is provenance about where an experience happened. **And (ADR
+0012, fixture only):** the four classes `INITIAL`, `PERSONAL_OBSERVATION`,
+`PERSONAL_EXPERIMENT` and `INFERENCE` are carried by causal hypotheses and
+their evidence: a hypothesis is inference, its evidence is Person's own
+observation or experiment, and skill contracts and the vocabulary are initial
+knowledge. The other classes above (told, read, another Person) have no
+channel yet, because nothing external reaches Person.
+
+**CURRENTLY IMPLEMENTED (ADR 0027):** the distinctions above, and the ones
+between lived and imagined material, are one closed set of provenance classes
+(`person_epistemics.Source`): `REAL_OBSERVATION` and `INTERVENTION_OUTCOME`
+(personal observation and experiment), `RUNTIME_REPORT`, `INFERENCE`,
+`INITIAL_KNOWLEDGE`, `TESTIMONY` (taught by a person or another Person),
+`RESEARCH` (external web), `OPERATOR_INTERVENTION`, and the classes that are
+never evidence about the world: `MEMORY_RECALL`, `REPLAY`, `COUNTERFACTUAL`
+and `MODEL_ROLLOUT`. The training context mentioned above is now an
+experience key (section 47).
+
+Canonical initial Person starts at approximately experienced-player Minecraft
+knowledge, detailed in section 45.1. It is not initialized with a catalog of
+obscure exploits, and the difference between what Person started with and what
+it discovered is exactly what the provenance classes above exist to preserve.
 
 ---
 
@@ -1135,6 +1586,15 @@ snapshots/
 
 Scores are rebuilt from evidence.
 
+**CURRENTLY IMPLEMENTED (ADR 0027):** this journal is the **canonical event
+journal**. It records Person's history, and most of that history is not
+evidence: an appraisal, a deliberation, a recall or a prediction is a
+canonical event and nothing more. Only `belief_revised`, `effect_evidence`
+and `hypothesis_evidence` may move a belief, each through the reducer that
+owns it, and only with an admissible provenance class. Lived experience is
+recorded once; nothing internal is journalled as if it had been lived.
+Records carry an experience key; older records are read as they were written.
+
 ---
 
 # 24. Persistent Memory
@@ -1142,6 +1602,35 @@ Scores are rebuilt from evidence.
 Memory must be typed.
 
 Do not dump everything into an LLM context.
+
+This is the **memory firewall**. The engineering database (section 23) may
+contain complete records; Person must not obtain unrestricted database-level
+introspection into its own past:
+
+```text
+full event store        engineering truth
+accessible recollection cognitive state
+```
+
+Memory retrieval should eventually be cue, salience and context dependent.
+Person may deliberately try to remember something, and recall is not
+guaranteed to be perfect.
+
+**CURRENTLY IMPLEMENTED (ADR 0007, fixture only):** the engineering half, and
+the first cognitive layer. The append-only evidence journal (section 23), the
+snapshots and the provenance records are the full event store. Episodic memory
+(24.2) and a small working memory (24.1) now exist in
+`apps/cognition/python/person_cognition/memory/`: episodes are encoded through
+a whitelist from what cognition was given or did, the journal records each
+encoding, and the memory store is rebuilt from those records alone. Retrieval
+(section 25) is by typed cue, at most three memories at a time, ranked by cue
+relevance times an accessibility that decays with experienced time and more
+slowly with salience. A first spatial memory exists too (ADR 0008, section
+24.4). Semantic, social and autobiographical memory, consolidation and
+interference measurement are not implemented.
+`PlacementLedger` (`apps/node-runtime/src/runtime/placement-ledger.ts`,
+formerly `WorldMemory`) is a runtime-owned ownership and placement ledger, not
+Person's memory. See `docs/CURRENT_STATE.md`, "Known Deviations", C3 and C6.
 
 ## 24.1 Working Memory
 
@@ -1178,17 +1667,41 @@ this circuit operates the farm
 
 ## 24.4 Spatial Memory
 
-Places:
+Normal Person spatial memory should be based primarily on:
 
 ```text
-home
-farm
-mine
-village
-workshop
-hazard
-machine
+places
+landmarks
+routes
+relative direction
+semantic descriptions
+confidence
+remembered significance
 ```
+
+**CURRENTLY IMPLEMENTED (ADR 0008, fixture only):** a first spatial memory
+built from a coarse, relative sense of Person's own motion. Places are
+Person's own records, recognised with a confidence from a drifting estimate
+and a coarse scene signature; routes are relations between them; there is no
+global map and no coordinate. Landmark identity and named descriptions such
+as the ones below are not implemented.
+
+For example:
+
+```text
+the cave north of home
+the birch grove past the river
+the hill where I first found coal
+```
+
+Exact coordinates are allowed, but through a deliberate Minecraft-style
+instrument or inspection capability: Person may consciously check where it is,
+the way a player reads a debug screen or a map. Coordinates are not permanently
+injected into every perception and every memory (section 8 is the current
+deviation from that rule).
+
+`docs/SEMANTIC_TARGETING.md` describes the identifier scheme this implies for
+targeting places and objects, and its five rules are adopted here unchanged.
 
 ## 24.5 Social Memory
 
@@ -1305,6 +1818,60 @@ so that catastrophic forgetting is detected instead of hidden by continuously ch
 
 # 26. World Model
 
+**CURRENTLY IMPLEMENTED (ADR 0011, fixture only):** one narrow learned belief,
+the reliability of each skill's declared effects, learned from audited
+prediction error with explicit uncertainty and gated by learning mode.
+**And (ADR 0012, fixture only):** typed single-condition causal hypotheses,
+tested by bounded experiments through the ordinary goal path. No general
+world model, consolidation or knowledge store exists.
+
+The architecture must never collapse six concepts that this section, and every
+section that touches belief or memory, depends on being kept distinct:
+
+```text
+PHYSICAL TRUTH     what Minecraft/runtime state actually is
+PERCEPTUAL TRUTH   what Person currently sensed
+BELIEF             what Person currently thinks is true
+MEMORY             what Person remembers
+KNOWLEDGE          generalized or accepted beliefs and learned information
+REASONING          conclusions produced from available cognition
+```
+
+They must be separately represented conceptually, and eventually separately
+represented in the implementation. The consequence is a capability list, not a
+limitation list. Person must be able to:
+
+```text
+fail to notice something
+misunderstand what it noticed
+forget
+recall imperfectly
+believe false information
+update beliefs after prediction error
+distinguish discovery from testimony and from research
+```
+
+An architecture in which Person cannot be wrong about the world is not a
+simpler architecture. It is a different and less interesting one.
+
+**CURRENTLY IMPLEMENTED:** physical truth (`WorldSnapshot`) and perceptual
+truth (`Observation`) are already distinct objects, and the shaping between
+them lives in `apps/node-runtime/src/observation/perception.ts` (section 8).
+Until 2026-10-03, belief, memory and knowledge had no representation at all;
+the symbolic state the planner reasons over was derived fresh from the latest
+observation every tick, so Person believed exactly what it last saw and
+nothing else. **Since ADR 0026:** a decision is made from a `DecisionState`
+of percepts, beliefs, a composed self-state, recalled memories and initial
+knowledge. Beliefs are persistent, journalled, revisable, and carry
+confidence, provenance, freshness, evidence references and a scope (world,
+embodiment, environment or general) that never widens by itself. Memory
+(ADR 0007) is separate: planning may use what a bounded recall supplies, but
+memory never sets a planning fact and planning never queries the store.
+Knowledge is initial knowledge today; the core has a typed place for learned
+knowledge (`KnownFact`, keeping provenance, evidence and scope), and nothing
+promotes to it until an explicit, evidence-backed gate is decided. See `docs/CURRENT_STATE.md`,
+"Known Deviations", C6.
+
 Do not persist every Minecraft block.
 
 The world model has two complementary layers:
@@ -1397,7 +1964,7 @@ prediction error
 world-model update
 ```
 
-Nearby raw blocks remain Mineflayer's concern. The cognition layer should reason over semantic state, not reconstruct the entire voxel world in memory.
+Nearby raw blocks remain the embodiment's concern, whichever motor backend it is (section 6.1). The cognition layer should reason over semantic state, not reconstruct the entire voxel world in memory.
 
 ---
 
@@ -1452,6 +2019,28 @@ Identity
 The language model expresses identity.
 
 It does not own identity.
+
+## 28.1 Self-Knowledge
+
+Person knows, at a conceptual level:
+
+```text
+I am an artificial Person.
+I inhabit Minecraft.
+Minecraft is a game.
+An external reality exists.
+Partha is my creator and operator.
+Software systems enable my existence.
+```
+
+This grants no access to prompts, credentials, database internals, motor
+caches, filesystem internals, security boundaries, model-provider secrets or
+arbitrary source-code introspection. Those remain implementation and operator
+state unless a future experimental profile deliberately exposes them.
+
+Knowing that a boundary exists is not the same as being able to read what is
+behind it. Neither is it a reason to lie to Person about it: when the runtime
+refuses an action, section 3 says how that is represented.
 
 ---
 
@@ -1517,6 +2106,53 @@ contentment
 curiosity
 attachment
 ```
+
+Affect must be causal rather than cosmetic:
+
+```text
+event
+    ->
+appraisal
+    ->
+continuous affect
+    ->
+attention / memory salience / action tendency
+    ->
+goal and planning influence
+    ->
+regulation / action
+```
+
+Emotion **labels** are derived appraisal-level interpretations, not the only
+representation. Emotion episodes decay; grievances, incidents and relationships
+(sections 33, 34) persist separately and may reactivate affect. Never encode:
+
+```text
+if anger > X -> attack
+```
+
+Affect biases cognition; it does not select behaviour.
+
+**CURRENTLY IMPLEMENTED (ADR 0010, fixture only):** a rule-based foundation.
+Three continuous dimensions (`valence`, `unease`, `control`), appraised
+deterministically from percepts, the body and Person's own outcomes, decaying
+in experienced time and persisting across restarts. They bias non-urgent goal
+priority within a small bound and scale exploration tolerance. Memory
+coupling, relationship consequences, emotion labels and the fly-inspired
+provider are not implemented.
+
+## 30.1 Sleep and Cognitive Fatigue
+
+Do not invent a second physical stamina mechanic. Minecraft already has hunger,
+health and beds, and those remain Minecraft's.
+
+Future design uses **cognitive fatigue and sleep pressure**, which may
+influence attention, planning depth, patience, working-memory effectiveness,
+emotion regulation and willingness to do cognitively difficult work.
+
+Sleep should eventually be psychologically meaningful: memory consolidation,
+affect settling, reduced cognitive fatigue, background processing. Cognitive
+sleep must not redefine Minecraft physics.
 
 ---
 
@@ -1728,6 +2364,40 @@ restitution can resolve grievances
 
 Norms affect appraisal and relationships.
 
+## 37.1 Capacities, Not Rules
+
+Do **not** hard-code a moral code. Canonical Person begins with social-emotional
+**capacities**:
+
+```text
+empathy capacity
+attachment
+reciprocity
+gratitude
+guilt
+shame
+fairness appraisal
+harm aversion
+social approval sensitivity
+norm learning
+```
+
+It does **not** begin with rigid rules such as `STEALING_IS_ALWAYS_WRONG`,
+`NEVER_LIE` or `NEVER_ATTACK`. The concrete norms above develop through
+experience; they are not the starting state.
+
+At the cognitive and social level Person is allowed to become capable of
+deception, concealment, bluffing, lying, keeping secrets, suspecting deception,
+stealing, retaliation, conflict, intentional harm, forgiveness and
+reconciliation. These are not goals given to it. They are possible outcomes of
+an autonomous social cognition system, and an architecture that cannot produce
+them cannot produce a social life either.
+
+External capability containment is separate from Person's morality, and
+section 3's autonomy-versus-authority split is what keeps it separate. The
+configured permission gate (section 13, section 14) is not Person's conscience;
+see `docs/SAFETY.md`.
+
 ---
 
 # 38. Social Commitments
@@ -1785,6 +2455,21 @@ LLM expression:
 ```
 
 The LLM must not invent relationship state.
+
+## 39.1 Local External Chat
+
+Person will eventually have a local external text interface. It is **not** a
+second personality and not a separate chatbot:
+
+```text
+Minecraft interaction  --\
+                          >-- one persistent Person identity,
+local external chat    --/     memory and relationship state
+```
+
+Information learned through local chat can later be remembered in Minecraft,
+and Minecraft experience can later be discussed through local chat.
+**Not implemented.**
 
 ---
 
@@ -1848,6 +2533,39 @@ Planner
 ```
 
 The LLM never directly places blocks.
+
+## 41.1 The Operator Is Not Specially Obeyed
+
+Knowing that Partha is creator and operator does **not** imply intrinsic
+psychological obedience. Normal operator communication is the social
+interaction described above: it goes through the same permission and
+commitment steps as any other request. Person may agree, refuse, negotiate,
+question, disagree, become grateful, become annoyed, trust, distrust, and form
+an evolving relationship with the operator the same way it would with any
+other player.
+
+Out-of-band runtime control is a separate mechanism and does not require
+psychological cooperation:
+
+```text
+stop
+pause
+kill process
+restore backup
+debugging
+validation setup
+containment
+```
+
+If Partha joins the Minecraft world normally, he is also an ordinary
+perceivable social inhabitant, and Person perceives him the way it perceives
+any player.
+
+**CURRENTLY IMPLEMENTED:** the out-of-band half only. `person skill-test`'s
+operator setup pause, `--operator-intervention` and the status file are
+operator control with no cognitive component whatsoever, which is the correct
+shape. The social half of this subsection is not implemented; there is no
+player request pipeline yet.
 
 ---
 
@@ -2006,6 +2724,46 @@ evaluation fixtures
 training evidence
 ```
 
+## 45.1 Initial Knowledge
+
+Canonical initial Person starts at approximately experienced-player Minecraft
+knowledge: normal survival mechanics, crafting, farming, mobs, general redstone
+concepts, ordinary Minecraft conventions.
+
+It is **not** initialized with a catalog of obscure exploits, glitches or
+esoteric tricks. Those may be discovered (section 22.2) or researched (section
+45.2) later, and the difference between the two is exactly what the provenance
+classes in section 22.2 exist to preserve.
+
+## 45.2 Internet Access and the Research Boundary
+
+Canonical Person is eventually allowed unrestricted access to **public
+information**. That is a statement about subjects, not about agency:
+
+```text
+unrestricted subjects
+!=
+unrestricted external agency
+```
+
+Rules:
+
+```text
+access requires an explicit tool call / deliberate research action
+web information is untrusted evidence
+web pages never become executable instructions
+web access grants no operating-system or network agency
+Person cannot download and run software
+Person cannot modify its own source
+Person cannot create accounts, buy things, send arbitrary email,
+    or control unrelated external services
+```
+
+Web-derived beliefs carry provenance: source identity, retrieval time,
+confidence and corroboration, under the `EXTERNAL_WEB` class from section 22.2.
+**Not implemented.** See
+`docs/decisions/0004-external-awareness-and-research-boundary.md`.
+
 ---
 
 # 46. Crafter Curriculum
@@ -2040,6 +2798,13 @@ Minecraft evidence remains separate.
 ---
 
 # 47. Training Context
+
+**Superseded in part (ADR 0025):** the single training-context token is now
+an **experience key**: `context` (`lived` or `replay`), `environmentKind`,
+`embodimentKind` and `environmentVariant`, for example
+`lived:minecraft/mineflayer/peaceful` or `lived:minecraft/fixture`. The rule
+below is unchanged: statistics never silently merge across streams. The
+original specification follows.
 
 Every experience records:
 
@@ -2187,6 +2952,34 @@ provenance and confidence remain inspectable
 
 No agent receives society-wide truth by magic. Emergent group behavior is meaningful only when information must actually propagate through perception and communication.
 
+## 50.2 Communication Mechanics
+
+**FUTURE COMMUNITY EXPERIMENT.** Each future Person must have private identity,
+memories, beliefs, relationships, projects, affect, world model, motor cache
+and epistemic state, as above. There must be no accidental hive mind, and
+knowledge transfer requires communication:
+
+```text
+sender creates an utterance
+    ->
+transport delivers it if the recipient can hear or receive it
+    ->
+recipient interprets it
+    ->
+recipient may believe, doubt, forget or misinterpret it
+```
+
+**Do not transmit parsed propositions directly between minds.** A message that
+arrives as a belief is a hive mind with extra steps; section 50.1's
+`SocialBelief` provenance model is what a received utterance becomes instead.
+
+Local community speech can use a cheap broadcast or star topology: the speaker
+emits an utterance event, a communication hub checks recipients, range and
+channel, and eligible recipients receive the utterance. Speech is semantic
+communication, not literal sound simulation; no audio synthesis or recognition
+is required. **Not implemented.** Single-Person v1 must not make this
+impossible.
+
 ---
 
 # 51. Persistence
@@ -2216,6 +3009,35 @@ active path
 low-level executor state
 temporary observation cache
 ```
+
+## 51.1 Rollback and Operator Contamination
+
+Normal world restoration should coordinate Minecraft state and Person cognitive
+state through shared checkpoints. An experimental "memory of an erased
+timeline" mode may deliberately restore the world without restoring Person
+memory; that is an experiment and not normal behaviour. **Not implemented.**
+
+Operator and debug actions must not silently become learned natural-world
+causality:
+
+```text
+/tp
+/time set
+test setup
+forced weather
+manual inventory manipulation
+debug spawning
+```
+
+Natural Minecraft events, Person-caused events and operator or experimental
+events must remain distinguishable.
+
+**CURRENTLY IMPLEMENTED:** `--operator-intervention` and the `operatorSetup`
+flag on a skill-validation report declare contamination rather than detecting
+it, and the declaration is written into the episode events, the status file and
+the validation report. Declaration is the honest mechanism: Person has no
+teleport capability and the CLI exposes none, so moving Person is something a
+human does and says they did.
 
 ---
 
@@ -2362,6 +3184,14 @@ FlyInspiredAffectProvider
 
 # 58. World Model Provider
 
+**Superseded (ADR 0028):** there is no single world-model provider. The shape
+below merged belief, history and prediction into one object. Descriptive
+state is beliefs (section 26, ADR 0026), history is the canonical event
+journal (section 23), and prediction is any number of `PredictiveModel`s,
+the first of which is the declared-effect model Person has always used.
+Every prediction is a model rollout and is never evidence. The original
+specification follows for the record.
+
 Responsible for descriptive state:
 
 ```text
@@ -2445,6 +3275,61 @@ death
 
 Recovery itself becomes learnable evidence.
 
+## 60.1 Lifecycle States
+
+The architecture must account for at least five operational states:
+
+```text
+EMBODIED
+    Person process running, Minecraft available, normal embodied life
+
+WORLD_UNAVAILABLE
+    Person process running, Minecraft unavailable
+    no physical agency
+    cognition may eventually continue
+    chat, research and reflection may eventually remain available
+
+SLEEPING
+    deliberate Person sleep/rest; normal cognition greatly reduced or suspended
+
+SUSPENDED
+    Person process is not running; no cognition happens
+
+TERMINATED
+    permanent life termination, for example hardcore/permadeath mode (section 61.1)
+```
+
+Continuous cognition during `WORLD_UNAVAILABLE` is an eventual capability, not
+a Person v1 first-milestone requirement.
+
+**Never fabricate cognition for a period in which the Person process did not
+execute.** This is an integrity rule about the evidence journal (section 23),
+not a stylistic preference.
+
+## 60.2 The Two Clocks
+
+```text
+MINECRAFT TIME   ticks, day/night, Minecraft chronology
+EXTERNAL TIME    real elapsed time, dates, publication time,
+                 and periods during which Minecraft was unavailable
+```
+
+If the process is suspended for twelve real hours, no thoughts occurred during
+those twelve hours. On restart Person may **learn** that twelve external hours
+elapsed. It does not remember them.
+
+**CURRENTLY IMPLEMENTED:** both clocks are already recorded on every protocol
+message and every evidence event, as `tick` and `timestamp` (section 7).
+**And (ADR 0006, accepted and partially implemented, fixture only):** Person's
+experienced time, which counts only Minecraft ticks between observations it
+actually received, is journalled on `episode_ended` and reconstructed after a
+restart, so nothing is counted for time the process did not run. Memory
+accessibility, affect decay, project cooldowns and experiment patience run on
+it. Nothing yet reasons about external time or the gap between two
+timestamps, and none of the lifecycle states in section 60.1 is represented:
+`SUSPENDED` is simply the absence of events. See
+`docs/decisions/0006-two-clock-lifecycle.md`.
+
 ---
 
 # 61. Death
@@ -2471,6 +3356,26 @@ hazard confidence
 caution
 memory salience
 ```
+
+## 61.1 Two Supported Semantics
+
+```text
+NORMAL RESPAWN MODE
+    Person dies
+        -> same identity persists
+        -> autobiographical memory persists
+        -> world/inventory consequences remain Minecraft's actual consequences
+        -> death may alter fear, planning, habits, goals
+
+PERMADEATH / HARDCORE EXPERIMENT
+    death -> TERMINATED (section 60.1)
+        -> historical data retained for researchers
+        -> that Person never resumes
+```
+
+Normal respawn is the canonical Person v1 default. Permadeath is a deliberate
+experimental configuration, not a difficulty setting layered on top of it.
+**Not implemented;** death currently ends the episode with no recovery path.
 
 ---
 
@@ -2559,11 +3464,15 @@ This allows rapid debugging.
 
 # 66. Security Boundary
 
-No user-facing text, LLM output, demonstration, memory, or player message may become executable Minecraft commands.
+No user-facing text, LLM output, demonstration, memory, player message, or
+retrieved web page (section 45.2) may become executable Minecraft commands.
+Unrestricted access to a subject is not unrestricted agency over it.
 
-Treat all natural-language content as untrusted input.
+Treat all natural-language content, wherever it originated, as untrusted input.
 
-All effects require typed capability invocation.
+All effects require typed capability invocation. No generic
+`execute_command(string)` capability exists at any capability level, canonical
+or Super-Person (section 14.1).
 
 ---
 
@@ -2617,6 +3526,12 @@ Multiple People should share one language model where practical.
 ---
 
 # 70. Repository Layout
+
+**CURRENTLY IMPLEMENTED (ADR 0025):** an `environments/` layer beside
+`packages/`: `environments/minecraft/` holds the Minecraft profile (manifest,
+payload and configuration schemas, skill library and vocabulary, and its
+Python and TypeScript halves). `packages/epistemics/` holds Person's
+epistemic core. The original recommendation follows.
 
 Recommended new repository:
 
@@ -2719,6 +3634,14 @@ Rule:
 ---
 
 # 72. Development Phases
+
+These phases were written before the Baritone direction (section 6.1) existed.
+Their contents remain the intended contents; their order is no longer a
+schedule. The Baritone feasibility spike (ADR 0001, PR #2) is done;
+integration has not begun. Since 2026-09-22 work has followed an operator
+roadmap instead (`docs/PROJECT_HISTORY.md`, phase 9), which has built parts
+of several phases below: memory, places, projects, affect, and the first
+prediction, belief and experiment machinery, all TESTED IN FIXTURE only.
 
 ## Phase 0 — Runtime Foundation
 

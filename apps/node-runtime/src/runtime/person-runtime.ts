@@ -1,22 +1,18 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import type { PersonConfig } from "#config";
 import {
   PROTOCOL_VERSION,
   envelope,
   type EmergencyEvent,
   type EpisodeEvent,
   type GoalDecision,
-  type ItemDelta,
+  type MessageType,
   type PolicyDecision,
   type PreviousOutcome,
   type SessionHello,
   type SessionIdentity,
   type SkillInvocation,
   type SkillOutcome,
-  type SkillStarted,
-  type TerminalStatus,
-  type ValidationDecision,
 } from "#protocol";
 import { skillRegistry, type SkillRegistry, type SkillSpec } from "#skills";
 import type { Embodiment, PhysicalGuard } from "../embodiment/types.ts";
@@ -31,7 +27,11 @@ import {
   type EmergencyAssessment,
 } from "../safety/safety-kernel.ts";
 import { InvocationValidator } from "../safety/validator.ts";
-import { SkillRunner, type ExecutionResult } from "../skills/executor.ts";
+import { SkillRunner } from "../skills/executor.ts";
+import {
+  dispatchSkill,
+  type DispatchDependencies,
+} from "../skills/dispatch.ts";
 import {
   CognitionChannel,
   CognitionUnavailableError,
@@ -40,12 +40,21 @@ import {
   EpisodeReportBuilder,
   summariseEpisode,
   writeEpisodeReport,
+  type DecisionRecord,
   type EpisodeReport,
 } from "../reporting/episode-report.ts";
-import { WorldMemory } from "./world-memory.ts";
+import { StatusWriter, statusPath } from "../reporting/status.ts";
+import { PlacementLedger } from "./placement-ledger.ts";
+import { SelfMotionSense } from "../observation/self-motion.ts";
+import {
+  distance,
+  type MinecraftConfig,
+  experienceOf,
+  describeExperience,
+} from "#minecraft";
 
 export interface PersonRuntimeOptions {
-  config: PersonConfig;
+  config: MinecraftConfig;
   embodiment: Embodiment;
   registry?: SkillRegistry;
   identity?: Partial<SessionIdentity>;
@@ -53,25 +62,16 @@ export interface PersonRuntimeOptions {
   channel?: CognitionChannel;
   cwd?: string;
   onDiagnostic?: (kind: string, detail: Record<string, unknown>) => void;
+  /**
+   * Marks a run as contaminated by a human acting on the world.
+   *
+   * A debug run where the operator moved Person or handed it items is not an
+   * acceptance run, and the difference has to be recorded at the time. It is
+   * declared, not detected: guessing which world changes were a person would
+   * be unreliable in exactly the cases that matter.
+   */
+  operatorIntervention?: { reason?: string };
 }
-
-const negativeOnly = (deltas: ItemDelta[]): ItemDelta[] =>
-  deltas.filter((item) => item.delta < 0);
-
-const resolveEffects = (
-  spec: SkillSpec,
-  parameters: Readonly<Record<string, number | string | boolean>>,
-): { fact: string; op: "+=" | "-=" | "=" | "max"; value: number }[] =>
-  spec.expectedEffects.map((effect) => {
-    const scaled = effect.scalesWith
-      ? parameters[effect.scalesWith]
-      : undefined;
-    return {
-      fact: effect.fact,
-      op: effect.op,
-      value: typeof scaled === "number" ? scaled : effect.value,
-    };
-  });
 
 /**
  * The decision loop, and the place where the trust boundary is actually
@@ -83,10 +83,10 @@ const resolveEffects = (
  * outcome of what ran, not of what it asked for.
  */
 export class PersonRuntime {
-  readonly config: PersonConfig;
+  readonly config: MinecraftConfig;
   readonly identity: SessionIdentity;
   readonly registry: SkillRegistry;
-  readonly memory: WorldMemory;
+  readonly ledger: PlacementLedger;
   readonly permissions: PermissionGate;
   readonly kernel: SafetyKernel;
   readonly validator: InvocationValidator;
@@ -105,6 +105,12 @@ export class PersonRuntime {
     suspendedGoals: [],
   };
   #previousOutcome: PreviousOutcome | null = null;
+  /** Person's sense of its own motion, for the life of this session. */
+  #selfMotion = new SelfMotionSense();
+  readonly #status: StatusWriter;
+  readonly #operatorIntervention: { flagged: boolean; reason: string | null };
+  #emergencyCount = 0;
+  #decisionCount = 0;
 
   constructor(options: PersonRuntimeOptions) {
     this.config = options.config;
@@ -117,7 +123,7 @@ export class PersonRuntime {
     };
     this.#episodeId = options.episodeId ?? `ep_${Date.now().toString(36)}`;
     this.#onDiagnostic = options.onDiagnostic ?? (() => {});
-    this.memory = WorldMemory.load(
+    this.ledger = PlacementLedger.load(
       options.config.runtime.outputDirectory,
       this.identity.worldId,
       this.identity.personId,
@@ -136,8 +142,37 @@ export class PersonRuntime {
       permissions: this.permissions,
       kernel: this.kernel,
       registry: this.registry,
-      memory: this.memory,
+      ledger: this.ledger,
     });
+    this.#operatorIntervention = {
+      flagged: options.operatorIntervention !== undefined,
+      reason: options.operatorIntervention?.reason ?? null,
+    };
+    this.#status = new StatusWriter(
+      statusPath(
+        options.config.runtime.outputDirectory,
+        this.identity.worldId,
+        this.identity.personId,
+      ),
+      {
+        command: "run",
+        personId: this.identity.personId,
+        botUsername: options.config.bot?.username ?? null,
+        worldId: this.identity.worldId,
+        sessionId: this.identity.sessionId,
+        episodeId: this.#episodeId,
+        server: options.config.server ?? null,
+        embodiment: options.config.runtime.embodiment,
+        experience: describeExperience(experienceOf(options.config)),
+        learningMode: options.config.learning.mode,
+        operatorIntervention: this.#operatorIntervention,
+        home: {
+          position: this.ledger.home.position,
+          distance: null,
+          shelterState: this.ledger.home.shelterState,
+        },
+      },
+    );
     this.#channel =
       options.channel ??
       new CognitionChannel({
@@ -170,6 +205,17 @@ export class PersonRuntime {
     return envelope(this.identity, type as never, tick);
   }
 
+  /** The one road to the embodiment, wired for this session. */
+  dispatchDependencies(): DispatchDependencies {
+    return {
+      registry: this.registry,
+      validator: this.validator,
+      runner: this.runner,
+      embodiment: this.#embodiment,
+      envelope: (type: MessageType, tick: number) => this.#envelope(type, tick),
+    };
+  }
+
   async run(): Promise<EpisodeReport> {
     const runtime = this.config.runtime;
     this.#embodiment.setGuard(this.guard);
@@ -179,7 +225,7 @@ export class PersonRuntime {
       personId: this.identity.personId,
       worldId: this.identity.worldId,
       sessionId: this.identity.sessionId,
-      trainingContext: runtime.trainingContext,
+      experience: describeExperience(experienceOf(this.config)),
       learningMode: this.config.learning.mode,
       rngSeed: runtime.rngSeed,
       policyRevision: 0,
@@ -191,17 +237,24 @@ export class PersonRuntime {
 
     let outcome: EpisodeReport["outcome"] = "completed";
     let reason: string | null = null;
+    let endTick = 0;
 
     try {
+      this.#status.update({
+        connection: "connecting",
+        readiness: "connecting",
+      });
       await this.#embodiment.connect();
       builder.report.startTick = this.#embodiment.snapshot().tick;
+      this.#status.update({ connection: "ready", readiness: "world ready" });
+      this.#syncStatus();
       this.#channel.start();
 
       const hello: SessionHello = {
         ...this.#envelope("SessionHello", this.#embodiment.snapshot().tick),
         type: "SessionHello",
         learningMode: this.config.learning.mode,
-        trainingContext: runtime.trainingContext,
+        experience: experienceOf(this.config),
         policyRevision: 0,
         skillLibraryRevision: this.registry.revision,
         rngSeed: runtime.rngSeed,
@@ -215,18 +268,54 @@ export class PersonRuntime {
       ).policyRevision;
 
       this.#sendEpisodeEvent("started", ["session_start"]);
+      this.#sendWorld("available", ["connected"]);
+      // A Person that died and was never brought back gets its respawn now,
+      // before it perceives anything (ADR 0017, I3).
+      let unrevived = false;
+      if ((ready as { lifeStatus?: string }).lifeStatus === "awaiting_respawn")
+        unrevived = !(await this.#respawn());
+      if (unrevived) {
+        outcome = "failed";
+        reason = "death";
+      }
 
       let decisions = 0;
-      while (decisions < runtime.maxDecisions) {
+      const stall = new StallDetector();
+      // The budgets are checked after the world and the body, so a death or
+      // a lost world during the last decision is still seen and reported.
+      while (!unrevived) {
         const snapshot = this.#embodiment.snapshot();
         if (!snapshot.connected) {
-          outcome = "failed";
-          reason = "disconnected";
+          // Losing the world is a state, not the end of Person (ADR 0017,
+          // I2): say so, try to reach it again within the configured budget,
+          // and only then end the episode, as interrupted rather than failed.
+          this.#sendWorld("unavailable", ["connection_lost"], snapshot.tick);
+          if (await this.#reconnect()) {
+            // Motion across the absence was never felt.
+            this.#selfMotion = new SelfMotionSense();
+            this.#sendWorld("available", ["reconnected"]);
+            continue;
+          }
+          outcome = "interrupted";
+          reason = "world_unavailable";
           break;
         }
         if (!snapshot.alive) {
+          // Life is its own axis (ADR 0017, I3). The runtime, never
+          // cognition, says a death happened and whether it is terminal.
+          const terminal = this.config.lifecycle?.death === "permadeath";
+          this.#sendLife("died", terminal, snapshot.tick);
+          if (!terminal && (await this.#respawn())) continue;
+          // Losing the world while dead is losing the world: the reconnection
+          // path decides. Cognition records the death once, however often the
+          // dead body is seen.
+          if (!terminal && !this.#embodiment.snapshot().connected) continue;
           outcome = "failed";
           reason = "death";
+          break;
+        }
+        if (decisions >= runtime.maxDecisions) {
+          reason = "decision_budget_reached";
           break;
         }
         if (snapshot.tick - builder.report.startTick >= runtime.maxTicks) {
@@ -234,14 +323,22 @@ export class PersonRuntime {
           break;
         }
         decisions += 1;
+        this.#decisionCount = decisions;
         await this.#decide(builder);
+        if (stall.observe(builder.report.decisions.at(-1))) {
+          outcome = "failed";
+          reason = "runtime_livelock";
+          this.#onDiagnostic("runtime_livelock", {
+            repeats: STALL_LIMIT,
+            tick: this.#embodiment.snapshot().tick,
+          });
+          break;
+        }
         if (runtime.decisionIntervalMs > 0)
           await new Promise((resolve) =>
             setTimeout(resolve, runtime.decisionIntervalMs),
           );
       }
-      if (decisions >= runtime.maxDecisions)
-        reason ??= "decision_budget_reached";
       this.#sendEpisodeEvent("ended", [reason ?? "completed"]);
     } catch (error) {
       outcome =
@@ -255,22 +352,142 @@ export class PersonRuntime {
         // Cognition is already gone; the report below is the record that matters.
       }
     } finally {
-      this.memory.save();
+      // Read the clock while the body is still connected: a disconnected
+      // Minecraft body no longer knows the world's time.
+      try {
+        endTick = this.#embodiment.snapshot().tick;
+      } catch {
+        endTick = builder.report.startTick;
+      }
+      this.ledger.save();
       await this.#channel.stop();
       await this.#embodiment.disconnect();
+      this.#status.update({
+        connection:
+          this.#status.status.connection === "failed"
+            ? "failed"
+            : "disconnected",
+        readiness: "stopped",
+        decisions: builder.report.decisions.length,
+      });
     }
 
-    builder.setStorageProvenance(this.memory.ownedStorage);
-    const report = builder.finish(
-      outcome,
-      reason,
-      this.#embodiment.snapshot().tick,
-    );
+    builder.setStorageProvenance(this.ledger.ownedStorage);
+    const report = builder.finish(outcome, reason, endTick);
     writeEpisodeReport(
       path.join(this.config.runtime.outputDirectory, "reports"),
       report,
     );
     return report;
+  }
+
+  /** Tells cognition whether the world is available to the body now (I2). */
+  #sendWorld(
+    state: "available" | "unavailable",
+    reasonCodes: string[],
+    tick?: number,
+  ): void {
+    let at = tick ?? 0;
+    try {
+      if (tick === undefined) at = this.#embodiment.snapshot().tick;
+    } catch {
+      // A body that cannot report its tick still has a state to report.
+    }
+    this.#channel.send({
+      ...this.#envelope("WorldAvailability", at),
+      type: "WorldAvailability",
+      state,
+      reasonCodes,
+    });
+  }
+
+  /** Tells cognition the body died, or came back (I3). */
+  #sendLife(
+    event: "died" | "respawned",
+    terminal: boolean,
+    tick?: number,
+  ): void {
+    let at = tick ?? 0;
+    try {
+      if (tick === undefined) at = this.#embodiment.snapshot().tick;
+    } catch {
+      // The event stands even if the body cannot report its tick.
+    }
+    this.#channel.send({
+      ...this.#envelope("LifeEvent", at),
+      type: "LifeEvent",
+      event,
+      terminal,
+      reasonCodes: [event === "died" ? "body_died" : "body_respawned"],
+    });
+  }
+
+  /** Brings the same Person's body back, if this body can (I3). */
+  async #respawn(): Promise<boolean> {
+    if (!this.#embodiment.respawn) return false;
+    try {
+      await this.#embodiment.respawn();
+    } catch (error) {
+      // A respawn that did not happen is not reported; the Person stays
+      // awaiting one, and the next run tries again.
+      this.#onDiagnostic("respawn_failed", {
+        error: error instanceof Error ? error.message : String(error),
+      });
+      return false;
+    }
+    if (!this.#embodiment.snapshot().alive) return false;
+    // Motion across a death was never felt.
+    this.#selfMotion = new SelfMotionSense();
+    this.#sendLife("respawned", false);
+    return true;
+  }
+
+  /** Tries to reach the world again, within the configured budget. */
+  async #reconnect(): Promise<boolean> {
+    const { reconnectAttempts, reconnectIntervalMs } = this.config.runtime;
+    for (let attempt = 0; attempt < reconnectAttempts; attempt++) {
+      if (reconnectIntervalMs > 0)
+        await new Promise((resolve) =>
+          setTimeout(resolve, reconnectIntervalMs),
+        );
+      try {
+        await this.#embodiment.connect();
+        if (this.#embodiment.snapshot().connected) return true;
+      } catch {
+        // Still unavailable; try again, or give up when the budget is spent.
+      }
+    }
+    return false;
+  }
+
+  /** Mirrors the live facts into the status file for an operator watching. */
+  #syncStatus(
+    patch: Partial<Parameters<StatusWriter["update"]>[0]> = {},
+  ): void {
+    const snapshot = this.#embodiment.snapshot();
+    const home = this.ledger.home.position;
+    this.#status.update({
+      tick: snapshot.tick,
+      dimension: snapshot.dimension,
+      position: snapshot.position,
+      health: snapshot.health,
+      food: snapshot.food,
+      lastSafePosition: snapshot.lastSafePosition,
+      home: {
+        position: home,
+        distance: distance(snapshot.position, home),
+        shelterState: this.ledger.home.shelterState,
+      },
+      safety: {
+        threat: this.kernel.threatState(snapshot),
+        emergencies: this.#emergencyCount,
+        lastEmergency: this.#status.status.safety.lastEmergency,
+      },
+      goal: this.#cognitionState.activeGoal,
+      routine: this.#cognitionState.activeRoutine,
+      skill: this.#cognitionState.activeSkill,
+      ...patch,
+    });
   }
 
   #sendEpisodeEvent(phase: "started" | "ended", reasonCodes: string[]): void {
@@ -279,9 +496,13 @@ export class PersonRuntime {
       type: "EpisodeEvent",
       episodeId: this.#episodeId,
       phase,
-      trainingContext: this.config.runtime.trainingContext,
+      experience: experienceOf(this.config),
       rngSeed: this.config.runtime.rngSeed,
-      reasonCodes,
+      // The contamination marker travels with the evidence, so an episode
+      // recorded during a debug session can never be mistaken for a counted one.
+      reasonCodes: this.#operatorIntervention.flagged
+        ? [...reasonCodes, "operator_intervention"]
+        : reasonCodes,
     };
     this.#channel.send(event);
   }
@@ -311,11 +532,12 @@ export class PersonRuntime {
       snapshot,
       permissions: this.permissions,
       kernel: this.kernel,
-      memory: this.memory,
-      trainingContext: this.config.runtime.trainingContext,
+      ledger: this.ledger,
+      experience: experienceOf(this.config),
       cognition: this.#cognitionState,
       previousOutcome: this.#previousOutcome,
       blockAt: (position) => this.#embodiment.blockAt(position),
+      selfMotion: this.#selfMotion.sense(snapshot),
     });
     this.#channel.send(observation);
 
@@ -336,239 +558,72 @@ export class PersonRuntime {
         .map((entry) => entry.goalId),
     };
 
-    const verdict = this.validator.validate(
+    // Everything physical goes through the one dispatch path, the same one an
+    // operator validation run uses. The hooks below only report what happened.
+    const dispatched = await dispatchSkill(
       invocation,
-      this.#embodiment.snapshot(),
+      {
+        goalId: goal.goal.goalId,
+        routineId: policy.routineId,
+        contextId: policy.contextId,
+      },
+      this.dispatchDependencies(),
+      {
+        onValidation: (validation, verdict) => {
+          this.#channel.send(validation);
+          this.#syncStatus({
+            goalType: goal.goal.goalType,
+            decisions: this.#decisionCount,
+            lastValidation: {
+              decision: verdict.decision,
+              level: verdict.level,
+              requestedSkill: invocation.skillId,
+              executedSkill: verdict.executedSkill,
+              reasonCodes: verdict.reasonCodes,
+            },
+          });
+        },
+        onEmergency: (assessment, decisionId, preemptedSkill) => {
+          this.#sendEmergency(assessment, decisionId, preemptedSkill);
+          builder.addSafetyOverride({
+            tick: this.#embodiment.snapshot().tick,
+            level: assessment.level,
+            trigger: assessment.trigger,
+            action: assessment.action,
+            preemptedSkill,
+          });
+        },
+        onStarted: (started) => this.#channel.send(started),
+      },
     );
-    const validation: ValidationDecision = {
-      ...this.#envelope("ValidationDecision", this.#embodiment.snapshot().tick),
-      type: "ValidationDecision",
-      decisionId: invocation.decisionId,
-      requestedSkill: invocation.skillId,
-      decision: verdict.decision,
-      level: verdict.level,
-      reasonCodes: verdict.reasonCodes,
-      executedSkill: verdict.executedSkill,
-      executedParameters: verdict.executedParameters,
-      executedLimits: verdict.executedLimits,
-    };
-    this.#channel.send(validation);
 
-    const requestedSpec = this.registry.has(invocation.skillId)
-      ? this.registry.get(invocation.skillId)
-      : null;
-
-    if (verdict.emergency) {
-      this.#sendEmergency(
-        verdict.emergency,
-        invocation.decisionId,
-        verdict.decision === "REPLACE" ? invocation.skillId : null,
-      );
-      builder.addSafetyOverride({
-        tick: this.#embodiment.snapshot().tick,
-        level: verdict.emergency.level,
-        trigger: verdict.emergency.trigger,
-        action: verdict.emergency.action,
-        preemptedSkill:
-          verdict.decision === "REPLACE" ? invocation.skillId : null,
-      });
-    }
-
-    if (
-      verdict.decision === "REJECT" ||
-      !verdict.executedSkill ||
-      !verdict.executedLimits
-    ) {
-      const outcome = this.#buildOutcome({
-        invocation,
-        policy,
-        goal,
-        executedSkill: null,
-        executedParameters: null,
-        requestedSkillStatus: "INVALIDATED",
-        status: "INVALIDATED",
-        emergency: Boolean(verdict.emergency),
-        reasonCodes: verdict.reasonCodes,
-        result: null,
-        expectedEffects: requestedSpec
-          ? resolveEffects(requestedSpec, invocation.parameters)
-          : [],
-      });
-      this.#channel.send(outcome);
-      this.#record(
-        builder,
-        goal,
-        policy,
-        invocation,
-        verdict.decision,
-        verdict.level,
-        verdict.reasonCodes,
-        outcome,
-        requestedSpec,
-      );
-      return;
-    }
-
-    const started: SkillStarted = {
-      ...this.#envelope("SkillStarted", this.#embodiment.snapshot().tick),
-      type: "SkillStarted",
-      decisionId: invocation.decisionId,
-      requestedSkill: invocation.skillId,
-      executedSkill: verdict.executedSkill,
-      parameters: verdict.executedParameters ?? {},
-      limits: verdict.executedLimits,
-      startTick: this.#embodiment.snapshot().tick,
-      startHealth: this.#embodiment.snapshot().health,
-      startFood: this.#embodiment.snapshot().food,
-      startInventory: this.#embodiment.snapshot().inventory,
-    };
-    this.#channel.send(started);
-
-    let executedSkill = verdict.executedSkill;
-    let executedParameters = verdict.executedParameters ?? {};
-    let result = await this.runner.run({
-      skillId: executedSkill,
-      parameters: executedParameters,
-      limits: verdict.executedLimits,
-      emergency:
-        this.registry.get(executedSkill).emergency ||
-        Boolean(verdict.emergency),
-    });
-
-    let requestedSkillStatus: TerminalStatus =
-      verdict.decision === "REPLACE" ? "PREEMPTED" : result.status;
-    const reasonCodes = [...verdict.reasonCodes, ...result.reasonCodes];
-
-    // A skill preempted mid-flight hands control to the emergency skill. The
-    // outcome then credits what actually ran, and says explicitly that the
-    // requested skill was preempted.
-    if (result.status === "PREEMPTED" && result.preemption) {
-      const assessment = result.preemption;
-      this.#sendEmergency(assessment, invocation.decisionId, executedSkill);
-      builder.addSafetyOverride({
-        tick: this.#embodiment.snapshot().tick,
-        level: assessment.level,
-        trigger: assessment.trigger,
-        action: assessment.action,
-        preemptedSkill: executedSkill,
-      });
-      const replacement = this.validator.emergencyInvocation(assessment);
-      requestedSkillStatus = "PREEMPTED";
-      if (replacement) {
-        const emergencyResult = await this.runner.run({
-          skillId: replacement.skillId,
-          parameters: replacement.parameters,
-          limits: replacement.limits,
-          emergency: true,
-        });
-        executedSkill = replacement.skillId;
-        executedParameters = replacement.parameters;
-        reasonCodes.push(assessment.trigger, ...emergencyResult.reasonCodes);
-        result = { ...emergencyResult, preemption: assessment };
-      }
-    }
-
-    const executedSpec = this.registry.get(executedSkill);
-    const outcome = this.#buildOutcome({
-      invocation,
-      policy,
-      goal,
-      executedSkill,
-      executedParameters,
-      requestedSkillStatus,
-      status: result.status,
-      emergency: Boolean(verdict.emergency) || Boolean(result.preemption),
-      reasonCodes,
-      result,
-      expectedEffects: resolveEffects(executedSpec, executedParameters),
-    });
+    const outcome = dispatched.outcome;
     this.#channel.send(outcome);
-    this.#previousOutcome = {
-      requestedSkill: outcome.requestedSkill,
-      executedSkill: outcome.executedSkill,
-      status: outcome.status,
-      effects: outcome.effects,
-      healthCost: outcome.healthCost,
-      resourceCost: outcome.resourceCost,
-      elapsedTicks: outcome.elapsedTicks,
-      interruptReason: outcome.interruptReason,
-    };
-    this.#cognitionState = { ...this.#cognitionState, activeSkill: null };
-    this.memory.save();
+    if (dispatched.executedSkill !== null) {
+      this.#previousOutcome = {
+        requestedSkill: outcome.requestedSkill,
+        executedSkill: outcome.executedSkill,
+        status: outcome.status,
+        effects: outcome.effects,
+        healthCost: outcome.healthCost,
+        resourceCost: outcome.resourceCost,
+        elapsedTicks: outcome.elapsedTicks,
+        interruptReason: outcome.interruptReason,
+      };
+      this.#cognitionState = { ...this.#cognitionState, activeSkill: null };
+      this.ledger.save();
+    }
     this.#record(
       builder,
       goal,
       policy,
       invocation,
-      verdict.decision,
-      verdict.level,
-      verdict.reasonCodes,
+      dispatched.verdict.decision,
+      dispatched.verdict.level,
+      dispatched.verdict.reasonCodes,
       outcome,
-      requestedSpec,
+      dispatched.requestedSpec,
     );
-  }
-
-  #buildOutcome(input: {
-    invocation: SkillInvocation;
-    policy: PolicyDecision;
-    goal: GoalDecision;
-    executedSkill: string | null;
-    executedParameters: Readonly<
-      Record<string, number | string | boolean>
-    > | null;
-    requestedSkillStatus: TerminalStatus;
-    status: TerminalStatus;
-    emergency: boolean;
-    reasonCodes: string[];
-    result: ExecutionResult | null;
-    expectedEffects: {
-      fact: string;
-      op: "+=" | "-=" | "=" | "max";
-      value: number;
-    }[];
-  }): SkillOutcome {
-    const snapshot = this.#embodiment.snapshot();
-    const result = input.result;
-    const interruptReason =
-      input.status === "PREEMPTED" || input.requestedSkillStatus === "PREEMPTED"
-        ? (result?.preemption?.trigger ?? "preempted")
-        : input.status === "TIMED_OUT"
-          ? "tick_budget_exceeded"
-          : null;
-    return {
-      ...this.#envelope("SkillOutcome", snapshot.tick),
-      type: "SkillOutcome",
-      decisionId: input.invocation.decisionId,
-      goalId: input.goal.goal.goalId,
-      routineId: input.policy.routineId,
-      contextId: input.policy.contextId,
-      requestedSkill: input.invocation.skillId,
-      requestedParameters: input.invocation.parameters,
-      requestedSkillStatus: input.requestedSkillStatus,
-      executedSkill: input.executedSkill,
-      executedParameters: input.executedParameters,
-      status: input.status,
-      emergency: input.emergency,
-      reasonCodes: [...new Set(input.reasonCodes)].slice(0, 32),
-      effects: result?.effects ?? [],
-      expectedEffects: input.expectedEffects,
-      healthBefore: result?.healthBefore ?? snapshot.health,
-      healthAfter: result?.healthAfter ?? snapshot.health,
-      foodBefore: result?.foodBefore ?? snapshot.food,
-      foodAfter: result?.foodAfter ?? snapshot.food,
-      healthCost: Math.max(
-        0,
-        (result?.healthBefore ?? 0) - (result?.healthAfter ?? 0),
-      ),
-      resourceCost: negativeOnly(result?.inventoryDelta ?? []),
-      inventoryDelta: result?.inventoryDelta ?? [],
-      elapsedTicks: result?.elapsedTicks ?? 0,
-      interruptReason,
-      completionEvidence: {
-        kinds: result?.evidenceKinds ?? [],
-        details: result?.evidenceDetails ?? {},
-      },
-    };
   }
 
   #record(
@@ -612,6 +667,21 @@ export class PersonRuntime {
       healthDelta: outcome.healthAfter - outcome.healthBefore,
       foodDelta: outcome.foodAfter - outcome.foodBefore,
       elapsedTicks: outcome.elapsedTicks,
+      budgetTicks: Number(
+        outcome.completionEvidence.details["timing_budget_ticks"] ?? 0,
+      ),
+      budgetPressure: Number(
+        outcome.completionEvidence.details["timing_budget_pressure"] ?? 0,
+      ),
+      navigationTicks: Number(
+        outcome.completionEvidence.details["timing_navigation_ticks"] ?? 0,
+      ),
+      interactionTicks: Number(
+        outcome.completionEvidence.details["timing_interaction_ticks"] ?? 0,
+      ),
+      waitingTicks: Number(
+        outcome.completionEvidence.details["timing_waiting_ticks"] ?? 0,
+      ),
       inventoryDelta: outcome.inventoryDelta,
       outcomeMessageId: outcome.messageId,
     });
@@ -619,3 +689,49 @@ export class PersonRuntime {
 }
 
 export { summariseEpisode };
+
+/**
+ * How many identical zero-time failures in a row end an episode.
+ *
+ * Across every recorded fixture run the longest legitimate streak was 3; the
+ * R2 held-out D livelock repeated one for thousands of decisions.
+ */
+export const STALL_LIMIT = 16;
+
+/**
+ * Notices an episode that has stopped going anywhere.
+ *
+ * A decision that took no time, did not succeed, and repeats the previous one
+ * exactly, at the same world tick, leaves Person where it was. Repeated
+ * without end it is a runtime fault, not behaviour, and the episode ends with
+ * `runtime_livelock` rather than spending its whole decision budget there.
+ * It changes nothing Person does before that point.
+ */
+export class StallDetector {
+  #last: string | null = null;
+  #repeats = 0;
+
+  observe(decision: DecisionRecord | undefined): boolean {
+    if (
+      !decision ||
+      decision.elapsedTicks > 0 ||
+      decision.status === "SUCCESS"
+    ) {
+      this.#last = null;
+      this.#repeats = 0;
+      return false;
+    }
+    const signature = [
+      decision.tick,
+      decision.goalId,
+      decision.requestedSkill,
+      decision.executedSkill,
+      decision.validation,
+      decision.status,
+      decision.requestedSkillStatus,
+    ].join("|");
+    this.#repeats = signature === this.#last ? this.#repeats + 1 : 1;
+    this.#last = signature;
+    return this.#repeats >= STALL_LIMIT;
+  }
+}

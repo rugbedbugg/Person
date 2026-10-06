@@ -1,7 +1,7 @@
-import { distance, type Position } from "#config";
 import type { BlockView } from "../embodiment/types.ts";
 import { SkillFailure, type SkillContext } from "./execution.ts";
 import { insideShelter, openShelterEntrance } from "./shelter-access.ts";
+import { distance, type Position } from "#minecraft";
 
 const OFFSETS: [number, number, number][] = [];
 for (let dx = -3; dx <= 3; dx++)

@@ -1,0 +1,1 @@
+ 987334 Wed Sep 30 20:17:24 2026 /home/rugbedbugg/Projects/Python/Person/.venv/bin/python3 /home/rugbedbugg/Projects/Python/Person/.venv/bin/person-cognition --config /home/rugbedbugg/Projects/Python/Person/runs/validation/e3/validation-000.toml

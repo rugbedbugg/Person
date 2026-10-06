@@ -1,0 +1,30 @@
+{
+  "candidates": [
+    {
+      "base_priority": 640.0,
+      "character": "outgoing",
+      "goal_id": "goal_secure_food",
+      "goal_type": "SECURE_FOOD"
+    },
+    {
+      "base_priority": 400.0,
+      "character": "protective",
+      "goal_id": "goal_secure_shelter",
+      "goal_type": "SECURE_SHELTER"
+    },
+    {
+      "base_priority": 220,
+      "character": "protective",
+      "goal_id": "goal_establish_storage",
+      "goal_type": "ESTABLISH_STORAGE"
+    }
+  ],
+  "class": "C",
+  "learning": "supervised",
+  "opportunities": {
+    "forage": "harvest plants: no combat, no stored stock",
+    "hunt": "kill an animal: combat, then cooking"
+  },
+  "result": "PASS",
+  "why": null
+}

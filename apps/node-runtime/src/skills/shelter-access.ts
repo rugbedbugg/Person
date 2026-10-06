@@ -1,7 +1,7 @@
-import { distance, type Position } from "#config";
 import { type SkillContext } from "./execution.ts";
 import { isBuildingMaterial } from "./materials.ts";
 import { shelterEntrance, shelterPlan } from "./shelter-plan.ts";
+import { distance, type Position } from "#minecraft";
 
 /** A sealed shelter Person built is a room, and a room needs a door. */
 export function shelterIsSealed(
@@ -38,10 +38,10 @@ export async function openShelterEntrance(
   for (const position of shelterEntrance(home)) {
     const block = context.embodiment.blockAt(position);
     if (!block || !block.solid) continue;
-    if (!block.ownedByPerson && !context.memory.isOwnedBlock(position))
+    if (!block.ownedByPerson && !context.ledger.isOwnedBlock(position))
       return false;
     await context.embodiment.dig(position);
-    context.memory.placedBlocks.delete(
+    context.ledger.placedBlocks.delete(
       `${position.x},${position.y},${position.z}`,
     );
     opened = true;
@@ -61,7 +61,7 @@ export async function sealShelterEntrance(
     const material = buildingItem(context);
     if (!material) return false;
     await context.embodiment.place(position, material);
-    context.memory.recordPlacement(position);
+    context.ledger.recordPlacement(position);
   }
   return true;
 }

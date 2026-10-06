@@ -1,4 +1,9 @@
-"""Load and validate the canonical SkillSpec files.
+"""Load and validate an environment's SkillSpec files.
+
+Generic infrastructure (ADR 0025): the registry, the spec contract and the
+parameter checks are Person's; the specs, the fact vocabulary and the skill
+vocabulary (categories, permissions, completion evidence, cost-limit bounds,
+fact classes) are the environment's, found through its manifest.
 
 Nothing in this module executes anything. A SkillSpec is the contract the
 planner reasons over and the Node runtime enforces; the executable half lives
@@ -10,12 +15,13 @@ from __future__ import annotations
 import hashlib
 import json
 from collections.abc import Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import lru_cache
 from pathlib import Path
 from typing import Any, Literal, NoReturn
 
 from jsonschema import Draft202012Validator
+from person_protocol import environment, sole_environment
 from person_protocol.assets import package_asset_directory
 
 ConditionOp = Literal[">=", "<=", "==", ">", "<"]
@@ -27,8 +33,95 @@ class SkillSpecError(ValueError):
     """A skill spec is missing, malformed, or used with invalid parameters."""
 
 
-def spec_directory() -> Path:
-    return package_asset_directory(__file__, "specs")
+#: Files in a skill directory that are not specs.
+NOT_SPECS = frozenset({"facts.json", "vocabulary.json"})
+
+
+def spec_schema_path() -> Path:
+    """The generic SkillSpec schema."""
+    return package_asset_directory(__file__, "schema") / "skill-spec.schema.json"
+
+
+def spec_directory(environment_kind: str | None = None) -> Path:
+    """An environment's skill directory; the only installed one by default."""
+    manifest = sole_environment() if environment_kind is None else environment(environment_kind)
+    return manifest.skills_directory
+
+
+@dataclass(frozen=True, slots=True)
+class SkillVocabulary:
+    """What an environment's specs may name, and how its facts may be used."""
+
+    categories: frozenset[str]
+    permissions: frozenset[str]
+    completion_evidence: frozenset[str]
+    max_ticks: int
+    max_distance: int
+    min_health: float
+    #: Facts only current perception establishes; no skill produces them.
+    evidence_facts: frozenset[str]
+    #: Facts worth reporting when they move unpredicted.
+    tracked_facts: frozenset[str]
+    #: Facts a trial can teach effect reliability about.
+    evaluable_facts: frozenset[str]
+    #: Facts no observation can carry.
+    unobservable_facts: frozenset[str]
+    #: Facts true only because an action just succeeded.
+    action_facts: frozenset[str]
+    #: Failure reasons meaning nothing physical was attempted.
+    not_attempted: frozenset[str]
+    #: Emergency skills that are also ordinary intentions, so plannable.
+    plannable_emergency: frozenset[str] = frozenset()
+    #: Emergency skills a caller may make plannable for a recovery goal.
+    recovery_skills: frozenset[str] = frozenset()
+    #: Skills whose plain success is not an experience: not remembered as an
+    #: episode, not appraised as Person's own success.
+    unremarkable_skills: frozenset[str] = frozenset()
+    #: The skills that play a role Person's core knows about: `idle` (a safe
+    #: wait when nothing is planned), `look` (one glance of information
+    #: seeking), `buildsHome` and `goesHome` (outcomes that make a place home).
+    roles: Mapping[str, str] = field(default_factory=dict)
+
+    @classmethod
+    def from_json(cls, body: Mapping[str, Any]) -> SkillVocabulary:
+        classes = body["factClasses"]
+        return cls(
+            categories=frozenset(body["categories"]),
+            permissions=frozenset(body["permissions"]),
+            completion_evidence=frozenset(body["completionEvidence"]),
+            max_ticks=int(body["limits"]["maxTicks"]),
+            max_distance=int(body["limits"]["maxDistance"]),
+            min_health=float(body["limits"]["minHealth"]),
+            evidence_facts=frozenset(classes["evidence"]),
+            tracked_facts=frozenset(classes["tracked"]),
+            evaluable_facts=frozenset(classes["evaluable"]),
+            unobservable_facts=frozenset(classes["unobservable"]),
+            action_facts=frozenset(classes["action"]),
+            not_attempted=frozenset(body["failures"]["notAttempted"]),
+            plannable_emergency=frozenset(body.get("planning", {}).get("plannableEmergency", ())),
+            recovery_skills=frozenset(body.get("planning", {}).get("recovery", ())),
+            unremarkable_skills=frozenset(body.get("unremarkable", ())),
+            roles=dict(body.get("roles", {})),
+        )
+
+    def problems(self, spec: SkillSpec) -> list[str]:
+        """What a spec names that this vocabulary does not allow."""
+        found = []
+        if spec.category not in self.categories:
+            found.append(f"category {spec.category}")
+        found += [f"permission {p}" for p in spec.required_permissions if p not in self.permissions]
+        found += [
+            f"completion evidence {k}"
+            for k in spec.completion_evidence
+            if k not in self.completion_evidence
+        ]
+        if spec.max_ticks > self.max_ticks:
+            found.append(f"maxTicks above {self.max_ticks}")
+        if spec.max_distance > self.max_distance:
+            found.append(f"maxDistance above {self.max_distance}")
+        if spec.min_health > self.min_health:
+            found.append(f"minHealth above {self.min_health:g}")
+        return found
 
 
 @dataclass(frozen=True, slots=True)
@@ -202,15 +295,28 @@ def _spec_from_json(document: dict[str, Any]) -> SkillSpec:
 class SkillRegistry:
     def __init__(self, directory: Path | None = None) -> None:
         self.directory = directory or spec_directory()
-        schema = json.loads((self.directory / "skill-spec.schema.json").read_text(encoding="utf-8"))
+        schema = json.loads(spec_schema_path().read_text(encoding="utf-8"))
         validator = Draft202012Validator(schema)
         self.facts: dict[str, str] = json.loads(
             (self.directory / "facts.json").read_text(encoding="utf-8")
         )["facts"]
+        self.vocabulary = SkillVocabulary.from_json(
+            json.loads((self.directory / "vocabulary.json").read_text(encoding="utf-8"))
+        )
+        for name in (
+            "evidence_facts",
+            "tracked_facts",
+            "evaluable_facts",
+            "unobservable_facts",
+            "action_facts",
+        ):
+            for fact in getattr(self.vocabulary, name):
+                if fact not in self.facts:
+                    raise SkillSpecError(f"vocabulary {name} names unknown fact {fact}")
         specs: dict[str, SkillSpec] = {}
         digest = hashlib.sha256()
         for path in sorted(self.directory.glob("*.json")):
-            if path.name in {"facts.json", "skill-spec.schema.json"}:
+            if path.name in NOT_SPECS:
                 continue
             raw = path.read_text(encoding="utf-8")
             document = json.loads(raw)
@@ -221,6 +327,11 @@ class SkillRegistry:
             if document["id"] != path.stem:
                 raise SkillSpecError(f"{path.name} declares mismatched skill id {document['id']}")
             spec = _spec_from_json(document)
+            outside = self.vocabulary.problems(spec)
+            if outside:
+                raise SkillSpecError(
+                    f"{path.name} names what its environment does not allow: {', '.join(outside)}"
+                )
             for condition in spec.preconditions:
                 if condition.fact not in self.facts:
                     raise SkillSpecError(
@@ -239,6 +350,9 @@ class SkillRegistry:
         if not specs:
             raise SkillSpecError(f"No skill specs found in {self.directory}")
         self._specs = specs
+        for role, skill in self.vocabulary.roles.items():
+            if skill not in specs:
+                raise SkillSpecError(f"vocabulary role {role} names unknown skill {skill}")
         self.revision = digest.hexdigest()[:16]
 
     @property
@@ -261,6 +375,7 @@ class SkillRegistry:
         return [spec for spec in self._specs.values() if spec.category == category]
 
 
-@lru_cache(maxsize=1)
-def skill_registry() -> SkillRegistry:
-    return SkillRegistry()
+@lru_cache(maxsize=4)
+def skill_registry(environment_kind: str | None = None) -> SkillRegistry:
+    """An environment's skill library; the only installed one by default."""
+    return SkillRegistry(spec_directory(environment_kind))
